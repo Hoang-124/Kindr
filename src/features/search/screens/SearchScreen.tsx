@@ -152,14 +152,15 @@ const styles = StyleSheet.create({
   filterBtn: { width: 44, height: 44, borderRadius: 14, backgroundColor: '#ffffff', justifyContent: 'center', alignItems: 'center', borderWidth: 1.5, borderColor: '#E8E3DB' },
   catScrollWrapper: {
     flexGrow: 0,
-    height: 58,
+    height: 60,
+    marginVertical: 6,
   },
   catScroll: {
     paddingHorizontal: 16,
     paddingVertical: 6,
     alignItems: 'center',
   },
-  catPill: { paddingHorizontal: 18, paddingVertical: 8, borderRadius: 20, backgroundColor: '#ffffff', marginRight: 8, borderWidth: 1.5, borderColor: '#E8E3DB' },
+  catPill: { paddingHorizontal: 18, paddingVertical: 8, borderRadius: 99, backgroundColor: '#ffffff', marginRight: 8, borderWidth: 1.5, borderColor: '#E8E3DB' },
   catPillActive: { backgroundColor: '#5B9A8B', borderColor: '#5B9A8B' },
   catPillText: { fontSize: 13, fontWeight: '600', color: '#5D5347' },
   catPillTextActive: { color: '#ffffff' },
