@@ -28,32 +28,16 @@ export default function MapNearbyScreen({ navigation }: { navigation: any }) {
 
       {/* Map Mock View */}
       <View style={styles.mapContainer}>
-        <View style={styles.mapBgWeb}>
-          {/* Grid lines */}
-          {[0, 1, 2, 3].map(i => <View key={`h${i}`} style={[styles.gridLineH, { top: 80 * i + 40 }]} />)}
-          {[0, 1, 2, 3].map(i => <View key={`v${i}`} style={[styles.gridLineV, { left: 80 * i + 40 }]} />)}
-
-          {/* Markers */}
-          {mockMarkersWeb.map(m => (
-            <TouchableOpacity 
-              key={m.id} 
-              style={[styles.markerWeb, { left: m.x, top: m.y }]}
-              onPress={() => setSelectedMarker(m)}
-            >
-              <View style={[styles.markerDotWeb, m.xu === 0 && styles.markerDotFreeWeb]}>
-                <Text style={styles.markerTextWeb}>{m.xu === 0 ? '🎁' : '🧸'}</Text>
-              </View>
-              <View style={styles.markerLabelWeb}>
-                <Text style={styles.markerLabelTextWeb}>{m.xu === 0 ? 'Tặng' : `${m.xu} Xu`}</Text>
-              </View>
-            </TouchableOpacity>
-          ))}
-
-          {/* Center indicator */}
-          <View style={styles.centerIndicatorWeb}>
-            <Text style={styles.centerEmojiWeb}>📍</Text>
-          </View>
-        </View>
+        {/* Web Google Maps Embed */}
+        <iframe
+          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3919.9540026217435!2d106.719656175704!3d10.729227189417436!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31752f9cdb84f3df%3A0xbc26d36e2f12f0e0!2zTOG7k3R0ZSBNYXJ0IFF14bqtbiA3!5e0!3m2!1svi!2svn!4v1700000000000!5m2!1svi!2svn"
+          width="100%"
+          height="100%"
+          style={{ border: 0, borderRadius: 22 }}
+          allowFullScreen={true}
+          loading="lazy"
+          referrerPolicy="no-referrer-when-downgrade"
+        />
       </View>
 
       {/* Info card */}
