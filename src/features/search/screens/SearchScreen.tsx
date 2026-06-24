@@ -65,7 +65,7 @@ export default function SearchScreen({ navigation, route }: { navigation: any, r
       </View>
 
       {/* Category pills */}
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.catScroll} style={{ flexGrow: 0 }}>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.catScroll} style={styles.catScrollWrapper}>
         {categoryOptions.map(cat => (
           <TouchableOpacity
             key={cat.key}
@@ -150,8 +150,16 @@ const styles = StyleSheet.create({
   },
   searchInput: { flex: 1, marginLeft: 8, fontSize: 14, color: '#3D3D3D' },
   filterBtn: { width: 44, height: 44, borderRadius: 14, backgroundColor: '#ffffff', justifyContent: 'center', alignItems: 'center', borderWidth: 1.5, borderColor: '#E8E3DB' },
-  catScroll: { paddingHorizontal: 16, paddingBottom: 10, alignItems: 'center' },
-  catPill: { paddingHorizontal: 18, paddingVertical: 10, borderRadius: 20, backgroundColor: '#ffffff', marginRight: 8, borderWidth: 1.5, borderColor: '#E8E3DB' },
+  catScrollWrapper: {
+    flexGrow: 0,
+    height: 54,
+  },
+  catScroll: {
+    paddingHorizontal: 16,
+    height: '100%',
+    alignItems: 'center',
+  },
+  catPill: { paddingHorizontal: 18, paddingVertical: 8, borderRadius: 20, backgroundColor: '#ffffff', marginRight: 8, borderWidth: 1.5, borderColor: '#E8E3DB' },
   catPillActive: { backgroundColor: '#5B9A8B', borderColor: '#5B9A8B' },
   catPillText: { fontSize: 13, fontWeight: '600', color: '#5D5347' },
   catPillTextActive: { color: '#ffffff' },

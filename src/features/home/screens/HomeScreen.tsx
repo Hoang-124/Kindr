@@ -106,7 +106,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Danh mục</Text>
         </View>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.categoryScroll} style={{ flexGrow: 0 }}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.categoryScroll} style={styles.categoryScrollWrapper}>
           {categories.map((cat, index) => (
             <TouchableOpacity
               key={cat.key}
@@ -245,7 +245,15 @@ const styles = StyleSheet.create({
   seeAllText: { fontSize: 13, color: '#5B9A8B', fontWeight: '700' },
 
   // Categories
-  categoryScroll: { paddingHorizontal: 20, alignItems: 'center' },
+  categoryScrollWrapper: {
+    flexGrow: 0,
+    height: 96,
+  },
+  categoryScroll: {
+    paddingHorizontal: 20,
+    height: '100%',
+    alignItems: 'center',
+  },
   categoryCard: {
     backgroundColor: '#ffffff', borderRadius: 18, paddingVertical: 14, paddingHorizontal: 18, marginRight: 10,
     alignItems: 'center', width: 90, borderWidth: 1.5, borderColor: '#F0EBE3',
