@@ -152,11 +152,11 @@ const styles = StyleSheet.create({
   filterBtn: { width: 44, height: 44, borderRadius: 14, backgroundColor: '#ffffff', justifyContent: 'center', alignItems: 'center', borderWidth: 1.5, borderColor: '#E8E3DB' },
   catScrollWrapper: {
     flexGrow: 0,
-    height: 54,
+    height: 58,
   },
   catScroll: {
     paddingHorizontal: 16,
-    height: '100%',
+    paddingVertical: 6,
     alignItems: 'center',
   },
   catPill: { paddingHorizontal: 18, paddingVertical: 8, borderRadius: 20, backgroundColor: '#ffffff', marginRight: 8, borderWidth: 1.5, borderColor: '#E8E3DB' },
