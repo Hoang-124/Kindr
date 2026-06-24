@@ -1,24 +1,48 @@
 // @ts-nocheck
 // components/MapNearbyScreen.js - Màn hình 24: Bản đồ quanh đây
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, SafeAreaView, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, SafeAreaView, ActivityIndicator, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import MapView, { Marker, PROVIDER_DEFAULT } from 'react-native-maps';
-import * as Location from 'expo-location';
+
+// Dynamically import native packages only on mobile to prevent web bundler crash
+let MapView = null;
+let Marker = null;
+let Location = null;
+
+if (Platform.OS !== 'web') {
+  try {
+    const Maps = require('react-native-maps');
+    MapView = Maps.default;
+    Marker = Maps.Marker;
+    Location = require('expo-location');
+  } catch (error) {
+    console.warn('Failed to load native maps or location modules', error);
+  }
+}
+
+const mockMarkersWeb = [
+  { id: '1', name: 'Xe đẩy Combi đời 2024', xu: 12, district: 'Quận 7', x: 120, y: 120, type: 'xe_noi' },
+  { id: '2', name: 'Bộ xếp hình Lego Duplo', xu: 5, district: 'Bình Thạnh', x: 200, y: 80, type: 'do_choi' },
+  { id: '3', name: 'Sách vải Montessori', xu: 3, district: 'Quận 2', x: 260, y: 160, type: 'sach_truyen' },
+  { id: '4', name: 'Bộ quần áo bé gái', xu: 4, district: 'Gò Vấp', x: 80, y: 200, type: 'quan_ao' },
+  { id: '5', name: 'Gấu bông Teddy lớn', xu: 0, district: 'Quận 7', x: 170, y: 240, type: 'tram_tang' },
+];
 
 export default function MapNearbyScreen({ navigation }: { navigation: any }) {
   const [userCoords, setUserCoords] = useState<{ latitude: number, longitude: number } | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(Platform.OS !== 'web');
   const [selectedMarker, setSelectedMarker] = useState<any>(null);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   useEffect(() => {
+    if (Platform.OS === 'web' || !Location) {
+      setLoading(false);
+      return;
+    }
+
     (async () => {
       try {
         let { status } = await Location.requestForegroundPermissionsAsync();
         if (status !== 'granted') {
-          setErrorMsg('Quyền truy cập vị trí bị từ chối.');
-          // Fallback to District 7, HCMC (Near Ton Duc Thang University / Lotte Mart D7)
           setUserCoords({ latitude: 10.7292, longitude: 106.7212 });
           setLoading(false);
           return;
@@ -34,7 +58,6 @@ export default function MapNearbyScreen({ navigation }: { navigation: any }) {
         });
       } catch (error) {
         console.log('Error getting location: ', error);
-        // Fallback to District 7, HCMC
         setUserCoords({ latitude: 10.7292, longitude: 106.7212 });
       } finally {
         setLoading(false);
@@ -42,7 +65,6 @@ export default function MapNearbyScreen({ navigation }: { navigation: any }) {
     })();
   }, []);
 
-  // Generate mock markers dynamically around user coordinates
   const getNearbyMarkers = (lat: number, lng: number) => {
     return [
       { id: '1', name: 'Xe đẩy Combi đời 2024', xu: 12, district: 'Quận 7', latitude: lat + 0.002, longitude: lng - 0.003, type: 'xe_noi' },
@@ -53,7 +75,9 @@ export default function MapNearbyScreen({ navigation }: { navigation: any }) {
     ];
   };
 
-  const markers = userCoords ? getNearbyMarkers(userCoords.latitude, userCoords.longitude) : [];
+  const markers = Platform.OS === 'web' 
+    ? mockMarkersWeb 
+    : (userCoords ? getNearbyMarkers(userCoords.latitude, userCoords.longitude) : []);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -74,37 +98,67 @@ export default function MapNearbyScreen({ navigation }: { navigation: any }) {
         </View>
       ) : (
         <View style={styles.mapContainer}>
-          <MapView
-            provider={PROVIDER_DEFAULT}
-            style={styles.map}
-            showsUserLocation={true}
-            showsMyLocationButton={true}
-            initialRegion={{
-              latitude: userCoords!.latitude,
-              longitude: userCoords!.longitude,
-              latitudeDelta: 0.015,
-              longitudeDelta: 0.015,
-            }}
-          >
-            {markers.map(m => (
-              <Marker
-                key={m.id}
-                coordinate={{ latitude: m.latitude, longitude: m.longitude }}
-                onPress={() => setSelectedMarker(m)}
-              >
-                <View style={[styles.customMarker, m.xu === 0 && styles.customMarkerFree]}>
-                  <Text style={styles.markerEmoji}>
-                    {m.xu === 0 ? '🎁' : '🧸'}
-                  </Text>
-                  <View style={styles.markerBubble}>
-                    <Text style={styles.markerBubbleText}>
-                      {m.xu === 0 ? 'Tặng' : `${m.xu} Xu`}
-                    </Text>
+          {Platform.OS === 'web' || !MapView ? (
+            /* Web Fallback Mock Map */
+            <View style={styles.mapBgWeb}>
+              {/* Grid lines */}
+              {[0, 1, 2, 3].map(i => <View key={`h${i}`} style={[styles.gridLineH, { top: 80 * i + 40 }]} />)}
+              {[0, 1, 2, 3].map(i => <View key={`v${i}`} style={[styles.gridLineV, { left: 80 * i + 40 }]} />)}
+
+              {/* Markers */}
+              {markers.map(m => (
+                <TouchableOpacity 
+                  key={m.id} 
+                  style={[styles.markerWeb, { left: m.x, top: m.y }]}
+                  onPress={() => setSelectedMarker(m)}
+                >
+                  <View style={[styles.markerDotWeb, m.xu === 0 && styles.markerDotFreeWeb]}>
+                    <Text style={styles.markerTextWeb}>{m.xu === 0 ? '🎁' : '🧸'}</Text>
                   </View>
-                </View>
-              </Marker>
-            ))}
-          </MapView>
+                  <View style={styles.markerLabelWeb}>
+                    <Text style={styles.markerLabelTextWeb}>{m.xu === 0 ? 'Tặng' : `${m.xu} Xu`}</Text>
+                  </View>
+                </TouchableOpacity>
+              ))}
+
+              {/* Center indicator */}
+              <View style={styles.centerIndicatorWeb}>
+                <Text style={styles.centerEmojiWeb}>📍</Text>
+              </View>
+            </View>
+          ) : (
+            /* Real Mobile MapView */
+            <MapView
+              style={styles.map}
+              showsUserLocation={true}
+              showsMyLocationButton={true}
+              initialRegion={{
+                latitude: userCoords ? userCoords.latitude : 10.7292,
+                longitude: userCoords ? userCoords.longitude : 106.7212,
+                latitudeDelta: 0.015,
+                longitudeDelta: 0.015,
+              }}
+            >
+              {markers.map(m => (
+                <Marker
+                  key={m.id}
+                  coordinate={{ latitude: m.latitude, longitude: m.longitude }}
+                  onPress={() => setSelectedMarker(m)}
+                >
+                  <View style={styles.customMarker}>
+                    <Text style={styles.markerEmoji}>
+                      {m.xu === 0 ? '🎁' : '🧸'}
+                    </Text>
+                    <View style={styles.markerBubble}>
+                      <Text style={styles.markerBubbleText}>
+                        {m.xu === 0 ? 'Tặng' : `${m.xu} Xu`}
+                      </Text>
+                    </View>
+                  </View>
+                </Marker>
+              ))}
+            </MapView>
+          )}
         </View>
       )}
 
@@ -117,7 +171,7 @@ export default function MapNearbyScreen({ navigation }: { navigation: any }) {
           </Text>
           <Text style={styles.infoText}>
             {selectedMarker 
-              ? `Món đồ này đang cách vị trí của mẹ dưới 1km. Nhấp bên dưới để xem.`
+              ? `Món đồ này đang ở khu vực ${selectedMarker.district}, cách vị trí của mẹ dưới 1km.`
               : 'Nhấp chọn một ghim đồ chơi/quà tặng trên bản đồ để xem chi tiết.'}
           </Text>
         </View>
@@ -155,18 +209,30 @@ const styles = StyleSheet.create({
   loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', marginHorizontal: 20, marginBottom: 10, backgroundColor: '#ffffff', borderRadius: 24 },
   loadingText: { marginTop: 12, fontSize: 14, fontWeight: '600', color: '#8B7E74' },
 
-  // Map
+  // Map Container
   mapContainer: { flex: 1, marginHorizontal: 20, marginBottom: 10, borderRadius: 24, overflow: 'hidden', borderWidth: 1.5, borderColor: '#E8E3DB' },
   map: { width: '100%', height: '100%' },
+
+  // Web Fallback styles
+  mapBgWeb: { flex: 1, backgroundColor: '#E8F5E8', position: 'relative', overflow: 'hidden' },
+  gridLineH: { position: 'absolute', left: 0, right: 0, height: 1, backgroundColor: 'rgba(163,213,198,0.2)' },
+  gridLineV: { position: 'absolute', top: 0, bottom: 0, width: 1, backgroundColor: 'rgba(163,213,198,0.2)' },
+  markerWeb: { position: 'absolute', alignItems: 'center' },
+  markerDotWeb: { width: 36, height: 36, borderRadius: 18, backgroundColor: '#5B9A8B', justifyContent: 'center', alignItems: 'center', shadowColor: '#5B9A8B', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.2, shadowRadius: 3 },
+  markerDotFreeWeb: { backgroundColor: '#D4577A' },
+  markerTextWeb: { fontSize: 16 },
+  markerLabelWeb: { backgroundColor: '#ffffff', borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2, marginTop: 2, borderWidth: 1, borderColor: '#E8E3DB' },
+  markerLabelTextWeb: { fontSize: 9, fontWeight: '700', color: '#3D3D3D' },
+  centerIndicatorWeb: { position: 'absolute', top: '45%', left: '45%' },
+  centerEmojiWeb: { fontSize: 26 },
   
-  // Custom Marker
+  // Custom Mobile Marker styles
   customMarker: {
     alignItems: 'center',
     justifyContent: 'center',
   },
-  customMarkerFree: {},
   markerEmoji: {
-    fontSize: 28,
+    fontSize: 26,
     textShadowColor: 'rgba(0, 0, 0, 0.1)',
     textShadowOffset: { width: 0, height: 2 },
     textShadowRadius: 3,
