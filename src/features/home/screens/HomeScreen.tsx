@@ -24,6 +24,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
   const wallet = useSelector(state => state.wallet);
 
   const activeItems = items.filter(i => i.status === 'active');
+  const unreadNotificationsCount = state.notifications.filter(n => !n.read).length;
 
   const handleLogout = () => {
     dispatch({ type: 'LOGOUT' });
@@ -64,14 +65,24 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         {/* Header */}
         <View style={styles.topBar}>
-          <View>
+          <View style={{ flex: 1 }}>
             <Text style={styles.greeting}>Chào mẹ {state.user?.name || 'bạn'}! 👋</Text>
             <Text style={styles.subGreeting}>Hôm nay mẹ muốn tìm gì cho bé?</Text>
           </View>
-          <TouchableOpacity style={styles.walletBadge} onPress={() => navigation.navigate('Wallet')}>
-            <Text style={styles.walletIcon}>💰</Text>
-            <Text style={styles.walletText}>{wallet.balance} Xu</Text>
-          </TouchableOpacity>
+          <View style={styles.headerRight}>
+            <TouchableOpacity style={styles.bellBadge} onPress={() => navigation.navigate('Notifications')}>
+              <Ionicons name="notifications-outline" size={22} color="#5D5347" />
+              {unreadNotificationsCount > 0 && (
+                <View style={styles.bellBadgeDot}>
+                  <Text style={styles.bellBadgeText}>{unreadNotificationsCount}</Text>
+                </View>
+              )}
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.walletBadge} onPress={() => navigation.navigate('Wallet')}>
+              <Text style={styles.walletIcon}>💰</Text>
+              <Text style={styles.walletText}>{wallet.balance} Xu</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Banner */}
@@ -95,7 +106,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Danh mục</Text>
         </View>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.categoryScroll}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.categoryScroll} style={{ flexGrow: 0 }}>
           {categories.map((cat, index) => (
             <TouchableOpacity
               key={cat.key}
@@ -197,6 +208,17 @@ const styles = StyleSheet.create({
   },
   walletIcon: { fontSize: 16, marginRight: 5 },
   walletText: { fontSize: 14, fontWeight: '700', color: '#8B6914' },
+  headerRight: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  bellBadge: {
+    width: 40, height: 40, borderRadius: 20, backgroundColor: '#ffffff',
+    justifyContent: 'center', alignItems: 'center', borderWidth: 1.5, borderColor: '#E8E3DB',
+    position: 'relative',
+  },
+  bellBadgeDot: {
+    position: 'absolute', top: -2, right: -2, backgroundColor: '#FF6B8A',
+    borderRadius: 8, minWidth: 16, height: 16, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 4,
+  },
+  bellBadgeText: { fontSize: 9, fontWeight: '800', color: '#ffffff' },
 
   // Banner
   banner: {
@@ -223,7 +245,7 @@ const styles = StyleSheet.create({
   seeAllText: { fontSize: 13, color: '#5B9A8B', fontWeight: '700' },
 
   // Categories
-  categoryScroll: { paddingHorizontal: 20 },
+  categoryScroll: { paddingHorizontal: 20, alignItems: 'center' },
   categoryCard: {
     backgroundColor: '#ffffff', borderRadius: 18, paddingVertical: 14, paddingHorizontal: 18, marginRight: 10,
     alignItems: 'center', width: 90, borderWidth: 1.5, borderColor: '#F0EBE3',

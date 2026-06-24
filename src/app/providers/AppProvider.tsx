@@ -10,6 +10,7 @@ export interface UserProfile {
   score: number;
   wallet_balance: number;
   status: string;
+  location?: string;
 }
 
 export interface NotificationItem {
