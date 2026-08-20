@@ -1,0 +1,21 @@
+{
+  "name": "kindr-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Kindr - Nền tảng trao đổi đồ cho bé với Bảo Chứng Kép",
+  "scripts": {
+    "dev": "concurrently -n \"SERVER,CLIENT\" -c \"blue.bold,magenta.bold\" \"npm --prefix server run dev\" \"npm --prefix client start\"",
+    "client": "npm --prefix client start",
+    "client:android": "npm --prefix client run android",
+    "client:ios": "npm --prefix client run ios",
+    "client:web": "npm --prefix client run web",
+    "server": "npm --prefix server run dev",
+    "server:seed": "npm --prefix server run seed",
+    "pitch": "npx serve pitch-page -p 3000",
+    "test": "npm --prefix server run test",
+    "typecheck": "cd client && npx tsc --noEmit && cd ../server && npx tsc --noEmit"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.4"
+  }
+}

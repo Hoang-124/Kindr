@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kindr — Nền Tảng Trao Đổi Đồ Mẹ & Bé Siêu Cục Bộ | Pitch & Landing Page</title>
+  <meta name="description" content="Kindr kết nối cộng đồng mẹ bỉm sữa trao đổi đồ dùng trẻ em qua Ví Xu & thuật toán Ký quỹ Trách nhiệm Song phương Double Escrow. An toàn 100%, triệt tiêu lừa đảo & mặc cả.">
+  
+  <!-- Google Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+  
+  <!-- CSS Design System -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- ================= HEADER & NAV ================= -->
+  <header class="navbar" id="navbar">
+    <div class="container navbar-container">
+      <a href="#" class="logo" id="main-logo">
+        <!-- PLACEHOLDER: Logo chính thức của Kindr - Hiện dùng SVG mascot + wordmark -->
+        <div class="logo-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+          </svg>
+        </div>
+        <span>Kindr</span>
+      </a>
+
+      <nav>
+        <ul class="nav-links" id="navLinks">
+          <li><a href="#about" class="nav-link" id="nav-about">Ý tưởng</a></li>
+          <li><a href="#how-it-works" class="nav-link" id="nav-how">Cách vận hành</a></li>
+          <li><a href="#escrow" class="nav-link" id="nav-escrow">Ký quỹ Escrow</a></li>
+          <li><a href="#usps" class="nav-link" id="nav-usps">3 USP Cốt lõi</a></li>
+          <li><a href="#value" class="nav-link" id="nav-value">Giá trị</a></li>
+          <li><a href="#comparison" class="nav-link" id="nav-comparison">So sánh</a></li>
+          <li><a href="#roadmap" class="nav-link" id="nav-roadmap">Lộ trình</a></li>
+          <li><a href="#team" class="nav-link" id="nav-team">Đội ngũ</a></li>
+        </ul>
+      </nav>
+
+      <div class="nav-actions">
+        <button class="btn btn-primary btn-sm open-modal-btn" id="btn-header-join">Tham gia ngay ❤️</button>
+        <button class="mobile-toggle" id="mobileToggle" aria-label="Menu">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= HERO SECTION ================= -->
+  <section class="hero" id="hero">
+    <div class="hero-shape-1"></div>
+    <div class="hero-shape-2"></div>
+    
+    <div class="container hero-grid">
+      <div class="hero-content reveal">
+        <div class="hero-badge">
+          <span>🧸 Dự án Khởi nghiệp Sinh viên FPT University</span>
+        </div>
+        
+        <h1 class="hero-title" id="hero-main-title">
+          Giải Phóng Không Gian,<br>
+          <span class="highlight">Tối Ưu Chi Phí Nuôi Con</span> Với Ví Xu Nội Bộ
+        </h1>
+        
+        <p class="hero-description" id="hero-desc">
+          Kindr là nền tảng trung gian tuần hoàn siêu cục bộ kết nối các bà mẹ bỉm sữa hoán đổi đồ dùng trẻ em an toàn. Triệt tiêu 100% rủi ro chất lượng nhờ thuật toán <strong>Ký quỹ Trách nhiệm Song phương (Double Escrow)</strong> &amp; bảo chứng <strong>6 giờ kiểm định tại nhà</strong>.
+        </p>
+
+        <div class="hero-cta-group">
+          <button class="btn btn-primary open-modal-btn" id="btn-hero-cta">
+            <span>Tham Gia Trải Nghiệm Sớm</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+          <a href="#how-it-works" class="btn btn-secondary" id="btn-hero-secondary">Xem Cách Vận Hành</a>
+        </div>
+
+        <div class="hero-stats">
+          <div class="stat-item">
+            <h4>0 VNĐ</h4>
+            <p>Mặc cả &amp; Ép giá</p>
+          </div>
+          <div class="stat-item">
+            <h4>100%</h4>
+            <p>Ký quỹ Bảo chứng</p>
+          </div>
+          <div class="stat-item">
+            <h4>6 Giờ</h4>
+            <p>Kiểm định tại nhà</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- App Mockup Mobile Preview -->
+      <div class="hero-visual reveal">
+        <div class="phone-mockup">
+          <div class="phone-notch"></div>
+          <div class="phone-screen">
+            <div class="app-header">
+              <div class="app-top-bar">
+                <div class="app-user">
+                  <div class="app-avatar">T</div>
+                  <div class="app-user-name">Chào Mẹ Phương Thảo! ❤️</div>
+                </div>
+                <div class="app-token-badge">
+                  <span>🪙 180 Xu</span>
+                </div>
+              </div>
+              <div class="app-banner">
+                <div class="app-banner-text">
+                  <p>Mẹ muốn đổi đồ gì hôm nay?</p>
+                  <h5>Đăng Đồ Ngay - Nhận Xu Liền Tay</h5>
+                </div>
+                <span style="font-size: 1.5rem;">🧸</span>
+              </div>
+            </div>
+
+            <div class="app-categories">
+              <div class="cat-pill active" data-cat="all">Tất cả</div>
+              <div class="cat-pill" data-cat="toys">Đồ chơi 🧸</div>
+              <div class="cat-pill" data-cat="books">Sách 📚</div>
+              <div class="cat-pill" data-cat="free">Trạm 0 Xu 🎁</div>
+            </div>
+
+            <div class="app-feed" id="mockupFeed">
+              <div class="app-card">
+                <div class="app-card-img">🧸</div>
+                <div class="app-card-title">Gấu bông Teddy biết hát</div>
+                <div class="app-card-meta">
+                  <span class="app-card-xu">30 Xu</span>
+                  <span class="app-card-dist">📍 0.4 km</span>
+                </div>
+              </div>
+              <div class="app-card">
+                <div class="app-card-img">🚲</div>
+                <div class="app-card-title">Xe chòi chân Holla</div>
+                <div class="app-card-meta">
+                  <span class="app-card-xu">80 Xu</span>
+                  <span class="app-card-dist">📍 0.8 km</span>
+                </div>
+              </div>
+              <div class="app-card">
+                <div class="app-card-img">📚</div>
+                <div class="app-card-title">Sách Ehon Nhật Bản (10c)</div>
+                <div class="app-card-meta">
+                  <span class="app-card-xu">45 Xu</span>
+                  <span class="app-card-dist">📍 1.2 km</span>
+                </div>
+              </div>
+              <div class="app-card">
+                <div class="app-card-img">🧩</div>
+                <div class="app-card-title">Bộ xếp hình Lego Duplo</div>
+                <div class="app-card-meta">
+                  <span class="app-card-xu">60 Xu</span>
+                  <span class="app-card-dist">📍 0.5 km</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mascot Floating Speech Bubble -->
+        <div class="floating-mascot-card">
+          <svg width="42" height="42" viewBox="0 0 100 100" class="mascot-svg">
+            <circle cx="50" cy="50" r="45" fill="#FFF0EB"/>
+            <circle cx="28" cy="30" r="14" fill="#6B5B5E"/>
+            <circle cx="72" cy="30" r="14" fill="#6B5B5E"/>
+            <circle cx="50" cy="52" r="30" fill="#E8D5C4"/>
+            <circle cx="42" cy="48" r="4" fill="#2D2325"/>
+            <circle cx="58" cy="48" r="4" fill="#2D2325"/>
+            <ellipse cx="50" cy="56" rx="7" ry="5" fill="#3D2C2E"/>
+            <path d="M 44 65 Q 50 70 56 65" stroke="#3D2C2E" stroke-width="2.5" fill="none"/>
+            <circle cx="36" cy="56" r="4" fill="#FF8C61" opacity="0.6"/>
+            <circle cx="64" cy="56" r="4" fill="#FF8C61" opacity="0.6"/>
+          </svg>
+          <div>
+            <p style="font-size: 0.78rem; font-weight: 700; color: var(--primary);">Gấu Kindy bảo vệ!</p>
+            <p style="font-size: 0.72rem; color: var(--text-secondary);">"Mẹ gửi tạm Xu vào rương, Gấu giữ an toàn 6h nhé!"</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= ABOUT & PROBLEM SECTION ================= -->
+  <section class="section problem-section" id="about">
+    <div class="container">
+      <div class="section-header reveal">
+        <div class="section-tag amber">Vấn Đề Thị Trường</div>
+        <h2 class="section-title">Tại Sao Các Mẹ Cần <span>Kindr</span> Ngay Lúc Này?</h2>
+        <p class="section-subtitle">
+          Nuôi con nhỏ tại các đô thị lớn mang lại niềm hạnh phúc vô bờ nhưng cũng kèm theo bài toán tài chính và nỗi lo lãng phí đồ dùng trẻ em có vòng đời cực ngắn.
+        </p>
+      </div>
+
+      <div class="problem-grid">
+        <div class="problem-card reveal">
+          <div class="problem-icon">👶</div>
+          <h3>Đồ Cũ Tồn Đọng Mau Chật Nhà</h3>
+          <p>Trẻ em lớn rất nhanh. Đồ chơi, xe chòi chân, sách truyện mua hàng triệu đồng chỉ dùng 2–3 tháng là bé chán hoặc quá lứa tuổi, gây lãng phí và chiếm không gian sống.</p>
+          <span class="problem-stat-badge">Vòng đời đồ chơi ~ 2-3 tháng</span>
+        </div>
+
+        <div class="problem-card reveal">
+          <div class="problem-icon">📈</div>
+          <h3>Quy Mô Nhu Cầu Khổng Lồ</h3>
+          <p>Việt Nam có khoảng 101,1 triệu dân, đón thêm ~1 triệu trẻ em chào đời mỗi năm. Nhu cầu thay mới đồ chơi và vật dụng học tập liên tục tăng cao.</p>
+          <span class="problem-stat-badge">~1 triệu trẻ sinh mới / năm <sup>[1]</sup></span>
+        </div>
+
+        <div class="problem-card reveal">
+          <div class="problem-icon">🌍</div>
+          <h3>Áp Lực Rác Thải Nhựa</h3>
+          <p>Khoảng 90% đồ chơi trên thế giới làm từ nhựa plastic. Hành vi vứt bỏ đồ cũ không chỉ lãng phí tiền bạc mà còn trực tiếp chất chồng áp lực môi trường.</p>
+          <span class="problem-stat-badge">>430M tấn rác nhựa / năm <sup>[2]</sup></span>
+        </div>
+
+        <div class="problem-card reveal">
+          <div class="problem-icon">⚠️</div>
+          <h3>Rủi Ro Chợ Truyền Thống</h3>
+          <p>Hội nhóm Facebook/Zalo tự phát &amp; chợ đồ cũ đầy rẫy mặc cả ép giá, lừa đảo giao hàng hư bẩn, không kiểm định và chi phí ship liên tỉnh đắt đỏ.</p>
+          <span class="problem-stat-badge">100% Mặc cả &amp; Nhiễu tin</span>
+        </div>
+      </div>
+
+      <div class="footnote-cite reveal">
+        * Nguồn số liệu chính thức: <sup>[1]</sup> Vietnam Briefing (2025) | <sup>[2]</sup> UNEP (2023) &amp; World Economic Forum (2024).
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= HOW IT WORKS (SOLUTION) ================= -->
+  <section class="section how-it-works" id="how-it-works">
+    <div class="container">
+      <div class="section-header reveal">
+        <div class="section-tag green">Giải Pháp &amp; Vận Hành</div>
+        <h2 class="section-title">4 Bước Hoán Đổi Đồ Cũ <span>Sòng Phẳng &amp; An Toàn</span></h2>
+        <p class="section-subtitle">
+          Không cần thương lượng hay mặc cả stress. Mọi vật phẩm đều được quy chuẩn giá trị bằng Xu nội bộ với quy trình 4 bước cực đơn giản.
+        </p>
+      </div>
+
+      <div class="stepper-flow">
+        <div class="step-item reveal">
+          <div class="step-number-node">1</div>
+          <div class="step-card">
+            <h4>Đăng Đồ &amp; Gợi Ý Xu</h4>
+            <p>Người bán chụp ảnh → chọn danh mục &amp; tình trạng (70%/80%/90%) → hệ thống tự gợi ý số Xu cố định → ký quỹ Safe Fee 10% bằng Xu.</p>
+          </div>
+        </div>
+
+        <div class="step-item reveal">
+          <div class="step-number-node">2</div>
+          <div class="step-card">
+            <h4>Khớp Nhu Cầu P2P</h4>
+            <p>Người mua lọc theo Quận/Phường gần nhà, bấm "Đổi Đồ" → hệ thống tạm khóa số Xu của người mua → mở thông tin Zalo/SĐT để 2 bên hẹn gặp.</p>
+          </div>
+        </div>
+
+        <div class="step-item reveal">
+          <div class="step-number-node">3</div>
+          <div class="step-card">
+            <h4>Giao Nhận Siêu Cục Bộ</h4>
+            <p>Gặp trực tiếp tiện đường đi chợ/đón con hoặc gọi GrabExpress. Nhận đồ xong bấm "Đã nhận" → kích hoạt <strong>"6 Hours Safeful Time"</strong>.</p>
+          </div>
+        </div>
+
+        <div class="step-item reveal">
+          <div class="step-number-node">4</div>
+          <div class="step-card">
+            <h4>Giải phóng Dòng Xu</h4>
+            <p>Hết 6 giờ bảo hộ không khiếu nại, hệ thống mở đóng băng và cộng Xu vào ví người bán. Hoàn tất giao dịch! Danh mục 0 Xu miễn hoàn toàn phí.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= DOUBLE ESCROW MECHANISM ================= -->
+  <section class="section escrow-section" id="escrow">
+    <div class="container">
+      <div class="section-header reveal">
+        <div class="section-tag">Cơ Chế Lõi Trái Tim</div>
+        <h2 class="section-title">Ký Quỹ Trách Nhiệm Song Phương <span>(Double Escrow)</span></h2>
+        <p class="section-subtitle">
+          Mượn ý tưởng từ cơ chế bảo hộ mua sắm Shopee, Kindr áp dụng thuật toán Double Escrow Tokenomics độc quyền để triệt tiêu hoàn toàn rủi ro lừa đảo.
+        </p>
+      </div>
+
+      <div class="escrow-box-container reveal">
+        <div class="mascot-dialogue">
+          <svg class="mascot-avatar-small" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="45" fill="#FFF0EB"/>
+            <circle cx="28" cy="30" r="14" fill="#6B5B5E"/>
+            <circle cx="72" cy="30" r="14" fill="#6B5B5E"/>
+            <circle cx="50" cy="52" r="30" fill="#E8D5C4"/>
+            <circle cx="42" cy="48" r="4" fill="#2D2325"/>
+            <circle cx="58" cy="48" r="4" fill="#2D2325"/>
+            <ellipse cx="50" cy="56" rx="7" ry="5" fill="#3D2C2E"/>
+            <path d="M 44 65 Q 50 70 56 65" stroke="#3D2C2E" stroke-width="2.5" fill="none"/>
+          </svg>
+          <p>"Mẹ gửi tạm Xu vào đây để Gấu Kindy giữ hộ cho an toàn nhé! Cả người đăng và người đổi đều đặt cọc Xu trách nhiệm. Đúng 6 tiếng trải nghiệm êm ả mới giải phóng dòng Xu!" ❤️</p>
+        </div>
+
+        <div class="escrow-diagram">
+          <div class="escrow-party">
+            <div class="escrow-party-title">Người Đăng Bài (Bán)</div>
+            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Đăng chiếc xe chòi chân (150 Xu)</p>
+            <span class="escrow-fee-badge">🔒 Khóa 10% Safe Fee (15 Xu)</span>
+          </div>
+
+          <div class="escrow-center-vault">
+            <div class="escrow-vault-title">HỘP KÝ QUỸ TRUNG TÂM</div>
+            <p style="font-size: 0.85rem; color: var(--text-secondary);">Tạm giữ Xu trách nhiệm cả 2 bên</p>
+            <div class="escrow-timer">
+              <span>⏱️ 6 Hours Safeful Time</span>
+            </div>
+          </div>
+
+          <div class="escrow-party">
+            <div class="escrow-party-title">Người Nhận Bài (Mua)</div>
+            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Bấm chọn "Đổi Đồ Của Mẹ"</p>
+            <span class="escrow-fee-badge" style="background: var(--accent-sage-light); color: var(--accent-sage);">🔒 Khóa 100% Giá trị (150 Xu)</span>
+          </div>
+        </div>
+
+        <!-- Interactive Simulator Tool -->
+        <div class="escrow-simulator">
+          <h4 style="margin-bottom: 1rem; font-size: 1rem;">🎮 Thử nghiệm trực quan dòng chảy Double Escrow:</h4>
+          <div class="sim-steps">
+            <button class="sim-btn active" data-step="1">1. Đăng đồ &amp; Cọc 10%</button>
+            <button class="sim-btn" data-step="2">2. Khớp đổi &amp; Khóa Xu</button>
+            <button class="sim-btn" data-step="3">3. Kiểm định 6h tại nhà</button>
+            <button class="sim-btn" data-step="4">4. Giải phóng ví Xu</button>
+          </div>
+          <div class="sim-display">
+            <span style="font-size: 1.5rem;">🛡️</span>
+            <div>
+              <strong id="simStatusBadge" style="color: var(--primary); display: block;">Bước 1: Khóa 10% Safe Fee</strong>
+              <p id="simText" style="font-size: 0.88rem; margin-top: 2px;">
+                Mẹ Lan đăng chiếc xe đẩy. Hệ thống tạm khóa 10% Phí Cam Kết (15 Xu) của Mẹ Lan để đảm bảo thông tin đúng 90% thực tế.
+              </p>
+            </div>
+            <div style="margin-left: auto; text-align: right; min-width: 110px;">
+              <span style="font-size: 0.75rem; color: var(--text-light);">Số Xu trong Hộp:</span>
+              <div id="simVaultAmount" style="font-weight: 700; color: var(--primary); font-size: 1.1rem;">15 Xu</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 3 CORE USPS ================= -->
+  <section class="section usp-section" id="usps">
+    <div class="container">
+      <div class="section-header reveal">
+        <div class="section-tag amber">Điểm Khác Biệt Mới Lạ</div>
+        <h2 class="section-title">3 Lợi Thế Cạnh Tranh <span>USP Cốt Lõi</span></h2>
+        <p class="section-subtitle">
+          Kindr giải quyết triệt để các nỗi đau của chợ đồ cũ truyền thống bằng mô hình kinh doanh và trải nghiệm công nghệ vượt trội.
+        </p>
+      </div>
+
+      <div class="usp-grid">
+        <div class="usp-card reveal">
+          <div class="usp-number">01</div>
+          <div class="usp-icon">🔒</div>
+          <h3>Double Escrow Tokenomics</h3>
+          <div class="usp-slogan">"Giao dịch không tiền mặt, không mặc cả, không rủi ro."</div>
+          <p>Số hóa giá trị đồ cũ bằng Token Xu cố định. Cơ chế ký quỹ trách nhiệm song phương triệt tiêu 100% tình trạng ép giá, bùng hàng và lừa đảo đồ hư bẩn.</p>
+        </div>
+
+        <div class="usp-card reveal">
+          <div class="usp-number">02</div>
+          <div class="usp-icon">🌸</div>
+          <h3>Giao Diện Chạm Cảm Xúc</h3>
+          <div class="usp-slogan">"Không chỉ là công nghệ, Kindr là người bạn thấu hiểu mẹ bỉm."</div>
+          <p>Lấy cảm hứng từ The Wonder Weeks &amp; Flo. Tone màu pastel ấm áp, ngôn từ micro-copy dịu dàng như lời tâm sự giúp các mẹ thư thái tâm hồn mỗi khi mở app.</p>
+        </div>
+
+        <div class="usp-card reveal">
+          <div class="usp-number">03</div>
+          <div class="usp-icon">🏘️</div>
+          <h3>Hệ Sinh Thái Siêu Cục Bộ</h3>
+          <div class="usp-slogan">"Đổi đồ cũ ngay trong Phường – Tiện đường đi chợ, mở rộng tình thân."</div>
+          <p>Mô hình B2B2C hợp tác cùng trường mầm non, cửa hàng Mẹ &amp; Bé làm "Kindr Hub" giao nhận bán kính 1–2km. Vừa tiết kiệm ship vừa kết nối xóm giềng văn minh.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= VALUE DELIVERED 3 COLUMNS ================= -->
+  <section class="section value-section" id="value">
+    <div class="container">
+      <div class="section-header reveal">
+        <div class="section-tag green">Tác Động 3 Chiều</div>
+        <h2 class="section-title">Giá Trị Mang Lại Cho <span>Cộng Đồng &amp; Startup</span></h2>
+        <p class="section-subtitle">
+          Kindr không chỉ mang lại hiệu quả kinh tế cho người dùng mà còn tạo ra mô hình kinh doanh bền vững và giá trị nhân văn sâu sắc.
+        </p>
+      </div>
+
+      <div class="value-grid">
+        <!-- User Column -->
+        <div class="value-column reveal">
+          <div class="value-header">
+            <div class="value-header-icon v-icon-user">👩</div>
+            <h3>Dành Cho Người Dùng (Mẹ Bỉm)</h3>
+          </div>
+          <ul class="value-list">
+            <li>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              <span><strong>Tối ưu kinh tế gia đình:</strong> Chi phí gần như 0 VNĐ để liên tục đổi đồ chơi, sách mới cho bé lớn theo từng tháng.</span>
+            </li>
+            <li>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              <span><strong>Giải phóng không gian:</strong> Dọn dẹp nhà cửa gọn gàng, biến đồ thừa thành dòng Xu có giá trị tái sử dụng.</span>
+            </li>
+            <li>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              <span><strong>Giao kết tin cậy:</strong> Giao lưu, kết nối với những người mẹ văn minh ngay trong cùng khu phố/quận.</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Business Monetization Column -->
+        <div class="value-column reveal">
+          <div class="value-header">
+            <div class="value-header-icon v-icon-biz">💼</div>
+            <h3>Dành Cho Doanh Nghiệp (Dòng Tiền)</h3>
+          </div>
+          <ul class="value-list">
+            <li>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              <span><strong>Phí dịch vụ 10%:</strong> Phí nạp/rút quy đổi Xu ra tiền mặt (1 Xu = 10.000 VNĐ) chuẩn hóa.</span>
+            </li>
+            <li>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              <span><strong>Dòng vốn thả nổi (Float Money):</strong> Doanh thu từ lượng tiền nạp chưa rút lưu ký trong hệ thống ví.</span>
+            </li>
+            <li>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              <span><strong>Phí đẩy bài &amp; B2B Ads:</strong> Phí hiển thị ưu tiên (~5.000đ/lượt), gói Premium và đối tác thương hiệu Mẹ &amp; Bé.</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Social Impact Column -->
+        <div class="value-column reveal">
+          <div class="value-header">
+            <div class="value-header-icon v-icon-soc">🌱</div>
+            <h3>Dành Cho Xã Hội &amp; Môi Trường</h3>
+          </div>
+          <ul class="value-list">
+            <li>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              <span><strong>Kinh tế tuần hoàn (Circular):</strong> Giảm hàng trăm tấn rác thải nhựa đồ chơi vứt bỏ ra môi trường mỗi năm.</span>
+            </li>
+            <li>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              <span><strong>Trạm Tặng Đồ (0 Xu):</strong> Hỗ trợ gia đình hoàn cảnh khó khăn &amp; các mái ấm tình thương.</span>
+            </li>
+            <li>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              <span><strong>Cộng đồng tử tế:</strong> Xây dựng nét đẹp văn hóa chia sẻ, tương thân tương ái tại đô thị hiện đại.</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= CALCULATOR SECTION (MOM SAVINGS) ================= -->
+  <section class="section calculator-section">
+    <div class="container">
+      <div class="section-header reveal">
+        <div class="section-tag amber">Bảng Tính Tiết Kiệm</div>
+        <h2 class="section-title">Mẹ Sẽ Tiết Kiệm Được <span>Bao Nhiêu Tiền?</span></h2>
+        <p class="section-subtitle">Kéo thanh trượt chi tiêu mua đồ chơi/sách hàng tháng để xem con số bất ngờ khi dùng Kindr!</p>
+      </div>
+
+      <div class="calc-box reveal">
+        <div class="calc-controls">
+          <label for="toyBudget">Chi tiêu mua mới đồ chơi/sách đồ dùng cho bé hàng tháng:</label>
+          <input type="range" id="toyBudget" class="range-slider" min="200000" max="2000000" step="100000" value="800000">
+          <p style="font-weight: 700; color: var(--primary); font-size: 1.1rem;" id="toyBudgetValue">800.000 VNĐ/tháng</p>
+        </div>
+
+        <div class="calc-result">
+          <h4>Số tiền mẹ tiết kiệm mỗi năm:</h4>
+          <div class="calc-amount" id="savedAmount">8.160.000 VNĐ</div>
+          <p style="font-size: 0.85rem; color: var(--accent-sage); font-weight: 600;" id="savedItems">Tương đương giữ lại ~12 món đồ chơi không thành rác nhựa!</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= COMPETITIVE MATRIX ================= -->
+  <section class="section comparison-section" id="comparison">
+    <div class="container">
+      <div class="section-header reveal">
+        <div class="section-tag">Ma Trận So Sánh</div>
+        <h2 class="section-title">Vì Sao Chọn <span>Kindr</span> Thay Vì Chợ Truyền Thống?</h2>
+        <p class="section-subtitle">
+          So sánh trực diện giải pháp Kindr với các kênh trao đổi tự phát trên thị trường hiện nay.
+        </p>
+      </div>
+
+      <div class="matrix-table-wrapper reveal">
+        <table class="matrix-table">
+          <thead>
+            <tr>
+              <th>Tiêu Chí So Sánh</th>
+              <th class="highlight-col">🧸 Kindr (Nền tảng Chuyên biệt)</th>
+              <th>🛒 Chợ Tốt / TMĐT</th>
+              <th>👥 Group FB / Zalo Tự Phát</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Cơ chế định giá</strong></td>
+              <td class="highlight-cell"><span class="feature-tag yes">✓ Gợi ý Xu cố định (Không mặc cả)</span></td>
+              <td><span class="feature-tag no">✕ Ép giá, thương lượng mệt mỏi</span></td>
+              <td><span class="feature-tag no">✕ Nhiễu loạn, hét giá vô chừng</span></td>
+            </tr>
+            <tr>
+              <td><strong>Đảm bảo chất lượng</strong></td>
+              <td class="highlight-cell"><span class="feature-tag yes">✓ Double Escrow + 6h kiểm định</span></td>
+              <td><span class="feature-tag no">✕ Rủi ro cao, không đổi trả</span></td>
+              <td><span class="feature-tag no">✕ Dễ lừa đảo, hàng hư bẩn</span></td>
+            </tr>
+            <tr>
+              <td><strong>Logistics chặng ngắn</strong></td>
+              <td class="highlight-cell"><span class="feature-tag yes">✓ Siêu cục bộ 1-2km + Kindr Hub</span></td>
+              <td><span class="feature-tag no">✕ Ship liên tỉnh đắt đỏ</span></td>
+              <td><span class="feature-tag no">✕ Tự thỏa thuận phức tạp</span></td>
+            </tr>
+            <tr>
+              <td><strong>Cảm xúc &amp; Giao diện</strong></td>
+              <td class="highlight-cell"><span class="feature-tag yes">✓ Emotional Design (Ấm áp, dịu nhẹ)</span></td>
+              <td><span class="feature-tag no">✕ Giao diện kỹ thuật khô khan</span></td>
+              <td><span class="feature-tag no">✕ Spam bài viết, trôi tin nhanh</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= ROADMAP SECTION ================= -->
+  <section class="section roadmap-section" id="roadmap">
+    <div class="container">
+      <div class="section-header reveal">
+        <div class="section-tag green">Kế Hoạch Tương Lai</div>
+        <h2 class="section-title">Lộ Trình Phát Triển <span>(Roadmap)</span></h2>
+        <p class="section-subtitle">
+          Chiến lược từng bước xây dựng hệ sinh thái mẹ &amp; bé toàn diện từ sản phẩm MVP tới quy mô toàn quốc.
+        </p>
+      </div>
+
+      <div class="roadmap-timeline">
+        <div class="roadmap-card active-phase reveal">
+          <span class="phase-badge phase-1">Giai Đoạn 1 (Hiện Tại)</span>
+          <h3>MVP &amp; Thí Điểm Đà Nẵng</h3>
+          <ul>
+            <li>Hoàn thiện ứng dụng trung gian đổi đồ bằng Ví Xu.</li>
+            <li>Thí điểm mô hình P2P siêu cục bộ tại các quận trung tâm Đà Nẵng.</li>
+            <li>Tích hợp cơ chế Double Escrow &amp; 6h kiểm định.</li>
+          </ul>
+        </div>
+
+        <div class="roadmap-card reveal">
+          <span class="phase-badge phase-2">Giai Đoạn 2 (6 Tháng Kế)</span>
+          <h3>Mở Rộng Kindr Hub &amp; Dịch Vụ</h3>
+          <ul>
+            <li>Mở thêm "Chợ thanh lý" bằng tiền mặt (thu phí đẩy bài).</li>
+            <li>Triển khai danh mục "Trạm Tặng Đồ" từ thiện 0 Xu.</li>
+            <li>Hợp tác Grab/Ahamove &amp; mở Kindr Hub tại trường mầm non.</li>
+          </ul>
+        </div>
+
+        <div class="roadmap-card reveal">
+          <span class="phase-badge phase-3">Giai Đoạn 3 (Dài Hạn)</span>
+          <h3>Hệ Sinh Thái Toàn Quốc</h3>
+          <ul>
+            <li>Tích hợp tiện ích chăm con: Nhắc lịch tiêm chủng, biểu đồ WHO.</li>
+            <li>Cộng đồng review trường mầm non &amp; tư vấn bác sĩ nhi.</li>
+            <li>Mở rộng quy mô toàn quốc (TP.HCM, Hà Nội, Cần Thơ).</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= TEAM SECTION ================= -->
+  <section class="section team-section" id="team">
+    <div class="container">
+      <div class="section-header reveal">
+        <div class="section-tag amber">Đội Ngũ Sáng Lập</div>
+        <h2 class="section-[#3D2C2E]">Thành Viên Đội Dự Án <span>Kindr</span></h2>
+        <p class="section-subtitle">
+          Đội ngũ 5 sinh viên năm 3 tràn đầy năng lượng &amp; nhiệt huyết từ Đại học FPT Đà Nẵng.
+        </p>
+      </div>
+
+      <div class="team-grid">
+        <!-- Member 1 -->
+        <div class="team-card reveal">
+          <div class="team-avatar" style="background: linear-gradient(135deg, #F26A36, #F4A261);">NB</div>
+          <h4>Nguyễn Ngọc Bữu</h4>
+          <div class="team-role">Chief Executive Officer</div>
+          <div class="team-major">Quản trị Kinh doanh</div>
+          <div class="team-uni">Đại học FPT</div>
+          <!-- PLACEHOLDER: SĐT, Email cá nhân (Bổ sung sau) -->
+        </div>
+
+        <!-- Member 2 -->
+        <div class="team-card reveal">
+          <div class="team-avatar" style="background: linear-gradient(135deg, #2A9D8F, #264653);">BH</div>
+          <h4>Trần Quang Bửu Hoàng</h4>
+          <div class="team-role">Chief Technology Officer</div>
+          <div class="team-major">Kỹ thuật Phần mềm (Node.js)</div>
+          <div class="team-uni">Đại học FPT</div>
+          <!-- PLACEHOLDER: SĐT, Email cá nhân (Bổ sung sau) -->
+        </div>
+
+        <!-- Member 3 -->
+        <div class="team-card reveal">
+          <div class="team-avatar" style="background: linear-gradient(135deg, #E76F51, #F4A261);">VH</div>
+          <h4>Nguyễn Văn Hoàng</h4>
+          <div class="team-role">Lead UX/UI Designer</div>
+          <div class="team-major">Thiết kế Đồ họa / Product UI</div>
+          <div class="team-uni">Đại học FPT</div>
+          <!-- PLACEHOLDER: SĐT, Email cá nhân (Bổ sung sau) -->
+        </div>
+
+        <!-- Member 4 -->
+        <div class="team-card reveal">
+          <div class="team-avatar" style="background: linear-gradient(135deg, #E9C46A, #F4A261);">HN</div>
+          <h4>Lô Hồng Ngọc</h4>
+          <div class="team-role">Chief Operating Officer</div>
+          <div class="team-major">Digital Marketing</div>
+          <div class="team-uni">Đại học FPT</div>
+          <!-- PLACEHOLDER: SĐT, Email cá nhân (Bổ sung sau) -->
+        </div>
+
+        <!-- Member 5 -->
+        <div class="team-card reveal">
+          <div class="team-avatar" style="background: linear-gradient(135deg, #A8DADC, #457B9D);">NT</div>
+          <h4>Vinh Thị Ngọc Trâm</h4>
+          <div class="team-role">Chief Marketing Officer</div>
+          <div class="team-major">Digital Marketing</div>
+          <div class="team-uni">Đại học FPT</div>
+          <!-- PLACEHOLDER: SĐT, Email cá nhân (Bổ sung sau) -->
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= TECH STACK ARCHITECTURE ================= -->
+  <section class="section tech-section" id="tech">
+    <div class="container">
+      <div class="section-header reveal">
+        <div class="section-tag">Kiến Trúc Kỹ Thuật</div>
+        <h2 class="section-title">Công Nghệ Xây Dựng <span>Nền Tảng</span></h2>
+        <p class="section-subtitle">
+          Minh bạch hệ thống kỹ thuật hiện đại đang được phát triển trong codebase thực tế.
+        </p>
+      </div>
+
+      <div class="tech-grid">
+        <div class="tech-card reveal">
+          <h4>📱 Mobile App Framework</h4>
+          <p>Xây dựng trên nền <strong>React Native + Expo + TypeScript</strong> cho trải nghiệm mượt mà đa nền tảng (iOS &amp; Android).</p>
+        </div>
+
+        <div class="tech-card reveal">
+          <h4>💳 Engine Ví Xu &amp; VietQR</h4>
+          <p>Tích hợp cổng nạp tự động qua <strong>VietQR / Casso Gateway</strong> (1 Xu = 10.000 VNĐ) giúp dòng tiền minh bạch 100%.</p>
+        </div>
+
+        <div class="tech-card reveal">
+          <h4>🔔 FCM Notification Engine</h4>
+          <p>Hệ thống thông báo đẩy thời gian thực từ <strong>Firebase Cloud Messaging</strong> cập nhật tức thì trạng thái 6h escrow.</p>
+        </div>
+
+        <div class="tech-card reveal">
+          <h4>📍 Spatial Geo-Indexing</h4>
+          <p>Thuật toán định vị siêu cục bộ lọc chính xác vật phẩm hoán đổi theo bán kính Quận/Phường 1–2km gần nhà nhất.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= CTA BANNER & FOOTER ================= -->
+  <section class="section" style="padding-bottom: 0;">
+    <div class="container">
+      <div class="cta-banner reveal">
+        <h2>Sẵn Sàng Đồng Hành Cùng Kindr? ❤️</h2>
+        <p>Đăng ký email ngay hôm nay để trở thành một trong những bà mẹ bỉm sữa đầu tiên trải nghiệm ứng dụng hoán đổi đồ cũ an toàn nhất tại Việt Nam.</p>
+        <form class="cta-form" id="waitlistForm">
+          <input type="email" class="cta-input" placeholder="Nhập địa chỉ Email của mẹ..." required>
+          <button type="submit" class="btn btn-primary" style="background: var(--text-main); color: white;">Đăng Ký Sớm</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="logo" style="color: white;">
+            <div class="logo-icon">🧸</div>
+            <span>Kindr</span>
+          </div>
+          <p>Nền tảng trung gian tuần hoàn siêu cục bộ dành cho mẹ &amp; bé. Giải phóng không gian sống và tối ưu chi phí nuôi con qua Ví Xu &amp; Double Escrow.</p>
+        </div>
+
+        <div class="footer-col">
+          <h4>Liên Kết Nhanh</h4>
+          <ul class="footer-links">
+            <li><a href="#about">Ý tưởng dự án</a></li>
+            <li><a href="#how-it-works">4 Bước vận hành</a></li>
+            <li><a href="#escrow">Ký quỹ Double Escrow</a></li>
+            <li><a href="#usps">3 USP nổi bật</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Về Đội Ngũ</h4>
+          <ul class="footer-links">
+            <li><a href="#team">5 Thành viên FPT</a></li>
+            <li><a href="#roadmap">Lộ trình 3 giai đoạn</a></li>
+            <li><a href="#tech">Kiến trúc công nghệ</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Mã Nguồn Repo</h4>
+          <ul class="footer-links">
+            <li><a href="https://github.com/Hoang-124/Kindr" target="_blank" rel="noopener">GitHub: Hoang-124/Kindr ↗</a></li>
+            <!-- PLACEHOLDER: Link Fanpage / Zalo Group (Bổ sung khi có) -->
+            <li><a href="#" class="open-modal-btn">Nhóm Zalo Mẹ Bỉm (Sắp mở)</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>© 2026 Kindr Startup Project — FPT University Student Project. All rights reserved.</p>
+        <p style="color: #9C8C8F;">Thiết kế với tinh thần Emotional Design ❤️ Ấm áp – Trực quan – Đồng hành</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- MODAL DIALOG FOR WAITLIST / DEMO -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal-box">
+      <button class="modal-close" id="modalClose">&times;</button>
+      <div style="font-size: 3rem; margin-bottom: 0.5rem;">🧸</div>
+      <h3 style="font-size: 1.5rem; margin-bottom: 0.5rem; color: var(--primary);">Tham Gia Danh Sách Chờ Kindr</h3>
+      <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1.5rem;">
+        Cảm ơn mẹ đã quan tâm! Điền email dưới đây để nhận thông báo ra mắt ứng dụng bản Beta tại Đà Nẵng &amp; tặng ngay <strong>50 Xu chào mừng</strong> vào ví nhé!
+      </p>
+      <form id="modalForm" style="display: flex; flex-direction: column; gap: 0.75rem;">
+        <input type="email" placeholder="Email của mẹ..." class="cta-input" style="border: 1px solid var(--border-light); background: var(--bg-main);" required>
+        <button type="submit" class="btn btn-primary" style="width: 100%;">Nhận 50 Xu &amp; Trải Nghiệm Sớm ❤️</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- JavaScript -->
+  <script src="script.js"></script>
+</body>
+</html>
