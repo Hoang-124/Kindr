@@ -7,6 +7,7 @@ import {
   StyleSheet, 
   TextStyle, 
   ViewStyle, 
+  StyleProp,
   GestureResponderEvent 
 } from 'react-native';
 import { COLORS, SPACING, RADIUS } from '../../theme';
@@ -16,8 +17,8 @@ interface ButtonProps {
   onPress: (event: GestureResponderEvent) => void;
   variant?: 'primary' | 'secondary' | 'outline' | 'error' | 'disabled';
   loading?: boolean;
-  style?: ViewStyle;
-  textStyle?: TextStyle;
+  style?: StyleProp<ViewStyle>;
+  textStyle?: StyleProp<TextStyle>;
   disabled?: boolean;
 }
 
@@ -65,6 +66,7 @@ export const Button = ({
       onPress={onPress}
       disabled={isButtonDisabled}
       scaleTo={0.96}
+      containerStyle={{ width: '100%' }}
       style={[styles.button, getButtonStyle(), style]}
     >
       {loading ? (

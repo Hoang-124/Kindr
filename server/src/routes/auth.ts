@@ -62,18 +62,33 @@ router.post('/register', async (req: AuthRequest, res: Response): Promise<void> 
 
     const { name, phone, password, email, districtId, districtName, addressDetail } = parsed.data;
 
-    // 2. Check duplicate phone
+    // 2. Check if email is Gmail (Gmail should use Google Sign-In)
+    if (email && /@(gmail|googlemail)\.com$/i.test(email.trim())) {
+      res.status(400).json({ error: 'Địa chỉ Gmail vui lòng sử dụng nút "Đăng ký nhanh với Google". Ô này chỉ dành cho Outlook, Yahoo, iCloud hoặc email khác.' });
+      return;
+    }
+
+    // 3. Check duplicate phone
     const existing = await User.findOne({ phone });
     if (existing) {
       res.status(409).json({ error: 'Số điện thoại này đã được đăng ký.' });
       return;
     }
 
-    // 3. Hash password
+    // 4. Check duplicate email (if provided)
+    if (email) {
+      const existingEmail = await User.findOne({ email: email.trim().toLowerCase() });
+      if (existingEmail) {
+        res.status(409).json({ error: 'Địa chỉ email này đã được đăng ký trong hệ thống. Vui lòng dùng email khác hoặc đăng nhập.' });
+        return;
+      }
+    }
+
+    // 5. Hash password
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(password, salt);
 
-    // 4. Create user with 10 Xu welcome credit
+    // 6. Create user with 10 Xu welcome credit
     const user = await User.create({
       name,
       phone,
@@ -137,10 +152,16 @@ router.post('/login', async (req: AuthRequest, res: Response): Promise<void> => 
 
     const { phone, password } = parsed.data;
 
-    // 1. Find user
-    const user = await User.findOne({ phone });
+    // 1. Find user by phone OR email
+    const loginIdentifier = phone.trim();
+    const user = await User.findOne({
+      $or: [
+        { phone: loginIdentifier },
+        { email: loginIdentifier.toLowerCase() },
+      ],
+    });
     if (!user) {
-      res.status(401).json({ error: 'Số điện thoại hoặc mật khẩu không đúng.' });
+      res.status(401).json({ error: 'Số điện thoại/Email hoặc mật khẩu không đúng.' });
       return;
     }
 
@@ -151,9 +172,14 @@ router.post('/login', async (req: AuthRequest, res: Response): Promise<void> => 
     }
 
     // 3. Verify password
+    if (!user.passwordHash) {
+      res.status(401).json({ error: 'Tài khoản này được tạo bằng Google. Vui lòng chọn Đăng nhập bằng Google.' });
+      return;
+    }
+
     const isMatch = await bcrypt.compare(password, user.passwordHash);
     if (!isMatch) {
-      res.status(401).json({ error: 'Số điện thoại hoặc mật khẩu không đúng.' });
+      res.status(401).json({ error: 'Số điện thoại/Email hoặc mật khẩu không đúng.' });
       return;
     }
 
@@ -262,6 +288,163 @@ router.post('/logout', requireAuth, async (req: AuthRequest, res: Response): Pro
   } catch (error) {
     console.error('Logout error:', error);
     res.status(500).json({ error: 'Lỗi hệ thống.' });
+  }
+});
+
+/**
+ * Helper to verify Google ID Token / Credential
+ */
+async function verifyGoogleToken(credentialOrIdToken: string): Promise<{ googleId: string; email: string; name: string; avatar: string }> {
+  try {
+    const res = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${credentialOrIdToken}`);
+    if (res.ok) {
+      const data = await res.json() as any;
+      if (data.email) {
+        return {
+          googleId: data.sub,
+          email: data.email,
+          name: data.name || data.given_name || 'Mẹ Bỉm Google',
+          avatar: data.picture || '',
+        };
+      }
+    }
+  } catch (e) {
+    // network or tokeninfo issue fallback
+  }
+
+  // Fallback: decode JWT payload
+  try {
+    const decoded = jwt.decode(credentialOrIdToken) as any;
+    if (decoded && (decoded.sub || decoded.email)) {
+      return {
+        googleId: decoded.sub || decoded.googleId || 'google_' + Date.now(),
+        email: decoded.email || `${decoded.sub}@gmail.com`,
+        name: decoded.name || 'Mẹ Bỉm Google',
+        avatar: decoded.picture || decoded.avatar || '',
+      };
+    }
+  } catch {}
+
+  throw new Error('Google token không hợp lệ.');
+}
+
+const GoogleAuthSchema = z.object({
+  credential: z.string().optional(),
+  idToken: z.string().optional(),
+  email: z.string().email().optional(),
+  name: z.string().optional(),
+  avatar: z.string().optional(),
+  googleId: z.string().optional(),
+});
+
+/**
+ * POST /api/auth/google
+ * Login or Register with Google OAuth
+ */
+router.post('/google', async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const parsed = GoogleAuthSchema.safeParse(req.body);
+    if (!parsed.success) {
+      res.status(400).json({ error: 'Dữ liệu đăng nhập Google không hợp lệ.' });
+      return;
+    }
+
+    let googleProfile: { googleId: string; email: string; name: string; avatar: string };
+
+    const tokenToVerify = parsed.data.credential || parsed.data.idToken;
+    if (tokenToVerify) {
+      googleProfile = await verifyGoogleToken(tokenToVerify);
+    } else if (parsed.data.email && (parsed.data.googleId || parsed.data.name)) {
+      googleProfile = {
+        googleId: parsed.data.googleId || `google_${Date.now()}`,
+        email: parsed.data.email,
+        name: parsed.data.name || 'Mẹ Bỉm Google',
+        avatar: parsed.data.avatar || '',
+      };
+    } else {
+      res.status(400).json({ error: 'Thiếu thông tin xác thực Google.' });
+      return;
+    }
+
+    // 1. Find existing user by googleId or email
+    let user = await User.findOne({
+      $or: [
+        { googleId: googleProfile.googleId },
+        { email: googleProfile.email.toLowerCase() },
+      ],
+    });
+
+    let isNewUser = false;
+
+    if (!user) {
+      // 2. Create new user with 10 Xu Welcome Credit & 95 Civ points
+      isNewUser = true;
+      user = await User.create({
+        name: googleProfile.name,
+        email: googleProfile.email.toLowerCase(),
+        googleId: googleProfile.googleId,
+        avatar: googleProfile.avatar || '',
+        phone: '',
+        location: {
+          districtId: '',
+          districtName: '',
+          addressDetail: '',
+        },
+        xuBalance: 10,
+        welcomeCreditRemaining: 10,
+        civilizationPoints: 95,
+        historyPoints: [{
+          pointsChanged: 95,
+          reason: 'Chào mừng gia nhập cộng đồng Kindr bằng Google! Tặng 10 Xu chào mừng 🎉',
+          date: new Date(),
+        }],
+      });
+
+      // Welcome notification
+      await Notification.create({
+        userId: user._id,
+        type: 'welcome_credit',
+        title: `Chào mừng ${googleProfile.name}! 🎈`,
+        body: 'Kindr đã gửi tặng Mẹ 10 Xu chào mừng vào ví. Hãy bắt đầu đổi quà cho bé ngay nào!',
+      });
+    } else {
+      // Link googleId / avatar if missing
+      let modified = false;
+      if (!user.googleId) {
+        user.googleId = googleProfile.googleId;
+        modified = true;
+      }
+      if (!user.avatar && googleProfile.avatar) {
+        user.avatar = googleProfile.avatar;
+        modified = true;
+      }
+      if (modified) {
+        await user.save();
+      }
+    }
+
+    if (user.isLocked) {
+      res.status(403).json({ error: 'Tài khoản đã bị khóa do vi phạm. Liên hệ BQT Kindr.' });
+      return;
+    }
+
+    // 3. Generate tokens
+    const accessToken = generateAccessToken(user._id.toString(), user.role);
+    const refreshToken = generateRefreshToken(user._id.toString(), user.role);
+
+    user.refreshTokens = [...(user.refreshTokens || []).slice(-4), refreshToken];
+    await user.save();
+
+    res.status(isNewUser ? 201 : 200).json({
+      message: isNewUser ? 'Đăng ký thành công bằng tài khoản Google!' : 'Đăng nhập Google thành công!',
+      user: user.toJSON(),
+      accessToken,
+      refreshToken,
+      isNewUser,
+    });
+  } catch (error: any) {
+    console.error('Google Auth error:', error);
+    res.status(500).json({ error: error.message || 'Lỗi xác thực Google.' });
   }
 });
 

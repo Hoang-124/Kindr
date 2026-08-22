@@ -1,6 +1,5 @@
-// client/src/components/common/FadeInItem.tsx
 import React, { useEffect, useRef } from 'react';
-import { Animated, ViewStyle, StyleProp } from 'react-native';
+import { Animated, ViewStyle, StyleProp, Platform } from 'react-native';
 
 interface FadeInItemProps {
   children: React.ReactNode;
@@ -31,14 +30,14 @@ export const FadeInItem: React.FC<FadeInItemProps> = ({
         toValue: 1,
         duration: duration,
         delay: totalDelay,
-        useNativeDriver: true,
+        useNativeDriver: Platform.OS !== 'web',
       }),
       Animated.spring(translateYAnim, {
         toValue: 0,
         delay: totalDelay,
         speed: 18,
         bounciness: 4,
-        useNativeDriver: true,
+        useNativeDriver: Platform.OS !== 'web',
       }),
     ]).start();
   }, [index, delay, duration, opacityAnim, translateYAnim]);

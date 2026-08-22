@@ -40,7 +40,8 @@ import {
   ChevronRight,
   ShieldCheck,
   Phone,
-  Sparkles
+  Sparkles,
+  ArrowLeft
 } from 'lucide-react-native';
 import { ScalePressable } from '../../../components/common/ScalePressable';
 import { PulseBadge } from '../../../components/common/PulseBadge';
@@ -189,7 +190,7 @@ export const ProductDetailScreen = () => {
           onPress={() => navigation.goBack()}
           activeOpacity={0.8}
         >
-          <Text style={[styles.headerCircleIcon, styles.rotatedBack]}>➔</Text>
+          <ArrowLeft size={20} color="#ffffff" />
         </TouchableOpacity>
         <TouchableOpacity 
           style={styles.headerCircleBtn}
@@ -228,12 +229,12 @@ export const ProductDetailScreen = () => {
             <View style={[styles.tag, { backgroundColor: '#E2F0CB' }]}>
               <Text style={[styles.tagText, { color: '#4B5C35' }]}>✨ {product.conditionLabel}</Text>
             </View>
-            {product.ageRange && (
+            {Boolean(product.ageRange) ? (
               <View style={[styles.tag, { backgroundColor: '#DFE7FD' }]}>
                 <Smile size={14} color="#24345F" />
                 <Text style={[styles.tagText, { color: '#24345F' }]}>Độ tuổi: {product.ageRange}</Text>
               </View>
-            )}
+            ) : null}
             <View style={[styles.tag, { backgroundColor: '#FDE2E4' }]}>
               <MapPin size={14} color="#5E3032" />
               <Text style={[styles.tagText, { color: '#5E3032' }]}>{product.locationName}</Text>

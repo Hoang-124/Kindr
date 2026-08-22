@@ -18,7 +18,9 @@ interface InputProps extends TextInputProps {
   error?: string;
   containerStyle?: ViewStyle;
   inputStyle?: TextStyle;
+  inputContainerStyle?: ViewStyle;
   icon?: React.ReactNode;
+  compact?: boolean;
 }
 
 export const Input = ({
@@ -26,8 +28,10 @@ export const Input = ({
   error,
   containerStyle,
   inputStyle,
+  inputContainerStyle,
   icon,
   secureTextEntry,
+  compact = false,
   ...props
 }: InputProps) => {
   const [isFocused, setIsFocused] = useState(false);
@@ -37,18 +41,20 @@ export const Input = ({
   const isSecure = secureTextEntry && !isPasswordVisible;
 
   return (
-    <View style={[styles.container, containerStyle]}>
-      {label && <Text style={styles.label}>{label}</Text>}
+    <View style={[styles.container, compact && styles.compactContainer, containerStyle]}>
+      {label && <Text style={[styles.label, compact && styles.compactLabel]}>{label}</Text>}
       
       <View style={[
         styles.inputContainer,
+        compact && styles.compactInputContainer,
+        inputContainerStyle,
         isFocused && styles.focusedBorder,
         error ? styles.errorBorder : null
       ]}>
-        {icon && <View style={styles.iconContainer}>{icon}</View>}
+        {icon && <View style={[styles.iconContainer, compact && styles.compactIconContainer]}>{icon}</View>}
         
         <TextInput
-          style={[styles.input, inputStyle]}
+          style={[styles.input, compact && styles.compactInput, inputStyle]}
           placeholderTextColor={COLORS.outline}
           secureTextEntry={isSecure}
           onFocus={() => setIsFocused(true)}
@@ -80,11 +86,20 @@ const styles = StyleSheet.create({
     width: '100%',
     marginBottom: SPACING.md,
   },
+  compactContainer: {
+    marginBottom: 6,
+  },
   label: {
     fontSize: 14,
     fontWeight: '600',
     color: COLORS.onBackground,
     marginBottom: SPACING.xs,
+  },
+  compactLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    marginBottom: 2,
+    color: COLORS.onSurfaceVariant,
   },
   inputContainer: {
     height: 52,
@@ -96,14 +111,31 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: 'transparent',
   },
+  compactInputContainer: {
+    height: 38,
+    paddingHorizontal: 8,
+    borderRadius: RADIUS.sm,
+    overflow: 'hidden',
+  },
   input: {
     flex: 1,
     height: '100%',
     color: COLORS.onSurface,
     fontSize: 15,
+    minWidth: 0,
+  },
+  compactInput: {
+    fontSize: 12,
+    paddingVertical: 0,
+    minWidth: 0,
   },
   iconContainer: {
     marginRight: SPACING.sm,
+    flexShrink: 0,
+  },
+  compactIconContainer: {
+    marginRight: 4,
+    flexShrink: 0,
   },
   focusedBorder: {
     borderColor: COLORS.primaryContainer,
@@ -117,8 +149,8 @@ const styles = StyleSheet.create({
   },
   errorText: {
     color: COLORS.error,
-    fontSize: 12,
-    marginTop: SPACING.xs,
+    fontSize: 11,
+    marginTop: 2,
   },
 });
 export default Input;

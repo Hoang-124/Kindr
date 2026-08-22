@@ -31,6 +31,8 @@ import EmptyState from '../../../components/common/EmptyState';
 import FormSelect from '../../../components/form/FormSelect';
 import { Search as SearchIcon, SlidersHorizontal, Heart, MapPin } from 'lucide-react-native';
 import { VIETNAM_LOCATIONS } from '../../../utils/locations';
+import { ScalePressable } from '../../../components/common/ScalePressable';
+import { FadeInItem } from '../../../components/common/FadeInItem';
 
 type NavigationProp = NativeStackNavigationProp<AppStackParamList>;
 
@@ -107,14 +109,22 @@ export const SearchScreen = () => {
     if (product.status !== 'available') return false;
 
     // 3. Category Filter
-    if (selectedCategory !== 'all' && product.category !== selectedCategory) {
-      if (selectedCategory === 'tu_thien' || selectedCategory === 'charity') {
-        if (product.price !== 0 && product.category !== 'charity' && product.category !== 'tu_thien') return false;
-      } else if (selectedCategory === 'book' || selectedCategory === 'sach_truyen') {
-        if (product.category !== 'book' && product.category !== 'sach_truyen') return false;
-      } else if (selectedCategory === 'toy_small' || selectedCategory === 'do_choi') {
-        if (product.category !== 'toy_small' && product.category !== 'do_choi') return false;
-      } else {
+    if (selectedCategory && selectedCategory !== 'all') {
+      const cat = selectedCategory.toLowerCase();
+      const pCat = (product.category || '').toLowerCase();
+      if (cat === 'tu_thien' || cat === 'charity') {
+        if (product.price !== 0 && pCat !== 'charity' && pCat !== 'tu_thien') return false;
+      } else if (cat === 'book' || cat === 'sach_truyen') {
+        if (pCat !== 'book' && pCat !== 'sach_truyen') return false;
+      } else if (cat === 'toy_small' || cat === 'toy_large' || cat === 'do_choi') {
+        if (pCat !== 'toy_small' && pCat !== 'toy_large' && pCat !== 'do_choi') return false;
+      } else if (cat === 'quan_ao' || cat === 'clothes') {
+        if (pCat !== 'quan_ao' && pCat !== 'clothes') return false;
+      } else if (cat === 'xe_noi' || cat === 'stroller') {
+        if (pCat !== 'xe_noi' && pCat !== 'stroller') return false;
+      } else if (cat === 'do_hoc_tap' || cat === 'learning') {
+        if (pCat !== 'do_hoc_tap' && pCat !== 'learning') return false;
+      } else if (pCat !== cat) {
         return false;
       }
     }
@@ -167,17 +177,17 @@ export const SearchScreen = () => {
             onChangeText={(text) => dispatch(setSearchQuery(text))}
           />
         </View>
-        <TouchableOpacity 
+        <ScalePressable 
           style={styles.filterBtn}
+          scaleTo={0.92}
           onPress={() => setFilterModalVisible(true)}
-          activeOpacity={0.8}
         >
           <SlidersHorizontal size={20} color={COLORS.onPrimary} />
-        </TouchableOpacity>
+        </ScalePressable>
       </View>
 
       {/* Filter Info Chips */}
-      {(selectedCategory !== 'all' || selectedDistrict !== 'all' || selectedCondition || searchQuery) && (
+      {Boolean((selectedCategory && selectedCategory !== 'all') || (selectedDistrict && selectedDistrict !== 'all') || selectedCondition || (searchQuery && searchQuery.trim() !== '')) ? (
         <View style={styles.activeFiltersRow}>
           <Text style={styles.resultsLabel}>
             Tìm thấy <Text style={styles.highlightText}>{filteredProducts.length}</Text> món đồ
@@ -186,7 +196,7 @@ export const SearchScreen = () => {
             <Text style={styles.clearFiltersText}>Xóa lọc</Text>
           </TouchableOpacity>
         </View>
-      )}
+      ) : null}
 
       {/* Results Feed */}
       <FlatList
@@ -202,40 +212,44 @@ export const SearchScreen = () => {
             onActionPress={handleClearFilters}
           />
         }
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            style={styles.productCard}
-            onPress={() => navigation.navigate('ProductDetail', { id: item.id })}
-            activeOpacity={0.9}
-          >
-            <Image source={{ uri: item.image }} style={styles.productImage} />
-            
-            <View style={styles.detailsContainer}>
-              <View style={styles.titleRow}>
-                <Text style={styles.productName} numberOfLines={2}>{item.name}</Text>
-                <TouchableOpacity style={styles.heartBtn}>
-                  <Heart size={20} color={COLORS.outline} />
-                </TouchableOpacity>
-              </View>
-
-              <View style={styles.locationRow}>
-                <MapPin size={14} color={COLORS.outline} />
-                <Text style={styles.locationText}>{item.distance || 'Gần đây'} • {item.locationName}</Text>
-              </View>
-
-              <View style={styles.priceRow}>
-                <View style={styles.sellerWrapper}>
-                  <Image source={{ uri: item.sellerAvatar }} style={styles.sellerAvatar} />
-                  <Text style={styles.sellerName}>{item.sellerName}</Text>
+        renderItem={({ item, index }) => (
+          <FadeInItem index={index} delay={35}>
+            <ScalePressable
+              style={styles.productCard}
+              scaleTo={0.97}
+              onPress={() => navigation.navigate('ProductDetail', { id: item.id })}
+            >
+              <Image source={{ uri: item.image }} style={styles.productImage} />
+              
+              <View style={styles.detailsContainer}>
+                <View style={styles.titleRow}>
+                  <Text style={styles.productName} numberOfLines={2}>{item.name}</Text>
+                  <View style={styles.heartBtn}>
+                    <Heart size={18} color={COLORS.outline} />
+                  </View>
                 </View>
 
-                <View style={styles.priceBadge}>
-                  <Text style={styles.priceSymbol}>X</Text>
-                  <Text style={styles.priceText}>{item.price} Xu</Text>
+                <View style={styles.locationRow}>
+                  <MapPin size={13} color={COLORS.primary} />
+                  <Text style={styles.locationText} numberOfLines={1}>
+                    {item.distance || 'Cách mẹ 0.8 km'} • {item.locationName}
+                  </Text>
+                </View>
+
+                <View style={styles.priceRow}>
+                  <View style={styles.sellerWrapper}>
+                    <Image source={{ uri: item.sellerAvatar }} style={styles.sellerAvatar} />
+                    <Text style={styles.sellerName} numberOfLines={1}>{item.sellerName}</Text>
+                  </View>
+
+                  <View style={styles.priceBadge}>
+                    <Text style={styles.priceSymbol}>🪙</Text>
+                    <Text style={styles.priceText}>{item.price} Xu</Text>
+                  </View>
                 </View>
               </View>
-            </View>
-          </TouchableOpacity>
+            </ScalePressable>
+          </FadeInItem>
         )}
       />
 

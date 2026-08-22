@@ -1,4 +1,3 @@
-// client/src/components/common/ScalePressable.tsx
 import React, { useRef } from 'react';
 import {
   Animated,
@@ -6,6 +5,7 @@ import {
   ViewStyle,
   StyleProp,
   GestureResponderEvent,
+  Platform,
 } from 'react-native';
 
 interface ScalePressableProps {
@@ -13,6 +13,7 @@ interface ScalePressableProps {
   onPress?: (event: GestureResponderEvent) => void;
   onLongPress?: (event: GestureResponderEvent) => void;
   style?: StyleProp<ViewStyle>;
+  containerStyle?: StyleProp<ViewStyle>;
   scaleTo?: number;
   disabled?: boolean;
 }
@@ -26,6 +27,7 @@ export const ScalePressable: React.FC<ScalePressableProps> = ({
   onPress,
   onLongPress,
   style,
+  containerStyle,
   scaleTo = 0.96,
   disabled = false,
 }) => {
@@ -35,7 +37,7 @@ export const ScalePressable: React.FC<ScalePressableProps> = ({
     if (disabled) return;
     Animated.spring(scaleAnim, {
       toValue: scaleTo,
-      useNativeDriver: true,
+      useNativeDriver: Platform.OS !== 'web',
       speed: 30,
       bounciness: 4,
     }).start();
@@ -45,7 +47,7 @@ export const ScalePressable: React.FC<ScalePressableProps> = ({
     if (disabled) return;
     Animated.spring(scaleAnim, {
       toValue: 1,
-      useNativeDriver: true,
+      useNativeDriver: Platform.OS !== 'web',
       speed: 25,
       bounciness: 6,
     }).start();
@@ -58,6 +60,10 @@ export const ScalePressable: React.FC<ScalePressableProps> = ({
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
       disabled={disabled}
+      style={({ pressed }) => [
+        containerStyle,
+        Platform.OS === 'web' ? ({ cursor: disabled ? 'default' : 'pointer' } as any) : undefined,
+      ]}
     >
       <Animated.View style={[{ transform: [{ scale: scaleAnim }] }, style]}>
         {children}

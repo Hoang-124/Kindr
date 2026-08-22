@@ -7,6 +7,7 @@ import {
   adjustCivilizationPoints,
   fetchCurrentUser,
   loginAsync,
+  loginGoogleAsync,
   registerAsync,
   logoutAsync,
 } from '../../features/auth/store/authSlice';
@@ -20,6 +21,7 @@ interface AuthContextType {
   error: string | null;
   login: (userId: string) => void;
   loginWithCredentials: (phone: string, password: string) => Promise<any>;
+  loginWithGoogle: (googleData: { credential?: string; idToken?: string; email?: string; name?: string; avatar?: string; googleId?: string }) => Promise<any>;
   register: (name: string, phone: string, email: string, districtId: string, addressDetail: string) => void;
   registerWithCredentials: (payload: { name: string; phone: string; password: string; email?: string; districtId?: string; districtName?: string; addressDetail?: string }) => Promise<any>;
   logout: () => Promise<void>;
@@ -53,6 +55,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const loginWithCredentials = async (phone: string, password: string) => {
     return dispatch(loginAsync({ phone, password })).unwrap();
+  };
+
+  const loginWithGoogle = async (googleData: { credential?: string; idToken?: string; email?: string; name?: string; avatar?: string; googleId?: string }) => {
+    return dispatch(loginGoogleAsync(googleData)).unwrap();
   };
 
   const registerWithCredentials = async (payload: {
@@ -110,6 +116,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         error,
         login,
         loginWithCredentials,
+        loginWithGoogle,
         register,
         registerWithCredentials,
         logout,

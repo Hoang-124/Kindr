@@ -36,14 +36,14 @@ export const Header = ({
   return (
     <View style={styles.container}>
       {showBack ? (
-        <ScalePressable onPress={handleBack} style={styles.backButton} scaleTo={0.9}>
+        <TouchableOpacity onPress={handleBack} style={styles.backButton} activeOpacity={0.7}>
           <ArrowLeft size={24} color={COLORS.primary} />
-        </ScalePressable>
+        </TouchableOpacity>
       ) : showProfileSummary && currentUser ? (
         <ScalePressable
           style={styles.profileSummary}
           scaleTo={0.97}
-          onPress={() => navigation.navigate('ProfileTab')}
+          onPress={() => (navigation as any).navigate('Profile')}
         >
           <Image source={{ uri: currentUser.avatar }} style={styles.avatar} />
           <View style={styles.welcomeTextContainer}>
@@ -125,7 +125,8 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     textAlign: 'center',
-    zIndex: -1,
+    zIndex: 0,
+    pointerEvents: 'none',
     fontSize: 18,
     fontWeight: '600',
     color: COLORS.primary,

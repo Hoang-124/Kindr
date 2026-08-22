@@ -7,6 +7,7 @@ import {
   Image, 
   TextInput, 
   TouchableOpacity, 
+  ScrollView,
   StyleSheet, 
   KeyboardAvoidingView, 
   Platform 
@@ -21,6 +22,7 @@ import { COLORS, SPACING, RADIUS, TYPOGRAPHY, SHADOWS } from '../../../theme';
 import ScreenContainer from '../../../components/layout/ScreenContainer';
 import Header from '../../../components/layout/Header';
 import { Send, SendHorizontal } from 'lucide-react-native';
+import { ScalePressable } from '../../../components/common/ScalePressable';
 
 type ChatDetailRouteProp = RouteProp<AppStackParamList, 'ChatDetail'>;
 
@@ -210,6 +212,27 @@ export const ChatDetailScreen = () => {
           }}
         />
 
+        {/* Quick Suggestion Chips for Moms */}
+        <View style={styles.quickChipsContainer}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.quickChipsContent}>
+            {[
+              'Đồ này còn mới không mẹ ơi? 👶',
+              'Mẹ có tiện freeship gần nhà không? 🛵',
+              'Em muốn qua xem trực tiếp nhé! ✨',
+              'Bé nhà mình dùng thích lắm ạ ❤️'
+            ].map((chip, idx) => (
+              <ScalePressable
+                key={idx}
+                style={styles.chipBtn}
+                scaleTo={0.93}
+                onPress={() => setInputText(chip)}
+              >
+                <Text style={styles.chipText}>{chip}</Text>
+              </ScalePressable>
+            ))}
+          </ScrollView>
+        </View>
+
         {/* Input Bar */}
         <View style={styles.inputBar}>
           <TextInput
@@ -220,16 +243,17 @@ export const ChatDetailScreen = () => {
             onChangeText={setInputText}
             multiline
           />
-          <TouchableOpacity 
+          <ScalePressable 
             style={[
               styles.sendBtn,
               !inputText.trim() ? styles.sendBtnDisabled : null
             ]}
+            scaleTo={0.9}
             onPress={handleSend}
             disabled={!inputText.trim()}
           >
             <SendHorizontal size={20} color={inputText.trim() ? COLORS.onPrimary : COLORS.outline} />
-          </TouchableOpacity>
+          </ScalePressable>
         </View>
       </ScreenContainer>
     </KeyboardAvoidingView>
@@ -351,6 +375,29 @@ const styles = StyleSheet.create({
   },
   otherMessageText: {
     color: COLORS.onSurface,
+  },
+  quickChipsContainer: {
+    paddingVertical: 6,
+    backgroundColor: COLORS.surface,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(58, 103, 88, 0.08)',
+  },
+  quickChipsContent: {
+    paddingHorizontal: SPACING.md,
+    gap: 8,
+  },
+  chipBtn: {
+    backgroundColor: '#F0FDF4',
+    borderColor: '#BBF7D0',
+    borderWidth: 1,
+    borderRadius: 14,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+  },
+  chipText: {
+    fontSize: 11,
+    color: COLORS.primary,
+    fontWeight: '600',
   },
   inputBar: {
     flexDirection: 'row',

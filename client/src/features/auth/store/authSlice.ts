@@ -51,6 +51,22 @@ export const loginAsync = createAsyncThunk(
   }
 );
 
+export const loginGoogleAsync = createAsyncThunk(
+  'auth/loginGoogleAsync',
+  async (googleData: { credential?: string; idToken?: string; email?: string; name?: string; avatar?: string; googleId?: string }, { rejectWithValue }) => {
+    try {
+      const response = await authService.loginGoogle(googleData);
+      const user = response.user;
+      return {
+        ...user,
+        id: (user as any)._id?.toString() || user.id,
+      };
+    } catch (err: any) {
+      return rejectWithValue(err.response?.data?.error || 'Đăng nhập Google không thành công');
+    }
+  }
+);
+
 export const registerAsync = createAsyncThunk(
   'auth/registerAsync',
   async (payload: authService.RegisterPayload, { rejectWithValue }) => {
@@ -246,6 +262,20 @@ const authSlice = createSlice({
     builder.addCase(loginAsync.rejected, (state, action) => {
       state.isLoading = false;
       state.error = (action.payload as string) || 'Đăng nhập thất bại';
+    });
+
+    // loginGoogleAsync
+    builder.addCase(loginGoogleAsync.pending, (state) => {
+      state.isLoading = true;
+      state.error = null;
+    });
+    builder.addCase(loginGoogleAsync.fulfilled, (state, action) => {
+      state.isLoading = false;
+      state.currentUser = action.payload;
+    });
+    builder.addCase(loginGoogleAsync.rejected, (state, action) => {
+      state.isLoading = false;
+      state.error = (action.payload as string) || 'Đăng nhập Google thất bại';
     });
 
     // registerAsync

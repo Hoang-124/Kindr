@@ -9,9 +9,10 @@ export interface ICivilizationLog {
 
 export interface IUser extends Document {
   name: string;
-  phone: string;
+  phone?: string;
   email?: string;
-  passwordHash: string;
+  googleId?: string;
+  passwordHash?: string;
   avatar: string;
   location: {
     districtId: string;
@@ -42,9 +43,10 @@ const CivilizationLogSchema = new Schema<ICivilizationLog>({
 
 const UserSchema = new Schema<IUser>({
   name: { type: String, required: true, trim: true },
-  phone: { type: String, required: true, unique: true, index: true },
-  email: { type: String, sparse: true, trim: true, lowercase: true },
-  passwordHash: { type: String, required: true },
+  phone: { type: String, sparse: true, index: true, default: '' },
+  email: { type: String, sparse: true, trim: true, lowercase: true, index: true },
+  googleId: { type: String, sparse: true, index: true },
+  passwordHash: { type: String, default: '' },
   avatar: { type: String, default: '' },
   location: {
     districtId: { type: String, default: '' },

@@ -34,6 +34,9 @@ import {
   ConditionType 
 } from '../../../utils/pricing';
 import { VIETNAM_LOCATIONS, getWardsByDistrictId } from '../../../utils/locations';
+import { generateAIAssistance } from '../../../services/aiService';
+import { ScalePressable } from '../../../components/common/ScalePressable';
+import { PulseBadge } from '../../../components/common/PulseBadge';
 
 export const PostItemScreen = () => {
   const navigation = useNavigation<any>();
@@ -52,6 +55,7 @@ export const PostItemScreen = () => {
   const [imageUri, setImageUri] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
 
   // Category and Condition Options
   const categoryOptions = [
@@ -158,6 +162,35 @@ export const PostItemScreen = () => {
   const priceNum = parseInt(xuPrice || '0', 10);
   const safeFee = calculateSafeFee(priceNum);
   const pricingNudge = getSmartPricingNudge(category, condition);
+
+  const handleAIAssist = async () => {
+    if (!name.trim()) {
+      Alert.alert(
+        'Gợi ý từ AI ✨',
+        'Mẹ vui lòng nhập tên món đồ trước (VD: "Xe đẩy Combi", "Bộ xếp hình lego") để AI có thể phân tích và viết mô tả nhé!'
+      );
+      return;
+    }
+
+    setAiLoading(true);
+    try {
+      const result = await generateAIAssistance(name.trim(), category, condition);
+      setCategory(result.category);
+      setAgeRange(result.ageRange);
+      if (category !== 'charity') {
+        setXuPrice(result.suggestedXu.toString());
+      }
+      setDescription(result.description);
+      Alert.alert(
+        'AI Đã Hoàn Tất ✨',
+        `Đã gợi ý mức giá ${result.suggestedXu} Xu và soạn sẵn nội dung mô tả chi tiết cho món "${name}"!`
+      );
+    } catch {
+      Alert.alert('Lỗi', 'Không thể tạo gợi ý lúc này. Mẹ vui lòng tự nhập nhé.');
+    } finally {
+      setAiLoading(false);
+    }
+  };
 
   const handlePost = async () => {
     if (!name.trim() || !category || !condition || !description.trim()) {
@@ -269,7 +302,7 @@ export const PostItemScreen = () => {
   };
 
   return (
-    <ScreenContainer scrollable>
+    <ScreenContainer scrollable={false}>
       <Header title="Đăng đồ trao đổi" />
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
@@ -319,6 +352,19 @@ export const PostItemScreen = () => {
             value={name}
             onChangeText={setName}
           />
+
+          {/* AI Smart Assistant Action Button */}
+          <ScalePressable
+            style={styles.aiAssistBtn}
+            scaleTo={0.96}
+            onPress={handleAIAssist}
+            disabled={aiLoading}
+          >
+            <Sparkles size={16} color={COLORS.primary} />
+            <Text style={styles.aiAssistText}>
+              {aiLoading ? 'AI đang phân tích & định giá...' : '✨ AI Gợi ý định giá & Viết mô tả'}
+            </Text>
+          </ScalePressable>
 
           <View style={styles.rowFields}>
             <FormSelect
@@ -470,6 +516,25 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.surfaceContainer,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  aiAssistBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: '#F0FDF4',
+    borderColor: '#BBF7D0',
+    borderWidth: 1,
+    borderRadius: RADIUS.default,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    marginBottom: SPACING.md,
+    marginTop: -4,
+  },
+  aiAssistText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: COLORS.primary,
   },
   rowFields: { flexDirection: 'row', gap: SPACING.md },
   priceFieldContainer: { marginBottom: SPACING.md },

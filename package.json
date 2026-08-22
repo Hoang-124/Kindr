@@ -13,9 +13,11 @@
     "server:seed": "npm --prefix server run seed",
     "pitch": "npx serve pitch-page -p 3000",
     "test": "npm --prefix server run test",
+    "test:e2e": "node scripts/e2e_kindr_full.js",
     "typecheck": "cd client && npx tsc --noEmit && cd ../server && npx tsc --noEmit"
   },
   "devDependencies": {
-    "concurrently": "^9.2.4"
+    "concurrently": "^9.2.4",
+    "puppeteer-core": "^24.43.1"
   }
 }

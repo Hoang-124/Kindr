@@ -32,8 +32,12 @@ import {
   Clock, 
   Phone,
   MessageCircle,
-  AlertTriangle
+  AlertTriangle,
+  QrCode,
+  CheckCircle2
 } from 'lucide-react-native';
+import { ScalePressable } from '../../../components/common/ScalePressable';
+import { PulseBadge } from '../../../components/common/PulseBadge';
 
 type TransactionDetailRouteProp = RouteProp<AppStackParamList, 'TransactionDetail'>;
 type NavigationProp = NativeStackNavigationProp<AppStackParamList>;
@@ -55,8 +59,9 @@ export const TransactionDetailScreen = () => {
   const [disputeReasonText, setDisputeReasonText] = useState('');
   const [reportModalVisible, setReportModalVisible] = useState(false);
   const [reportReasonText, setReportReasonText] = useState('');
+  const [qrModalVisible, setQrModalVisible] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [timeLeftStr, setTimeLeftStr] = useState('6h 00m');
+  const [timeLeftStr, setTimeLeftStr] = useState('6h 00m 00s');
 
   // Countdown timer for 6 Hours Safeful Time
   useEffect(() => {
@@ -175,7 +180,7 @@ export const TransactionDetailScreen = () => {
   };
 
   return (
-    <ScreenContainer scrollable>
+    <ScreenContainer scrollable={false}>
       <Header title="Chi tiết Ký Quỹ Escrow" showBack />
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
@@ -263,9 +268,17 @@ export const TransactionDetailScreen = () => {
         </View>
 
         {/* Dynamic Action Buttons */}
+        {tx.status === 'awaiting_handover' && isSeller && (
+          <Button
+            title="📱 Mở mã QR Bàn Giao Đồ"
+            onPress={() => setQrModalVisible(true)}
+            style={styles.actionBtn}
+          />
+        )}
+
         {tx.status === 'awaiting_handover' && isBuyer && (
           <Button
-            title="Đã gặp mặt / Nhận đồ P2P (Bắt đầu 6h)"
+            title="🤝 Đã gặp mặt / Nhận đồ P2P (Bắt đầu 6h)"
             onPress={handleHandoverConfirm}
             style={styles.actionBtn}
           />
@@ -278,9 +291,9 @@ export const TransactionDetailScreen = () => {
               onPress={handleImmediateComplete}
               style={styles.actionBtn}
             />
-            <TouchableOpacity style={styles.disputeBtn} onPress={() => setDisputeModalVisible(true)}>
+            <ScalePressable style={styles.disputeBtn} scaleTo={0.96} onPress={() => setDisputeModalVisible(true)}>
               <Text style={styles.disputeBtnText}>⚠️ Báo lỗi / Khiếu nại chất lượng</Text>
-            </TouchableOpacity>
+            </ScalePressable>
           </View>
         )}
 
@@ -293,12 +306,31 @@ export const TransactionDetailScreen = () => {
         )}
 
         {/* Report Action for Trust & Safety */}
-        <TouchableOpacity style={styles.reportRow} onPress={() => setReportModalVisible(true)}>
+        <ScalePressable style={styles.reportRow} scaleTo={0.96} onPress={() => setReportModalVisible(true)}>
           <AlertTriangle size={14} color={COLORS.outline} />
           <Text style={styles.reportText}>Báo cáo vi phạm về giao dịch này</Text>
-        </TouchableOpacity>
+        </ScalePressable>
 
       </ScrollView>
+
+      {/* QR Code Handover Modal for Seller */}
+      <ModalConfirm
+        visible={qrModalVisible}
+        onClose={() => setQrModalVisible(false)}
+        onConfirm={() => setQrModalVisible(false)}
+        title="📱 Mã QR Bàn Giao Đồ An Toàn"
+        confirmTitle="Đã xong"
+        confirmVariant="primary"
+        description="Mẹ hãy đưa mã này cho người mua kiểm tra hoặc quét khi gặp mặt nhận đồ để kích hoạt bảo chứng."
+      >
+        <View style={styles.qrContainer}>
+          <View style={styles.qrBox}>
+            <QrCode size={130} color={COLORS.primary} />
+          </View>
+          <Text style={styles.qrCodeText}>Mã xác thực P2P: <Text style={styles.qrCodeHighlight}>KND-{tx.id.slice(-6).toUpperCase()}</Text></Text>
+          <Text style={styles.qrSubText}>Người mua nhận đồ xong sẽ bắt đầu 6 tiếng kiểm định tại nhà.</Text>
+        </View>
+      </ModalConfirm>
 
       {/* Dispute Modal */}
       <ModalConfirm
@@ -383,6 +415,11 @@ const styles = StyleSheet.create({
   reportRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 4, marginTop: SPACING.md },
   reportText: { fontSize: 11, color: COLORS.outline },
   modalInput: { borderWidth: 1, borderColor: COLORS.outlineVariant, borderRadius: RADIUS.default, padding: SPACING.sm, height: 75, marginTop: SPACING.xs, color: COLORS.onSurface, textAlignVertical: 'top' },
+  qrContainer: { alignItems: 'center', marginVertical: SPACING.sm },
+  qrBox: { padding: SPACING.md, backgroundColor: '#FFF', borderRadius: RADIUS.md, borderWidth: 1, borderColor: COLORS.outlineVariant, marginBottom: SPACING.sm },
+  qrCodeText: { fontSize: 13, color: COLORS.onSurface, fontWeight: '600', marginBottom: 4 },
+  qrCodeHighlight: { color: COLORS.primary, fontWeight: '800' },
+  qrSubText: { fontSize: 11, color: COLORS.outline, textAlign: 'center', paddingHorizontal: SPACING.sm },
 });
 
 export default TransactionDetailScreen;

@@ -53,6 +53,14 @@ export const ProfileScreen = () => {
 
   const [activeHistoryTab, setActiveHistoryTab] = useState<'escrow' | 'completed' | 'civilization' | 'reviews'>('escrow');
 
+  const navigateTo = (screenName: keyof AppStackParamList, params?: any) => {
+    try {
+      navigation.navigate(screenName as any, params);
+    } catch {
+      (navigation as any).getParent()?.navigate(screenName, params);
+    }
+  };
+
   if (!currentUser) return null;
 
   const userTransactions = transactions.filter(
@@ -92,7 +100,7 @@ export const ProfileScreen = () => {
   };
 
   return (
-    <ScreenContainer scrollable>
+    <ScreenContainer scrollable={false}>
       <Header title="Trang cá nhân của mẹ" />
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
@@ -134,7 +142,7 @@ export const ProfileScreen = () => {
             <Text style={styles.civLevel}>Văn Minh ✨</Text>
           </Card>
 
-          <ScalePressable style={styles.bentoItem} scaleTo={0.96} onPress={() => navigation.navigate('Wallet')}>
+          <ScalePressable style={styles.bentoItem} scaleTo={0.96} onPress={() => navigateTo('Wallet')}>
             <Card style={{ flex: 1 }} contentStyle={styles.walletContainer}>
               <PulseBadge scaleMin={0.94} scaleMax={1.08} duration={2200}>
                 <Coins size={28} color={COLORS.tertiary} />
@@ -144,11 +152,11 @@ export const ProfileScreen = () => {
               <Text style={styles.walletValueVND}>~ {formatXuToVND(currentUser.xuBalance)}</Text>
               
               <View style={styles.walletActions}>
-                <ScalePressable style={styles.walletBtn} scaleTo={0.9} onPress={() => navigation.navigate('TopUp')}>
+                <ScalePressable style={styles.walletBtn} scaleTo={0.9} onPress={() => navigateTo('TopUp')}>
                   <Plus size={12} color={COLORS.primary} />
                   <Text style={styles.walletBtnText}>Nạp</Text>
                 </ScalePressable>
-                <ScalePressable style={styles.walletBtn} scaleTo={0.9} onPress={() => navigation.navigate('Withdraw')}>
+                <ScalePressable style={styles.walletBtn} scaleTo={0.9} onPress={() => navigateTo('Withdraw')}>
                   <TrendingUp size={12} color={COLORS.tertiary} />
                   <Text style={styles.walletBtnText}>Rút</Text>
                 </ScalePressable>
@@ -161,43 +169,43 @@ export const ProfileScreen = () => {
         <View style={styles.actionsPanel}>
           <Text style={styles.actionsTitle}>Chức năng của mẹ:</Text>
           <View style={styles.actionsGrid}>
-            <ScalePressable style={styles.actionRow} scaleTo={0.97} onPress={() => navigation.navigate('MyPosts')}>
+            <TouchableOpacity style={styles.actionRow} activeOpacity={0.7} onPress={() => navigateTo('MyPosts')}>
               <View style={styles.actionLeft}>
                 <FileText size={18} color={COLORS.primary} />
                 <Text style={styles.actionLabel}>Bài đăng của tôi</Text>
               </View>
               <ChevronRight size={16} color={COLORS.outline} />
-            </ScalePressable>
+            </TouchableOpacity>
 
-            <ScalePressable style={styles.actionRow} scaleTo={0.97} onPress={() => navigation.navigate('Notification')}>
+            <TouchableOpacity style={styles.actionRow} activeOpacity={0.7} onPress={() => navigateTo('Notification')}>
               <View style={styles.actionLeft}>
                 <Bell size={18} color={COLORS.primary} />
                 <Text style={styles.actionLabel}>Thông báo của mẹ</Text>
               </View>
               <ChevronRight size={16} color={COLORS.outline} />
-            </ScalePressable>
+            </TouchableOpacity>
 
-            <ScalePressable style={styles.actionRow} scaleTo={0.97} onPress={() => navigation.navigate('CareHandbook')}>
+            <TouchableOpacity style={styles.actionRow} activeOpacity={0.7} onPress={() => navigateTo('CareHandbook')}>
               <View style={styles.actionLeft}>
                 <Syringe size={18} color={COLORS.primary} />
                 <Text style={styles.actionLabel}>Sổ tay mẹ bỉm (Tiêm chủng & WHO) 👶</Text>
               </View>
               <ChevronRight size={16} color={COLORS.outline} />
-            </ScalePressable>
+            </TouchableOpacity>
 
-            <ScalePressable style={styles.actionRow} scaleTo={0.97} onPress={() => navigation.navigate('DonationStation')}>
+            <TouchableOpacity style={styles.actionRow} activeOpacity={0.7} onPress={() => navigateTo('DonationStation')}>
               <View style={styles.actionLeft}>
                 <Gift size={18} color={COLORS.primary} />
                 <Text style={styles.actionLabel}>Trạm tặng đồ Kindr (0 Xu)</Text>
               </View>
               <ChevronRight size={16} color={COLORS.outline} />
-            </ScalePressable>
+            </TouchableOpacity>
           </View>
         </View>
 
         {/* Admin Portal Card Trigger (Admin only) */}
         {currentUser.role === 'admin' && (
-          <ScalePressable style={styles.adminPortalCard} scaleTo={0.97} onPress={() => navigation.navigate('AdminDashboard')}>
+          <TouchableOpacity style={styles.adminPortalCard} activeOpacity={0.8} onPress={() => navigateTo('AdminDashboard')}>
             <View style={styles.adminPortalLeft}>
               <ShieldAlert size={22} color="#ffffff" />
               <View style={{ marginLeft: 10 }}>
@@ -206,7 +214,7 @@ export const ProfileScreen = () => {
               </View>
             </View>
             <ChevronRight size={18} color="#ffffff" />
-          </ScalePressable>
+          </TouchableOpacity>
         )}
 
         {/* History Tabs */}
@@ -356,10 +364,10 @@ const styles = StyleSheet.create({
   adminPortalTitle: { fontSize: 13, fontWeight: '800', color: '#FFF' },
   adminPortalSubtitle: { fontSize: 10, color: 'rgba(255, 255, 255, 0.85)' },
   historySection: { backgroundColor: COLORS.surfaceContainerLowest, borderRadius: 16, borderWidth: 1, borderColor: COLORS.surfaceVariant, overflow: 'hidden', marginBottom: SPACING.md },
-  tabHeader: { flexDirection: 'row', backgroundColor: COLORS.surfaceContainerLow, borderBottomWidth: 1, borderBottomColor: COLORS.surfaceVariant },
-  tabBtn: { flex: 1, paddingVertical: SPACING.sm, alignItems: 'center' },
+  tabHeader: { flexDirection: 'row', backgroundColor: COLORS.surfaceContainerLow, borderBottomWidth: 1, borderBottomColor: COLORS.surfaceVariant, paddingHorizontal: 4 },
+  tabBtn: { flex: 1, paddingVertical: 10, paddingHorizontal: 4, alignItems: 'center', justifyContent: 'center' },
   tabBtnActive: { borderBottomWidth: 2, borderBottomColor: COLORS.primary, backgroundColor: '#FFF' },
-  tabText: { fontSize: 11, fontWeight: '600', color: COLORS.outline },
+  tabText: { fontSize: 11, fontWeight: '600', color: COLORS.outline, textAlign: 'center' },
   tabTextActive: { color: COLORS.primary, fontWeight: '700' },
   tabContent: { padding: SPACING.md },
   emptyText: { fontSize: 12, color: COLORS.outline, textAlign: 'center', paddingVertical: SPACING.md },

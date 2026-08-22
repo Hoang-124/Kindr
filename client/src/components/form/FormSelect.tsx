@@ -25,6 +25,7 @@ interface FormSelectProps {
   onValueChange: (value: string) => void;
   containerStyle?: ViewStyle;
   error?: string;
+  compact?: boolean;
 }
 
 export const FormSelect = ({
@@ -35,6 +36,7 @@ export const FormSelect = ({
   onValueChange,
   containerStyle,
   error,
+  compact = false,
 }: FormSelectProps) => {
   const [modalVisible, setModalVisible] = useState(false);
 
@@ -46,12 +48,13 @@ export const FormSelect = ({
   };
 
   return (
-    <View style={[styles.container, containerStyle]}>
-      {label && <Text style={styles.label}>{label}</Text>}
+    <View style={[styles.container, compact && styles.compactContainer, containerStyle]}>
+      {label && <Text style={[styles.label, compact && styles.compactLabel]}>{label}</Text>}
       
       <TouchableOpacity 
         style={[
           styles.selectTrigger, 
+          compact && styles.compactSelectTrigger,
           error ? styles.errorBorder : null
         ]}
         onPress={() => setModalVisible(true)}
@@ -123,11 +126,20 @@ const styles = StyleSheet.create({
     width: '100%',
     marginBottom: SPACING.md,
   },
+  compactContainer: {
+    marginBottom: 6,
+  },
   label: {
     fontSize: 14,
     fontWeight: '600',
     color: COLORS.onBackground,
     marginBottom: SPACING.xs,
+  },
+  compactLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    marginBottom: 2,
+    color: COLORS.onSurfaceVariant,
   },
   selectTrigger: {
     height: 52,
@@ -139,6 +151,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.md,
     borderWidth: 1.5,
     borderColor: 'transparent',
+  },
+  compactSelectTrigger: {
+    height: 40,
+    paddingHorizontal: SPACING.sm,
+    borderRadius: RADIUS.sm,
   },
   triggerText: {
     fontSize: 15,

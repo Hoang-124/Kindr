@@ -77,6 +77,14 @@ export const HomeScreen = () => {
     tabNavigation.navigate('Search');
   };
 
+  const handleProductPress = (id: string) => {
+    try {
+      navigation.navigate('ProductDetail', { id });
+    } catch {
+      tabNavigation.getParent()?.navigate('ProductDetail', { id });
+    }
+  };
+
   const renderHeader = () => (
     <View style={styles.headerSection}>
       {/* Search Trigger with Tactile Feedback */}
@@ -183,7 +191,7 @@ export const HomeScreen = () => {
             title="Chưa có món đồ nào quanh khu vực của mẹ"
             description="Hãy là người đầu tiên chia sẻ đồ chơi hoặc đồ dùng cho bé để nhận Xu thưởng nhé!"
             actionTitle="Đăng đồ ngay"
-            onActionPress={() => tabNavigation.navigate('PostTab')}
+            onActionPress={() => tabNavigation.navigate('Post')}
           />
         }
         renderItem={({ item, index }) => (
@@ -191,7 +199,7 @@ export const HomeScreen = () => {
             <ScalePressable
               style={styles.itemCard}
               scaleTo={0.95}
-              onPress={() => navigation.navigate('ProductDetail', { id: item.id })}
+              onPress={() => handleProductPress(item.id)}
             >
               <View style={styles.imageContainer}>
                 <Image source={{ uri: item.image }} style={styles.itemImage} />

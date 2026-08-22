@@ -1,6 +1,5 @@
-// client/src/components/common/PulseBadge.tsx
 import React, { useEffect, useRef } from 'react';
-import { Animated, ViewStyle, StyleProp } from 'react-native';
+import { Animated, ViewStyle, StyleProp, Platform } from 'react-native';
 
 interface PulseBadgeProps {
   children: React.ReactNode;
@@ -29,12 +28,12 @@ export const PulseBadge: React.FC<PulseBadgeProps> = ({
         Animated.timing(pulseAnim, {
           toValue: scaleMax,
           duration: duration / 2,
-          useNativeDriver: true,
+          useNativeDriver: Platform.OS !== 'web',
         }),
         Animated.timing(pulseAnim, {
           toValue: scaleMin,
           duration: duration / 2,
-          useNativeDriver: true,
+          useNativeDriver: Platform.OS !== 'web',
         }),
       ])
     );

@@ -83,7 +83,7 @@ export const RateTransactionScreen = () => {
   };
 
   return (
-    <ScreenContainer scrollable>
+    <ScreenContainer scrollable={false}>
       <Header title="Đánh giá Mẹ Bỉm Văn Minh" showBack />
 
       <ScrollView contentContainerStyle={styles.content}>
