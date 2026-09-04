@@ -15,8 +15,6 @@ class PushNotificationService {
   }
 
   public async requestPermissions(): Promise<boolean> {
-    // Permission simulator for Expo mobile environment
-    console.log('[PushService] Requesting notification permissions...');
     return true;
   }
 
@@ -40,7 +38,6 @@ class PushNotificationService {
       createdAt: new Date().toISOString(),
     };
 
-    console.log(`[PushService Notification Fired] (${type}) ${title}: ${body}`);
     this.listeners.forEach(listener => listener(notification));
     return notification;
   }
