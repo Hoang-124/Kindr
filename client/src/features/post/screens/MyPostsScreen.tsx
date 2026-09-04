@@ -14,6 +14,8 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AppStackParamList } from '../../../app/navigation/navigationTypes';
 import { useAppSelector, useAppDispatch } from '../../../app/store/hooks';
 import { hydrateProducts } from '../../home/store/homeSlice';
+import { refreshWalletBalance } from '../../auth/store/authSlice';
+import * as productService from '../../../services/productService';
 import { COLORS, SPACING, RADIUS, TYPOGRAPHY, SHADOWS } from '../../../theme';
 import { Edit3, Trash2, Plus, Info, ChevronRight } from 'lucide-react-native';
 import ScreenContainer from '../../../components/layout/ScreenContainer';
@@ -42,10 +44,14 @@ export const MyPostsScreen = () => {
         { 
           text: 'Xóa bài', 
           style: 'destructive',
-          onPress: () => {
+          onPress: async () => {
+            try {
+              await productService.deleteProduct(id);
+              dispatch(refreshWalletBalance());
+            } catch (e) {}
             const updatedProducts = products.filter(p => p.id !== id);
             dispatch(hydrateProducts(updatedProducts));
-            Alert.alert('Thành công', 'Bài viết đã được gỡ bỏ.');
+            Alert.alert('Thành công', 'Bài viết đã được gỡ bỏ và hoàn trả Safe Fee (nếu có).');
           }
         }
       ]

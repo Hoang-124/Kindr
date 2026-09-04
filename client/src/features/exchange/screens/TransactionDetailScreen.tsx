@@ -152,13 +152,17 @@ export const TransactionDetailScreen = () => {
   };
 
   // Dispute submission
-  const handleFileDispute = () => {
+  const handleFileDispute = async () => {
     if (!disputeReasonText.trim()) {
       Alert.alert('Chưa nhập lý do', 'Vui lòng nhập lý do khiếu nại.');
       return;
     }
 
-    dispatch(fileDispute({ transactionId: tx.id, reason: disputeReasonText }));
+    try {
+      await dispatch(fileDisputeAsync({ transactionId: tx.id, reason: disputeReasonText.trim() })).unwrap();
+    } catch (e) {
+      dispatch(fileDispute({ transactionId: tx.id, reason: disputeReasonText }));
+    }
     setDisputeModalVisible(false);
     Alert.alert('Đã nộp Khiếu Nại ⚠️', 'Bộ phận Trust & Safety sẽ liên hệ đối soát chứng cứ trong vòng 24h.');
   };

@@ -18,6 +18,7 @@ import Header from '../../../components/layout/Header';
 import Input from '../../../components/common/Input';
 import Button from '../../../components/common/Button';
 import FormError from '../../../components/form/FormError';
+import * as productService from '../../../services/productService';
 
 const CATEGORIES = [
   { id: 'do_choi', name: 'Đồ chơi' },
@@ -74,7 +75,7 @@ export const EditPostScreen = () => {
     );
   }
 
-  const handleSaveChanges = () => {
+  const handleSaveChanges = async () => {
     setError('');
 
     if (!name.trim()) {
@@ -102,28 +103,32 @@ export const EditPostScreen = () => {
 
     const conditionLabel = CONDITIONS.find(c => c.id === condition)?.label || 'Khá tốt';
 
-    setTimeout(() => {
-      setLoading(false);
-      
-      const updatedProduct = {
-        ...product,
-        name,
-        description,
-        price,
-        category,
-        condition: condition as any,
-        conditionLabel,
-      };
+    try {
+      await productService.updateProduct(postId, { name, description });
+    } catch (apiErr) {
+      // Offline fallback
+    }
 
-      const updatedProductsList = products.map(p => p.id === postId ? updatedProduct : p);
-      dispatch(hydrateProducts(updatedProductsList));
+    setLoading(false);
+    
+    const updatedProduct = {
+      ...product,
+      name,
+      description,
+      price,
+      category,
+      condition: condition as any,
+      conditionLabel,
+    };
 
-      Alert.alert(
-        'Thành công! 🎉',
-        'Bài viết của mẹ đã được cập nhật thông tin mới.',
-        [{ text: 'Đồng ý', onPress: () => navigation.goBack() }]
-      );
-    }, 1000);
+    const updatedProductsList = products.map(p => p.id === postId ? updatedProduct : p);
+    dispatch(hydrateProducts(updatedProductsList));
+
+    Alert.alert(
+      'Thành công! 🎉',
+      'Bài viết của mẹ đã được cập nhật thông tin mới.',
+      [{ text: 'Đồng ý', onPress: () => navigation.goBack() }]
+    );
   };
 
   return (

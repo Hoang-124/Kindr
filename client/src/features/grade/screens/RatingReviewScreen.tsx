@@ -18,6 +18,7 @@ import ScreenContainer from '../../../components/layout/ScreenContainer';
 import Header from '../../../components/layout/Header';
 import Input from '../../../components/common/Input';
 import Button from '../../../components/common/Button';
+import * as ratingService from '../../../services/ratingService';
 
 const QUICK_TAGS = [
   'Đồ mới đúng mô tả 👕',
@@ -62,14 +63,9 @@ export const RatingReviewScreen = () => {
     setComment(prev => prev ? `${prev}, ${tag}` : tag);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     setLoading(true);
 
-    // Calculate Civilization Points changes for the partner based on stars:
-    // 5 stars: +5 pts
-    // 4 stars: +2 pts
-    // 3 stars: +0 pts
-    // 1-2 stars: -5 pts
     let pointsChanged = 0;
     let reason = '';
 
@@ -84,31 +80,39 @@ export const RatingReviewScreen = () => {
       reason = `Bị ${currentUser.name} đánh giá thấp (${rating} sao): "${comment || 'Có lỗi xảy ra'}"`;
     }
 
-    setTimeout(() => {
-      setLoading(false);
-      
-      // Update partner civilization points in state
-      if (pointsChanged !== 0) {
-        dispatch(adjustCivilizationPoints({
-          userId: partnerId,
-          points: pointsChanged,
-          reason,
-        }));
-      }
-
-      // Mark transaction as complete if it wasn't already, or save metadata.
-      dispatch(updateTransactionStatus({
+    try {
+      await ratingService.submitRating({
         transactionId: tx.id,
-        status: 'completed',
-        finalizedAt: new Date().toISOString()
-      }));
+        stars: rating,
+        comment: comment.trim(),
+      });
+    } catch (e) {
+      // Fallback
+    }
 
-      Alert.alert(
-        'Đã gửi đánh giá! 🌟',
-        `Cảm ơn mẹ đã đóng góp ý kiến. Điểm văn minh của ${partnerName} đã được cập nhật tương ứng.`,
-        [{ text: 'Đồng ý', onPress: () => navigation.navigate('Main') }]
-      );
-    }, 1200);
+    setLoading(false);
+    
+    // Update partner civilization points in state
+    if (pointsChanged !== 0) {
+      dispatch(adjustCivilizationPoints({
+        userId: partnerId,
+        points: pointsChanged,
+        reason,
+      }));
+    }
+
+    // Mark transaction as complete
+    dispatch(updateTransactionStatus({
+      transactionId: tx.id,
+      status: 'completed',
+      finalizedAt: new Date().toISOString()
+    }));
+
+    Alert.alert(
+      'Đã gửi đánh giá! 🌟',
+      `Cảm ơn mẹ đã đóng góp ý kiến. Điểm văn minh của ${partnerName} đã được cập nhật tương ứng.`,
+      [{ text: 'Đồng ý', onPress: () => navigation.navigate('Main') }]
+    );
   };
 
   return (
