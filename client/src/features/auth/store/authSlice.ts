@@ -115,6 +115,46 @@ export const refreshWalletBalance = createAsyncThunk(
   }
 );
 
+export const updateProfileAsync = createAsyncThunk(
+  'auth/updateProfileAsync',
+  async (
+    payload: {
+      name?: string;
+      phone?: string;
+      avatar?: string;
+      bio?: string;
+      districtId?: string;
+      districtName?: string;
+      addressDetail?: string;
+    },
+    { rejectWithValue }
+  ) => {
+    try {
+      const response = await authService.updateProfile(payload);
+      const user = response.user;
+      return {
+        ...user,
+        id: (user as any)._id?.toString() || user.id,
+      };
+    } catch (err: any) {
+      return rejectWithValue(err.response?.data?.error || 'Cập nhật thông tin thất bại');
+    }
+  }
+);
+
+export const changePasswordAsync = createAsyncThunk(
+  'auth/changePasswordAsync',
+  async (payload: { oldPassword?: string; newPassword: string }, { rejectWithValue }) => {
+    try {
+      const response = await authService.changePassword(payload);
+      return response.message;
+    } catch (err: any) {
+      return rejectWithValue(err.response?.data?.error || 'Đổi mật khẩu thất bại');
+    }
+  }
+);
+
+
 const authSlice = createSlice({
   name: 'auth',
   initialState,
@@ -315,6 +355,25 @@ const authSlice = createSlice({
         state.currentUser.welcomeCreditRemaining = action.payload.welcomeCreditRemaining;
       }
     });
+
+    // updateProfileAsync
+    builder.addCase(updateProfileAsync.pending, (state) => {
+      state.isLoading = true;
+      state.error = null;
+    });
+    builder.addCase(updateProfileAsync.fulfilled, (state, action) => {
+      state.isLoading = false;
+      state.currentUser = action.payload;
+      const idx = state.allUsers.findIndex((u) => u.id === action.payload.id);
+      if (idx !== -1) {
+        state.allUsers[idx] = action.payload;
+      }
+    });
+    builder.addCase(updateProfileAsync.rejected, (state, action) => {
+      state.isLoading = false;
+      state.error = (action.payload as string) || 'Cập nhật thông tin thất bại';
+    });
+
   },
 });
 

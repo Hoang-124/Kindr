@@ -13,6 +13,20 @@ const router = Router();
 
 // ---- Validation ----
 
+function calculateHaversineKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return Math.round(R * c * 10) / 10;
+}
+
 const CreateProductSchema = z.object({
   name: z.string().min(5, 'Tên sản phẩm phải ít nhất 5 ký tự'),
   price: z.number().min(0),
@@ -23,8 +37,12 @@ const CreateProductSchema = z.object({
   locationName: z.string(),
   wardId: z.string().optional(),
   districtId: z.string().optional(),
-  image: z.string().url(),
-  additionalImages: z.array(z.string().url()).optional(),
+  coordinates: z.object({
+    latitude: z.number(),
+    longitude: z.number(),
+  }).optional(),
+  image: z.string().min(1, 'Ảnh sản phẩm không được để trống'),
+  additionalImages: z.array(z.string()).optional(),
   description: z.string().min(10, 'Mô tả phải ít nhất 10 ký tự'),
 });
 
@@ -77,11 +95,15 @@ router.get('/', optionalAuth, async (req: AuthRequest, res: Response): Promise<v
       filter.$text = { $search: search.trim() };
     }
 
+    const userLat = req.query.lat ? parseFloat(req.query.lat as string) : null;
+    const userLng = req.query.lng ? parseFloat(req.query.lng as string) : null;
+    const maxRadius = req.query.radiusKm ? parseFloat(req.query.radiusKm as string) : null;
+
     const pageNum = Math.max(1, parseInt(page as string, 10));
     const limitNum = Math.min(50, Math.max(1, parseInt(limit as string, 10)));
     const skip = (pageNum - 1) * limitNum;
 
-    const [products, total] = await Promise.all([
+    const [rawProducts, total] = await Promise.all([
       Product.find(filter)
         .sort({ createdAt: -1 })
         .skip(skip)
@@ -90,13 +112,31 @@ router.get('/', optionalAuth, async (req: AuthRequest, res: Response): Promise<v
       Product.countDocuments(filter),
     ]);
 
+    let products = rawProducts.map((p: any) => {
+      if (userLat && userLng) {
+        const pLat = p.coordinates?.latitude || 16.0748;
+        const pLng = p.coordinates?.longitude || 108.2240;
+        const d = calculateHaversineKm(userLat, userLng, pLat, pLng);
+        return { ...p, distance: `${d} km`, distanceKm: d };
+      }
+      return p;
+    });
+
+    if (maxRadius && userLat && userLng) {
+      products = products.filter((p: any) => p.distanceKm <= maxRadius);
+    }
+
+    if (userLat && userLng) {
+      products.sort((a: any, b: any) => (a.distanceKm || 0) - (b.distanceKm || 0));
+    }
+
     res.json({
       products,
       pagination: {
         page: pageNum,
         limit: limitNum,
-        total,
-        totalPages: Math.ceil(total / limitNum),
+        total: maxRadius ? products.length : total,
+        totalPages: Math.ceil((maxRadius ? products.length : total) / limitNum),
       },
     });
   } catch (error) {
@@ -188,6 +228,7 @@ router.post('/', requireAuth, async (req: AuthRequest, res: Response): Promise<v
     // Create product
     const product = await Product.create({
       ...data,
+      coordinates: data.coordinates || { latitude: 16.0748, longitude: 108.2240 },
       sellerId: seller._id,
       sellerName: seller.name,
       sellerAvatar: seller.avatar,

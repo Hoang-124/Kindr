@@ -18,6 +18,8 @@ import ChatDetailScreen from '../../features/chat/screens/ChatDetailScreen';
 import WalletScreen from '../../features/profile/screens/WalletScreen';
 import TopUpScreen from '../../features/profile/screens/TopUpScreen';
 import WithdrawScreen from '../../features/profile/screens/WithdrawScreen';
+import EditProfileScreen from '../../features/profile/screens/EditProfileScreen';
+import SettingsScreen from '../../features/profile/screens/SettingsScreen';
 import MyPostsScreen from '../../features/post/screens/MyPostsScreen';
 import EditPostScreen from '../../features/post/screens/EditPostScreen';
 import NotificationScreen from '../../features/notification/screens/NotificationScreen';
@@ -62,6 +64,8 @@ export const AppNavigator = () => {
             <Stack.Screen name="Wallet" component={WalletScreen} />
             <Stack.Screen name="TopUp" component={TopUpScreen} />
             <Stack.Screen name="Withdraw" component={WithdrawScreen} />
+            <Stack.Screen name="EditProfile" component={EditProfileScreen} />
+            <Stack.Screen name="Settings" component={SettingsScreen} />
             <Stack.Screen name="MyPosts" component={MyPostsScreen} />
             <Stack.Screen name="EditPost" component={EditPostScreen} />
             <Stack.Screen name="Notification" component={NotificationScreen} />

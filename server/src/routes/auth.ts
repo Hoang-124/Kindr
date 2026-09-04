@@ -183,6 +183,11 @@ router.post('/login', async (req: AuthRequest, res: Response): Promise<void> => 
       return;
     }
 
+    // Auto-grant admin role if email matches system admin configuration
+    if (user.email && (ENV.ADMIN_EMAILS as readonly string[]).includes(user.email.toLowerCase()) && user.role !== 'admin') {
+      user.role = 'admin';
+    }
+
     // 4. Generate tokens
     const accessToken = generateAccessToken(user._id.toString(), user.role);
     const refreshToken = generateRefreshToken(user._id.toString(), user.role);
@@ -261,6 +266,11 @@ router.get('/me', requireAuth, async (req: AuthRequest, res: Response): Promise<
     if (!user) {
       res.status(404).json({ error: 'Không tìm thấy tài khoản.' });
       return;
+    }
+
+    if (user.email && (ENV.ADMIN_EMAILS as readonly string[]).includes(user.email.toLowerCase()) && user.role !== 'admin') {
+      user.role = 'admin';
+      await user.save();
     }
 
     res.json({ user: user.toJSON() });
@@ -384,7 +394,6 @@ router.post('/google', async (req: AuthRequest, res: Response): Promise<void> =>
         email: googleProfile.email.toLowerCase(),
         googleId: googleProfile.googleId,
         avatar: googleProfile.avatar || '',
-        phone: '',
         location: {
           districtId: '',
           districtName: '',
@@ -398,6 +407,7 @@ router.post('/google', async (req: AuthRequest, res: Response): Promise<void> =>
           reason: 'Chào mừng gia nhập cộng đồng Kindr bằng Google! Tặng 10 Xu chào mừng 🎉',
           date: new Date(),
         }],
+        role: (ENV.ADMIN_EMAILS as readonly string[]).includes(googleProfile.email.toLowerCase()) ? 'admin' : 'user',
       });
 
       // Welcome notification
@@ -408,7 +418,7 @@ router.post('/google', async (req: AuthRequest, res: Response): Promise<void> =>
         body: 'Kindr đã gửi tặng Mẹ 10 Xu chào mừng vào ví. Hãy bắt đầu đổi quà cho bé ngay nào!',
       });
     } else {
-      // Link googleId / avatar if missing
+      // Link googleId / avatar / admin role if needed
       let modified = false;
       if (!user.googleId) {
         user.googleId = googleProfile.googleId;
@@ -416,6 +426,10 @@ router.post('/google', async (req: AuthRequest, res: Response): Promise<void> =>
       }
       if (!user.avatar && googleProfile.avatar) {
         user.avatar = googleProfile.avatar;
+        modified = true;
+      }
+      if (user.email && (ENV.ADMIN_EMAILS as readonly string[]).includes(user.email.toLowerCase()) && user.role !== 'admin') {
+        user.role = 'admin';
         modified = true;
       }
       if (modified) {
@@ -445,6 +459,121 @@ router.post('/google', async (req: AuthRequest, res: Response): Promise<void> =>
   } catch (error: any) {
     console.error('Google Auth error:', error);
     res.status(500).json({ error: error.message || 'Lỗi xác thực Google.' });
+  }
+});
+
+// ---- Profile & Account Settings Routes ----
+
+const UpdateProfileSchema = z.object({
+  name: z.string().trim().min(2, 'Tên phải ít nhất 2 ký tự').max(50, 'Tên tối đa 50 ký tự').optional(),
+  phone: z.string().trim().regex(/^0\d{9}$/, 'Số điện thoại Việt Nam không hợp lệ (10 số, bắt đầu bằng 0)').optional().or(z.literal('')),
+  avatar: z.string().optional(),
+  bio: z.string().max(250, 'Giới thiệu tối đa 250 ký tự').optional(),
+  districtId: z.string().optional(),
+  districtName: z.string().optional(),
+  addressDetail: z.string().optional(),
+});
+
+/**
+ * PUT /api/auth/profile
+ * Update user personal info: name, phone, avatar, bio, location
+ */
+router.put('/profile', requireAuth, async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const parsed = UpdateProfileSchema.safeParse(req.body);
+    if (!parsed.success) {
+      res.status(400).json({ error: parsed.error.errors[0].message });
+      return;
+    }
+
+    const { name, phone, avatar, bio, districtId, districtName, addressDetail } = parsed.data;
+
+    const user = await User.findById(req.userId);
+    if (!user) {
+      res.status(404).json({ error: 'Không tìm thấy người dùng.' });
+      return;
+    }
+
+    // Check duplicate phone if changed
+    if (phone && phone !== user.phone) {
+      const existingPhone = await User.findOne({ phone, _id: { $ne: user._id } });
+      if (existingPhone) {
+        res.status(409).json({ error: 'Số điện thoại này đã được sử dụng bởi một tài khoản khác.' });
+        return;
+      }
+      user.phone = phone;
+    }
+
+    if (name) user.name = name;
+    if (avatar !== undefined) user.avatar = avatar;
+    if (bio !== undefined) user.bio = bio;
+
+    if (districtId !== undefined || districtName !== undefined || addressDetail !== undefined) {
+      user.location = {
+        districtId: districtId !== undefined ? districtId : (user.location?.districtId || ''),
+        districtName: districtName !== undefined ? districtName : (user.location?.districtName || ''),
+        addressDetail: addressDetail !== undefined ? addressDetail : (user.location?.addressDetail || ''),
+      };
+    }
+
+    await user.save();
+
+    res.json({
+      message: 'Cập nhật thông tin cá nhân thành công!',
+      user: user.toJSON(),
+    });
+  } catch (error: any) {
+    console.error('Update profile error:', error);
+    res.status(500).json({ error: error.message || 'Lỗi cập nhật thông tin cá nhân.' });
+  }
+});
+
+const ChangePasswordSchema = z.object({
+  oldPassword: z.string().optional(),
+  newPassword: z.string().min(6, 'Mật khẩu mới phải ít nhất 6 ký tự'),
+});
+
+/**
+ * PUT /api/auth/change-password
+ * Change or set user password
+ */
+router.put('/change-password', requireAuth, async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const parsed = ChangePasswordSchema.safeParse(req.body);
+    if (!parsed.success) {
+      res.status(400).json({ error: parsed.error.errors[0].message });
+      return;
+    }
+
+    const { oldPassword, newPassword } = parsed.data;
+    const user = await User.findById(req.userId);
+    if (!user) {
+      res.status(404).json({ error: 'Không tìm thấy người dùng.' });
+      return;
+    }
+
+    // If user already has a password, verify oldPassword
+    if (user.passwordHash) {
+      if (!oldPassword) {
+        res.status(400).json({ error: 'Vui lòng nhập mật khẩu hiện tại.' });
+        return;
+      }
+      const isMatch = await bcrypt.compare(oldPassword, user.passwordHash);
+      if (!isMatch) {
+        res.status(400).json({ error: 'Mật khẩu hiện tại không đúng.' });
+        return;
+      }
+    }
+
+    // Hash and save new password
+    const salt = await bcrypt.genSalt(10);
+    user.passwordHash = await bcrypt.hash(newPassword, salt);
+    await user.save();
+
+    res.json({ message: 'Đổi mật khẩu thành công!' });
+  } catch (error: any) {
+    console.error('Change password error:', error);
+    res.status(500).json({ error: 'Lỗi cập nhật mật khẩu.' });
   }
 });
 

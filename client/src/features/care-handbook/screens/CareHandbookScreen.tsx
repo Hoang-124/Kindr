@@ -1,5 +1,5 @@
 // src/features/care-handbook/screens/CareHandbookScreen.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   View, 
   Text, 
@@ -31,6 +31,7 @@ import {
   ThumbsUp
 } from 'lucide-react-native';
 import { VaccineDose, GrowthRecord, CommunityReview } from '../../../types/common';
+import * as careService from '../../../services/careService';
 
 const initialVaccines: VaccineDose[] = [
   { id: 'v1', name: 'Lao (BCG) & Viêm gan B', ageRecommendation: 'Sơ sinh (24h đầu)', ageInMonths: 0, diseaseTarget: 'Phòng bệnh Lao và Viêm gan B', isCompleted: true, completedDate: '12/03/2026', facilityName: 'Bệnh viện Phụ sản - Nhi Đà Nẵng' },
@@ -115,14 +116,61 @@ export const CareHandbookScreen = () => {
   // Community state
   const [reviews, setReviews] = useState<CommunityReview[]>(initialCommunityReviews);
 
+  // Load persistent records from MongoDB Cloud on mount
+  useEffect(() => {
+    async function loadCloudCareData() {
+      try {
+        const [cloudVaccines, cloudGrowth] = await Promise.all([
+          careService.getVaccineRecords(),
+          careService.getGrowthRecords(),
+        ]);
+
+        if (cloudVaccines && cloudVaccines.length > 0) {
+          setVaccines(prev => prev.map(v => {
+            const match = cloudVaccines.find(cv => cv.vaccineId === v.id);
+            if (match) {
+              return {
+                ...v,
+                isCompleted: match.isCompleted,
+                completedDate: match.completedDate,
+                facilityName: match.facilityName || v.facilityName,
+                notes: match.notes || v.notes,
+              };
+            }
+            return v;
+          }));
+        }
+
+        if (cloudGrowth && cloudGrowth.length > 0) {
+          setGrowthRecords(cloudGrowth as any);
+        }
+      } catch (e) {
+        console.warn('Error loading cloud care records:', e);
+      }
+    }
+    loadCloudCareData();
+  }, []);
+
   const toggleVaccine = (id: string) => {
     setVaccines(prev => prev.map(v => {
       if (v.id === id) {
         const nextState = !v.isCompleted;
+        const compDate = nextState ? new Date().toLocaleDateString('vi-VN') : undefined;
+
+        // Persist to Cloud DB
+        careService.toggleVaccineRecord({
+          vaccineId: v.id,
+          vaccineName: v.name,
+          isCompleted: nextState,
+          completedDate: compDate,
+          facilityName: v.facilityName,
+          notes: v.notes,
+        }).catch(err => console.warn('Failed to sync vaccine toggle with cloud:', err));
+
         return {
           ...v,
           isCompleted: nextState,
-          completedDate: nextState ? new Date().toLocaleDateString('vi-VN') : undefined
+          completedDate: compDate
         };
       }
       return v;
@@ -158,12 +206,21 @@ export const CareHandbookScreen = () => {
       whoHeightStatus: heightStatus,
     };
 
+    // Persist to Cloud DB
+    careService.addGrowthRecord({
+      childName: 'Bé Bắp',
+      date: new Date().toLocaleDateString('vi-VN'),
+      ageMonths: m,
+      weightKg: w,
+      heightCm: h,
+    }).catch(err => console.warn('Failed to sync growth record with cloud:', err));
+
     setGrowthRecords([newRecord, ...growthRecords]);
     setInputWeight('');
     setInputHeight('');
     setInputAgeMonths('');
 
-    Alert.alert('Đã lưu chỉ số bé 🎉', 'Chỉ số phát triển của bé đã được cập nhật theo bảng tiêu chuẩn WHO!');
+    Alert.alert('Đã lưu chỉ số bé lên đám mây 🎉', 'Chỉ số phát triển của bé đã được cập nhật theo bảng tiêu chuẩn WHO và đồng bộ tài khoản!');
   };
 
   return (

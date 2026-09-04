@@ -14,6 +14,8 @@ import walletRoutes from './routes/wallet';
 import ratingRoutes from './routes/ratings';
 import reportRoutes from './routes/reports';
 import adminRoutes from './routes/admin';
+import uploadRoutes from './routes/upload';
+import careRoutes from './routes/care';
 
 export function createApp(): Express {
   const app = express();
@@ -66,6 +68,8 @@ export function createApp(): Express {
   app.use('/api/ratings', ratingRoutes);
   app.use('/api/reports', reportRoutes);
   app.use('/api/admin', adminRoutes);
+  app.use('/api/upload', uploadRoutes);
+  app.use('/api/care', careRoutes);
 
   // 5. Global error handler
   app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {

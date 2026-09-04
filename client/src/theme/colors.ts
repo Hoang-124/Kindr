@@ -1,45 +1,69 @@
 // src/theme/colors.ts
+// Single source of truth aligned with DESIGN.md
 export const COLORS = {
-  primary: '#3a6758',            // Kindr Green
-  onPrimary: '#ffffff',
-  primaryContainer: '#a7d7c5',
-  onPrimaryContainer: '#325f51',
-  primaryFixedDim: '#a1d1bf',
+  // Brand Primary (Vibrant Coral)
+  primary: '#FF6B6B',
+  primaryDark: '#E05353',
+  primaryLight: '#FFE8E8',
+  onPrimary: '#FFFFFF',
+  primaryContainer: '#FFE8E8',
+  onPrimaryContainer: '#B73232',
+  primaryFixedDim: '#FFA8A8',
 
-  secondary: '#615e54',          // Warm Gray/Brown
-  onSecondary: '#ffffff',
-  secondaryContainer: '#e8e2d4',
-  onSecondaryContainer: '#686459',
+  // Secondary (Energetic Teal)
+  secondary: '#4ECDC4',
+  secondaryDark: '#3AB5AC',
+  secondaryLight: '#E0F7F5',
+  onSecondary: '#FFFFFF',
+  secondaryContainer: '#E0F7F5',
+  onSecondaryContainer: '#166B64',
 
-  tertiary: '#7b5455',           // Terracotta Red / Xu Color
-  onTertiary: '#ffffff',
-  tertiaryContainer: '#f3c1c1',
-  onTertiaryContainer: '#724d4e',
+  // Tertiary & Currency (Sun Amber Gold / Xu Token)
+  tertiary: '#FFD166',
+  onTertiary: '#4B3600',
+  tertiaryContainer: '#FFF8E1',
+  onTertiaryContainer: '#8C6500',
+  accentGold: '#FFD166',
+  accent: '#FFD166',
 
-  background: '#fff8f4',         // Warm Soft Peach
-  onBackground: '#221a11',
+  // Canvas & Background (Clean Warm Canvas)
+  background: '#F8F9FA',
+  onBackground: '#1A1D20',
 
-  surface: '#ffffff',
-  onSurface: '#221a11',
-  surfaceDim: '#e7d8c8',
-  surfaceVariant: '#efe0d1',
-  onSurfaceVariant: '#404945',
+  // Surfaces & Cards
+  surface: '#FFFFFF',
+  card: '#FFFFFF',
+  onSurface: '#1A1D20',
+  surfaceDim: '#F1F3F5',
+  surfaceVariant: '#E9ECEF',
+  onSurfaceVariant: '#495057',
   
-  surfaceContainerLowest: '#ffffff',
-  surfaceContainerLow: '#fff1e5',
-  surfaceContainer: '#fbebdc',
-  surfaceContainerHigh: '#f5e6d6',
-  surfaceContainerHighest: '#efe0d1',
+  surfaceContainerLowest: '#FFFFFF',
+  surfaceContainerLow: '#F8F9FA',
+  surfaceContainer: '#F1F3F5',
+  surfaceContainerHigh: '#E9ECEF',
+  surfaceContainerHighest: '#DEE2E6',
+  surfaceSubtle: '#F1F3F5',
 
-  error: '#ba1a1a',
-  onError: '#ffffff',
-  errorContainer: '#ffdad6',
-  onErrorContainer: '#93000a',
+  // Feedback & Status
+  success: '#2EC4B6',
+  warning: '#FF9F1C',
+  error: '#E63946',
+  onError: '#FFFFFF',
+  errorContainer: '#FFE5E7',
+  onErrorContainer: '#9E1B26',
 
-  outline: '#717975',
-  outlineVariant: '#c0c8c3',
+  // Borders & Text Hierarchy
+  outline: '#6C757D',
+  outlineVariant: '#E2E8F0',
+  text: '#1A1D20',
+  textMuted: '#6C757D',
+  textDim: '#ADB5BD',
+  border: 'rgba(0, 0, 0, 0.08)',
   
-  shadowColor: 'rgba(58, 103, 88, 0.08)',
-  accentGold: '#FFB020',
+  // Shadows
+  shadowColor: 'rgba(255, 107, 107, 0.12)',
 };
+
 export type ColorsType = typeof COLORS;
+

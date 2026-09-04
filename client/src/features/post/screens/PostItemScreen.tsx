@@ -35,6 +35,7 @@ import {
 } from '../../../utils/pricing';
 import { VIETNAM_LOCATIONS, getWardsByDistrictId } from '../../../utils/locations';
 import { generateAIAssistance } from '../../../services/aiService';
+import { uploadImageToCloud } from '../../../services/uploadService';
 import { ScalePressable } from '../../../components/common/ScalePressable';
 import { PulseBadge } from '../../../components/common/PulseBadge';
 
@@ -212,7 +213,14 @@ export const PostItemScreen = () => {
     const districtObj = VIETNAM_LOCATIONS.find(d => d.id === selectedDistrictId);
     const wardObj = districtObj?.wards.find(w => w.id === selectedWardId);
     const fullLocationName = `${wardObj?.name || 'Phường Thạch Thang'}, ${districtObj?.name || 'Quận Hải Châu'}, ${districtObj?.city || 'Đà Nẵng'}`;
-    const finalImage = imageUri || DEFAULT_IMAGES.PRODUCT_FALLBACK;
+    let finalImage = DEFAULT_IMAGES.PRODUCT_FALLBACK;
+    if (imageUri) {
+      try {
+        finalImage = await uploadImageToCloud(imageUri, 'kindr/products');
+      } catch {
+        finalImage = imageUri;
+      }
+    }
 
     try {
       // 1. Call real API

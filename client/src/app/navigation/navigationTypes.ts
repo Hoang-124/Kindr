@@ -24,6 +24,8 @@ export type AppStackParamList = {
   ChatDetail: { chatId: string };
   MyPosts: undefined;
   EditPost: { postId: string };
+  EditProfile: undefined;
+  Settings: undefined;
   Wallet: undefined;
   TopUp: undefined;
   Withdraw: undefined;

@@ -3,10 +3,26 @@ import { TextStyle } from 'react-native';
 
 export const TYPOGRAPHY: Record<string, TextStyle> = {
   displayLg: {
-    fontSize: 32,
+    fontSize: 28,
     fontWeight: '700',
-    lineHeight: 40,
-    letterSpacing: -0.64,
+    lineHeight: 34,
+    letterSpacing: -0.5,
+  },
+  titleLg: {
+    fontSize: 22,
+    fontWeight: '700',
+    lineHeight: 28,
+    letterSpacing: -0.3,
+  },
+  titleMd: {
+    fontSize: 18,
+    fontWeight: '600',
+    lineHeight: 24,
+  },
+  titleSm: {
+    fontSize: 16,
+    fontWeight: '600',
+    lineHeight: 22,
   },
   headlineLg: {
     fontSize: 24,
@@ -24,30 +40,40 @@ export const TYPOGRAPHY: Record<string, TextStyle> = {
     lineHeight: 24,
   },
   bodyLg: {
-    fontSize: 18,
-    fontWeight: '400',
-    lineHeight: 28,
-  },
-  bodyMd: {
     fontSize: 16,
     fontWeight: '400',
     lineHeight: 24,
   },
-  bodySm: {
+  bodyMd: {
     fontSize: 14,
     fontWeight: '400',
     lineHeight: 20,
+  },
+  bodySm: {
+    fontSize: 13,
+    fontWeight: '400',
+    lineHeight: 18,
   },
   labelLg: {
     fontSize: 14,
     fontWeight: '600',
     lineHeight: 20,
-    letterSpacing: 0.14,
+    letterSpacing: 0.1,
+  },
+  labelMd: {
+    fontSize: 12,
+    fontWeight: '600',
+    lineHeight: 16,
   },
   labelSm: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '500',
-    lineHeight: 16,
+    lineHeight: 15,
+  },
+  caption: {
+    fontSize: 11,
+    fontWeight: '500',
+    lineHeight: 14,
   },
 };
 export type TypographyType = typeof TYPOGRAPHY;

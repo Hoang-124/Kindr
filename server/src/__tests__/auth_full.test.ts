@@ -243,4 +243,118 @@ describe('🔐 Auth API Full Test Suite', () => {
       expect(res.body.message).toMatch(/đăng xuất|thành công/i);
     });
   });
+
+  describe('6. Update Profile (PUT /api/auth/profile)', () => {
+    let testToken: string;
+
+    beforeAll(async () => {
+      const res = await request(app)
+        .post('/api/auth/login')
+        .send({ phone: validPhone, password: validPassword });
+      testToken = res.body.accessToken;
+    });
+
+    it('Cập nhật tên, bio, địa chỉ thành công', async () => {
+      const res = await request(app)
+        .put('/api/auth/profile')
+        .set('Authorization', `Bearer ${testToken}`)
+        .send({
+          name: 'Mẹ Bỉm Đà Nẵng Mới',
+          bio: 'Chuyên chia sẻ đồ chơi gỗ Montessori',
+          districtId: 'dn_haichau',
+          districtName: 'Quận Hải Châu',
+          addressDetail: '123 Bạch Đằng',
+        });
+
+      expect(res.status).toBe(200);
+      expect(res.body.user.name).toBe('Mẹ Bỉm Đà Nẵng Mới');
+      expect(res.body.user.bio).toBe('Chuyên chia sẻ đồ chơi gỗ Montessori');
+      expect(res.body.user.location.districtName).toBe('Quận Hải Châu');
+    });
+
+    it('Lỗi 400 khi tên quá ngắn (< 2 ký tự)', async () => {
+      const res = await request(app)
+        .put('/api/auth/profile')
+        .set('Authorization', `Bearer ${testToken}`)
+        .send({ name: 'A' });
+
+      expect(res.status).toBe(400);
+    });
+  });
+
+  describe('7. Change Password (PUT /api/auth/change-password)', () => {
+    let testToken: string;
+
+    beforeAll(async () => {
+      const res = await request(app)
+        .post('/api/auth/login')
+        .send({ phone: validPhone, password: validPassword });
+      testToken = res.body.accessToken;
+    });
+
+    it('Lỗi 400 khi sai mật khẩu hiện tại', async () => {
+      const res = await request(app)
+        .put('/api/auth/change-password')
+        .set('Authorization', `Bearer ${testToken}`)
+        .send({ oldPassword: 'wrongpassword', newPassword: 'newpassword123' });
+
+      expect(res.status).toBe(400);
+      expect(res.body.error).toMatch(/không đúng/i);
+    });
+
+    it('Đổi mật khẩu thành công và đăng nhập được bằng mật khẩu mới', async () => {
+      const res = await request(app)
+        .put('/api/auth/change-password')
+        .set('Authorization', `Bearer ${testToken}`)
+        .send({ oldPassword: validPassword, newPassword: 'brandNewPassword123' });
+
+      expect(res.status).toBe(200);
+      expect(res.body.message).toMatch(/thành công/i);
+
+      // Verify login with new password works
+      const loginRes = await request(app)
+        .post('/api/auth/login')
+        .send({ phone: validPhone, password: 'brandNewPassword123' });
+
+      expect(loginRes.status).toBe(200);
+    });
+  });
+
+  describe('8. Admin Access & Role Management', () => {
+    let adminToken: string;
+    let targetUserId: string;
+
+    beforeAll(async () => {
+      // Create or login user with admin email
+      const res = await request(app)
+        .post('/api/auth/google')
+        .send({
+          email: 'admin@kindr.vn',
+          name: 'Super Admin Kindr',
+          googleId: 'google_admin_test_123',
+        });
+      adminToken = res.body.accessToken;
+
+      const target = await User.findOne({ phone: validPhone });
+      targetUserId = target?._id.toString() || '';
+    });
+
+    it('Tài khoản email admin tự động nhận quyền admin và truy cập được admin dashboard', async () => {
+      const adminRes = await request(app)
+        .get('/api/admin/dashboard')
+        .set('Authorization', `Bearer ${adminToken}`);
+
+      expect(adminRes.status).toBe(200);
+    });
+
+    it('Chỉ Admin mới có thể phân quyền admin cho người dùng khác (PUT /api/admin/users/:id/role)', async () => {
+      const res = await request(app)
+        .put(`/api/admin/users/${targetUserId}/role`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ role: 'admin' });
+
+      expect(res.status).toBe(200);
+      expect(res.body.user.role).toBe('admin');
+    });
+  });
 });

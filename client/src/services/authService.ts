@@ -46,6 +46,24 @@ export async function getMe(): Promise<User> {
   return data.user;
 }
 
+export async function updateProfile(payload: {
+  name?: string;
+  phone?: string;
+  avatar?: string;
+  bio?: string;
+  districtId?: string;
+  districtName?: string;
+  addressDetail?: string;
+}): Promise<{ message: string; user: User }> {
+  const { data } = await api.put<{ message: string; user: User }>('/auth/profile', payload);
+  return data;
+}
+
+export async function changePassword(payload: { oldPassword?: string; newPassword: string }): Promise<{ message: string }> {
+  const { data } = await api.put<{ message: string }>('/auth/change-password', payload);
+  return data;
+}
+
 export async function logout(): Promise<void> {
   try {
     const refreshToken = await getRefreshToken();

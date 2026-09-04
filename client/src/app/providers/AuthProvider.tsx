@@ -10,6 +10,8 @@ import {
   loginGoogleAsync,
   registerAsync,
   logoutAsync,
+  updateProfileAsync,
+  changePasswordAsync,
 } from '../../features/auth/store/authSlice';
 import { User } from '../../types/user';
 import { socketService } from '../../services/socketService';
@@ -24,6 +26,8 @@ interface AuthContextType {
   loginWithGoogle: (googleData: { credential?: string; idToken?: string; email?: string; name?: string; avatar?: string; googleId?: string }) => Promise<any>;
   register: (name: string, phone: string, email: string, districtId: string, addressDetail: string) => void;
   registerWithCredentials: (payload: { name: string; phone: string; password: string; email?: string; districtId?: string; districtName?: string; addressDetail?: string }) => Promise<any>;
+  updateProfile: (payload: { name?: string; phone?: string; avatar?: string; bio?: string; districtId?: string; districtName?: string; addressDetail?: string }) => Promise<any>;
+  changePassword: (payload: { oldPassword?: string; newPassword: string }) => Promise<any>;
   logout: () => Promise<void>;
   rewardCivilizationPoints: (userId: string, points: number, reason: string) => void;
 }
@@ -103,6 +107,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     );
   };
 
+  const updateProfile = async (payload: {
+    name?: string;
+    phone?: string;
+    avatar?: string;
+    bio?: string;
+    districtId?: string;
+    districtName?: string;
+    addressDetail?: string;
+  }) => {
+    return dispatch(updateProfileAsync(payload)).unwrap();
+  };
+
+  const changePassword = async (payload: { oldPassword?: string; newPassword: string }) => {
+    return dispatch(changePasswordAsync(payload)).unwrap();
+  };
+
+
   const rewardCivilizationPoints = (userId: string, points: number, reason: string) => {
     dispatch(adjustCivilizationPoints({ userId, points, reason }));
   };
@@ -119,6 +140,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         loginWithGoogle,
         register,
         registerWithCredentials,
+        updateProfile,
+        changePassword,
         logout,
         rewardCivilizationPoints,
       }}

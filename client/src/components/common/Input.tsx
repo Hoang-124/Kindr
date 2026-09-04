@@ -105,15 +105,15 @@ const styles = StyleSheet.create({
     height: 52,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.surfaceContainer,
+    backgroundColor: COLORS.surface,
     borderRadius: RADIUS.default,
     paddingHorizontal: SPACING.md,
-    borderWidth: 1.5,
-    borderColor: 'transparent',
+    borderWidth: 1.2,
+    borderColor: 'rgba(0, 0, 0, 0.08)',
   },
   compactInputContainer: {
-    height: 38,
-    paddingHorizontal: 8,
+    height: 40,
+    paddingHorizontal: 10,
     borderRadius: RADIUS.sm,
     overflow: 'hidden',
   },
@@ -125,7 +125,7 @@ const styles = StyleSheet.create({
     minWidth: 0,
   },
   compactInput: {
-    fontSize: 12,
+    fontSize: 13,
     paddingVertical: 0,
     minWidth: 0,
   },
@@ -134,23 +134,25 @@ const styles = StyleSheet.create({
     flexShrink: 0,
   },
   compactIconContainer: {
-    marginRight: 4,
+    marginRight: 6,
     flexShrink: 0,
   },
   focusedBorder: {
-    borderColor: COLORS.primaryContainer,
-    backgroundColor: COLORS.surfaceContainerLowest,
+    borderColor: COLORS.primary,
+    backgroundColor: COLORS.surface,
   },
   errorBorder: {
     borderColor: COLORS.error,
+    backgroundColor: '#FFF8F8',
   },
   toggleContainer: {
     padding: SPACING.xs,
   },
   errorText: {
     color: COLORS.error,
-    fontSize: 11,
-    marginTop: 2,
+    fontSize: 12,
+    fontWeight: '500',
+    marginTop: 4,
   },
 });
 export default Input;

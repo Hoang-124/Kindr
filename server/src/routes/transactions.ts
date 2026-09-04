@@ -107,7 +107,8 @@ router.get('/:id', validateObjectId('id'), requireAuth, async (req: AuthRequest,
 router.post('/:id/handover', validateObjectId('id'), requireAuth, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const id = req.params.id as string;
-    const result = await escrowService.confirmHandover(id, req.userId!);
+    const { handoverCode } = req.body || {};
+    const result = await escrowService.confirmHandover(id, req.userId!, handoverCode);
     if (!result.success) {
       res.status(400).json({ error: result.error });
       return;

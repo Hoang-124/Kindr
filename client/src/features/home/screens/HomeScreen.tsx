@@ -23,6 +23,8 @@ import EmptyState from '../../../components/common/EmptyState';
 import { 
   Search, 
   PlusCircle, 
+  Plus,
+  Sparkles,
   MapPin, 
   ToyBrick, 
   BookOpen, 
@@ -40,14 +42,14 @@ import { FadeInItem } from '../../../components/common/FadeInItem';
 type NavigationProp = NativeStackNavigationProp<AppStackParamList>;
 type TabNavigationProp = NativeStackNavigationProp<MainTabParamList>;
 
-// Categories metadata
+// Categories metadata with harmonious Kindr palette
 const categoriesMetadata = [
-  { id: 'do_choi', name: 'Đồ chơi', icon: ToyBrick, bg: '#FDE2E4', text: '#5E3032' },
-  { id: 'sach_truyen', name: 'Sách truyện', icon: BookOpen, bg: '#E2ECE9', text: '#2A4D43' },
-  { id: 'do_hoc_tap', name: 'Đồ học tập', icon: GraduationCap, bg: '#DFE7FD', text: '#24345F' },
-  { id: 'quan_ao', name: 'Quần áo bé', icon: Shirt, bg: '#F5E6D6', text: '#684521' },
-  { id: 'xe_noi', name: 'Xe & Nôi cũi', icon: Baby, bg: '#E2F0CB', text: '#4B5C35' },
-  { id: 'tu_thien', name: 'Trạm Tặng Đồ', icon: Gift, bg: '#FFE5EC', text: '#7B2C3F' },
+  { id: 'do_choi', name: 'Đồ chơi', icon: ToyBrick, bg: '#FFE8E8', text: '#FF6B6B' },
+  { id: 'sach_truyen', name: 'Sách truyện', icon: BookOpen, bg: '#E0F7F5', text: '#26A69A' },
+  { id: 'do_hoc_tap', name: 'Đồ học tập', icon: GraduationCap, bg: '#E8EDFB', text: '#4361EE' },
+  { id: 'quan_ao', name: 'Quần áo bé', icon: Shirt, bg: '#FFF3D6', text: '#D97706' },
+  { id: 'xe_noi', name: 'Xe & Nôi cũi', icon: Baby, bg: '#E5F8ED', text: '#2EC4B6' },
+  { id: 'tu_thien', name: 'Trạm Tặng Đồ', icon: Gift, bg: '#FFEBF0', text: '#E63946' },
 ];
 
 export const HomeScreen = () => {
@@ -97,29 +99,44 @@ export const HomeScreen = () => {
         <Text style={styles.searchText}>Mẹ muốn tìm món gì cho bé?</Text>
       </ScalePressable>
 
-      {/* Declutter Banner with Mascot animation */}
-      <Card style={styles.banner} contentStyle={styles.bannerContent}>
-        <View style={styles.bannerTextContainer}>
-          <Text style={styles.bannerText}>
+      {/* Declutter Banner with Synchronized Mascot Card */}
+      <View style={styles.bannerCard}>
+        <View style={styles.bannerLeft}>
+          <View style={styles.bannerTag}>
+            <Sparkles size={11} color={COLORS.primary} />
+            <Text style={styles.bannerTagText}>GÓC CHIA SẺ MẸ BỈM</Text>
+          </View>
+
+          <Text style={styles.bannerTitle}>
             Hôm nay dọn nhà cho bé đỡ chật nhé mẹ ơi!
           </Text>
+
+          <Text style={styles.bannerSubtitle}>
+            Đổi đồ chơi cũ lấy Xu, thêm niềm vui cho con
+          </Text>
+
           <ScalePressable 
             style={styles.bannerBtn}
-            scaleTo={0.94}
+            scaleTo={0.95}
             onPress={() => tabNavigation.navigate('Post')}
           >
-            <PlusCircle size={16} color={COLORS.onPrimary} />
+            <Plus size={15} color="#FFFFFF" strokeWidth={2.6} />
             <Text style={styles.bannerBtnText}>Đăng đồ ngay</Text>
           </ScalePressable>
         </View>
-        <PulseBadge scaleMin={0.96} scaleMax={1.06} duration={2400}>
-          <Image 
-            source={{ uri: DEFAULT_IMAGES.MASCOT }} 
-            style={styles.bannerImage} 
-            resizeMode="contain"
-          />
-        </PulseBadge>
-      </Card>
+
+        <View style={styles.bannerRight}>
+          <PulseBadge scaleMin={0.97} scaleMax={1.04} duration={2400}>
+            <View style={styles.mascotBadgeWrapper}>
+              <Image 
+                source={{ uri: DEFAULT_IMAGES.MASCOT }} 
+                style={styles.bannerMascot} 
+                resizeMode="cover"
+              />
+            </View>
+          </PulseBadge>
+        </View>
+      </View>
 
       {/* Grid Categories (Bento style with Tactile Physics) */}
       <View style={styles.categoriesSection}>
@@ -128,7 +145,7 @@ export const HomeScreen = () => {
           {categoriesMetadata.map((cat, idx) => {
             const Icon = cat.icon;
             return (
-              <FadeInItem key={cat.id} index={idx} delay={40} style={{ width: '31%' }}>
+              <FadeInItem key={cat.id} index={idx} delay={40} style={styles.categoryCardWrapper}>
                 <ScalePressable
                   style={styles.categoryCard}
                   scaleTo={0.92}
@@ -204,7 +221,7 @@ export const HomeScreen = () => {
               <View style={styles.imageContainer}>
                 <Image source={{ uri: item.image }} style={styles.itemImage} />
                 <View style={styles.distanceBadge}>
-                  <MapPin size={10} color={COLORS.outline} />
+                  <MapPin size={10} color={COLORS.primary} />
                   <Text style={styles.distanceText}>{item.distance || '1 km'} • {item.locationName.split(',')[0]}</Text>
                 </View>
               </View>
@@ -217,7 +234,7 @@ export const HomeScreen = () => {
                     <Text style={styles.sellerName} numberOfLines={1}>{item.sellerName}</Text>
                   </View>
                   <View style={styles.priceBadge}>
-                    <Text style={styles.priceTextSymbol}>X</Text>
+                    <Text style={styles.priceCoin}>🪙</Text>
                     <Text style={styles.priceText}>{item.price} Xu</Text>
                   </View>
                 </View>
@@ -240,12 +257,15 @@ const styles = StyleSheet.create({
   },
   searchBar: {
     height: 48,
-    backgroundColor: COLORS.surfaceContainer,
+    backgroundColor: COLORS.surface,
     borderRadius: RADIUS.full,
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: SPACING.md,
     marginBottom: SPACING.lg,
+    borderWidth: 1,
+    borderColor: 'rgba(0, 0, 0, 0.07)',
+    ...SHADOWS.soft,
   },
   searchIcon: {
     marginRight: SPACING.sm,
@@ -255,47 +275,90 @@ const styles = StyleSheet.create({
     color: COLORS.outline,
     fontWeight: '500',
   },
-  banner: {
-    backgroundColor: COLORS.primaryContainer,
-    marginBottom: SPACING.lg,
-    borderWidth: 0,
-    elevation: 0,
-  },
-  bannerContent: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+  bannerCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 107, 107, 0.18)',
     padding: SPACING.md,
+    marginBottom: SPACING.lg,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    ...SHADOWS.card,
   },
-  bannerTextContainer: {
+  bannerLeft: {
     flex: 1,
     paddingRight: SPACING.sm,
   },
-  bannerText: {
-    ...TYPOGRAPHY.labelLg,
-    color: COLORS.onPrimaryContainer,
-    lineHeight: 18,
-    marginBottom: SPACING.md,
+  bannerTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    alignSelf: 'flex-start',
+    backgroundColor: '#FFE8E8',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: RADIUS.full,
+    marginBottom: 6,
+  },
+  bannerTagText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: COLORS.primary,
+    letterSpacing: 0.3,
+  },
+  bannerTitle: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: COLORS.text,
+    lineHeight: 21,
+    letterSpacing: -0.2,
+  },
+  bannerSubtitle: {
+    fontSize: 11.5,
+    color: COLORS.textMuted,
+    lineHeight: 16,
+    marginTop: 2,
+    marginBottom: 12,
   },
   bannerBtn: {
     alignSelf: 'flex-start',
     backgroundColor: COLORS.primary,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: SPACING.xs,
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.xs + 2,
+    gap: 5,
+    paddingHorizontal: 16,
+    height: 38,
     borderRadius: RADIUS.full,
-    ...SHADOWS.soft,
+    ...SHADOWS.btn,
   },
   bannerBtnText: {
-    color: COLORS.onPrimary,
-    fontSize: 12,
+    color: '#FFFFFF',
+    fontSize: 12.5,
     fontWeight: '700',
   },
-  bannerImage: {
-    width: 90,
-    height: 90,
+  bannerRight: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingLeft: 4,
+  },
+  mascotBadgeWrapper: {
+    width: 82,
+    height: 82,
+    borderRadius: 41,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 2,
+    borderColor: '#FFE4E6',
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+    ...SHADOWS.soft,
+  },
+  bannerMascot: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
   },
   categoriesSection: {
     marginBottom: SPACING.lg,
@@ -312,21 +375,25 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     rowGap: SPACING.md,
   },
+  categoryCardWrapper: {
+    width: '31%',
+  },
   categoryCard: {
-    width: '30%',
+    width: '100%',
     alignItems: 'center',
+    paddingVertical: 4,
   },
   categoryIconCircle: {
-    width: 54,
-    height: 54,
-    borderRadius: 27,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: SPACING.xs,
     ...SHADOWS.soft,
   },
   categoryLabel: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '600',
     color: COLORS.onSurface,
     textAlign: 'center',
@@ -342,12 +409,12 @@ const styles = StyleSheet.create({
   },
   itemCard: {
     width: '100%',
-    backgroundColor: COLORS.surfaceContainerLowest,
+    backgroundColor: COLORS.surface,
     borderRadius: RADIUS.default,
     borderWidth: 1,
-    borderColor: COLORS.surfaceVariant,
+    borderColor: 'rgba(0, 0, 0, 0.06)',
     overflow: 'hidden',
-    ...SHADOWS.soft,
+    ...SHADOWS.card,
   },
   imageContainer: {
     aspectRatio: 1,
@@ -361,18 +428,20 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: SPACING.xs,
     left: SPACING.xs,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    paddingHorizontal: SPACING.xs + 2,
-    paddingVertical: 2,
+    paddingHorizontal: 6,
+    paddingVertical: 3,
     borderRadius: 8,
+    borderWidth: 0.5,
+    borderColor: 'rgba(0, 0, 0, 0.08)',
   },
   distanceText: {
-    fontSize: 9,
+    fontSize: 11,
     fontWeight: '600',
-    color: COLORS.onSurfaceVariant,
+    color: COLORS.text,
   },
   itemDetails: {
     padding: SPACING.sm,
@@ -380,11 +449,12 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
   itemName: {
-    ...TYPOGRAPHY.labelSm,
+    fontSize: 13,
+    fontWeight: '600',
     color: COLORS.onSurface,
-    lineHeight: 16,
-    marginBottom: SPACING.xs,
-    minHeight: 32,
+    lineHeight: 18,
+    marginBottom: 6,
+    minHeight: 36,
   },
   priceRow: {
     flexDirection: 'row',
@@ -395,48 +465,52 @@ const styles = StyleSheet.create({
   sellerRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: 5,
     flex: 1,
     marginRight: SPACING.xs,
   },
   sellerAvatar: {
-    width: 18,
-    height: 18,
-    borderRadius: 9,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
     backgroundColor: COLORS.surfaceDim,
   },
   sellerName: {
-    fontSize: 9,
-    color: COLORS.outline,
+    fontSize: 11,
+    color: COLORS.textMuted,
     fontWeight: '500',
     flex: 1,
   },
   priceBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 2,
+    gap: 3,
+    backgroundColor: '#FFF8E1',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: RADIUS.full,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 209, 102, 0.4)',
   },
-  priceTextSymbol: {
+  priceCoin: {
     fontSize: 11,
-    fontWeight: '800',
-    color: COLORS.tertiary,
   },
   priceText: {
     fontSize: 11,
-    fontWeight: '700',
-    color: COLORS.tertiary,
+    fontWeight: '800',
+    color: '#8C6500',
   },
   careHandbookCard: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#FFFDF9',
-    borderColor: 'rgba(58, 103, 88, 0.2)',
-    borderWidth: 1.5,
+    backgroundColor: COLORS.surface,
+    borderColor: 'rgba(255, 107, 107, 0.2)',
+    borderWidth: 1.2,
     borderRadius: RADIUS.lg,
     padding: SPACING.md,
     marginBottom: SPACING.lg,
-    ...SHADOWS.soft,
+    ...SHADOWS.card,
   },
   careHandbookLeft: {
     flexDirection: 'row',
@@ -449,7 +523,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: COLORS.primaryContainer,
+    backgroundColor: '#FFE8E8',
     alignItems: 'center',
     justifyContent: 'center',
   },

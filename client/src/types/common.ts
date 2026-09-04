@@ -31,6 +31,7 @@ export interface Product {
   category: CategoryType;
   ageRange?: string; // 0-6m, 6-12m, 1-3y, 3+
   distance?: string; // e.g., "0.8 km"
+  coordinates?: { latitude: number; longitude: number };
   locationName: string; // VD: "Phường Thạch Thang, Q. Hải Châu, Đà Nẵng"
   wardId?: string;
   districtId?: string;
@@ -83,6 +84,7 @@ export interface Transaction {
   createdAt: string;
   finalizedAt?: string;
   qrCodePayload?: string;
+  handoverCode?: string;
   buyerRated?: boolean;
   sellerRated?: boolean;
 }

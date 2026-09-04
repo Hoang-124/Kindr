@@ -5,12 +5,14 @@
 import { Router, Response } from 'express';
 import { z } from 'zod';
 import { User } from '../models/User';
+import { TopupOrder } from '../models/TopupOrder';
+import { Notification } from '../models/Notification';
+import { emitToUser } from '../socket';
 import { WithdrawRequest } from '../models/WithdrawRequest';
 import { requireAuth, AuthRequest } from '../middleware/auth';
+import { ENV } from '../config/env';
 
 const router = Router();
-
-// ---- Validation Schemas ----
 
 const TopupSchema = z.object({
   xuAmount: z.number().min(1, 'Số Xu nạp tối thiểu là 1 Xu').max(500, 'Số Xu nạp tối đa là 500 Xu'),
@@ -68,25 +70,131 @@ router.post('/topup', requireAuth, async (req: AuthRequest, res: Response): Prom
       return;
     }
 
-    // In demo/MVP, we credit directly and generate dynamic VietQR transfer link
+    const vndAmount = xuAmount * 10000;
+    const orderCode = `TOPUP_${Date.now()}_${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+    const memo = `KINDR NAP ${xuAmount}XU ${orderCode}`;
+    const vietqrUrl = `https://img.vietqr.io/image/MB-0905123456-compact.png?amount=${vndAmount}&addInfo=${encodeURIComponent(memo)}`;
+
+    // Create cloud TopupOrder in MongoDB
+    const order = await TopupOrder.create({
+      orderCode,
+      userId: user._id,
+      userName: user.name,
+      userPhone: user.phone,
+      xuAmount,
+      vndAmount,
+      memo,
+      vietqrUrl,
+      status: 'completed',
+      completedAt: new Date(),
+    });
+
     user.xuBalance += xuAmount;
     await user.save();
-
-    const vndAmount = xuAmount * 10000;
-    const memo = `KINDR ${user.phone} NAP ${xuAmount}XU`;
-    const vietqrUrl = `https://img.vietqr.io/image/MB-0905123456-compact.png?amount=${vndAmount}&addInfo=${encodeURIComponent(
-      memo
-    )}`;
 
     res.json({
       message: `Nạp thành công ${xuAmount} Xu vào ví!`,
       newBalance: user.xuBalance,
       vietqrUrl,
       vndAmount,
+      order,
     });
   } catch (error) {
     console.error('Topup error:', error);
     res.status(500).json({ error: 'Lỗi hệ thống khi nạp Xu.' });
+  }
+});
+
+/**
+ * POST /api/wallet/webhook
+ * Secure webhook receiver for banking automation (SePay / Casso / VietQR IPN).
+ * Verifies secret header/key and credits Xu atomically upon real incoming bank transfer.
+ */
+router.post('/webhook', async (req, res): Promise<void> => {
+  try {
+    const webhookSecret = req.headers['x-webhook-secret'] || req.query.secret;
+    if (webhookSecret !== ENV.WEBHOOK_SECRET) {
+      res.status(401).json({ error: 'Webhook secret không hợp lệ.' });
+      return;
+    }
+
+    const { orderCode, content, transactionRef } = req.body || {};
+
+    let order = null;
+    if (orderCode) {
+      order = await TopupOrder.findOne({ orderCode, status: 'pending' });
+    } else if (content) {
+      const match = content.match(/TOPUP_\d+_[A-Z0-9]+/i);
+      if (match) {
+        order = await TopupOrder.findOne({ orderCode: match[0], status: 'pending' });
+      }
+    }
+
+    if (!order) {
+      res.status(404).json({ error: 'Không tìm thấy đơn nạp Xu tương ứng hoặc đơn đã được xử lý.' });
+      return;
+    }
+
+    // Atomic CAS: transition from 'pending' to 'completed'
+    const completedOrder = await TopupOrder.findOneAndUpdate(
+      { _id: order._id, status: 'pending' },
+      {
+        $set: {
+          status: 'completed',
+          transactionRef: transactionRef || 'BANK_' + Date.now(),
+          completedAt: new Date(),
+        },
+      },
+      { new: true }
+    );
+
+    if (!completedOrder) {
+      res.status(400).json({ error: 'Đơn nạp Xu đã được xử lý trước đó.' });
+      return;
+    }
+
+    // Credit Xu to user
+    const updatedUser = await User.findByIdAndUpdate(
+      completedOrder.userId,
+      { $inc: { xuBalance: completedOrder.xuAmount } },
+      { new: true }
+    );
+
+    // Push notification to user
+    const notif = await Notification.create({
+      userId: completedOrder.userId,
+      type: 'xu_released',
+      title: 'Biến động số dư: Nạp Xu thành công! 🟡',
+      body: `Hệ thống đã nhận được chuyển khoản. Đã cộng ${completedOrder.xuAmount} Xu vào ví của bạn. Số dư mới: ${updatedUser?.xuBalance} Xu.`,
+    });
+    emitToUser(completedOrder.userId.toString(), 'notification_new', notif);
+
+    res.json({
+      success: true,
+      message: `Đã xử lý nạp ${completedOrder.xuAmount} Xu thành công!`,
+      order: completedOrder,
+    });
+  } catch (error) {
+    console.error('Wallet webhook error:', error);
+    res.status(500).json({ error: 'Lỗi hệ thống khi xử lý webhook ngân hàng.' });
+  }
+});
+
+/**
+ * GET /api/wallet/orders
+ * Get current user's top-up orders from Cloud DB.
+ */
+router.get('/orders', requireAuth, async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const orders = await TopupOrder.find({ userId: req.userId })
+      .sort({ createdAt: -1 })
+      .limit(20)
+      .lean();
+
+    res.json({ orders });
+  } catch (error) {
+    console.error('Get topup orders error:', error);
+    res.status(500).json({ error: 'Lỗi hệ thống khi lấy danh sách đơn nạp.' });
   }
 });
 

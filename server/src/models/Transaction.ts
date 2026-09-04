@@ -30,6 +30,7 @@ export interface ITransaction extends Document {
   disputeEvidenceImages: string[];
   disputeStatus?: 'open' | 'resolved_buyer' | 'resolved_seller';
   qrCodePayload?: string;
+  handoverCode?: string;
   buyerRated: boolean;
   sellerRated: boolean;
   finalizedAt?: Date;
@@ -64,6 +65,7 @@ const TransactionSchema = new Schema<ITransaction>({
   disputeEvidenceImages: { type: [String], default: [] },
   disputeStatus: { type: String, enum: ['open', 'resolved_buyer', 'resolved_seller'] },
   qrCodePayload: { type: String },
+  handoverCode: { type: String, index: true },
   buyerRated: { type: Boolean, default: false },
   sellerRated: { type: Boolean, default: false },
   finalizedAt: { type: Date },

@@ -325,10 +325,20 @@ export const TransactionDetailScreen = () => {
       >
         <View style={styles.qrContainer}>
           <View style={styles.qrBox}>
-            <QrCode size={130} color={COLORS.primary} />
+            <Image
+              source={{
+                uri: `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(
+                  tx.qrCodePayload || `KINDR|TX:${tx.id}|${tx.buyerId}|${tx.sellerId}`
+                )}`,
+              }}
+              style={{ width: 170, height: 170, borderRadius: 8 }}
+              resizeMode="contain"
+            />
           </View>
-          <Text style={styles.qrCodeText}>Mã xác thực P2P: <Text style={styles.qrCodeHighlight}>KND-{tx.id.slice(-6).toUpperCase()}</Text></Text>
-          <Text style={styles.qrSubText}>Người mua nhận đồ xong sẽ bắt đầu 6 tiếng kiểm định tại nhà.</Text>
+          <Text style={styles.qrCodeText}>
+            Mã PIN xác thực: <Text style={styles.qrCodeHighlight}>{tx.handoverCode || `KND-${tx.id.slice(-6).toUpperCase()}`}</Text>
+          </Text>
+          <Text style={styles.qrSubText}>Người mua nhận đồ trực tiếp có thể quét mã QR này hoặc nhập mã PIN để kích hoạt 6 giờ bảo chứng tại nhà.</Text>
         </View>
       </ModalConfirm>
 

@@ -14,6 +14,7 @@ export interface IUser extends Document {
   googleId?: string;
   passwordHash?: string;
   avatar: string;
+  bio?: string;
   location: {
     districtId: string;
     districtName: string;
@@ -43,11 +44,12 @@ const CivilizationLogSchema = new Schema<ICivilizationLog>({
 
 const UserSchema = new Schema<IUser>({
   name: { type: String, required: true, trim: true },
-  phone: { type: String, sparse: true, index: true, default: '' },
+  phone: { type: String, sparse: true, index: true },
   email: { type: String, sparse: true, trim: true, lowercase: true, index: true },
   googleId: { type: String, sparse: true, index: true },
   passwordHash: { type: String, default: '' },
   avatar: { type: String, default: '' },
+  bio: { type: String, default: '' },
   location: {
     districtId: { type: String, default: '' },
     districtName: { type: String, default: '' },

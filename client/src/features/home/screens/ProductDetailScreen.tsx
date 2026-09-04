@@ -284,19 +284,20 @@ export const ProductDetailScreen = () => {
 
       {/* Bottom Sticky Action Buttons */}
       <View style={styles.bottomBar}>
-        <Button
-          title={isCharity ? "Nhận Quà 0 Xu ❤️" : `Đổi Đồ Ngay (${product.price} Xu)`}
-          onPress={handleRequestItem}
-          style={styles.requestBtn}
-        />
         <ScalePressable 
           style={styles.chatBtn}
-          scaleTo={0.92}
+          scaleTo={0.94}
           onPress={handleOpenChat}
         >
-          <MessageSquare size={20} color={COLORS.primary} />
+          <MessageSquare size={18} color={COLORS.primary} />
           <Text style={styles.chatBtnText}>Nhắn tin</Text>
         </ScalePressable>
+        <View style={styles.requestBtnWrapper}>
+          <Button
+            title={isCharity ? "Nhận Quà 0 Xu ❤️" : `Đổi Đồ Ngay (${product.price} Xu)`}
+            onPress={handleRequestItem}
+          />
+        </View>
       </View>
 
       {/* Double Escrow Confirmation Modal */}
@@ -540,23 +541,25 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     ...SHADOWS.card,
   },
-  requestBtn: {
-    flex: 2,
-  },
   chatBtn: {
-    flex: 1,
-    height: 48,
+    width: 108,
+    height: 52,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: COLORS.primaryContainer,
-    borderRadius: RADIUS.md,
+    borderRadius: RADIUS.full,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 107, 107, 0.25)',
     gap: 6,
   },
   chatBtnText: {
     fontSize: 14,
     fontWeight: '700',
-    color: COLORS.onPrimaryContainer,
+    color: COLORS.primary,
+  },
+  requestBtnWrapper: {
+    flex: 1,
   },
 });
 

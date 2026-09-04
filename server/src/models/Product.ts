@@ -9,6 +9,7 @@ export interface IProduct extends Document {
   category: string;
   ageRange?: string;
   distance?: string;
+  coordinates?: { latitude: number; longitude: number };
   locationName: string;
   wardId?: string;
   districtId?: string;
@@ -34,6 +35,10 @@ const ProductSchema = new Schema<IProduct>({
   category: { type: String, required: true, index: true },
   ageRange: { type: String },
   distance: { type: String },
+  coordinates: {
+    latitude: { type: Number },
+    longitude: { type: Number },
+  },
   locationName: { type: String, required: true },
   wardId: { type: String },
   districtId: { type: String, index: true },

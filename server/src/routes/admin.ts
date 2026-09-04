@@ -145,6 +145,43 @@ router.put('/users/:id/unlock', async (req: AuthRequest, res: Response): Promise
   }
 });
 
+const UpdateRoleSchema = z.object({
+  role: z.enum(['admin', 'user']),
+});
+
+/**
+ * PUT /api/admin/users/:id/role
+ * Only an Admin can promote or demote user roles
+ */
+router.put('/users/:id/role', async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const parsed = UpdateRoleSchema.safeParse(req.body);
+    if (!parsed.success) {
+      res.status(400).json({ error: 'Vai trò không hợp lệ (admin hoặc user).' });
+      return;
+    }
+
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      res.status(404).json({ error: 'Người dùng không tồn tại.' });
+      return;
+    }
+
+    user.role = parsed.data.role;
+    await user.save();
+
+    res.json({
+      message: parsed.data.role === 'admin'
+        ? `Đã nâng quyền Quản trị viên (Admin) cho ${user.name}.`
+        : `Đã chuyển ${user.name} về vai trò Thành viên (User).`,
+      user: user.toJSON(),
+    });
+  } catch (error) {
+    console.error('Update user role error:', error);
+    res.status(500).json({ error: 'Lỗi hệ thống.' });
+  }
+});
+
 // ---- Products Management ----
 
 /**

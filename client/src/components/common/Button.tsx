@@ -52,6 +52,8 @@ export const Button = ({
 
   const getTextStyle = (): TextStyle => {
     switch (variant) {
+      case 'secondary':
+        return styles.textSecondary;
       case 'outline':
         return styles.textOutline;
       case 'disabled':
@@ -65,13 +67,13 @@ export const Button = ({
     <ScalePressable
       onPress={onPress}
       disabled={isButtonDisabled}
-      scaleTo={0.96}
+      scaleTo={0.97}
       containerStyle={{ width: '100%' }}
       style={[styles.button, getButtonStyle(), style]}
     >
       {loading ? (
         <ActivityIndicator 
-          color={variant === 'outline' ? COLORS.primary : COLORS.onPrimary} 
+          color={variant === 'outline' ? COLORS.primary : variant === 'secondary' ? COLORS.onSecondaryContainer : COLORS.onPrimary} 
           size="small" 
         />
       ) : (
@@ -95,16 +97,18 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.primary,
     shadowColor: COLORS.primary,
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
+    shadowOpacity: 0.22,
     shadowRadius: 8,
-    elevation: 3,
+    elevation: 4,
   },
   secondary: {
     backgroundColor: COLORS.secondaryContainer,
+    borderWidth: 1,
+    borderColor: 'rgba(78, 205, 196, 0.25)',
   },
   outline: {
     backgroundColor: 'transparent',
-    borderWidth: 2,
+    borderWidth: 1.5,
     borderColor: COLORS.primary,
   },
   error: {
@@ -114,11 +118,15 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.outlineVariant,
   },
   text: {
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 15,
+    fontWeight: '700',
+    letterSpacing: 0.1,
   },
   textWhite: {
     color: COLORS.onPrimary,
+  },
+  textSecondary: {
+    color: COLORS.onSecondaryContainer,
   },
   textOutline: {
     color: COLORS.primary,

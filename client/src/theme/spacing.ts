@@ -21,31 +21,32 @@ export const RADIUS = {
 
 export const SHADOWS = {
   soft: {
-    shadowColor: '#3a6758',
-    shadowOffset: { width: 0, height: 4 },
+    shadowColor: '#1A1D20',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  ambient: {
+    shadowColor: '#1A1D20',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.07,
+    shadowRadius: 16,
+    elevation: 4,
+  },
+  card: {
+    shadowColor: '#1A1D20',
+    shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.05,
     shadowRadius: 10,
     elevation: 3,
   },
-  ambient: {
-    shadowColor: '#3a6758',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.08,
-    shadowRadius: 20,
-    elevation: 6,
-  },
-  card: {
-    shadowColor: '#3a6758',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.08,
-    shadowRadius: 16,
-    elevation: 4,
-  },
   btn: {
-    shadowColor: '#3a6758',
+    shadowColor: '#FF6B6B',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
+    shadowOpacity: 0.22,
     shadowRadius: 8,
     elevation: 4,
   }
 };
+

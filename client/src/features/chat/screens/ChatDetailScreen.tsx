@@ -111,32 +111,22 @@ export const ChatDetailScreen = () => {
     setInputText('');
     scrollToBottom();
 
-    // 2. Trigger Smart AI chatbot simulation of the other mother
-    setTimeout(() => {
-      let botReplyText = '';
-
-      if (typedText.includes('mới') || typedText.includes('cũ') || typedText.includes('tình trạng')) {
-        botReplyText = `Dạ đồ vẫn còn rất mới và sạch sẽ nha mẹ ơi! Bé nhà mình chơi rất giữ gìn nên gỗ còn nhẵn nhụi, không bị trầy xước hay tróc sơn gì đâu ạ. Mẹ yên tâm nha.`;
-      } else if (typedText.includes('địa chỉ') || typedText.includes('ở đâu') || typedText.includes('quận') || typedText.includes('phường')) {
-        botReplyText = `Dạ mình đang ở khu vực ${isSellerOfChat ? chat.buyerName : 'Đà Nẵng'} nha mẹ. Mẹ rảnh lúc nào tiện ghé qua giao lưu trực tiếp rồi quét mã QR luôn cho tiện, đỡ mất phí ship bưu điện nè!`;
-      } else if (typedText.includes('giảm') || typedText.includes('bớt') || typedText.includes('xu')) {
-        botReplyText = `Hệ thống gợi ý giá này là chuẩn rồi mẹ ạ. 1 Xu chỉ tương đương 10.000 VNĐ thui nè. Mình đóng góp đồ tốt nên mới được Xu, mẹ thông cảm nha hihi.`;
-      } else if (typedText.includes('lấy') || typedText.includes('đổi') || typedText.includes('nhận') || typedText.includes('giao dịch')) {
-        botReplyText = `Dạ ok mẹ nè! Mẹ cứ nhấn nút "Yêu cầu nhận đồ" ở trang chi tiết sản phẩm nha. Két Xu của Trạm tạm khóa sẽ đóng băng Xu bảo chứng uy tín cho cả hai mẹ, rất an toàn nha!`;
-      } else {
-        botReplyText = `Dạ chào mẹ nhé! Rất vui được trao đổi đồ dùng cùng mẹ. Bé nhà mình lớn rồi nên muốn chia sẻ món đồ chơi này cho các bé khác. Mẹ có câu hỏi gì thêm cứ nhắn mình nha.`;
-      }
-
-      const botMessage = {
-        id: 'm_bot_' + Math.random().toString(),
-        senderId: otherPartyId,
-        content: botReplyText,
-        timestamp: new Date().toISOString(),
-      };
-
-      dispatch(addMessage({ chatId, message: botMessage }));
-      scrollToBottom();
-    }, 1500);
+    // Pure P2P Realtime Chat via Socket.IO
+    // Demo bot is disabled for real mother-to-mother messaging
+    const ENABLE_DEMO_BOT = false;
+    if (ENABLE_DEMO_BOT && otherPartyId === 'bot_demo') {
+      setTimeout(() => {
+        let botReplyText = 'Dạ chào mẹ nhé! Rất vui được trao đổi đồ dùng cùng mẹ.';
+        const botMessage = {
+          id: 'm_bot_' + Math.random().toString(),
+          senderId: otherPartyId,
+          content: botReplyText,
+          timestamp: new Date().toISOString(),
+        };
+        dispatch(addMessage({ chatId, message: botMessage }));
+        scrollToBottom();
+      }, 1500);
+    }
   };
 
   return (

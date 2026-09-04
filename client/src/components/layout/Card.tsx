@@ -37,12 +37,12 @@ export const Card = ({ children, onPress, style, contentStyle }: CardProps) => {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: COLORS.surfaceContainerLowest,
+    backgroundColor: COLORS.surface,
     borderRadius: RADIUS.default,
     borderWidth: 1,
-    borderColor: COLORS.surfaceVariant,
+    borderColor: 'rgba(0, 0, 0, 0.06)',
     overflow: 'hidden',
-    ...SHADOWS.soft,
+    ...SHADOWS.card,
   },
   content: {
     padding: SPACING.md,

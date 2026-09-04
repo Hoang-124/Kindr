@@ -1,12 +1,12 @@
 // src/app/navigation/MainNavigator.tsx
 import React from 'react';
+import { View, Text, StyleSheet, Platform } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { MainTabParamList } from './navigationTypes';
-import { Home, Search, PlusCircle, MessageCircle, User } from 'lucide-react-native';
+import { Home, Search, Plus, MessageCircle, User } from 'lucide-react-native';
 import { COLORS } from '../../theme';
-import { Platform } from 'react-native';
 
-// Import Screens (to be implemented)
+// Import Screens
 import HomeScreen from '../../features/home/screens/HomeScreen';
 import SearchScreen from '../../features/home/screens/SearchScreen';
 import PostItemScreen from '../../features/post/screens/PostItemScreen';
@@ -21,25 +21,24 @@ export const MainNavigator = () => {
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: COLORS.primary,
-        tabBarInactiveTintColor: COLORS.outline,
+        tabBarInactiveTintColor: COLORS.textMuted,
         tabBarStyle: {
           backgroundColor: COLORS.surface,
           borderTopWidth: 1,
-          borderTopColor: 'rgba(58, 103, 88, 0.08)',
-          height: Platform.OS === 'ios' ? 88 : 68,
-          paddingBottom: Platform.OS === 'ios' ? 28 : 10,
-          paddingTop: 10,
-          borderTopLeftRadius: 24,
-          borderTopRightRadius: 24,
-          elevation: 10,
-          shadowColor: COLORS.primary,
+          borderTopColor: 'rgba(0, 0, 0, 0.06)',
+          height: Platform.OS === 'ios' ? 86 : 66,
+          paddingBottom: Platform.OS === 'ios' ? 26 : 8,
+          paddingTop: 8,
+          elevation: 12,
+          shadowColor: '#1A1D20',
           shadowOffset: { width: 0, height: -4 },
-          shadowOpacity: 0.05,
-          shadowRadius: 10,
+          shadowOpacity: 0.06,
+          shadowRadius: 12,
         },
         tabBarLabelStyle: {
           fontSize: 11,
           fontWeight: '600',
+          marginTop: -2,
         },
       }}
     >
@@ -48,7 +47,7 @@ export const MainNavigator = () => {
         component={HomeScreen}
         options={{
           tabBarLabel: 'Trang chủ',
-          tabBarIcon: ({ color, size }) => <Home size={size} color={color} />,
+          tabBarIcon: ({ color }) => <Home size={22} color={color} strokeWidth={2.2} />,
         }}
       />
       <Tab.Screen
@@ -56,15 +55,21 @@ export const MainNavigator = () => {
         component={SearchScreen}
         options={{
           tabBarLabel: 'Tìm kiếm',
-          tabBarIcon: ({ color, size }) => <Search size={size} color={color} />,
+          tabBarIcon: ({ color }) => <Search size={22} color={color} strokeWidth={2.2} />,
         }}
       />
       <Tab.Screen
         name="Post"
         component={PostItemScreen}
         options={{
-          tabBarLabel: 'Đăng đồ',
-          tabBarIcon: ({ color, size }) => <PlusCircle size={size} color={color} />,
+          tabBarLabel: () => null,
+          tabBarIcon: ({ focused }) => (
+            <View style={styles.postFabContainer}>
+              <View style={[styles.postFabButton, focused && styles.postFabButtonActive]}>
+                <Plus size={28} color="#FFFFFF" strokeWidth={2.8} />
+              </View>
+            </View>
+          ),
         }}
       />
       <Tab.Screen
@@ -72,7 +77,7 @@ export const MainNavigator = () => {
         component={ChatListScreen}
         options={{
           tabBarLabel: 'Tin nhắn',
-          tabBarIcon: ({ color, size }) => <MessageCircle size={size} color={color} />,
+          tabBarIcon: ({ color }) => <MessageCircle size={22} color={color} strokeWidth={2.2} />,
         }}
       />
       <Tab.Screen
@@ -80,11 +85,38 @@ export const MainNavigator = () => {
         component={ProfileScreen}
         options={{
           tabBarLabel: 'Cá nhân',
-          tabBarIcon: ({ color, size }) => <User size={size} color={color} />,
+          tabBarIcon: ({ color }) => <User size={22} color={color} strokeWidth={2.2} />,
         }}
       />
     </Tab.Navigator>
   );
 };
+
+const styles = StyleSheet.create({
+  postFabContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    top: -16,
+  },
+  postFabButton: {
+    width: 54,
+    height: 54,
+    borderRadius: 27,
+    backgroundColor: COLORS.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 3.5,
+    borderColor: COLORS.surface,
+    shadowColor: COLORS.primary,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.35,
+    shadowRadius: 10,
+    elevation: 8,
+  },
+  postFabButtonActive: {
+    backgroundColor: COLORS.primaryDark,
+    transform: [{ scale: 1.05 }],
+  },
+});
 
 export default MainNavigator;
