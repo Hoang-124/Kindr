@@ -11,6 +11,7 @@ import { User } from '../models/User';
 import { Notification } from '../models/Notification';
 import { requireAuth, AuthRequest } from '../middleware/auth';
 import { ENV } from '../config/env';
+import { registerPushToken, unregisterPushToken } from '../services/pushNotificationService';
 
 const router = Router();
 
@@ -577,4 +578,47 @@ router.put('/change-password', requireAuth, async (req: AuthRequest, res: Respon
   }
 });
 
+const PushTokenSchema = z.object({
+  token: z.string().min(1, 'Token không được rỗng'),
+});
+
+/**
+ * POST /api/auth/push-token
+ * Register device Expo Push Token
+ */
+router.post('/push-token', requireAuth, async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const parsed = PushTokenSchema.safeParse(req.body);
+    if (!parsed.success) {
+      res.status(400).json({ error: parsed.error.errors[0].message });
+      return;
+    }
+    await registerPushToken(req.userId!, parsed.data.token);
+    res.json({ message: 'Đăng ký Push Token thành công.' });
+  } catch (error) {
+    console.error('Register push token error:', error);
+    res.status(500).json({ error: 'Lỗi hệ thống.' });
+  }
+});
+
+/**
+ * DELETE /api/auth/push-token
+ * Unregister device Expo Push Token (on logout)
+ */
+router.delete('/push-token', requireAuth, async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const parsed = PushTokenSchema.safeParse(req.body);
+    if (!parsed.success) {
+      res.status(400).json({ error: parsed.error.errors[0].message });
+      return;
+    }
+    await unregisterPushToken(req.userId!, parsed.data.token);
+    res.json({ message: 'Hủy đăng ký Push Token thành công.' });
+  } catch (error) {
+    console.error('Unregister push token error:', error);
+    res.status(500).json({ error: 'Lỗi hệ thống.' });
+  }
+});
+
 export default router;
+

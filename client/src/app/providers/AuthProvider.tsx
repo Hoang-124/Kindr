@@ -15,6 +15,7 @@ import {
 } from '../../features/auth/store/authSlice';
 import { User } from '../../types/user';
 import { socketService } from '../../services/socketService';
+import { registerPushNotifications, unregisterPushNotifications } from '../../services/pushNotificationClient';
 
 interface AuthContextType {
   currentUser: User | null;
@@ -41,12 +42,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const isLoading = useAppSelector((state) => state.auth.isLoading);
   const error = useAppSelector((state) => state.auth.error);
 
-  // Check current session & auto-connect Socket on mount
+  // Check current session & auto-connect Socket + register Push Token on mount
   useEffect(() => {
     dispatch(fetchCurrentUser())
       .unwrap()
       .then(() => {
         socketService.connect();
+        registerPushNotifications();
       })
       .catch(() => {
         // Fallback: If local demo user is present, socket connects if token is stored
@@ -58,11 +60,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const loginWithCredentials = async (phone: string, password: string) => {
-    return dispatch(loginAsync({ phone, password })).unwrap();
+    const res = await dispatch(loginAsync({ phone, password })).unwrap();
+    registerPushNotifications();
+    return res;
   };
 
   const loginWithGoogle = async (googleData: { credential?: string; idToken?: string; email?: string; name?: string; avatar?: string; googleId?: string }) => {
-    return dispatch(loginGoogleAsync(googleData)).unwrap();
+    const res = await dispatch(loginGoogleAsync(googleData)).unwrap();
+    registerPushNotifications();
+    return res;
   };
 
   const registerWithCredentials = async (payload: {
@@ -74,12 +80,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     districtName?: string;
     addressDetail?: string;
   }) => {
-    return dispatch(registerAsync(payload)).unwrap();
+    const res = await dispatch(registerAsync(payload)).unwrap();
+    registerPushNotifications();
+    return res;
   };
 
   const logout = async () => {
+    await unregisterPushNotifications();
     await dispatch(logoutAsync()).unwrap();
   };
+
 
   const register = (name: string, phone: string, email: string, districtId: string, addressDetail: string) => {
     const districtName =

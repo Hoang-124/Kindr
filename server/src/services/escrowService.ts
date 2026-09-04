@@ -9,6 +9,7 @@ import { Product } from '../models/Product';
 import { Transaction, TransactionStatus } from '../models/Transaction';
 import { Notification } from '../models/Notification';
 import { emitToUser } from '../socket';
+import { sendPushToUser } from './pushNotificationService';
 
 /**
  * Calculate Safe Fee (10% of price, minimum 1 Xu, charity = 0)
@@ -116,6 +117,11 @@ export async function createEscrow(buyerId: string, productId: string): Promise<
   });
 
   emitToUser(seller._id.toString(), 'notification_new', notif);
+  sendPushToUser(seller._id, {
+    title: notif.title,
+    body: notif.body,
+    data: { type: 'match_request', transactionId: tx._id.toString() },
+  }).catch(() => {});
 
   return { success: true, transaction: tx };
 }
@@ -172,6 +178,11 @@ export async function confirmHandover(
     relatedTransactionId: tx._id,
   });
   emitToUser(tx.buyerId.toString(), 'notification_new', buyerNotif);
+  sendPushToUser(tx.buyerId, {
+    title: buyerNotif.title,
+    body: buyerNotif.body,
+    data: { type: 'safeful_time_started', transactionId: tx._id.toString() },
+  }).catch(() => {});
 
   // Notify seller
   const sellerNotif = await Notification.create({
@@ -182,6 +193,11 @@ export async function confirmHandover(
     relatedTransactionId: tx._id,
   });
   emitToUser(tx.sellerId.toString(), 'notification_new', sellerNotif);
+  sendPushToUser(tx.sellerId, {
+    title: sellerNotif.title,
+    body: sellerNotif.body,
+    data: { type: 'safeful_time_started', transactionId: tx._id.toString() },
+  }).catch(() => {});
 
   return { success: true };
 }
@@ -241,6 +257,11 @@ export async function finalizeTransaction(transactionId: string): Promise<{
     relatedTransactionId: tx._id,
   });
   emitToUser(tx.sellerId.toString(), 'notification_new', sellerNotif);
+  sendPushToUser(tx.sellerId, {
+    title: sellerNotif.title,
+    body: sellerNotif.body,
+    data: { type: 'xu_released', transactionId: tx._id.toString() },
+  }).catch(() => {});
 
   // Notify buyer
   const buyerNotif = await Notification.create({
@@ -251,6 +272,11 @@ export async function finalizeTransaction(transactionId: string): Promise<{
     relatedTransactionId: tx._id,
   });
   emitToUser(tx.buyerId.toString(), 'notification_new', buyerNotif);
+  sendPushToUser(tx.buyerId, {
+    title: buyerNotif.title,
+    body: buyerNotif.body,
+    data: { type: 'trade_completed', transactionId: tx._id.toString() },
+  }).catch(() => {});
 
   return { success: true };
 }
@@ -284,6 +310,11 @@ export async function fileDispute(
     relatedTransactionId: tx._id,
   });
   emitToUser(tx.sellerId.toString(), 'notification_new', notif);
+  sendPushToUser(tx.sellerId, {
+    title: notif.title,
+    body: notif.body,
+    data: { type: 'dispute_opened', transactionId: tx._id.toString() },
+  }).catch(() => {});
 
   return { success: true };
 }

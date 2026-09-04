@@ -32,6 +32,7 @@ export interface IUser extends Document {
   historyPoints: ICivilizationLog[];
   role: 'user' | 'admin';
   refreshTokens: string[];
+  pushTokens: string[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -67,6 +68,7 @@ const UserSchema = new Schema<IUser>({
   historyPoints: { type: [CivilizationLogSchema], default: [] },
   role: { type: String, enum: ['user', 'admin'], default: 'user' },
   refreshTokens: { type: [String], default: [] },
+  pushTokens: { type: [String], default: [] },
 }, {
   timestamps: true,
 });

@@ -9,6 +9,9 @@ import { Product } from '../models/Product';
 import { Transaction } from '../models/Transaction';
 import { WithdrawRequest } from '../models/WithdrawRequest';
 import { Report } from '../models/Report';
+import { Notification } from '../models/Notification';
+import { emitToUser } from '../socket';
+import { sendPushToUser } from '../services/pushNotificationService';
 import { requireAuth, requireAdmin, AuthRequest } from '../middleware/auth';
 import * as escrowService from '../services/escrowService';
 
@@ -380,6 +383,20 @@ router.put('/withdraws/:id/approve', async (req: AuthRequest, res: Response): Pr
     request.status = 'approved';
     await request.save();
 
+    // Notify user
+    const notif = await Notification.create({
+      userId: request.userId,
+      type: 'xu_released',
+      title: 'Yêu cầu rút tiền đã được duyệt! 🏦',
+      body: `BQT Kindr đã hoàn tất chuyển ${request.payoutVnd?.toLocaleString('vi-VN') || ''}đ về tài khoản ngân hàng của mẹ.`,
+    });
+    emitToUser(request.userId.toString(), 'notification_new', notif);
+    sendPushToUser(request.userId, {
+      title: notif.title,
+      body: notif.body,
+      data: { type: 'withdraw_approved', requestId: request._id.toString() },
+    }).catch(() => {});
+
     res.json({ message: 'Đã duyệt yêu cầu chuyển tiền thành công.', withdrawRequest: request });
   } catch (error) {
     console.error('Admin approve withdraw error:', error);
@@ -411,6 +428,20 @@ router.put('/withdraws/:id/reject', async (req: AuthRequest, res: Response): Pro
     request.status = 'rejected';
     request.adminNote = req.body.adminNote || 'Yêu cầu bị từ chối';
     await request.save();
+
+    // Notify user
+    const notif = await Notification.create({
+      userId: request.userId,
+      type: 'xu_released',
+      title: 'Yêu cầu rút tiền bị từ chối ⚠️',
+      body: `Lý do: ${request.adminNote}. Số Xu (${request.xuAmount} Xu) đã được hoàn trả lại ví của mẹ.`,
+    });
+    emitToUser(request.userId.toString(), 'notification_new', notif);
+    sendPushToUser(request.userId, {
+      title: notif.title,
+      body: notif.body,
+      data: { type: 'withdraw_rejected', requestId: request._id.toString() },
+    }).catch(() => {});
 
     res.json({
       message: 'Đã từ chối yêu cầu rút tiền và hoàn trả lại Xu vào ví người dùng.',

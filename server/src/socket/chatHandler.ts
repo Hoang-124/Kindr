@@ -2,6 +2,7 @@
 import { Server, Socket } from 'socket.io';
 import { Chat } from '../models/Chat';
 import { Message } from '../models/Message';
+import { sendPushToUser } from '../services/pushNotificationService';
 
 export function setupChatHandler(io: Server, socket: Socket, userId: string): void {
   /**
@@ -89,6 +90,13 @@ export function setupChatHandler(io: Server, socket: Socket, userId: string): vo
         lastMessageTime: new Date(),
         unreadCount: isBuyer ? chat.sellerUnreadCount : chat.buyerUnreadCount,
       });
+
+      // Send background Push Notification
+      sendPushToUser(otherUserId, {
+        title: `${senderName} 💬`,
+        body: content.trim(),
+        data: { type: 'chat_message', chatId },
+      }).catch(() => {});
     } catch (error) {
       console.error('send_message error:', error);
     }

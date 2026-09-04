@@ -22,6 +22,32 @@ export interface WithdrawPayload {
   accountHolder: string;
 }
 
+export interface TopupOrderData {
+  orderCode: string;
+  xuAmount: number;
+  vndAmount: number;
+  memo: string;
+  vietqrUrl: string;
+  bankName: string;
+  accountNumber: string;
+  accountHolder: string;
+  status: 'pending' | 'completed' | 'cancelled' | 'expired';
+  createdAt: string;
+}
+
+export interface CreateOrderResponse {
+  message: string;
+  order: TopupOrderData;
+}
+
+export interface OrderStatusResponse {
+  orderCode: string;
+  status: 'pending' | 'completed' | 'cancelled' | 'expired';
+  xuAmount: number;
+  vndAmount: number;
+  completedAt?: string;
+}
+
 export async function getWalletBalance(): Promise<WalletBalance> {
   const { data } = await api.get<WalletBalance>('/wallet/balance');
   return data;
@@ -29,6 +55,16 @@ export async function getWalletBalance(): Promise<WalletBalance> {
 
 export async function topUpXu(xuAmount: number): Promise<TopupResponse> {
   const { data } = await api.post<TopupResponse>('/wallet/topup', { xuAmount });
+  return data;
+}
+
+export async function createTopupOrder(xuAmount: number): Promise<CreateOrderResponse> {
+  const { data } = await api.post<CreateOrderResponse>('/wallet/create-order', { xuAmount });
+  return data;
+}
+
+export async function checkOrderStatus(orderCode: string): Promise<OrderStatusResponse> {
+  const { data } = await api.get<OrderStatusResponse>(`/wallet/orders/${orderCode}/status`);
   return data;
 }
 
@@ -41,3 +77,4 @@ export async function getWalletHistory(): Promise<{ withdrawRequests: any[] }> {
   const { data } = await api.get('/wallet/history');
   return data;
 }
+

@@ -16,6 +16,8 @@ export interface ITopupOrder extends Document {
   bankName?: string;
   accountNumber?: string;
   transactionRef?: string;    // Bank transfer reference from Webhook IPN
+  gatewayName?: string;       // sepay, casso, payos, manual, etc.
+  rawWebhookPayload?: any;
   completedAt?: Date;
   createdAt: Date;
   updatedAt: Date;
@@ -39,6 +41,8 @@ const TopupOrderSchema = new Schema<ITopupOrder>({
   bankName: { type: String, default: 'MBBank' },
   accountNumber: { type: String, default: '0905123456' },
   transactionRef: { type: String },
+  gatewayName: { type: String, default: 'vietqr' },
+  rawWebhookPayload: { type: Schema.Types.Mixed },
   completedAt: { type: Date },
 }, {
   timestamps: true,
