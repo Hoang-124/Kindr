@@ -26,7 +26,6 @@ import NotificationScreen from '../../features/notification/screens/Notification
 import RatingReviewScreen from '../../features/grade/screens/RatingReviewScreen';
 import DisputeFormScreen from '../../features/exchange/screens/DisputeFormScreen';
 import DonationStationScreen from '../../features/post/screens/DonationStationScreen';
-import CareHandbookScreen from '../../features/care-handbook/screens/CareHandbookScreen';
 
 // Admin Screens
 import AdminDashboardScreen from '../../features/admin/screens/AdminDashboardScreen';
@@ -72,7 +71,6 @@ export const AppNavigator = () => {
             <Stack.Screen name="RatingReview" component={RatingReviewScreen} />
             <Stack.Screen name="DisputeForm" component={DisputeFormScreen} />
             <Stack.Screen name="DonationStation" component={DonationStationScreen} />
-            <Stack.Screen name="CareHandbook" component={CareHandbookScreen} />
             <Stack.Screen name="AdminDashboard" component={AdminDashboardScreen} />
             <Stack.Screen name="ManageUsers" component={ManageUsersScreen} />
             <Stack.Screen name="ManagePosts" component={ManagePostsScreen} />

@@ -34,7 +34,6 @@ export type AppStackParamList = {
   RatingReview: { transactionId: string };
   DisputeForm: { transactionId: string };
   DonationStation: undefined;
-  CareHandbook: undefined;
   AdminDashboard: undefined;
   ManageUsers: undefined;
   ManagePosts: undefined;

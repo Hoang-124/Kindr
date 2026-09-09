@@ -33,7 +33,6 @@ import {
   Gift,
   Star,
   Lock,
-  Syringe,
   Phone,
   MapPin,
   Sparkles,
@@ -316,23 +315,6 @@ export const ProfileScreen = () => {
               <View style={styles.actionTextContainer}>
                 <Text style={styles.actionLabel}>Thông báo của mẹ</Text>
                 <Text style={styles.actionSubLabel}>Cập nhật biến động Xu & trạng thái đơn hàng</Text>
-              </View>
-              <ChevronRight size={18} color={COLORS.outline} />
-            </ScalePressable>
-
-            <ScalePressable style={styles.actionRow} scaleTo={0.98} onPress={() => navigateTo('CareHandbook')}>
-              <View style={[styles.actionIconBox, { backgroundColor: '#E8EDFB' }]}>
-                <Syringe size={18} color="#4361EE" />
-              </View>
-              <View style={styles.actionTextContainer}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                  <Text style={styles.actionLabel}>Sổ tay mẹ bỉm (Tiêm & WHO)</Text>
-                  <View style={styles.hotBadge}>
-                    <Flame size={10} color="#EF4444" />
-                    <Text style={styles.hotBadgeText}>Hot</Text>
-                  </View>
-                </View>
-                <Text style={styles.actionSubLabel}>Nhắc lịch tiêm chủng & chuẩn cân nặng WHO</Text>
               </View>
               <ChevronRight size={18} color={COLORS.outline} />
             </ScalePressable>

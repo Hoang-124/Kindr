@@ -159,28 +159,6 @@ export const HomeScreen = () => {
         </View>
       </View>
 
-      {/* Sổ Tay Mẹ Bỉm Feature Card with Pulse Badge */}
-      <ScalePressable
-        style={styles.careHandbookCard}
-        scaleTo={0.97}
-        onPress={() => navigation.navigate('CareHandbook')}
-      >
-        <View style={styles.careHandbookLeft}>
-          <View style={styles.careHandbookIconBg}>
-            <Baby size={22} color={COLORS.primary} />
-          </View>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.careHandbookTitle}>Sổ Tay Tiêm Chủng & Chuẩn WHO</Text>
-            <Text style={styles.careHandbookSubtitle}>Nhắc lịch tiêm theo tháng & theo dõi cân nặng chuẩn</Text>
-          </View>
-        </View>
-        <PulseBadge scaleMin={1.0} scaleMax={1.08} duration={1800}>
-          <View style={styles.careHandbookBadge}>
-            <Text style={styles.careHandbookBadgeText}>Khám phá</Text>
-          </View>
-        </PulseBadge>
-      </ScalePressable>
-
       <Text style={styles.sectionTitle}>Gần mẹ hôm nay</Text>
     </View>
   );
@@ -496,54 +474,6 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '800',
     color: '#8C6500',
-  },
-  careHandbookCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: COLORS.surface,
-    borderColor: 'rgba(255, 107, 107, 0.2)',
-    borderWidth: 1.2,
-    borderRadius: RADIUS.lg,
-    padding: SPACING.md,
-    marginBottom: SPACING.lg,
-    ...SHADOWS.card,
-  },
-  careHandbookLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    flex: 1,
-    marginRight: 8,
-  },
-  careHandbookIconBg: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#FFE8E8',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  careHandbookTitle: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: COLORS.onSurface,
-  },
-  careHandbookSubtitle: {
-    fontSize: 11,
-    color: COLORS.onSurfaceVariant,
-    marginTop: 2,
-  },
-  careHandbookBadge: {
-    backgroundColor: COLORS.primary,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: RADIUS.full,
-  },
-  careHandbookBadgeText: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#ffffff',
   },
 });
 export default HomeScreen;

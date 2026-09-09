@@ -75,9 +75,8 @@ Tuy nhiên, việc trao đổi và mua bán sang tay truyền thống trên mạ
 * Chat P2P trực tiếp giữa hai mẹ để hẹn địa điểm giao nhận đồ.
 * Tích hợp Expo Push Notification và Socket.IO real-time thông báo ngay khi có người bấm đổi đồ, nạp Xu thành công, hoặc bắt đầu khung giờ kiểm định.
 
-### 6. 🎁 Trạm Tặng Đồ (0 Xu) & 📚 Sổ Tay Mẹ Bỉm
-* **Trạm Tặng Đồ (0 Xu):** Danh mục phi lợi nhuận dành riêng cho các mẹ muốn san sẻ đồ dùng không còn nhu cầu sử dụng cho những gia đình khó khăn hơn.
-* **Sổ Tay Mẹ Bỉm:** Cung cấp lịch tiêm chủng chuẩn Bộ Y Tế theo từng tháng tuổi và biểu đồ tăng trưởng chiều cao/cân nặng chuẩn WHO.
+### 6. 🎁 Trạm Tặng Đồ (0 Xu)
+* **Trạm Tặng Đồ (0 Xu):** Danh mục phi lợi nhuận dành riêng cho các mẹ muốn san sẻ đồ dùng, quần áo, đồ chơi không còn nhu cầu sử dụng cho những gia đình khó khăn hơn hoàn toàn miễn phí.
 
 ### 7. 🛡️ Bảng Quản Trị Admin Backoffice
 * 7 phân hệ quản trị toàn diện: Dashboard số liệu thống kê, Quản lý tài khoản (Khóa/Mở User), Kiểm duyệt bài đăng, Phân xử khiếu nại (Hoàn Xu / Trừ điểm), Phê duyệt yêu cầu rút tiền về ngân hàng, và Xử lý Báo cáo vi phạm.
@@ -159,7 +158,6 @@ Kindr/
 │   │   ├── features/
 │   │   │   ├── admin/screens/            # 7 màn hình Backoffice Dashboard
 │   │   │   ├── auth/screens/             # Login, Register, ForgotPassword, ActivateAccount...
-│   │   │   ├── care-handbook/screens/    # Sổ tay tiêm chủng & biểu đồ WHO
 │   │   │   ├── chat/screens/             # Chat P2P real-time
 │   │   │   ├── exchange/screens/         # Quản lý ký quỹ, giao nhận & khiếu nại
 │   │   │   ├── home/screens/             # Màn hình chính, Tìm kiếm, Chi tiết đồ dùng
