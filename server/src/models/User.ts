@@ -28,11 +28,16 @@ export interface IUser extends Document {
   reputationScore: number;
   ratingCount: number;
   isLocked: boolean;
+  isActivated: boolean;
   disputeStrikeCount: number;
   historyPoints: ICivilizationLog[];
   role: 'user' | 'admin';
   refreshTokens: string[];
   pushTokens: string[];
+  activationOtp?: string;
+  activationOtpExpires?: Date;
+  resetPasswordOtp?: string;
+  resetPasswordOtpExpires?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -64,20 +69,29 @@ const UserSchema = new Schema<IUser>({
   reputationScore: { type: Number, default: 5.0 },
   ratingCount: { type: Number, default: 0 },
   isLocked: { type: Boolean, default: false },
+  isActivated: { type: Boolean, default: false },
   disputeStrikeCount: { type: Number, default: 0 },
   historyPoints: { type: [CivilizationLogSchema], default: [] },
   role: { type: String, enum: ['user', 'admin'], default: 'user' },
   refreshTokens: { type: [String], default: [] },
   pushTokens: { type: [String], default: [] },
+  activationOtp: { type: String, default: undefined },
+  activationOtpExpires: { type: Date, default: undefined },
+  resetPasswordOtp: { type: String, default: undefined },
+  resetPasswordOtpExpires: { type: Date, default: undefined },
 }, {
   timestamps: true,
 });
 
-// Never return passwordHash or refreshTokens in JSON
+// Never return passwordHash, refreshTokens, or sensitive OTPs in JSON
 UserSchema.methods.toJSON = function () {
   const obj = this.toObject();
   delete obj.passwordHash;
   delete obj.refreshTokens;
+  delete obj.activationOtp;
+  delete obj.activationOtpExpires;
+  delete obj.resetPasswordOtp;
+  delete obj.resetPasswordOtpExpires;
   return obj;
 };
 

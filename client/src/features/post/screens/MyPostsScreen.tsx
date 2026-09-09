@@ -37,7 +37,7 @@ export const MyPostsScreen = () => {
 
   const handleDelete = (id: string, name: string) => {
     Alert.alert(
-      'Xóa bài đăng? 🗑️',
+      'Xóa bài đăng?',
       `Mẹ có chắc chắn muốn xóa bài đăng: "${name}"? Thao tác này không thể hoàn tác.`,
       [
         { text: 'Hủy', style: 'cancel' },

@@ -247,7 +247,7 @@ router.post('/', requireAuth, async (req: AuthRequest, res: Response): Promise<v
 
     res.status(201).json({
       message: isCharity
-        ? `Đã đăng lên Trạm Tặng Đồ (0 Xu) ❤️`
+        ? `Đã đăng lên Trạm Tặng Đồ (0 Xu)`
         : `Đăng đồ thành công! Đã tạm khóa ${safeFee} Xu Safe Fee.`,
       product,
     });

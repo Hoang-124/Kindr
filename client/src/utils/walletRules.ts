@@ -55,7 +55,7 @@ export function validateSwapXuRequirement(
   if (requiredXu > maxSpendable) {
     return {
       allowed: false,
-      reason: `Mẹ ơi, hãy đăng ít nhất 1 món đồ lên sàn để mở khóa thêm Xu chào mừng và đổi món đồ xịn hơn nhé! 🧸`
+      reason: `Mẹ ơi, hãy đăng ít nhất 1 món đồ lên sàn để mở khóa thêm Xu chào mừng và đổi món đồ xịn hơn nhé!`
     };
   }
 

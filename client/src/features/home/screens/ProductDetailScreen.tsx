@@ -25,6 +25,7 @@ import Header from '../../../components/layout/Header';
 import ModalConfirm from '../../../components/common/ModalConfirm';
 import Button from '../../../components/common/Button';
 import MascotIcon from '../../../components/common/MascotIcon';
+import KindrCoin from '../../../components/common/KindrCoin';
 import { DEFAULT_IMAGES } from '../../../utils/constants';
 import { formatXuToVND, maskPhoneNumber } from '../../../utils/helpers';
 import { calculateSafeFee } from '../../../utils/pricing';
@@ -92,7 +93,7 @@ export const ProductDetailScreen = () => {
       setModalVisible(false);
       Alert.alert(
         'Số Xu không đủ',
-        `Mẹ cần tối thiểu ${buyerPrice} Xu để thực hiện đổi món đồ này.\n\nSố dư ví hiện tại: ${currentUser.xuBalance} Xu.\nMẹ hãy đăng món đồ cũ của bé lên sàn để tích thêm Xu nhé! ❤️`,
+        `Mẹ cần tối thiểu ${buyerPrice} Xu để thực hiện đổi món đồ này.\n\nSố dư ví hiện tại: ${currentUser.xuBalance} Xu.\nMẹ hãy đăng món đồ cũ của bé lên sàn để tích thêm Xu nhé!`,
         [{ text: 'Đồng ý' }]
       );
       return;
@@ -218,7 +219,7 @@ export const ProductDetailScreen = () => {
 
             {/* Price Badge */}
             <View style={styles.priceBadge}>
-              <Text style={styles.priceSymbol}>🪙</Text>
+              <KindrCoin size={15} />
               <Text style={styles.priceText}>{product.price} Xu</Text>
               <Text style={styles.priceSubVnd}>~ {formatXuToVND(product.price)}</Text>
             </View>
@@ -227,7 +228,8 @@ export const ProductDetailScreen = () => {
           {/* Categories/Attribute tags */}
           <View style={styles.tagsContainer}>
             <View style={[styles.tag, { backgroundColor: '#E2F0CB' }]}>
-              <Text style={[styles.tagText, { color: '#4B5C35' }]}>✨ {product.conditionLabel}</Text>
+              <Sparkles size={13} color="#4B5C35" />
+              <Text style={[styles.tagText, { color: '#4B5C35' }]}>{product.conditionLabel}</Text>
             </View>
             {Boolean(product.ageRange) ? (
               <View style={[styles.tag, { backgroundColor: '#DFE7FD' }]}>
@@ -260,9 +262,12 @@ export const ProductDetailScreen = () => {
                   <Star size={13} color="#F5A623" fill="#F5A623" />
                   <Text style={styles.ratingText}>4.9 (Mẹ Bỉm Văn Minh 98 điểm)</Text>
                 </View>
-                <Text style={styles.sellerMaskedPhone}>
-                  📞 SĐT: {maskPhoneNumber(product.sellerPhone)} (Mở khóa khi đổi)
-                </Text>
+                <View style={styles.sellerPhoneRow}>
+                  <Phone size={12} color={COLORS.outline} />
+                  <Text style={styles.sellerMaskedPhone}>
+                    SĐT: {maskPhoneNumber(product.sellerPhone)} (Mở khóa khi đổi)
+                  </Text>
+                </View>
               </View>
             </View>
           </View>
@@ -272,7 +277,7 @@ export const ProductDetailScreen = () => {
             <View style={styles.safetyBox}>
               <ShieldCheck size={28} color={COLORS.primary} />
               <View style={styles.safetyTextWrapper}>
-                <Text style={styles.safetyTitle}>Bảo chứng Ký Quỹ Kép (Double Escrow) 🛡️</Text>
+                <Text style={styles.safetyTitle}>Bảo chứng Ký Quỹ Kép (Double Escrow)</Text>
                 <Text style={styles.safetyText}>
                   Người bán đã ký quỹ {sellerSafeFee} Xu Safe Fee (10%) cam kết chất lượng. Mẹ có 6 giờ kiểm định tại nhà sau khi nhận đồ trước khi Xu được giải ngân.
                 </Text>
@@ -294,7 +299,7 @@ export const ProductDetailScreen = () => {
         </ScalePressable>
         <View style={styles.requestBtnWrapper}>
           <Button
-            title={isCharity ? "Nhận Quà 0 Xu ❤️" : `Đổi Đồ Ngay (${product.price} Xu)`}
+            title={isCharity ? "Nhận Quà 0 Xu" : `Đổi Đồ Ngay (${product.price} Xu)`}
             onPress={handleRequestItem}
           />
         </View>
@@ -306,7 +311,7 @@ export const ProductDetailScreen = () => {
         onClose={() => setModalVisible(false)}
         onConfirm={handleConfirmEscrow}
         loading={loading}
-        title="🔒 Xác Nhận Ký Quỹ Đổi Đồ"
+        title="Xác Nhận Ký Quỹ Đổi Đồ"
         confirmTitle="Đồng Ý Khóa Xu"
         description={isCharity 
           ? `Món đồ này thuộc Trạm Tặng Đồ (0 Xu). Mẹ không mất Xu nào để nhận đồ cho bé!`
@@ -497,10 +502,15 @@ const styles = StyleSheet.create({
     color: COLORS.onSurfaceVariant,
     fontWeight: '500',
   },
+  sellerPhoneRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginTop: 3,
+  },
   sellerMaskedPhone: {
     fontSize: 11,
     color: COLORS.outline,
-    marginTop: 3,
   },
   safetyBox: {
     flexDirection: 'row',

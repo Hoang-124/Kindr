@@ -180,7 +180,7 @@ export const EditProfileScreen = () => {
       });
 
       setIsSubmitting(false);
-      Alert.alert('Thành công 🎉', 'Thông tin cá nhân của mẹ đã được cập nhật an toàn.', [
+      Alert.alert('Thành công', 'Thông tin cá nhân của mẹ đã được cập nhật an toàn.', [
         { text: 'Đồng ý', onPress: () => navigation.goBack() },
       ]);
     } catch (error: any) {

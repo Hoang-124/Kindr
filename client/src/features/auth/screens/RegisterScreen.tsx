@@ -21,7 +21,7 @@ import Button from '../../../components/common/Button';
 import FormError from '../../../components/form/FormError';
 import GoogleSignInButton from '../../../components/common/GoogleSignInButton';
 import AddressMapPreview from '../../../components/common/AddressMapPreview';
-import { User, Phone, Mail, Lock, MapPin, ArrowLeft } from 'lucide-react-native';
+import { User, Phone, Mail, Lock, MapPin, ArrowLeft, Info } from 'lucide-react-native';
 
 type NavigationProp = NativeStackNavigationProp<AuthStackParamList, 'Register'>;
 
@@ -110,7 +110,7 @@ export const RegisterScreen = () => {
 
     try {
       const districtName = districtOptions.find(d => d.value === districtId)?.label || '';
-      await registerWithCredentials({
+      const res = await registerWithCredentials({
         name: fullName.trim(),
         phone: cleanPhone,
         password: password.trim(),
@@ -120,6 +120,9 @@ export const RegisterScreen = () => {
         addressDetail: addressDetail.trim(),
       });
       setLoading(false);
+      if (res?.needsActivation) {
+        navigation.navigate('ActivateAccount', { email: res.email || cleanEmail });
+      }
     } catch (apiErr: any) {
       setError(apiErr || 'Đăng ký không thành công. Vui lòng thử lại.');
       setLoading(false);
@@ -165,6 +168,10 @@ export const RegisterScreen = () => {
               placeholder="VD: Nguyễn Lan"
               value={fullName}
               onChangeText={setFullName}
+              autoComplete="name"
+              textContentType="name"
+              name="fullName"
+              id="register-fullname"
               icon={<User size={15} color={COLORS.outline} />}
             />
           </View>
@@ -176,6 +183,11 @@ export const RegisterScreen = () => {
               value={phone}
               onChangeText={setPhone}
               keyboardType="phone-pad"
+              inputMode="tel"
+              autoComplete="tel"
+              textContentType="telephoneNumber"
+              name="phone"
+              id="register-phone"
               icon={<Phone size={15} color={COLORS.outline} />}
             />
           </View>
@@ -192,6 +204,10 @@ export const RegisterScreen = () => {
               onChangeText={setPassword}
               secureTextEntry
               autoCapitalize="none"
+              autoComplete="new-password"
+              textContentType="newPassword"
+              name="password"
+              id="register-password"
               icon={<Lock size={15} color={COLORS.outline} />}
             />
           </View>
@@ -204,6 +220,10 @@ export const RegisterScreen = () => {
               onChangeText={setConfirmPassword}
               secureTextEntry
               autoCapitalize="none"
+              autoComplete="new-password"
+              textContentType="newPassword"
+              name="confirmPassword"
+              id="register-confirm-password"
               icon={<Lock size={15} color={COLORS.outline} />}
             />
           </View>
@@ -229,6 +249,10 @@ export const RegisterScreen = () => {
               placeholder="Số nhà, tên đường..."
               value={addressDetail}
               onChangeText={setAddressDetail}
+              autoComplete="street-address"
+              textContentType="streetAddressLine1"
+              name="address"
+              id="register-address"
               icon={<MapPin size={15} color={COLORS.outline} />}
             />
           </View>
@@ -252,11 +276,19 @@ export const RegisterScreen = () => {
             value={email}
             onChangeText={handleEmailChange}
             keyboardType="email-address"
+            inputMode="email"
+            autoComplete="email"
+            textContentType="emailAddress"
             autoCapitalize="none"
+            name="email"
+            id="register-email"
             icon={<Mail size={15} color={COLORS.outline} />}
           />
           {emailWarning ? (
-            <Text style={styles.warningText}>ℹ️ {emailWarning}</Text>
+            <View style={styles.warningContainer}>
+              <Info size={13} color="#D97706" />
+              <Text style={styles.warningText}>{emailWarning}</Text>
+            </View>
           ) : (
             <Text style={styles.helperText}>* Dùng Gmail? Vui lòng chọn "Đăng ký nhanh với Google" bên dưới.</Text>
           )}
@@ -378,14 +410,20 @@ const styles = StyleSheet.create({
     marginBottom: 2,
     paddingHorizontal: 2,
   },
+  warningContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginTop: -4,
+    marginBottom: 2,
+    paddingHorizontal: 2,
+  },
   warningText: {
     fontSize: 11,
     color: '#D97706',
     fontWeight: '600',
-    marginTop: -4,
-    marginBottom: 2,
-    paddingHorizontal: 2,
     lineHeight: 14,
+    flex: 1,
   },
   actionsRow: {
     flexDirection: 'column',

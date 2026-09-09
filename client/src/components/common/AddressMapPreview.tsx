@@ -10,7 +10,7 @@ import {
   Modal 
 } from 'react-native';
 import { COLORS, SPACING, RADIUS, SHADOWS } from '../../theme';
-import { MapPin, Maximize2, CheckCircle2, Crosshair, X, ZoomIn, ZoomOut, Layers } from 'lucide-react-native';
+import { MapPin, Maximize2, CheckCircle2, Crosshair, X, ZoomIn, ZoomOut, Layers, Map } from 'lucide-react-native';
 
 // Coordinates for Districts in Da Nang
 const DISTRICT_COORDINATES: Record<string, { lat: number; lng: number; name: string }> = {
@@ -394,9 +394,13 @@ export const AddressMapPreview: React.FC<AddressMapPreviewProps> = ({
             onPress={toggleMapMode}
             activeOpacity={0.7}
           >
-            <Layers size={12} color={mapMode === 'satellite' ? '#FFFFFF' : COLORS.primary} />
+            {mapMode === 'satellite' ? (
+              <Layers size={12} color="#FFFFFF" />
+            ) : (
+              <Map size={12} color={COLORS.primary} />
+            )}
             <Text style={[styles.gpsBtnText, mapMode === 'satellite' && styles.gpsBtnTextActive]}>
-              {mapMode === 'satellite' ? '🛰️ Vệ tinh' : '🗺️ Bản đồ'}
+              {mapMode === 'satellite' ? 'Vệ tinh' : 'Bản đồ'}
             </Text>
           </TouchableOpacity>
           <TouchableOpacity 
@@ -488,9 +492,13 @@ export const AddressMapPreview: React.FC<AddressMapPreviewProps> = ({
                   onPress={toggleMapMode}
                   activeOpacity={0.7}
                 >
-                  <Layers size={13} color={mapMode === 'satellite' ? '#FFFFFF' : COLORS.primary} />
+                  {mapMode === 'satellite' ? (
+                    <Layers size={13} color="#FFFFFF" />
+                  ) : (
+                    <Map size={13} color={COLORS.primary} />
+                  )}
                   <Text style={[styles.gpsBtnText, mapMode === 'satellite' && styles.gpsBtnTextActive]}>
-                    {mapMode === 'satellite' ? '🛰️ Vệ tinh' : '🗺️ Bản đồ'}
+                    {mapMode === 'satellite' ? 'Vệ tinh' : 'Bản đồ'}
                   </Text>
                 </TouchableOpacity>
                 <TouchableOpacity 

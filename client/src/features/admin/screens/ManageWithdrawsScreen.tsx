@@ -53,7 +53,7 @@ export const ManageWithdrawsScreen = () => {
     const rate = 10000;
     const cash = coins * rate * 0.90; // 10% fee
     Alert.alert(
-      'Duyệt Yêu Cầu Rút Xu ✅',
+      'Duyệt Yêu Cầu Rút Xu',
       `Phê duyệt chuyển khoản ${formatNumber(cash)}đ cho mẹ ${name}?`,
       [
         { text: 'Hủy', style: 'cancel' },
@@ -74,7 +74,7 @@ export const ManageWithdrawsScreen = () => {
 
   const handleReject = async (id: string, name: string, coins: number) => {
     Alert.alert(
-      'Từ Chối Yêu Cầu Rút Xu ❌',
+      'Từ Chối Yêu Cầu Rút Xu',
       `Từ chối yêu cầu và hoàn trả lại ${coins} Xu vào tài khoản cho mẹ ${name}?`,
       [
         { text: 'Hủy', style: 'cancel' },
@@ -148,7 +148,7 @@ export const ManageWithdrawsScreen = () => {
               <View style={styles.cardHeader}>
                 <Coins size={16} color={COLORS.tertiary} />
                 <Text style={styles.requestAmount}>{item.xuAmount} Xu</Text>
-                <Text style={styles.cashVal}>➔ Thực nhận: {formatNumber(payout)}đ</Text>
+                <Text style={styles.cashVal}>(Thực nhận: {formatNumber(payout)}đ)</Text>
               </View>
 
               <Text style={styles.requester}>Mẹ bỉm yêu cầu: {item.userName}</Text>

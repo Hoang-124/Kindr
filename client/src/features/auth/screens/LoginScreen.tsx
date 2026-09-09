@@ -6,7 +6,8 @@ import {
   StyleSheet, 
   Image, 
   TouchableOpacity, 
-  ScrollView 
+  ScrollView,
+  Alert 
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -18,7 +19,8 @@ import Button from '../../../components/common/Button';
 import FormError from '../../../components/form/FormError';
 import GoogleSignInButton from '../../../components/common/GoogleSignInButton';
 import { Mail, Lock, Phone } from 'lucide-react-native';
-import { DEFAULT_IMAGES } from '../../../utils/constants';
+
+const KINDR_LOGO = require('../../../../assets/images/kindr-logo.png');
 
 type NavigationProp = NativeStackNavigationProp<AuthStackParamList, 'Login'>;
 
@@ -30,6 +32,7 @@ export const LoginScreen = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [unactivatedEmail, setUnactivatedEmail] = useState<string | null>(null);
 
   const handleLogin = async () => {
     if (!username.trim() || !password.trim()) {
@@ -39,13 +42,40 @@ export const LoginScreen = () => {
 
     setLoading(true);
     setError('');
+    setUnactivatedEmail(null);
 
     try {
       await loginWithCredentials(username.trim(), password.trim());
       setLoading(false);
     } catch (apiErr: any) {
-      setError(apiErr || 'Số điện thoại hoặc mật khẩu không chính xác.');
       setLoading(false);
+
+      const isNeedsActivation = 
+        apiErr?.needsActivation || 
+        (typeof apiErr === 'object' && apiErr?.needsActivation);
+      const targetEmail = 
+        apiErr?.email || 
+        (username.includes('@') ? username.trim().toLowerCase() : '');
+
+      if (isNeedsActivation && targetEmail) {
+        setUnactivatedEmail(targetEmail);
+        Alert.alert(
+          'Kích hoạt tài khoản',
+          `Tài khoản của bạn chưa được kích hoạt.\n\nKindr đã gửi mã xác thực gồm 6 chữ số đến email:\n${targetEmail}\n\nVui lòng nhập mã để kích hoạt tài khoản của bạn.`,
+          [
+            { text: 'Để sau', style: 'cancel' },
+            { 
+              text: 'Kích hoạt ngay', 
+              onPress: () => navigation.navigate('ActivateAccount', { email: targetEmail }) 
+            }
+          ]
+        );
+        setError('Tài khoản chưa được kích hoạt. Kindr đã gửi mã xác thực về email của bạn.');
+        return;
+      }
+
+      const msg = typeof apiErr === 'string' ? apiErr : (apiErr?.error || 'Số điện thoại hoặc mật khẩu không chính xác.');
+      setError(msg);
     }
   };
 
@@ -72,11 +102,12 @@ export const LoginScreen = () => {
       <View style={styles.blob} />
 
       <View style={styles.cardFrame}>
-        {/* Mascot & Header */}
+        {/* Brand Logo & Header */}
         <View style={styles.header}>
           <View style={styles.mascotWrapper}>
-            <Image source={{ uri: DEFAULT_IMAGES.MASCOT }} style={styles.mascot} />
+            <Image source={KINDR_LOGO} style={styles.mascot} resizeMode="cover" />
           </View>
+          <Text style={styles.brandName}>Kindr</Text>
           <Text style={styles.title}>Chào mừng mẹ!</Text>
           <Text style={styles.subtitle}>Cùng Kindr tiếp tục hành trình chia sẻ yêu thương.</Text>
         </View>
@@ -84,6 +115,19 @@ export const LoginScreen = () => {
         {/* Credentials Form */}
         <View style={styles.form}>
           <FormError message={error} />
+
+          {unactivatedEmail && (
+            <TouchableOpacity 
+              style={styles.activationNoticeBanner}
+              onPress={() => navigation.navigate('ActivateAccount', { email: unactivatedEmail })}
+              activeOpacity={0.8}
+            >
+              <Mail size={16} color={COLORS.primary} />
+              <Text style={styles.activationNoticeText}>
+                Nhấn vào đây để nhập mã kích hoạt email ({unactivatedEmail}) →
+              </Text>
+            </TouchableOpacity>
+          )}
           
           <Input
             compact
@@ -93,6 +137,10 @@ export const LoginScreen = () => {
             onChangeText={setUsername}
             keyboardType="email-address"
             autoCapitalize="none"
+            autoComplete="username"
+            textContentType="username"
+            name="username"
+            id="login-username"
             icon={<Phone size={18} color={COLORS.outline} />}
           />
 
@@ -104,6 +152,10 @@ export const LoginScreen = () => {
             onChangeText={setPassword}
             secureTextEntry
             autoCapitalize="none"
+            autoComplete="current-password"
+            textContentType="password"
+            name="password"
+            id="login-password"
             icon={<Lock size={18} color={COLORS.outline} />}
           />
 
@@ -186,28 +238,36 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
   },
   mascotWrapper: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: COLORS.surface,
+    width: 92,
+    height: 92,
+    borderRadius: 46,
+    backgroundColor: '#FFFFFF',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: SPACING.sm,
+    marginBottom: SPACING.xs,
     ...SHADOWS.ambient,
     borderWidth: 2,
-    borderColor: '#ffffff',
+    borderColor: '#D4EBE3',
+    overflow: 'hidden',
   },
   mascot: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+    width: 92,
+    height: 92,
+    borderRadius: 46,
+  },
+  brandName: {
+    fontSize: 26,
+    fontWeight: '800',
+    color: COLORS.primary,
+    letterSpacing: -0.5,
+    marginBottom: 2,
   },
   title: {
     ...TYPOGRAPHY.headlineLg,
-    color: COLORS.primary,
+    color: COLORS.text,
     fontWeight: '700',
     marginBottom: SPACING.xs,
-    fontSize: 22,
+    fontSize: 18,
   },
   subtitle: {
     ...TYPOGRAPHY.bodySm,
@@ -264,6 +324,25 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: COLORS.primary,
     fontWeight: '700',
+  },
+  activationNoticeBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#E6F8F7',
+    borderWidth: 1,
+    borderColor: '#0ABAB5',
+    borderRadius: RADIUS.md,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    marginBottom: SPACING.md,
+    gap: 8,
+  },
+  activationNoticeText: {
+    flex: 1,
+    fontSize: 13,
+    color: '#007A78',
+    fontWeight: '600',
+    lineHeight: 18,
   },
 });
 

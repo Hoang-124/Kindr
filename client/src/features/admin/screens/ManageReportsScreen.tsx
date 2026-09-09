@@ -70,7 +70,7 @@ export const ManageReportsScreen = () => {
 
   const handleRemovePost = async (reportId: string, productId: string, productName: string) => {
     Alert.alert(
-      'Gỡ bài đăng vi phạm? 🗑️',
+      'Gỡ bài đăng vi phạm?',
       `Mẹ có chắc chắn muốn gỡ bỏ hoàn toàn bài đăng: "${productName}"?`,
       [
         { text: 'Hủy', style: 'cancel' },

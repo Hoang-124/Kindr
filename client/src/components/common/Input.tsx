@@ -8,7 +8,8 @@ import {
   ViewStyle, 
   TextStyle, 
   TextInputProps,
-  TouchableOpacity
+  TouchableOpacity,
+  Platform
 } from 'react-native';
 import { COLORS, SPACING, RADIUS } from '../../theme';
 import { Eye, EyeOff } from 'lucide-react-native';
@@ -21,6 +22,8 @@ interface InputProps extends TextInputProps {
   inputContainerStyle?: ViewStyle;
   icon?: React.ReactNode;
   compact?: boolean;
+  name?: string;
+  id?: string;
 }
 
 export const Input = ({
@@ -32,6 +35,8 @@ export const Input = ({
   icon,
   secureTextEntry,
   compact = false,
+  name,
+  id,
   ...props
 }: InputProps) => {
   const [isFocused, setIsFocused] = useState(false);
@@ -54,9 +59,12 @@ export const Input = ({
         {icon && <View style={[styles.iconContainer, compact && styles.compactIconContainer]}>{icon}</View>}
         
         <TextInput
+          id={id}
+          {...({ name } as any)}
           style={[styles.input, compact && styles.compactInput, inputStyle]}
           placeholderTextColor={COLORS.outline}
           secureTextEntry={isSecure}
+          underlineColorAndroid="transparent"
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
           {...props}
@@ -123,11 +131,23 @@ const styles = StyleSheet.create({
     color: COLORS.onSurface,
     fontSize: 15,
     minWidth: 0,
+    ...(Platform.OS === 'web' ? ({
+      outline: 'none',
+      outlineStyle: 'none',
+      outlineWidth: 0,
+      boxShadow: 'none',
+    } as any) : {}),
   },
   compactInput: {
     fontSize: 13,
     paddingVertical: 0,
     minWidth: 0,
+    ...(Platform.OS === 'web' ? ({
+      outline: 'none',
+      outlineStyle: 'none',
+      outlineWidth: 0,
+      boxShadow: 'none',
+    } as any) : {}),
   },
   iconContainer: {
     marginRight: SPACING.sm,

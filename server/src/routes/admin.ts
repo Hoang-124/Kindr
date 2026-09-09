@@ -387,7 +387,7 @@ router.put('/withdraws/:id/approve', async (req: AuthRequest, res: Response): Pr
     const notif = await Notification.create({
       userId: request.userId,
       type: 'xu_released',
-      title: 'Yêu cầu rút tiền đã được duyệt! 🏦',
+      title: 'Yêu cầu rút tiền đã được duyệt!',
       body: `BQT Kindr đã hoàn tất chuyển ${request.payoutVnd?.toLocaleString('vi-VN') || ''}đ về tài khoản ngân hàng của mẹ.`,
     });
     emitToUser(request.userId.toString(), 'notification_new', notif);
@@ -433,7 +433,7 @@ router.put('/withdraws/:id/reject', async (req: AuthRequest, res: Response): Pro
     const notif = await Notification.create({
       userId: request.userId,
       type: 'xu_released',
-      title: 'Yêu cầu rút tiền bị từ chối ⚠️',
+      title: 'Yêu cầu rút tiền bị từ chối',
       body: `Lý do: ${request.adminNote}. Số Xu (${request.xuAmount} Xu) đã được hoàn trả lại ví của mẹ.`,
     });
     emitToUser(request.userId.toString(), 'notification_new', notif);

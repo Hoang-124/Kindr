@@ -37,7 +37,7 @@ export const COLORS = {
   surfaceDim: '#F1F3F5',
   surfaceVariant: '#E9ECEF',
   onSurfaceVariant: '#495057',
-  
+
   surfaceContainerLowest: '#FFFFFF',
   surfaceContainerLow: '#F8F9FA',
   surfaceContainer: '#F1F3F5',
@@ -60,7 +60,7 @@ export const COLORS = {
   textMuted: '#6C757D',
   textDim: '#ADB5BD',
   border: 'rgba(0, 0, 0, 0.08)',
-  
+
   // Shadows
   shadowColor: 'rgba(255, 107, 107, 0.12)',
 };

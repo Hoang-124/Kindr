@@ -86,7 +86,7 @@ export const ManageUsersScreen = () => {
     const newRole = isPromoting ? 'admin' : 'user';
 
     Alert.alert(
-      isPromoting ? 'Cấp Quyền Quản Trị Viên 👑' : 'Thu Hồi Quyền Quản Trị ⚠️',
+      isPromoting ? 'Cấp Quyền Quản Trị Viên' : 'Thu Hồi Quyền Quản Trị',
       isPromoting
         ? `Mẹ có chắc muốn cấp quyền Admin cho "${name}"?\n\nTài khoản này sẽ có quyền truy cập Bảng điều khiển quản trị, duyệt lệnh rút tiền và phân xử tranh chấp.`
         : `Mẹ có chắc muốn hạ quyền tài khoản "${name}" về Thành viên (User) thông thường?`,
@@ -99,7 +99,7 @@ export const ManageUsersScreen = () => {
             try {
               const res = await api.put(`/admin/users/${userId}/role`, { role: newRole });
               setUsers(prev => prev.map(u => u.id === userId ? { ...u, role: newRole } : u));
-              Alert.alert('Thành công 🎉', res.data.message || 'Cập nhật quyền hạn thành công.');
+              Alert.alert('Thành công', res.data.message || 'Cập nhật quyền hạn thành công.');
             } catch (err: any) {
               Alert.alert('Lỗi', err.response?.data?.error || 'Không thể cập nhật quyền hạn.');
             }
@@ -111,7 +111,7 @@ export const ManageUsersScreen = () => {
 
   const handleReward = async (userId: string, name: string) => {
     Alert.alert(
-      'Cộng Điểm Uy Tín 🌟',
+      'Cộng Điểm Uy Tín',
       `Cộng +5 Điểm Mẹ Bỉm Văn Minh cho mẹ: ${name}?`,
       [
         { text: 'Hủy', style: 'cancel' },
@@ -136,7 +136,7 @@ export const ManageUsersScreen = () => {
 
   const handlePenalty = async (userId: string, name: string) => {
     Alert.alert(
-      'Trừ Điểm Uy Tín ⚠️',
+      'Trừ Điểm Uy Tín',
       `Phạt trừ -10 Điểm Mẹ Bỉm Văn Minh của mẹ: ${name}?`,
       [
         { text: 'Hủy', style: 'cancel' },
@@ -162,7 +162,7 @@ export const ManageUsersScreen = () => {
 
   const handleToggleFreeze = async (userId: string, name: string, isLocked: boolean) => {
     Alert.alert(
-      isLocked ? 'Mở Khóa Tài Khoản 🔓' : 'Khóa Tài Khoản 🔒',
+      isLocked ? 'Mở Khóa Tài Khoản' : 'Khóa Tài Khoản',
       isLocked 
         ? `Mẹ có chắc muốn mở khóa hoạt động cho tài khoản: ${name}?`
         : `Mẹ có chắc muốn tạm khóa tài khoản: ${name}? Người dùng sẽ không thể đăng nhập hoặc giao dịch.`,

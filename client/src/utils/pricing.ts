@@ -81,21 +81,21 @@ export function getCategoryLabel(category: CategoryType): string {
   switch (category) {
     case 'toy_small':
     case 'do_choi':
-      return 'Đồ chơi nhỏ 🧸';
+      return 'Đồ chơi nhỏ';
     case 'toy_large':
-      return 'Đồ chơi lớn 🚲';
+      return 'Đồ chơi lớn';
     case 'xe_noi':
-      return 'Xe đẩy & Nôi cũi 🚼';
+      return 'Xe đẩy & Nôi cũi';
     case 'book':
     case 'sach_truyen':
-      return 'Sách truyện 📚';
+      return 'Sách truyện';
     case 'quan_ao':
-      return 'Quần áo bé 👶';
+      return 'Quần áo bé';
     case 'do_hoc_tap':
-      return 'Đồ học tập ✏️';
+      return 'Đồ học tập';
     case 'charity':
     case 'tu_thien':
-      return 'Trạm Tặng Đồ 🎁 (0 Xu)';
+      return 'Trạm Tặng Đồ (0 Xu)';
     default:
       return 'Khác';
   }
@@ -107,7 +107,7 @@ export function getCategoryLabel(category: CategoryType): string {
 export function getSmartPricingNudge(category: CategoryType, condition: ConditionType): string {
   const suggested = getSuggestedXu(category, condition);
   if (suggested === 0) {
-    return 'Món đồ này sẽ được đăng tại Trạm Tặng Đồ với 0 Xu dành tặng các bé có hoàn cảnh khó khăn ❤️';
+    return 'Món đồ này sẽ được đăng tại Trạm Tặng Đồ với 0 Xu dành tặng các bé có hoàn cảnh khó khăn.';
   }
   return `Mẹo từ Kindr: Các mẹ khác thường sẵn sàng đổi món đồ này với giá ${suggested} Xu (~${(suggested * 10).toLocaleString('vi-VN')}k). Đặt giá này giúp mẹ tăng 85% cơ hội đổi đồ thành công trong vòng 24 giờ!`;
 }

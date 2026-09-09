@@ -23,12 +23,12 @@ interface CategoryItem {
 }
 
 const INITIAL_CATEGORIES: CategoryItem[] = [
-  { id: 'c1', name: 'Đồ chơi cho bé 🧸', code: 'do_choi', itemsCount: 15 },
-  { id: 'c2', name: 'Quần áo sơ sinh Nous nous 👕', code: 'quan_ao', itemsCount: 22 },
-  { id: 'c3', name: 'Sách truyện Ehon 📚', code: 'sach_truyen', itemsCount: 9 },
-  { id: 'c4', name: 'Đồ học tập phát triển trí não 🎨', code: 'do_hoc_tap', itemsCount: 4 },
-  { id: 'c5', name: 'Xe nôi cũi võng xếp 👶', code: 'xe_noi', itemsCount: 7 },
-  { id: 'c6', name: 'Trạm Tặng Đồ 0 Xu 🎁', code: 'tu_thien', itemsCount: 12 },
+  { id: 'c1', name: 'Đồ chơi cho bé', code: 'do_choi', itemsCount: 15 },
+  { id: 'c2', name: 'Quần áo sơ sinh Nous nous', code: 'quan_ao', itemsCount: 22 },
+  { id: 'c3', name: 'Sách truyện Ehon', code: 'sach_truyen', itemsCount: 9 },
+  { id: 'c4', name: 'Đồ học tập phát triển trí não', code: 'do_hoc_tap', itemsCount: 4 },
+  { id: 'c5', name: 'Xe nôi cũi võng xếp', code: 'xe_noi', itemsCount: 7 },
+  { id: 'c6', name: 'Trạm Tặng Đồ 0 Xu', code: 'tu_thien', itemsCount: 12 },
 ];
 
 export const ManageCategoriesScreen = () => {
@@ -52,7 +52,7 @@ export const ManageCategoriesScreen = () => {
     setCategories(prev => [...prev, newCat]);
     setNewCatName('');
     setNewCatCode('');
-    Alert.alert('Thành công 🎉', `Đã thêm danh mục mới: ${newCat.name}`);
+    Alert.alert('Thành công', `Đã thêm danh mục mới: ${newCat.name}`);
   };
 
   const handleDelete = (id: string, name: string) => {

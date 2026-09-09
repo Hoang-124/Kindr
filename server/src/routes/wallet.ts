@@ -316,7 +316,7 @@ router.post('/webhook', async (req, res): Promise<void> => {
     const notif = await Notification.create({
       userId: completedOrder.userId,
       type: 'xu_released',
-      title: 'Nạp Xu Tự Động Thành Công! 🟡',
+      title: 'Nạp Xu Tự Động Thành Công!',
       body: `Hệ thống vừa nhận được chuyển khoản ngân hàng. Đã cộng +${completedOrder.xuAmount} Xu vào ví của bạn. Số dư mới: ${updatedUser?.xuBalance} Xu.`,
     });
     emitToUser(completedOrder.userId.toString(), 'notification_new', notif);
@@ -330,7 +330,7 @@ router.post('/webhook', async (req, res): Promise<void> => {
 
     // Send background Push Notification via Expo Push
     await sendPushToUser(completedOrder.userId, {
-      title: 'Nạp Xu Tự Động Thành Công! 🟡',
+      title: 'Nạp Xu Tự Động Thành Công!',
       body: `Đã cộng +${completedOrder.xuAmount} Xu vào ví từ chuyển khoản ngân hàng.`,
       data: { type: 'topup_success', orderCode: completedOrder.orderCode },
     });

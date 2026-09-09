@@ -21,7 +21,8 @@ import {
   Activity, 
   AlertOctagon,
   ChevronRight,
-  TrendingUp
+  TrendingUp,
+  ShieldCheck
 } from 'lucide-react-native';
 import ScreenContainer from '../../../components/layout/ScreenContainer';
 import Header from '../../../components/layout/Header';
@@ -89,7 +90,10 @@ export const AdminDashboardScreen = () => {
       >
         {/* Banner */}
         <View style={styles.adminBanner}>
-          <Text style={styles.bannerTitle}>Hệ Thống Quản Trị Kindr 🛡️</Text>
+          <View style={styles.bannerTitleRow}>
+            <ShieldCheck size={20} color="#ffffff" />
+            <Text style={styles.bannerTitle}>Hệ Thống Quản Trị Kindr</Text>
+          </View>
           <Text style={styles.bannerText}>
             Giám sát cộng đồng văn minh, phân xử giao dịch bảo chứng và quản lý tài chính dòng xu.
           </Text>
@@ -163,11 +167,16 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.lg,
     ...SHADOWS.ambient,
   },
+  bannerTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 4,
+  },
   bannerTitle: {
     fontSize: 18,
     fontWeight: '800',
     color: '#ffffff',
-    marginBottom: 4,
   },
   bannerText: {
     fontSize: 11,

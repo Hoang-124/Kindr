@@ -22,4 +22,9 @@ export const ENV = {
     .split(',')
     .map(e => e.trim().toLowerCase())
     .filter(Boolean),
+  SMTP_HOST: process.env.SMTP_HOST || 'smtp.gmail.com',
+  SMTP_PORT: parseInt(process.env.SMTP_PORT || '587', 10),
+  SMTP_USER: process.env.SMTP_USER || process.env.EMAIL_USER || '',
+  SMTP_PASS: process.env.SMTP_PASS || process.env.EMAIL_PASS || '',
+  EMAIL_FROM: process.env.EMAIL_FROM || 'Kindr Support <support@kindr.vn>',
 } as const;

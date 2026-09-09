@@ -29,7 +29,7 @@ interface Station {
 const STATIONS: Station[] = [
   {
     id: 'st_1',
-    name: 'Trạm Tặng Đồ Hải Châu 💖',
+    name: 'Trạm Tặng Đồ Hải Châu',
     address: '45 Trần Phú, P. Phước Ninh, Q. Hải Châu, Đà Nẵng',
     district: 'Hải Châu',
     phone: '0905 111 222',
@@ -39,7 +39,7 @@ const STATIONS: Station[] = [
   },
   {
     id: 'st_2',
-    name: 'Trạm Tặng Đồ Thanh Khê 🧸',
+    name: 'Trạm Tặng Đồ Thanh Khê',
     address: '112 Điện Biên Phủ, P. Chính Gián, Q. Thanh Khê, Đà Nẵng',
     district: 'Thanh Khê',
     phone: '0905 333 444',
@@ -49,7 +49,7 @@ const STATIONS: Station[] = [
   },
   {
     id: 'st_3',
-    name: 'Trạm Tặng Đồ Sơn Trà 🍼',
+    name: 'Trạm Tặng Đồ Sơn Trà',
     address: '23 Ngô Quyền, P. An Hải Bắc, Q. Sơn Trà, Đà Nẵng',
     district: 'Sơn Trà',
     phone: '0905 555 666',
@@ -62,7 +62,7 @@ const STATIONS: Station[] = [
 export const DonationStationScreen = () => {
   const handleDepositClick = (stationName: string) => {
     Alert.alert(
-      'Ký gửi đồ dùng 🎁',
+      'Ký gửi đồ dùng',
       `Mẹ muốn đăng ký mang đồ dùng không dùng nữa tới ký gửi tại "${stationName}"?\n\nNhân viên trạm sẽ tiếp nhận, phân loại vệ sinh và tặng lại 0 Xu cho các mẹ bỉm khó khăn khác. Mẹ sẽ được cộng điểm Mẹ bỉm văn minh.`,
       [
         { text: 'Hủy', style: 'cancel' },
@@ -73,7 +73,7 @@ export const DonationStationScreen = () => {
 
   const handleBrowseItems = (stationName: string, count: number) => {
     Alert.alert(
-      'Nhận đồ 0 Xu 👶',
+      'Nhận đồ 0 Xu',
       `Trạm "${stationName}" hiện có ${count} đồ dùng dành cho mẹ và bé đang sẵn sàng trao tặng.\n\nMẹ có thể tới trạm trực tiếp hoặc đăng ký với tình nguyện viên qua số điện thoại hỗ trợ của trạm.`,
       [{ text: 'Đã hiểu' }]
     );

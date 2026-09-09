@@ -97,7 +97,7 @@ const exchangeSlice = createSlice({
       pushService.notifyUser(
         newTx.sellerId,
         'match_request',
-        'Có mẹ vừa chọn đổi đồ của bạn! ❤️',
+        'Có mẹ vừa chọn đổi đồ của bạn!',
         `${newTx.buyerName} vừa bấm đổi món: ${newTx.productName}. Kiểm tra liên hệ để hẹn gặp nhé!`,
         newTx.id,
         newTx.productId
@@ -126,7 +126,7 @@ const exchangeSlice = createSlice({
         pushService.notifyUser(
           tx.buyerId,
           'safeful_time_started',
-          'Đã kích hoạt 6 Giờ Kiểm Định! ⏱️',
+          'Đã kích hoạt 6 Giờ Kiểm Định',
           `Bạn có 6 tiếng kiểm tra đồ "${tx.productName}" tại nhà. Nếu có lỗi ẩn, hãy bấm Khiếu nại nhé!`,
           tx.id
         );
@@ -134,7 +134,7 @@ const exchangeSlice = createSlice({
         pushService.notifyUser(
           tx.sellerId,
           'safeful_time_started',
-          'Người mua đã nhận hàng! 📦',
+          'Người mua đã nhận hàng',
           `Khung giờ 6h kiểm định tại nhà bắt đầu. Xu sẽ tự động giải phóng khi hết 6 giờ.`,
           tx.id
         );
@@ -150,7 +150,7 @@ const exchangeSlice = createSlice({
         pushService.notifyUser(
           tx.sellerId,
           'xu_released',
-          'Giao dịch hoàn tất! Xu đã vào ví 🟡',
+          'Giao dịch hoàn tất! Xu đã vào ví',
           `Hệ thống đã giải phóng ${tx.buyerEscrowFrozen + tx.sellerEscrowFrozen} Xu vào ví của mẹ. Đừng quên đánh giá nhé!`,
           tx.id
         );
@@ -158,7 +158,7 @@ const exchangeSlice = createSlice({
         pushService.notifyUser(
           tx.buyerId,
           'xu_released',
-          'Giao dịch thành công! 🎉',
+          'Giao dịch thành công',
           `Cảm ơn mẹ đã sử dụng Kindr. Hãy dành 30s đánh giá cho ${tx.sellerName} nhé!`,
           tx.id
         );
@@ -178,7 +178,7 @@ const exchangeSlice = createSlice({
         pushService.notifyUser(
           tx.sellerId,
           'dispute_opened',
-          'Có khiếu nại mới cho đơn hàng! ⚠️',
+          'Có khiếu nại mới cho đơn hàng',
           `Người mua đã báo lỗi món "${tx.productName}". Đội ngũ Kindr đang kiểm tra chứng cứ.`,
           tx.id
         );

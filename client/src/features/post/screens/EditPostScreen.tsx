@@ -125,7 +125,7 @@ export const EditPostScreen = () => {
     dispatch(hydrateProducts(updatedProductsList));
 
     Alert.alert(
-      'Thành công! 🎉',
+      'Thành công',
       'Bài viết của mẹ đã được cập nhật thông tin mới.',
       [{ text: 'Đồng ý', onPress: () => navigation.goBack() }]
     );

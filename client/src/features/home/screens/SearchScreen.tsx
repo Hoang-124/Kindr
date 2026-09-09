@@ -33,6 +33,7 @@ import { Search as SearchIcon, SlidersHorizontal, Heart, MapPin } from 'lucide-r
 import { VIETNAM_LOCATIONS } from '../../../utils/locations';
 import { ScalePressable } from '../../../components/common/ScalePressable';
 import { FadeInItem } from '../../../components/common/FadeInItem';
+import KindrCoin from '../../../components/common/KindrCoin';
 
 type NavigationProp = NativeStackNavigationProp<AppStackParamList>;
 
@@ -61,13 +62,13 @@ export const SearchScreen = () => {
   // Dropdown options
   const categoryOptions = [
     { value: 'all', label: 'Tất cả danh mục' },
-    { value: 'toy_small', label: 'Đồ chơi nhỏ 🧸' },
-    { value: 'toy_large', label: 'Đồ chơi lớn 🚲' },
-    { value: 'book', label: 'Sách truyện 📚' },
-    { value: 'quan_ao', label: 'Quần áo bé 👶' },
-    { value: 'xe_noi', label: 'Xe đẩy & Nôi cũi 🚼' },
-    { value: 'do_hoc_tap', label: 'Đồ học tập ✏️' },
-    { value: 'tu_thien', label: 'Trạm Tặng Đồ 🎁 (0 Xu)' },
+    { value: 'toy_small', label: 'Đồ chơi nhỏ' },
+    { value: 'toy_large', label: 'Đồ chơi lớn' },
+    { value: 'book', label: 'Sách truyện' },
+    { value: 'quan_ao', label: 'Quần áo bé' },
+    { value: 'xe_noi', label: 'Xe đẩy & Nôi cũi' },
+    { value: 'do_hoc_tap', label: 'Đồ học tập' },
+    { value: 'tu_thien', label: 'Trạm Tặng Đồ (0 Xu)' },
   ];
 
   const districtOptions = [
@@ -243,7 +244,7 @@ export const SearchScreen = () => {
                   </View>
 
                   <View style={styles.priceBadge}>
-                    <Text style={styles.priceSymbol}>🪙</Text>
+                    <KindrCoin size={13} />
                     <Text style={styles.priceText}>{item.price} Xu</Text>
                   </View>
                 </View>

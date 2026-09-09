@@ -9,6 +9,7 @@ import {
   loginAsync,
   loginGoogleAsync,
   registerAsync,
+  activateAccountAsync,
   logoutAsync,
   updateProfileAsync,
   changePasswordAsync,
@@ -27,6 +28,7 @@ interface AuthContextType {
   loginWithGoogle: (googleData: { credential?: string; idToken?: string; email?: string; name?: string; avatar?: string; googleId?: string }) => Promise<any>;
   register: (name: string, phone: string, email: string, districtId: string, addressDetail: string) => void;
   registerWithCredentials: (payload: { name: string; phone: string; password: string; email?: string; districtId?: string; districtName?: string; addressDetail?: string }) => Promise<any>;
+  activateAccount: (email: string, otp: string) => Promise<any>;
   updateProfile: (payload: { name?: string; phone?: string; avatar?: string; bio?: string; districtId?: string; districtName?: string; addressDetail?: string }) => Promise<any>;
   changePassword: (payload: { oldPassword?: string; newPassword: string }) => Promise<any>;
   logout: () => Promise<void>;
@@ -81,6 +83,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     addressDetail?: string;
   }) => {
     const res = await dispatch(registerAsync(payload)).unwrap();
+    if (!res?.needsActivation) {
+      registerPushNotifications();
+    }
+    return res;
+  };
+
+  const activateAccount = async (email: string, otp: string) => {
+    const res = await dispatch(activateAccountAsync({ email, otp })).unwrap();
+    socketService.connect();
     registerPushNotifications();
     return res;
   };
@@ -150,6 +161,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         loginWithGoogle,
         register,
         registerWithCredentials,
+        activateAccount,
         updateProfile,
         changePassword,
         logout,

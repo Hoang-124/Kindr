@@ -8,6 +8,9 @@ import { useAuth } from '../../app/providers/AuthProvider';
 
 import { ScalePressable } from '../common/ScalePressable';
 import { PulseBadge } from '../common/PulseBadge';
+import KindrCoin from '../common/KindrCoin';
+
+const KINDR_LOGO = require('../../../assets/images/kindr-logo.png');
 
 interface HeaderProps {
   title?: string;
@@ -63,7 +66,10 @@ export const Header = ({
         ) : title ? (
           <Text style={styles.leftTitleText} numberOfLines={1}>{title}</Text>
         ) : (
-          <Text style={styles.brandText}>Kindr</Text>
+          <View style={styles.brandRow}>
+            <Image source={KINDR_LOGO} style={styles.brandLogo} />
+            <Text style={styles.brandText}>Kindr</Text>
+          </View>
         )}
       </View>
 
@@ -85,7 +91,7 @@ export const Header = ({
           >
             <View style={styles.walletContainer}>
               <PulseBadge scaleMin={0.92} scaleMax={1.1} duration={2000}>
-                <Text style={styles.walletTokenSymbol}>🪙</Text>
+                <KindrCoin size={15} />
               </PulseBadge>
               <Text style={styles.walletBalance}>{currentUser.xuBalance} Xu</Text>
             </View>
@@ -164,6 +170,16 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '700',
     color: COLORS.text,
+  },
+  brandRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  brandLogo: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
   },
   brandText: {
     fontSize: 22,

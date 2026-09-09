@@ -33,15 +33,15 @@ class SocketService {
       });
 
       this.socket.on('connect', () => {
-        console.log('🔌 Socket connected successfully');
+        console.log('[Socket] Connected successfully');
       });
 
       this.socket.on('connect_error', (error) => {
-        console.warn('⚠️ Socket connection error:', error.message);
+        console.warn('[Socket] Connection error:', error.message);
       });
 
       this.socket.on('disconnect', (reason) => {
-        console.log('🔌 Socket disconnected:', reason);
+        console.log('[Socket] Disconnected:', reason);
       });
 
       this.isConnecting = false;

@@ -93,7 +93,7 @@ export function setupChatHandler(io: Server, socket: Socket, userId: string): vo
 
       // Send background Push Notification
       sendPushToUser(otherUserId, {
-        title: `${senderName} 💬`,
+        title: senderName,
         body: content.trim(),
         data: { type: 'chat_message', chatId },
       }).catch(() => {});

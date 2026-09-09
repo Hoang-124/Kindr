@@ -27,7 +27,7 @@ interface NotificationItem {
 const INITIAL_NOTIFICATIONS: NotificationItem[] = [
   {
     id: 'n1',
-    title: 'Giao dịch thành công 🎉',
+    title: 'Giao dịch thành công',
     body: 'Đơn hàng "Set 3 bộ body suit nous" đã được hoàn tất. Chúc bé mặc ngoan chóng lớn!',
     type: 'trade',
     time: '2 giờ trước',
@@ -35,7 +35,7 @@ const INITIAL_NOTIFICATIONS: NotificationItem[] = [
   },
   {
     id: 'n2',
-    title: 'Mẹ Bắp đã gửi tin nhắn 💬',
+    title: 'Mẹ Bắp đã gửi tin nhắn',
     body: '"Ok mẹ nè, mình đã duyệt và bàn giao rồi đó. Mẹ check giúp mình."',
     type: 'message',
     time: '5 giờ trước',
@@ -43,7 +43,7 @@ const INITIAL_NOTIFICATIONS: NotificationItem[] = [
   },
   {
     id: 'n3',
-    title: 'Cộng điểm Mẹ Bỉm Văn Minh 🌟',
+    title: 'Cộng điểm Mẹ Bỉm Văn Minh',
     body: 'Mẹ được cộng +5 điểm vì bàn giao đồ chơi gỗ đúng hẹn cho Mẹ Bắp.',
     type: 'civ',
     time: '1 ngày trước',
@@ -51,7 +51,7 @@ const INITIAL_NOTIFICATIONS: NotificationItem[] = [
   },
   {
     id: 'n4',
-    title: 'Chào mừng mẹ đến với Kindr! 👶',
+    title: 'Chào mừng mẹ đến với Kindr!',
     body: 'Nhận ngay 15 Xu làm vốn để bắt đầu trao đổi đồ cũ bảo chứng văn minh mẹ nhé.',
     type: 'sys',
     time: '3 ngày trước',
@@ -115,7 +115,7 @@ export const NotificationScreen = () => {
 
   const handleClearAll = async () => {
     Alert.alert(
-      'Xóa tất cả thông báo? 🗑️',
+      'Xóa tất cả thông báo?',
       'Mẹ muốn đánh dấu đã đọc toàn bộ lịch sử thông báo?',
       [
         { text: 'Hủy', style: 'cancel' },

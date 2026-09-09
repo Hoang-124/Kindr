@@ -5,7 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AuthStackParamList } from '../../../app/navigation/navigationTypes';
 import { COLORS, TYPOGRAPHY, SPACING, RADIUS } from '../../../theme';
-import { DEFAULT_IMAGES } from '../../../utils/constants';
+import MascotIcon from '../../../components/common/MascotIcon';
 
 type NavigationProp = NativeStackNavigationProp<AuthStackParamList, 'Splash'>;
 
@@ -44,11 +44,7 @@ export const SplashScreen = () => {
         <Text style={styles.logoText}>Kindr</Text>
 
         <View style={styles.mascotContainer}>
-          <Image 
-            source={{ uri: DEFAULT_IMAGES.MASCOT }} 
-            style={styles.mascot}
-            resizeMode="contain"
-          />
+          <MascotIcon size={140} mood="celebrate" />
           <View style={styles.mascotShadow} />
         </View>
 

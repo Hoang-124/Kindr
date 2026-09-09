@@ -97,7 +97,7 @@ export const ManageTransactionsScreen = () => {
                 <View style={styles.prodDetails}>
                   <Text style={styles.prodName} numberOfLines={1}>{item.productName}</Text>
                   <Text style={styles.parties}>
-                    Mẹ mua: {item.buyerName} ➔ Mẹ bán: {item.sellerName}
+                    Mẹ mua: {item.buyerName} → Mẹ bán: {item.sellerName}
                   </Text>
                   <Text style={styles.dateText}>Khởi tạo: {formatFullDate(item.createdAt)}</Text>
                 </View>

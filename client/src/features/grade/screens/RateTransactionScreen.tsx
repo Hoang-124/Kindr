@@ -53,7 +53,7 @@ export const RateTransactionScreen = () => {
       await ratingService.submitRating({
         transactionId: tx.id,
         stars,
-        comment: comment.trim() || 'Giao dịch văn minh mượt mà! ❤️',
+        comment: comment.trim() || 'Giao dịch văn minh mượt mà!',
       });
       dispatch(refreshWalletBalance());
     } catch (e) {
@@ -65,7 +65,7 @@ export const RateTransactionScreen = () => {
         fromUserAvatar: currentUser.avatar,
         toUserId: targetUserId,
         stars,
-        comment: comment.trim() || 'Giao dịch văn minh mượt mà! ❤️',
+        comment: comment.trim() || 'Giao dịch văn minh mượt mà!',
       }));
 
       dispatch(updateUserReputation({ userId: targetUserId, newStars: stars }));
@@ -76,7 +76,7 @@ export const RateTransactionScreen = () => {
     setLoading(false);
 
     Alert.alert(
-      'Đã gửi đánh giá 🎉',
+      'Đã gửi đánh giá',
       `Cảm ơn mẹ đã đóng góp ý kiến cho ${targetUserName}! Mẹ được thưởng +2 điểm Mẹ Bỉm Văn Minh.`,
       [{ text: 'Trở về', onPress: () => navigation.navigate('Home') }]
     );

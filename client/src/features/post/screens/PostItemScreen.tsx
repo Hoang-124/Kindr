@@ -22,6 +22,7 @@ import FormSelect from '../../../components/form/FormSelect';
 import Button from '../../../components/common/Button';
 import FormError from '../../../components/form/FormError';
 import MascotIcon from '../../../components/common/MascotIcon';
+import KindrCoin from '../../../components/common/KindrCoin';
 import { Image as ImageIcon, Sparkles, X, Lightbulb, MapPin, Camera } from 'lucide-react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { DEFAULT_IMAGES } from '../../../utils/constants';
@@ -60,13 +61,13 @@ export const PostItemScreen = () => {
 
   // Category and Condition Options
   const categoryOptions = [
-    { value: 'toy_small', label: 'Đồ chơi nhỏ 🧸' },
-    { value: 'toy_large', label: 'Đồ chơi lớn 🚲' },
-    { value: 'book', label: 'Sách truyện 📚' },
-    { value: 'quan_ao', label: 'Quần áo bé 👶' },
-    { value: 'xe_noi', label: 'Xe đẩy & Nôi cũi 🚼' },
-    { value: 'do_hoc_tap', label: 'Đồ học tập ✏️' },
-    { value: 'charity', label: 'Trạm Tặng Đồ 🎁 (0 Xu)' },
+    { value: 'toy_small', label: 'Đồ chơi nhỏ' },
+    { value: 'toy_large', label: 'Đồ chơi lớn' },
+    { value: 'book', label: 'Sách truyện' },
+    { value: 'quan_ao', label: 'Quần áo bé' },
+    { value: 'xe_noi', label: 'Xe đẩy & Nôi cũi' },
+    { value: 'do_hoc_tap', label: 'Đồ học tập' },
+    { value: 'charity', label: 'Trạm Tặng Đồ (0 Xu)' },
   ];
 
   const conditionOptions = [
@@ -114,7 +115,7 @@ export const PostItemScreen = () => {
 
   const handlePickImage = async () => {
     Alert.alert(
-      'Chọn hình ảnh món đồ 📸',
+      'Chọn hình ảnh món đồ',
       'Mẹ muốn chụp ảnh mới hay chọn từ bộ sưu tập ảnh trên máy?',
       [
         { text: 'Hủy', style: 'cancel' },
@@ -167,7 +168,7 @@ export const PostItemScreen = () => {
   const handleAIAssist = async () => {
     if (!name.trim()) {
       Alert.alert(
-        'Gợi ý từ AI ✨',
+        'Gợi ý từ AI',
         'Mẹ vui lòng nhập tên món đồ trước (VD: "Xe đẩy Combi", "Bộ xếp hình lego") để AI có thể phân tích và viết mô tả nhé!'
       );
       return;
@@ -183,7 +184,7 @@ export const PostItemScreen = () => {
       }
       setDescription(result.description);
       Alert.alert(
-        'AI Đã Hoàn Tất ✨',
+        'AI Đã Hoàn Tất',
         `Đã gợi ý mức giá ${result.suggestedXu} Xu và soạn sẵn nội dung mô tả chi tiết cho món "${name}"!`
       );
     } catch {
@@ -242,10 +243,10 @@ export const PostItemScreen = () => {
       setLoading(false);
 
       const msg = category === 'charity'
-        ? `Món đồ "${name}" của mẹ đã được đăng lên Trạm Tặng Đồ (0 Xu) cho gia đình cần nhận ❤️`
+        ? `Món đồ "${name}" của mẹ đã được đăng lên Trạm Tặng Đồ (0 Xu) cho gia đình cần nhận.`
         : `Món đồ "${name}" của mẹ đã được duyệt đăng lên sàn! Hệ thống tạm khóa ${safeFee} Xu Safe Fee bảo chứng chất lượng.`;
 
-      Alert.alert('Đăng đồ thành công 🎉', msg, [
+      Alert.alert('Đăng đồ thành công', msg, [
         {
           text: 'Đồng ý',
           onPress: () => {
@@ -292,10 +293,10 @@ export const PostItemScreen = () => {
       setLoading(false);
 
       const msg = category === 'charity'
-        ? `Món đồ "${name}" của mẹ đã được đăng lên Trạm Tặng Đồ (0 Xu) cho gia đình cần nhận ❤️`
+        ? `Món đồ "${name}" của mẹ đã được đăng lên Trạm Tặng Đồ (0 Xu) cho gia đình cần nhận.`
         : `Món đồ "${name}" của mẹ đã được duyệt đăng lên sàn! Hệ thống tạm khóa ${safeFee} Xu Safe Fee bảo chứng chất lượng.`;
 
-      Alert.alert('Đăng đồ thành công 🎉', msg, [
+      Alert.alert('Đăng đồ thành công', msg, [
         {
           text: 'Đồng ý',
           onPress: () => {
@@ -320,7 +321,7 @@ export const PostItemScreen = () => {
             size={52} 
             mood="protective" 
             dialogue={category === 'charity' 
-              ? "Tặng đồ 0 Xu từ thiện được miễn hoàn toàn Safe Fee mẹ nhé! ❤️"
+              ? "Tặng đồ 0 Xu từ thiện được miễn hoàn toàn Safe Fee mẹ nhé!"
               : `Mẹ tạm gửi ${safeFee} Xu Safe Fee vào rương bảo vệ để đảm bảo đồ chất lượng nhé!`}
           />
         </View>
@@ -370,7 +371,7 @@ export const PostItemScreen = () => {
           >
             <Sparkles size={16} color={COLORS.primary} />
             <Text style={styles.aiAssistText}>
-              {aiLoading ? 'AI đang phân tích & định giá...' : '✨ AI Gợi ý định giá & Viết mô tả'}
+              {aiLoading ? 'AI đang phân tích & định giá...' : 'AI Gợi ý định giá & Viết mô tả'}
             </Text>
           </ScalePressable>
 
@@ -407,7 +408,7 @@ export const PostItemScreen = () => {
             <View style={[styles.priceFieldContainer, { flex: 1 }]}>
               <Text style={styles.priceLabel}>Định giá (Xu) *</Text>
               <View style={styles.priceInputWrapper}>
-                <Text style={styles.priceSymbol}>🪙</Text>
+                <KindrCoin size={18} style={{ marginRight: 8 }} />
                 <TextInput
                   style={styles.priceInput}
                   keyboardType="numeric"

@@ -12,6 +12,7 @@ import { Notification } from '../models/Notification';
 import { requireAuth, AuthRequest } from '../middleware/auth';
 import { ENV } from '../config/env';
 import { registerPushToken, unregisterPushToken } from '../services/pushNotificationService';
+import { sendPasswordResetOtpEmail, sendAccountActivationOtpEmail } from '../services/emailService';
 
 const router = Router();
 
@@ -89,12 +90,24 @@ router.post('/register', async (req: AuthRequest, res: Response): Promise<void> 
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(password, salt);
 
+    const hasEmail = Boolean(email && email.trim());
+    let activationOtp: string | undefined;
+    let activationOtpExpires: Date | undefined;
+
+    if (hasEmail) {
+      activationOtp = Math.floor(100000 + Math.random() * 900000).toString();
+      activationOtpExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+    }
+
     // 6. Create user with 10 Xu welcome credit
     const user = await User.create({
       name,
       phone,
-      email,
+      email: email ? email.trim().toLowerCase() : undefined,
       passwordHash,
+      isActivated: !hasEmail,
+      activationOtp,
+      activationOtpExpires,
       location: {
         districtId: districtId || '',
         districtName: districtName || '',
@@ -105,28 +118,38 @@ router.post('/register', async (req: AuthRequest, res: Response): Promise<void> 
       civilizationPoints: 95,
       historyPoints: [{
         pointsChanged: 95,
-        reason: 'Chào mừng gia nhập cộng đồng Kindr! Tặng 10 Xu chào mừng 🎉',
+        reason: 'Chào mừng gia nhập cộng đồng Kindr! Tặng 10 Xu chào mừng',
         date: new Date(),
       }],
     });
 
-    // 5. Create welcome notification
+    // 7. Create welcome notification
     await Notification.create({
       userId: user._id,
       type: 'welcome_credit',
-      title: `Chào mừng ${name}! 🎈`,
+      title: `Chào mừng ${name}!`,
       body: 'Kindr đã gửi tặng Mẹ 10 Xu chào mừng vào ví. Hãy bắt đầu đổi quà cho bé ngay nào!',
     });
 
-    // 6. Generate tokens
+    // If has email, require activation first!
+    if (hasEmail && activationOtp && user.email) {
+      await sendAccountActivationOtpEmail(user.email, user.name, activationOtp);
+
+      res.status(201).json({
+        message: 'Đăng ký thành công! Vui lòng kiểm tra email để nhập mã kích hoạt tài khoản.',
+        needsActivation: true,
+        email: user.email,
+      });
+      return;
+    }
+
+    // 8. Generate tokens for phone-only users
     const accessToken = generateAccessToken(user._id.toString(), user.role);
     const refreshToken = generateRefreshToken(user._id.toString(), user.role);
 
-    // 7. Store refresh token
     user.refreshTokens.push(refreshToken);
     await user.save();
 
-    // 8. Response
     res.status(201).json({
       message: 'Đăng ký thành công!',
       user: user.toJSON(),
@@ -181,6 +204,28 @@ router.post('/login', async (req: AuthRequest, res: Response): Promise<void> => 
     const isMatch = await bcrypt.compare(password, user.passwordHash);
     if (!isMatch) {
       res.status(401).json({ error: 'Số điện thoại/Email hoặc mật khẩu không đúng.' });
+      return;
+    }
+
+    // Check if account needs email activation
+    if (user.email && !user.isActivated) {
+      // Always generate a fresh 6-digit activation OTP
+      const activationOtp = Math.floor(100000 + Math.random() * 900000).toString();
+      user.activationOtp = activationOtp;
+      user.activationOtpExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+      await user.save();
+
+      // Send real email via SMTP
+      const emailResult = await sendAccountActivationOtpEmail(user.email, user.name, activationOtp);
+      if (!emailResult.success) {
+        console.warn('[AUTH] Error sending activation email via SMTP:', emailResult.error);
+      }
+
+      res.status(403).json({
+        error: 'Tài khoản của bạn chưa được kích hoạt. Kindr đã gửi mã xác thực kích hoạt 6 số về email của bạn. Vui lòng kích hoạt tài khoản để tiếp tục.',
+        needsActivation: true,
+        email: user.email,
+      });
       return;
     }
 
@@ -405,7 +450,7 @@ router.post('/google', async (req: AuthRequest, res: Response): Promise<void> =>
         civilizationPoints: 95,
         historyPoints: [{
           pointsChanged: 95,
-          reason: 'Chào mừng gia nhập cộng đồng Kindr bằng Google! Tặng 10 Xu chào mừng 🎉',
+          reason: 'Chào mừng gia nhập cộng đồng Kindr bằng Google! Tặng 10 Xu chào mừng',
           date: new Date(),
         }],
         role: (ENV.ADMIN_EMAILS as readonly string[]).includes(googleProfile.email.toLowerCase()) ? 'admin' : 'user',
@@ -415,7 +460,7 @@ router.post('/google', async (req: AuthRequest, res: Response): Promise<void> =>
       await Notification.create({
         userId: user._id,
         type: 'welcome_credit',
-        title: `Chào mừng ${googleProfile.name}! 🎈`,
+        title: `Chào mừng ${googleProfile.name}!`,
         body: 'Kindr đã gửi tặng Mẹ 10 Xu chào mừng vào ví. Hãy bắt đầu đổi quà cho bé ngay nào!',
       });
     } else {
@@ -620,5 +665,343 @@ router.delete('/push-token', requireAuth, async (req: AuthRequest, res: Response
   }
 });
 
+// ---- Password Recovery (OTP via Email) ----
+
+const ForgotPasswordSchema = z.object({
+  email: z.string().trim().email('Địa chỉ email không hợp lệ'),
+});
+
+/**
+ * POST /api/auth/forgot-password
+ * Send OTP to user's registered email
+ */
+router.post('/forgot-password', async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const parsed = ForgotPasswordSchema.safeParse(req.body);
+    if (!parsed.success) {
+      res.status(400).json({ error: parsed.error.errors[0].message });
+      return;
+    }
+
+    const email = parsed.data.email.toLowerCase();
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      res.status(404).json({
+        error: 'Tài khoản chưa được đăng ký! Email này chưa liên kết với bất kỳ tài khoản Kindr nào. Vui lòng kiểm tra lại hoặc đăng ký tài khoản mới.',
+        code: 'ACCOUNT_NOT_FOUND',
+        notRegistered: true,
+      });
+      return;
+    }
+
+    if (user.isLocked) {
+      res.status(403).json({ error: 'Tài khoản này đã bị khóa do vi phạm. Vui lòng liên hệ BQT Kindr.' });
+      return;
+    }
+
+    // Google-authenticated accounts do not use password reset
+    if (user.googleId) {
+      res.status(400).json({
+        error: 'Tài khoản này được đăng ký và đăng nhập bằng Google. Mẹ không cần khôi phục mật khẩu, vui lòng chọn "Đăng nhập bằng Google" trên trang Đăng nhập.',
+        code: 'GOOGLE_ACCOUNT',
+        isGoogleAccount: true,
+      });
+      return;
+    }
+
+    // Generate random 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+    user.resetPasswordOtp = otp;
+    user.resetPasswordOtpExpires = otpExpires;
+    await user.save();
+
+    const result = await sendPasswordResetOtpEmail(user.email || email, user.name, otp);
+
+    if (!result.success) {
+      res.status(500).json({ error: result.error || 'Không thể gửi email. Vui lòng kiểm tra lại cấu hình email hệ thống.' });
+      return;
+    }
+
+    res.json({
+      message: 'Mã xác thực OTP đã được gửi đến email của bạn. Vui lòng kiểm tra hộp thư (cả thư mục Rác/Spam).',
+      email: user.email,
+    });
+  } catch (error: any) {
+    console.error('Forgot password error:', error);
+    res.status(500).json({ error: 'Lỗi hệ thống khi gửi mã OTP. Vui lòng thử lại sau.' });
+  }
+});
+
+const VerifyOtpSchema = z.object({
+  email: z.string().trim().email('Địa chỉ email không hợp lệ'),
+  otp: z.string().length(6, 'Mã OTP phải gồm đúng 6 chữ số'),
+});
+
+/**
+ * POST /api/auth/verify-otp
+ * Verify if OTP is valid before showing reset password form
+ */
+router.post('/verify-otp', async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const parsed = VerifyOtpSchema.safeParse(req.body);
+    if (!parsed.success) {
+      res.status(400).json({ error: parsed.error.errors[0].message });
+      return;
+    }
+
+    const { email, otp } = parsed.data;
+    const normalizedEmail = email.toLowerCase();
+
+    const user = await User.findOne({ email: normalizedEmail });
+    if (!user) {
+      res.status(404).json({ error: 'Không tìm thấy tài khoản.' });
+      return;
+    }
+
+    if (user.googleId) {
+      res.status(400).json({
+        error: 'Tài khoản này được đăng ký và đăng nhập bằng Google.',
+        code: 'GOOGLE_ACCOUNT',
+        isGoogleAccount: true,
+      });
+      return;
+    }
+
+    if (!user.resetPasswordOtp || !user.resetPasswordOtpExpires) {
+      res.status(400).json({ error: 'Bạn chưa yêu cầu mã OTP hoặc mã đã hết hạn. Vui lòng nhấn gửi lại mã.' });
+      return;
+    }
+
+    if (new Date() > user.resetPasswordOtpExpires) {
+      res.status(400).json({ error: 'Mã OTP đã hết hiệu lực (quá 10 phút). Vui lòng gửi lại mã mới.' });
+      return;
+    }
+
+    if (user.resetPasswordOtp.trim() !== otp.trim()) {
+      res.status(400).json({ error: 'Mã xác thực OTP không chính xác. Vui lòng kiểm tra lại.' });
+      return;
+    }
+
+    res.json({
+      valid: true,
+      message: 'Xác thực mã OTP thành công! Vui lòng tạo mật khẩu mới.',
+    });
+  } catch (error: any) {
+    console.error('Verify OTP error:', error);
+    res.status(500).json({ error: 'Lỗi hệ thống khi xác thực mã OTP.' });
+  }
+});
+
+const ResetPasswordSchema = z.object({
+  email: z.string().trim().email('Địa chỉ email không hợp lệ'),
+  otp: z.string().length(6, 'Mã OTP phải gồm đúng 6 chữ số'),
+  newPassword: z.string().min(6, 'Mật khẩu mới phải ít nhất 6 ký tự'),
+});
+
+/**
+ * POST /api/auth/reset-password
+ * Verify OTP and set new password
+ */
+router.post('/reset-password', async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const parsed = ResetPasswordSchema.safeParse(req.body);
+    if (!parsed.success) {
+      res.status(400).json({ error: parsed.error.errors[0].message });
+      return;
+    }
+
+    const { email, otp, newPassword } = parsed.data;
+    const normalizedEmail = email.toLowerCase();
+
+    const user = await User.findOne({ email: normalizedEmail });
+    if (!user) {
+      res.status(404).json({ error: 'Không tìm thấy tài khoản.' });
+      return;
+    }
+
+    if (user.googleId) {
+      res.status(400).json({
+        error: 'Tài khoản này được đăng ký và đăng nhập bằng Google.',
+        code: 'GOOGLE_ACCOUNT',
+        isGoogleAccount: true,
+      });
+      return;
+    }
+
+    if (!user.resetPasswordOtp || !user.resetPasswordOtpExpires) {
+      res.status(400).json({ error: 'Bạn chưa yêu cầu mã OTP hoặc mã đã hết hạn. Vui lòng nhấn gửi lại mã.' });
+      return;
+    }
+
+    if (new Date() > user.resetPasswordOtpExpires) {
+      res.status(400).json({ error: 'Mã OTP đã hết hiệu lực (quá 10 phút). Vui lòng yêu cầu mã OTP mới.' });
+      return;
+    }
+
+    if (user.resetPasswordOtp.trim() !== otp.trim()) {
+      res.status(400).json({ error: 'Mã OTP không chính xác. Vui lòng kiểm tra lại.' });
+      return;
+    }
+
+    // Hash new password
+    const salt = await bcrypt.genSalt(10);
+    user.passwordHash = await bcrypt.hash(newPassword, salt);
+
+    // Clear reset OTP and revoke all existing sessions for security
+    user.resetPasswordOtp = undefined;
+    user.resetPasswordOtpExpires = undefined;
+    user.refreshTokens = [];
+    await user.save();
+
+    // Create system notification
+    await Notification.create({
+      userId: user._id,
+      type: 'system',
+      title: 'Mật khẩu đã được thay đổi',
+      body: 'Mật khẩu tài khoản Kindr của bạn đã được cập nhật thành công qua mã OTP xác thực email.',
+    });
+
+    res.json({
+      message: 'Đặt lại mật khẩu thành công! Hãy đăng nhập bằng mật khẩu mới của bạn.',
+    });
+  } catch (error: any) {
+    console.error('Reset password error:', error);
+    res.status(500).json({ error: 'Lỗi hệ thống khi đặt lại mật khẩu.' });
+  }
+});
+
+// ---- Account Activation Routes (TrekMap Style) ----
+
+const ActivateAccountSchema = z.object({
+  email: z.string().trim().email('Địa chỉ email không hợp lệ'),
+  otp: z.string().length(6, 'Mã kích hoạt phải gồm đúng 6 chữ số'),
+});
+
+/**
+ * POST /api/auth/activate-account
+ * Activate account using the 6-digit OTP code sent via email
+ */
+router.post('/activate-account', async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const parsed = ActivateAccountSchema.safeParse(req.body);
+    if (!parsed.success) {
+      res.status(400).json({ error: parsed.error.errors[0].message });
+      return;
+    }
+
+    const { email, otp } = parsed.data;
+    const normalizedEmail = email.toLowerCase();
+    const user = await User.findOne({ email: normalizedEmail });
+
+    if (!user) {
+      res.status(404).json({ error: 'Không tìm thấy tài khoản.' });
+      return;
+    }
+
+    if (user.isActivated) {
+      const accessToken = generateAccessToken(user._id.toString(), user.role);
+      const refreshToken = generateRefreshToken(user._id.toString(), user.role);
+      user.refreshTokens = [...user.refreshTokens.slice(-4), refreshToken];
+      await user.save();
+      res.status(200).json({
+        message: 'Tài khoản đã được kích hoạt trước đó.',
+        user: user.toJSON(),
+        accessToken,
+        refreshToken,
+        alreadyActivated: true,
+      });
+      return;
+    }
+
+    if (!user.activationOtp || !user.activationOtpExpires) {
+      res.status(400).json({ error: 'Mã kích hoạt không tồn tại hoặc đã hết hạn. Vui lòng bấm gửi lại mã.' });
+      return;
+    }
+
+    if (new Date() > user.activationOtpExpires) {
+      res.status(400).json({ error: 'Mã kích hoạt đã hết hiệu lực. Vui lòng yêu cầu gửi lại mã mới.' });
+      return;
+    }
+
+    if (user.activationOtp.trim() !== otp.trim()) {
+      res.status(400).json({ error: 'Mã xác thực kích hoạt không chính xác. Vui lòng kiểm tra lại.' });
+      return;
+    }
+
+    // Mark activated & clear OTP
+    user.isActivated = true;
+    user.activationOtp = undefined;
+    user.activationOtpExpires = undefined;
+
+    // Generate tokens for immediate login
+    const accessToken = generateAccessToken(user._id.toString(), user.role);
+    const refreshToken = generateRefreshToken(user._id.toString(), user.role);
+    user.refreshTokens.push(refreshToken);
+    await user.save();
+
+    res.json({
+      message: 'Kích hoạt tài khoản thành công! Chào mừng bạn đến với Kindr.',
+      user: user.toJSON(),
+      accessToken,
+      refreshToken,
+    });
+  } catch (error: any) {
+    console.error('Activate account error:', error);
+    res.status(500).json({ error: 'Lỗi hệ thống khi kích hoạt tài khoản.' });
+  }
+});
+
+const ResendActivationSchema = z.object({
+  email: z.string().trim().email('Địa chỉ email không hợp lệ'),
+});
+
+/**
+ * POST /api/auth/resend-activation
+ * Resend activation OTP to user email
+ */
+router.post('/resend-activation', async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const parsed = ResendActivationSchema.safeParse(req.body);
+    if (!parsed.success) {
+      res.status(400).json({ error: parsed.error.errors[0].message });
+      return;
+    }
+
+    const email = parsed.data.email.toLowerCase();
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      res.status(404).json({ error: 'Không tìm thấy tài khoản nào liên kết với email này.' });
+      return;
+    }
+
+    if (user.isActivated) {
+      res.status(400).json({ error: 'Tài khoản này đã được kích hoạt rồi. Bạn có thể đăng nhập trực tiếp.' });
+      return;
+    }
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    user.activationOtp = otp;
+    user.activationOtpExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    await user.save();
+
+    const result = await sendAccountActivationOtpEmail(user.email || email, user.name, otp);
+    if (!result.success) {
+      res.status(500).json({ error: result.error || 'Không thể gửi email kích hoạt.' });
+      return;
+    }
+
+    res.json({ message: 'Mã kích hoạt mới đã được gửi đến email của bạn.' });
+  } catch (error: any) {
+    console.error('Resend activation error:', error);
+    res.status(500).json({ error: 'Lỗi hệ thống khi gửi lại mã kích hoạt.' });
+  }
+});
+
 export default router;
+
+
 

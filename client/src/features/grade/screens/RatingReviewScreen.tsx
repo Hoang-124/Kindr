@@ -21,11 +21,11 @@ import Button from '../../../components/common/Button';
 import * as ratingService from '../../../services/ratingService';
 
 const QUICK_TAGS = [
-  'Đồ mới đúng mô tả 👕',
-  'Giao hàng nhanh chóng ⚡',
-  'Mẹ bỉm rất thân thiện 😊',
-  'Đóng gói cẩn thận 📦',
-  'Đồ dùng sạch sẽ 🧼',
+  'Đồ mới đúng mô tả',
+  'Giao hàng nhanh chóng',
+  'Mẹ bỉm rất thân thiện',
+  'Đóng gói cẩn thận',
+  'Đồ dùng sạch sẽ',
 ];
 
 export const RatingReviewScreen = () => {
@@ -109,7 +109,7 @@ export const RatingReviewScreen = () => {
     }));
 
     Alert.alert(
-      'Đã gửi đánh giá! 🌟',
+      'Đã gửi đánh giá thành công',
       `Cảm ơn mẹ đã đóng góp ý kiến. Điểm văn minh của ${partnerName} đã được cập nhật tương ứng.`,
       [{ text: 'Đồng ý', onPress: () => navigation.navigate('Main') }]
     );

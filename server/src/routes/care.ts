@@ -85,7 +85,7 @@ router.post('/vaccines/toggle', requireAuth, async (req: AuthRequest, res: Respo
     );
 
     res.json({
-      message: isCompleted ? 'Đã ghi nhận tiêm chủng thành công! 💉' : 'Đã cập nhật trạng thái mũi tiêm.',
+      message: isCompleted ? 'Đã ghi nhận tiêm chủng thành công!' : 'Đã cập nhật trạng thái mũi tiêm.',
       record,
     });
   } catch (error) {
@@ -146,7 +146,7 @@ router.post('/growth', requireAuth, async (req: AuthRequest, res: Response): Pro
     });
 
     res.status(201).json({
-      message: 'Đã lưu chỉ số phát triển của bé lên đám mây thành công! 📈',
+      message: 'Đã lưu chỉ số phát triển của bé lên đám mây thành công!',
       record,
     });
   } catch (error) {
@@ -202,7 +202,7 @@ router.post('/reviews', requireAuth, async (req: AuthRequest, res: Response): Pr
     });
 
     res.status(201).json({
-      message: 'Đã đăng bài chia sẻ kinh nghiệm chọn trường/phòng khám! ❤️',
+      message: 'Đã đăng bài chia sẻ kinh nghiệm chọn trường/phòng khám thành công.',
       review,
     });
   } catch (error) {

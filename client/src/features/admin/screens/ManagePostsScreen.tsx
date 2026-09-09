@@ -12,7 +12,7 @@ import { useAppSelector, useAppDispatch } from '../../../app/store/hooks';
 import { hydrateProducts } from '../../home/store/homeSlice';
 import { api } from '../../../services/api';
 import { COLORS, SPACING, RADIUS, TYPOGRAPHY, SHADOWS } from '../../../theme';
-import { Check, X, ShieldAlert, AlertTriangle } from 'lucide-react-native';
+import { Check, X, ShieldAlert, AlertTriangle, MapPin } from 'lucide-react-native';
 import ScreenContainer from '../../../components/layout/ScreenContainer';
 import Header from '../../../components/layout/Header';
 
@@ -51,14 +51,14 @@ export const ManagePostsScreen = () => {
   const displayProducts = apiPosts !== null ? apiPosts : products;
 
   const handleApprove = async (name: string) => {
-    Alert.alert('Duyệt tin đăng 👍', `Xác nhận duyệt tin đăng "${name}" hiển thị trên trang chủ?`, [
+    Alert.alert('Duyệt tin đăng', `Xác nhận duyệt tin đăng "${name}" hiển thị trên trang chủ?`, [
       { text: 'Đồng ý', onPress: () => Alert.alert('Thành công', 'Tin đăng đã được duyệt hoạt động.') }
     ]);
   };
 
   const handleRemove = async (productId: string, name: string) => {
     Alert.alert(
-      'Gỡ tin đăng? 🗑️',
+      'Gỡ tin đăng?',
       `Mẹ có chắc chắn muốn gỡ bỏ tin đăng: "${name}" khỏi hệ thống do vi phạm chính sách?`,
       [
         { text: 'Hủy', style: 'cancel' },
@@ -111,7 +111,10 @@ export const ManagePostsScreen = () => {
               <View style={styles.postDetails}>
                 <Text style={styles.postTitle} numberOfLines={1}>{item.name}</Text>
                 <Text style={styles.postDesc} numberOfLines={2}>{item.description}</Text>
-                <Text style={styles.postLocation}>📍 {item.locationName}</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3, marginTop: 4 }}>
+                  <MapPin size={11} color={COLORS.outline} />
+                  <Text style={styles.postLocation}>{item.locationName}</Text>
+                </View>
               </View>
             </View>
 
@@ -232,7 +235,6 @@ const styles = StyleSheet.create({
     fontSize: 9,
     color: COLORS.outline,
     fontWeight: '600',
-    marginTop: 4,
   },
   divider: {
     height: 1,

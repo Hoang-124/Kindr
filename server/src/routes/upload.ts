@@ -33,7 +33,7 @@ router.post('/', requireAuth, async (req: AuthRequest, res: Response): Promise<v
     }
 
     res.status(201).json({
-      message: 'Tải ảnh lên đám mây Cloudinary thành công! ☁️',
+      message: 'Tải ảnh lên đám mây Cloudinary thành công!',
       url: result.url,
       publicId: result.publicId,
     });

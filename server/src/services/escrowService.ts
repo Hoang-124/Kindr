@@ -110,7 +110,7 @@ export async function createEscrow(buyerId: string, productId: string): Promise<
   const notif = await Notification.create({
     userId: seller._id,
     type: 'match_request',
-    title: 'Có mẹ vừa chọn đổi đồ của bạn! ❤️',
+    title: 'Có mẹ vừa chọn đổi đồ của bạn!',
     body: `${buyer.name} vừa bấm đổi món: ${product.name}. Mã nhận đồ: ${handoverCode}. Kiểm tra liên hệ để hẹn gặp nhé!`,
     relatedTransactionId: tx._id,
     relatedProductId: product._id,
@@ -173,7 +173,7 @@ export async function confirmHandover(
   const buyerNotif = await Notification.create({
     userId: tx.buyerId,
     type: 'safeful_time_started',
-    title: 'Đã kích hoạt 6 Giờ Kiểm Định! ⏱️',
+    title: 'Đã kích hoạt 6 Giờ Kiểm Định',
     body: `Bạn có 6 tiếng kiểm tra đồ "${tx.productName}" tại nhà. Nếu có lỗi ẩn, hãy bấm Khiếu nại nhé!`,
     relatedTransactionId: tx._id,
   });
@@ -188,7 +188,7 @@ export async function confirmHandover(
   const sellerNotif = await Notification.create({
     userId: tx.sellerId,
     type: 'safeful_time_started',
-    title: 'Người mua đã nhận hàng! 📦',
+    title: 'Người mua đã nhận hàng',
     body: `Khung giờ 6h kiểm định tại nhà bắt đầu. Xu sẽ tự động giải phóng khi hết 6 giờ.`,
     relatedTransactionId: tx._id,
   });
@@ -252,7 +252,7 @@ export async function finalizeTransaction(transactionId: string): Promise<{
   const sellerNotif = await Notification.create({
     userId: tx.sellerId,
     type: 'xu_released',
-    title: 'Giao dịch hoàn tất! Xu đã vào ví 🟡',
+    title: 'Giao dịch hoàn tất! Xu đã vào ví',
     body: `Hệ thống đã giải phóng ${totalXuToSeller} Xu vào ví của mẹ. Đừng quên đánh giá nhé!`,
     relatedTransactionId: tx._id,
   });
@@ -267,7 +267,7 @@ export async function finalizeTransaction(transactionId: string): Promise<{
   const buyerNotif = await Notification.create({
     userId: tx.buyerId,
     type: 'xu_released',
-    title: 'Giao dịch thành công! 🎉',
+    title: 'Giao dịch thành công',
     body: `Cảm ơn mẹ đã sử dụng Kindr. Hãy dành 30s đánh giá cho ${tx.sellerName} nhé!`,
     relatedTransactionId: tx._id,
   });
@@ -305,7 +305,7 @@ export async function fileDispute(
   const notif = await Notification.create({
     userId: tx.sellerId,
     type: 'dispute_opened',
-    title: 'Có khiếu nại mới cho đơn hàng! ⚠️',
+    title: 'Có khiếu nại mới cho đơn hàng',
     body: `Người mua đã báo lỗi món "${tx.productName}". Đội ngũ Kindr đang kiểm tra chứng cứ.`,
     relatedTransactionId: tx._id,
   });
@@ -360,7 +360,7 @@ export async function resolveDispute(
     const buyerNotif = await Notification.create({
       userId: tx.buyerId,
       type: 'dispute_resolved',
-      title: 'Khiếu nại được chấp thuận! ✅',
+      title: 'Khiếu nại được chấp thuận',
       body: `BQT Kindr đã hoàn trả ${tx.buyerEscrowFrozen} Xu vào ví của mẹ cho đơn "${tx.productName}".`,
       relatedTransactionId: tx._id,
     });
@@ -370,7 +370,7 @@ export async function resolveDispute(
     const sellerNotif = await Notification.create({
       userId: tx.sellerId,
       type: 'dispute_resolved',
-      title: 'Kết quả giải quyết khiếu nại ⚠️',
+      title: 'Kết quả giải quyết khiếu nại',
       body: `Khiếu nại đơn "${tx.productName}" đã được xử lý: Khấu trừ Safe Fee và hoàn Xu cho người mua.`,
       relatedTransactionId: tx._id,
     });
@@ -390,7 +390,7 @@ export async function resolveDispute(
     const sellerNotif = await Notification.create({
       userId: tx.sellerId,
       type: 'dispute_resolved',
-      title: 'Khiếu nại đã giải quyết! 🎉',
+      title: 'Khiếu nại đã giải quyết',
       body: `BQT Kindr xác nhận đồ đạt chuẩn. Đã giải ngân ${totalXu} Xu vào ví của mẹ.`,
       relatedTransactionId: tx._id,
     });

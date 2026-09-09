@@ -28,7 +28,11 @@ import {
   Sparkles,
   Heart,
   PlusCircle,
-  ThumbsUp
+  ThumbsUp,
+  AlertTriangle,
+  Target,
+  Building2,
+  FileText
 } from 'lucide-react-native';
 import { VaccineDose, GrowthRecord, CommunityReview } from '../../../types/common';
 import * as careService from '../../../services/careService';
@@ -54,7 +58,7 @@ const initialCommunityReviews: CommunityReview[] = [
     id: 'r1',
     title: 'Trường Mầm non Quốc tế ABC (Cơ sở Trần Phú)',
     category: 'daycare',
-    categoryLabel: 'Trường Mầm Non 🏫',
+    categoryLabel: 'Trường Mầm Non',
     rating: 5,
     address: '45 Trần Phú, P. Hải Châu 1, Q. Hải Châu, Đà Nẵng',
     wardName: 'Phường Hải Châu 1',
@@ -70,7 +74,7 @@ const initialCommunityReviews: CommunityReview[] = [
     id: 'r2',
     title: 'Phòng khám Nhi BS. Nguyễn Thị Thu Hà',
     category: 'clinic',
-    categoryLabel: 'Phòng Khám Nhi 🏥',
+    categoryLabel: 'Phòng Khám Nhi',
     rating: 5,
     address: '112 Quang Trung, P. Thạch Thang, Q. Hải Châu',
     wardName: 'Phường Thạch Thang',
@@ -86,7 +90,7 @@ const initialCommunityReviews: CommunityReview[] = [
     id: 'r3',
     title: 'Khu vui chơi TiniWorld Vincom Đà Nẵng',
     category: 'playground',
-    categoryLabel: 'Khu Vui Chơi 🎡',
+    categoryLabel: 'Khu Vui Chơi',
     rating: 4,
     address: 'Tầng 3 Vincom Plaza, Ngô Quyền, Q. Sơn Trà',
     wardName: 'Phường An Hải Bắc',
@@ -220,7 +224,7 @@ export const CareHandbookScreen = () => {
     setInputHeight('');
     setInputAgeMonths('');
 
-    Alert.alert('Đã lưu chỉ số bé lên đám mây 🎉', 'Chỉ số phát triển của bé đã được cập nhật theo bảng tiêu chuẩn WHO và đồng bộ tài khoản!');
+    Alert.alert('Đã lưu chỉ số bé lên đám mây', 'Chỉ số phát triển của bé đã được cập nhật theo bảng tiêu chuẩn WHO và đồng bộ tài khoản!');
   };
 
   return (
@@ -262,7 +266,7 @@ export const CareHandbookScreen = () => {
         {activeTab === 'vaccine' && (
           <View style={styles.tabContent}>
             <View style={styles.bannerBox}>
-              <MascotIcon size={44} mood="happy" dialogue="Mẹ theo dõi các mốc tiêm phòng quan trọng để bảo vệ bé yêu nhé! ❤️" />
+              <MascotIcon size={44} mood="happy" dialogue="Mẹ theo dõi các mốc tiêm phòng quan trọng để bảo vệ bé yêu nhé!" />
             </View>
 
             <Text style={styles.sectionTitle}>Lộ Trình Tiêm Chủng Mở Rộng & Dịch Vụ</Text>
@@ -294,12 +298,21 @@ export const CareHandbookScreen = () => {
                         </View>
                       )}
                     </View>
-                    <Text style={styles.diseaseText}>🎯 {v.diseaseTarget}</Text>
+                    <View style={styles.detailRow}>
+                      <Target size={13} color={COLORS.primary} />
+                      <Text style={styles.diseaseText}>{v.diseaseTarget}</Text>
+                    </View>
                     {v.facilityName && (
-                      <Text style={styles.facilityText}>🏥 {v.facilityName}</Text>
+                      <View style={styles.detailRow}>
+                        <Building2 size={13} color={COLORS.onSurfaceVariant} />
+                        <Text style={styles.facilityText}>{v.facilityName}</Text>
+                      </View>
                     )}
                     {v.notes && (
-                      <Text style={styles.notesText}>📝 {v.notes}</Text>
+                      <View style={styles.detailRow}>
+                        <FileText size={13} color="#D97706" />
+                        <Text style={styles.notesText}>{v.notes}</Text>
+                      </View>
                     )}
                   </View>
                 </TouchableOpacity>
@@ -364,13 +377,21 @@ export const CareHandbookScreen = () => {
             {growthRecords.map((r) => (
               <Card key={r.id} style={styles.recordCard}>
                 <View style={styles.recordHeader}>
-                  <Text style={styles.recordDate}>📅 {r.date} ({r.ageMonths} tháng tuổi)</Text>
+                  <View style={styles.recordDateRow}>
+                    <Calendar size={13} color={COLORS.outline} />
+                    <Text style={styles.recordDate}>{r.date} ({r.ageMonths} tháng tuổi)</Text>
+                  </View>
                   <View style={[
                     styles.statusPill, 
                     r.whoWeightStatus === 'normal' ? styles.statusNormal : styles.statusWarning
                   ]}>
+                    {r.whoWeightStatus === 'normal' ? (
+                      <Sparkles size={11} color="#16A34A" />
+                    ) : (
+                      <AlertTriangle size={11} color="#D97706" />
+                    )}
                     <Text style={styles.statusPillText}>
-                      {r.whoWeightStatus === 'normal' ? 'Chuẩn WHO ✨' : 'Cần chú ý ⚠️'}
+                      {r.whoWeightStatus === 'normal' ? 'Chuẩn WHO' : 'Cần chú ý'}
                     </Text>
                   </View>
                 </View>
@@ -409,7 +430,10 @@ export const CareHandbookScreen = () => {
                 <View style={styles.reviewHeader}>
                   <View style={styles.reviewerInfo}>
                     <Text style={styles.reviewerName}>{rev.reviewerName}</Text>
-                    <Text style={styles.reviewerChildAge}>👶 {rev.childAge}</Text>
+                    <View style={styles.reviewerAgeRow}>
+                      <Baby size={12} color={COLORS.outline} />
+                      <Text style={styles.reviewerChildAge}>{rev.childAge}</Text>
+                    </View>
                   </View>
                   <View style={styles.ratingBadge}>
                     <Star size={14} color="#F5A623" fill="#F5A623" />
@@ -542,10 +566,15 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#4B5C35',
   },
+  detailRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 3,
+  },
   diseaseText: {
     fontSize: 13,
     color: COLORS.onSurfaceVariant,
-    marginTop: 2,
   },
   facilityText: {
     fontSize: 12,
@@ -607,8 +636,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: SPACING.sm,
   },
+  recordDateRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
   recordDate: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '700',
     color: COLORS.onSurface,
   },
@@ -616,6 +650,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: RADIUS.full,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
   },
   statusNormal: {
     backgroundColor: '#E2F0CB',
@@ -678,6 +715,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '700',
     color: COLORS.onSurface,
+  },
+  reviewerAgeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    marginTop: 2,
   },
   reviewerChildAge: {
     fontSize: 11,

@@ -40,7 +40,7 @@ export const ManageDisputesScreen = () => {
 
   const handleResolveForBuyer = async (tx: any) => {
     Alert.alert(
-      'Phán Quyết Hoàn Trả Người Mua ⚖️',
+      'Phán Quyết Hoàn Trả Người Mua',
       `Bạn phán quyết phần thắng thuộc về Người mua (${tx.buyerName || tx.buyerId?.name})?\n\n• Hoàn lại ${tx.buyerEscrowFrozen} Xu cho Mẹ mua.\n• Giải tỏa trả lại ${tx.sellerEscrowFrozen} Xu cọc cho Mẹ bán.`,
       [
         { text: 'Hủy', style: 'cancel' },
@@ -70,7 +70,7 @@ export const ManageDisputesScreen = () => {
 
   const handleResolveForSeller = async (tx: any) => {
     Alert.alert(
-      'Phán Quyết Thanh Toán Người Bán ⚖️',
+      'Phán Quyết Thanh Toán Người Bán',
       `Bạn phán quyết phần thắng thuộc về Người bán (${tx.sellerName || tx.sellerId?.name})?\n\n• Giải ngân ${tx.productPrice + tx.sellerEscrowFrozen} Xu cho Mẹ bán.\n• Hoàn lại cọc bảo chứng cho Mẹ mua.`,
       [
         { text: 'Hủy', style: 'cancel' },

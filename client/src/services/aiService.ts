@@ -53,7 +53,7 @@ export async function generateAIAssistance(
 
   // Generate warm, mom-friendly description
   const descriptions: Record<string, string> = {
-    xe_noi: `Xe / nôi cho bé giữ gìn rất cẩn thận, khung kim loại chắc chắn, đệm lót sạch sẽ đã tiệt trùng bằng nước giặt hữu cơ. Khung gấp gọn tiện lợi khi cho bé đi dạo hoặc đi du lịch. Bé nhà mình đã lớn nên nhượng lại cho mẹ nào cần nhé ❤️`,
+    xe_noi: `Xe / nôi cho bé giữ gìn rất cẩn thận, khung kim loại chắc chắn, đệm lót sạch sẽ đã tiệt trùng bằng nước giặt hữu cơ. Khung gấp gọn tiện lợi khi cho bé đi dạo hoặc đi du lịch. Bé nhà mình đã lớn nên nhượng lại cho mẹ nào cần nhé.`,
     book: `Bộ sách truyện tranh hình ảnh sinh động, màu sắc tươi sáng giúp bé phát triển ngôn ngữ và trí tưởng tượng. Giấy dày dặn, không quăn mép, bé xem rất thích. Mẹ pass lại cho bé khác cùng đọc nha.`,
     quan_ao: `Chất liệu cotton 100% mềm mịn, thấm hút mồ hôi tốt, an toàn cho làn da nhạy cảm của bé. Form dáng xinh xắn, đường may tỉ mỉ, bé mặc chỉ vài lần dịp đi chơi nên còn rất mới.`,
     do_hoc_tap: `Đồ dùng học tập và phát triển tư duy cho bé, các chi tiết bo tròn an toàn không góc nhọn. Giúp bé rèn luyện tính kiên nhẫn và khả năng sáng tạo.`,

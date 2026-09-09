@@ -46,6 +46,13 @@ export const loginAsync = createAsyncThunk(
         id: (user as any)._id?.toString() || user.id,
       };
     } catch (err: any) {
+      if (err.response?.data?.needsActivation) {
+        return rejectWithValue({
+          error: err.response.data.error || 'Tài khoản chưa được kích hoạt.',
+          needsActivation: true,
+          email: err.response.data.email,
+        });
+      }
       return rejectWithValue(err.response?.data?.error || 'Đăng nhập không thành công');
     }
   }
@@ -72,7 +79,13 @@ export const registerAsync = createAsyncThunk(
   async (payload: authService.RegisterPayload, { rejectWithValue }) => {
     try {
       const response = await authService.register(payload);
-      const user = response.user;
+      if (response.needsActivation) {
+        return {
+          needsActivation: true,
+          email: response.email,
+        } as any;
+      }
+      const user = response.user!;
       return {
         ...user,
         id: (user as any)._id?.toString() || user.id,
@@ -82,6 +95,23 @@ export const registerAsync = createAsyncThunk(
     }
   }
 );
+
+export const activateAccountAsync = createAsyncThunk(
+  'auth/activateAccountAsync',
+  async ({ email, otp }: { email: string; otp: string }, { rejectWithValue }) => {
+    try {
+      const response = await authService.activateAccount(email, otp);
+      const user = response.user;
+      return {
+        ...user,
+        id: (user as any)._id?.toString() || user.id,
+      };
+    } catch (err: any) {
+      return rejectWithValue(err.response?.data?.error || 'Kích hoạt tài khoản không thành công');
+    }
+  }
+);
+
 
 export const fetchCurrentUser = createAsyncThunk(
   'auth/fetchCurrentUser',
@@ -301,7 +331,9 @@ const authSlice = createSlice({
     });
     builder.addCase(loginAsync.rejected, (state, action) => {
       state.isLoading = false;
-      state.error = (action.payload as string) || 'Đăng nhập thất bại';
+      state.error = typeof action.payload === 'string'
+        ? action.payload
+        : ((action.payload as any)?.error || 'Đăng nhập thất bại');
     });
 
     // loginGoogleAsync
@@ -325,12 +357,29 @@ const authSlice = createSlice({
     });
     builder.addCase(registerAsync.fulfilled, (state, action) => {
       state.isLoading = false;
-      state.currentUser = action.payload;
-      state.allUsers.push(action.payload);
+      if (!action.payload?.needsActivation) {
+        state.currentUser = action.payload;
+        state.allUsers.push(action.payload);
+      }
     });
     builder.addCase(registerAsync.rejected, (state, action) => {
       state.isLoading = false;
       state.error = (action.payload as string) || 'Đăng ký thất bại';
+    });
+
+    // activateAccountAsync
+    builder.addCase(activateAccountAsync.pending, (state) => {
+      state.isLoading = true;
+      state.error = null;
+    });
+    builder.addCase(activateAccountAsync.fulfilled, (state, action) => {
+      state.isLoading = false;
+      state.currentUser = action.payload;
+      state.allUsers.push(action.payload);
+    });
+    builder.addCase(activateAccountAsync.rejected, (state, action) => {
+      state.isLoading = false;
+      state.error = (action.payload as string) || 'Kích hoạt tài khoản thất bại';
     });
 
     // fetchCurrentUser

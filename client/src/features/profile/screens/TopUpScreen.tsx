@@ -30,8 +30,10 @@ import {
   Zap, 
   ShieldCheck, 
   Sparkles,
-  ArrowRight
+  ArrowRight,
+  Flame
 } from 'lucide-react-native';
+import KindrCoin from '../../../components/common/KindrCoin';
 import { formatNumber } from '../../../utils/helpers';
 import ScreenContainer from '../../../components/layout/ScreenContainer';
 import Header from '../../../components/layout/Header';
@@ -149,7 +151,7 @@ export const TopUpScreen = () => {
   const handleCopy = (field: string, value: string) => {
     setCopiedField(field);
     setTimeout(() => setCopiedField(null), 2500);
-    Alert.alert('Đã sao chép 📋', `Đã chép "${value}" vào bộ nhớ tạm.`);
+    Alert.alert('Đã sao chép', `Đã chép "${value}" vào bộ nhớ tạm.`);
   };
 
   // Manual check button handler
@@ -236,14 +238,15 @@ export const TopUpScreen = () => {
               >
                 {pack.popular && (
                   <View style={styles.popularBadge}>
-                    <Text style={styles.popularBadgeText}>HOT 🔥</Text>
+                    <Flame size={10} color="#ffffff" />
+                    <Text style={styles.popularBadgeText}>HOT</Text>
                   </View>
                 )}
                 
                 <Text style={styles.packLabel}>{pack.label}</Text>
                 
                 <View style={styles.coinWrapper}>
-                  <Text style={styles.coinEmoji}>🪙</Text>
+                  <KindrCoin size={20} />
                   <Text style={[styles.coinText, isSelected && styles.coinTextSelected]}>
                     {pack.coins} Xu
                   </Text>
@@ -381,7 +384,7 @@ export const TopUpScreen = () => {
         {/* Action Buttons */}
         <View style={styles.actionButtonGroup}>
           <Button
-            title={checkingPayment ? 'Đang kiểm tra...' : 'Kiểm tra trạng thái thanh toán 🔄'}
+            title={checkingPayment ? 'Đang kiểm tra...' : 'Kiểm tra trạng thái thanh toán'}
             onPress={handleManualCheck}
             loading={checkingPayment}
             variant="outline"
@@ -389,7 +392,7 @@ export const TopUpScreen = () => {
           />
 
           <Button
-            title={simulating ? 'Đang xử lý...' : `⚡ Giả lập thanh toán test (${selectedPack.coins} Xu)`}
+            title={simulating ? 'Đang xử lý...' : `Giả lập thanh toán test (${selectedPack.coins} Xu)`}
             onPress={handleSimulateTopup}
             loading={simulating}
             style={styles.simulateBtn}
@@ -410,7 +413,7 @@ export const TopUpScreen = () => {
               <CheckCircle2 size={56} color="#16A34A" />
             </View>
 
-            <Text style={styles.modalTitle}>NẠP XU THÀNH CÔNG! 🎉</Text>
+            <Text style={styles.modalTitle}>NẠP XU THÀNH CÔNG!</Text>
             <Text style={styles.modalSubText}>
               Hệ thống vừa nhận được chuyển khoản ngân hàng qua Webhook tự động.
             </Text>
@@ -518,12 +521,15 @@ const styles = StyleSheet.create({
   },
   popularBadge: {
     position: 'absolute',
-    top: -8,
-    right: 10,
-    backgroundColor: '#D97706',
+    top: -10,
+    right: -6,
+    backgroundColor: '#EF4444',
     borderRadius: RADIUS.full,
     paddingHorizontal: 8,
     paddingVertical: 2,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
   },
   popularBadgeText: {
     fontSize: 9,

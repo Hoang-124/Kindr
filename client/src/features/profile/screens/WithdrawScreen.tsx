@@ -73,7 +73,7 @@ export const WithdrawScreen = () => {
       setLoading(false);
 
       Alert.alert(
-        'Đã gửi yêu cầu rút Xu! 📩',
+        'Đã gửi yêu cầu rút Xu',
         `Yêu cầu rút ${amount} Xu của mẹ đã được chuyển tới hệ thống.\n\n• Số tiền thực nhận: ${formatNumber(payoutVND)}đ\n• Phí dịch vụ (10%): ${formatNumber(feeVND)}đ\n\nAdmin sẽ kiểm tra và giải ngân trong vòng 24 giờ.`,
         [{ text: 'Đồng ý', onPress: () => navigation.goBack() }]
       );
@@ -92,7 +92,7 @@ export const WithdrawScreen = () => {
       setLoading(false);
 
       Alert.alert(
-        'Đã gửi yêu cầu rút Xu! 📩',
+        'Đã gửi yêu cầu rút Xu',
         `Yêu cầu rút ${amount} Xu của mẹ đã được chuyển tới hệ thống.\n\n• Số tiền thực nhận: ${formatNumber(payoutVND)}đ\n• Phí dịch vụ (10%): ${formatNumber(feeVND)}đ\n\nAdmin sẽ kiểm tra và giải ngân trong vòng 24 giờ.`,
         [{ text: 'Đồng ý', onPress: () => navigation.goBack() }]
       );

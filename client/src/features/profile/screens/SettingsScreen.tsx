@@ -83,7 +83,7 @@ export const SettingsScreen = () => {
       setOldPassword('');
       setNewPassword('');
       setConfirmPassword('');
-      Alert.alert('Thành công 🎉', 'Đổi mật khẩu thành công! Mẹ hãy ghi nhớ mật khẩu mới nhé.');
+      Alert.alert('Thành công', 'Đổi mật khẩu thành công! Mẹ hãy ghi nhớ mật khẩu mới nhé.');
     } catch (err: any) {
       setIsChangingPass(false);
       Alert.alert('Lỗi đổi mật khẩu', err || 'Có lỗi xảy ra khi cập nhật mật khẩu.');
@@ -105,7 +105,7 @@ export const SettingsScreen = () => {
 
   const showCharterModal = () => {
     setActivePolicy({
-      title: 'Quy Chế Mẹ Bỉm Văn Minh 🌸',
+      title: 'Quy Chế Mẹ Bỉm Văn Minh',
       content:
         '1. Đồ đạc trao đổi phải đảm bảo sạch sẽ, an toàn vệ sinh cho bé.\n\n' +
         '2. Mô tả trung thực tình trạng sản phẩm (độ mới, phụ kiện, khuyết điểm nếu có).\n\n' +
@@ -117,7 +117,7 @@ export const SettingsScreen = () => {
 
   const showEscrowModal = () => {
     setActivePolicy({
-      title: 'Cơ Chế Ký Quỹ Kép 6 Giờ 🔒',
+      title: 'Cơ Chế Ký Quỹ Kép 6 Giờ',
       content:
         '1. Khi có yêu cầu đổi đồ, người mua đóng băng 100% Xu giá trị món đồ, người bán đặt cọc 10% Phí bảo chứng (SafeFee).\n\n' +
         '2. Cả hai bên kiểm tra mã xác nhận 6 ký tự khi gặp nhau bàn giao trực tiếp hoặc qua shipper.\n\n' +
@@ -128,7 +128,7 @@ export const SettingsScreen = () => {
 
   const showPrivacyModal = () => {
     setActivePolicy({
-      title: 'Chính Sách Bảo Mật Dữ Liệu 🛡️',
+      title: 'Chính Sách Bảo Mật Dữ Liệu',
       content:
         '1. Kindr cam kết bảo vệ dữ liệu cá nhân của mọi gia đình thành viên.\n\n' +
         '2. Số điện thoại chỉ hiển thị cho đối tác sau khi bàn giao để hai bên tiện gọi điện, hoàn toàn không công khai trên mạng.\n\n' +

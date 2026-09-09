@@ -21,10 +21,10 @@ import Input from '../../../components/common/Input';
 import Button from '../../../components/common/Button';
 
 const REASONS = [
-  'Đồ nhận được không giống mô tả (rách, hỏng, thiếu phụ kiện) ❌',
-  'Gửi sai món đồ hoặc đồ chơi không hoạt động được 🧸',
-  'Sản phẩm mất vệ sinh, không an toàn cho bé sơ sinh 🧼',
-  'Lý do khác (Mẹ ghi rõ chi tiết bên dưới) 📝',
+  'Đồ nhận được không giống mô tả (rách, hỏng, thiếu phụ kiện)',
+  'Gửi sai món đồ hoặc đồ chơi không hoạt động được',
+  'Sản phẩm mất vệ sinh, không an toàn cho bé sơ sinh',
+  'Lý do khác (Mẹ ghi rõ chi tiết bên dưới)',
 ];
 
 export const DisputeFormScreen = () => {
@@ -59,7 +59,7 @@ export const DisputeFormScreen = () => {
     }
 
     Alert.alert(
-      'Chụp ảnh bằng chứng lỗi 📸',
+      'Chụp ảnh bằng chứng lỗi',
       'Mẹ muốn chụp ảnh vết lỗi trực tiếp hay chọn từ thư viện ảnh?',
       [
         { text: 'Hủy', style: 'cancel' },
@@ -132,7 +132,7 @@ export const DisputeFormScreen = () => {
     setLoading(false);
 
     Alert.alert(
-      'Đã gửi khiếu nại thành công! 🛡️',
+      'Đã gửi khiếu nại thành công',
       'Hệ thống đã ghi nhận khiếu nại bảo chứng của mẹ. Số xu giao dịch vẫn sẽ được tạm khóa an toàn.\n\nBan quản trị Kindr sẽ làm trọng tài kiểm tra bằng chứng và liên hệ phân xử trong vòng 24h.',
       [{ text: 'Đồng ý', onPress: () => navigation.navigate('Main' as any) }]
     );

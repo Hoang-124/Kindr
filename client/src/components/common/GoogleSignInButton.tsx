@@ -6,17 +6,19 @@ import Svg, { Path } from 'react-native-svg';
 
 export const GOOGLE_CLIENT_ID = '616320462696-2gh4jaj1pafnatlujrqurv043cada6b8.apps.googleusercontent.com';
 
-interface GoogleSignInButtonProps {
-  onSuccess: (data: { credential?: string; email?: string; name?: string; avatar?: string; googleId?: string }) => void;
+export interface GoogleSignInButtonProps {
+  onSuccess?: (data: { credential?: string; email?: string; name?: string; avatar?: string; googleId?: string }) => void;
   onError?: (err: string) => void;
+  onPress?: () => void;
   title?: string;
   style?: any;
   wrapperStyle?: any;
   compact?: boolean;
+  tone?: 'default' | 'warm' | 'coral';
 }
 
 // Official Google G Logo SVG
-const GoogleGLogo = ({ size = 20 }: { size?: number }) => (
+export const GoogleGLogo = ({ size = 20 }: { size?: number }) => (
   <Svg width={size} height={size} viewBox="0 0 48 48">
     <Path
       fill="#EA4335"
@@ -40,10 +42,12 @@ const GoogleGLogo = ({ size = 20 }: { size?: number }) => (
 export const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = ({
   onSuccess,
   onError,
+  onPress,
   title = 'Tiếp tục với Google',
   style,
   wrapperStyle,
   compact = false,
+  tone = 'warm',
 }) => {
   const [loading, setLoading] = useState(false);
   const googleBtnContainerRef = useRef<any>(null);
@@ -64,7 +68,7 @@ export const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = ({
             callback: (response: any) => {
               setLoading(false);
               if (response && response.credential) {
-                onSuccess({ credential: response.credential });
+                onSuccess?.({ credential: response.credential });
               } else {
                 onError?.('Không nhận được thông tin xác thực Google.');
               }
@@ -103,6 +107,11 @@ export const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = ({
   }, [onSuccess, onError]);
 
   const handleCustomClick = () => {
+    if (onPress) {
+      onPress();
+      return;
+    }
+
     if (Platform.OS === 'web' && typeof window !== 'undefined') {
       const g = (window as any).google;
       if (g && g.accounts && g.accounts.id) {
@@ -123,7 +132,7 @@ export const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = ({
                           headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
                         });
                         const userInfo = await userInfoRes.json();
-                        onSuccess({
+                        onSuccess?.({
                           googleId: userInfo.sub,
                           email: userInfo.email,
                           name: userInfo.name,
@@ -157,23 +166,40 @@ export const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = ({
   return (
     <View style={[styles.wrapper, compact && styles.compactWrapper, wrapperStyle]}>
       <TouchableOpacity
-        style={[styles.googleButton, compact && styles.compactButton, style]}
+        style={[
+          styles.googleButton,
+          tone === 'warm' && styles.warmButton,
+          tone === 'coral' && styles.coralButton,
+          compact && styles.compactButton,
+          style,
+        ]}
         onPress={handleCustomClick}
-        activeOpacity={0.85}
+        activeOpacity={0.82}
         disabled={loading}
       >
         {loading ? (
-          <ActivityIndicator size="small" color={COLORS.primary} />
+          <ActivityIndicator size="small" color={tone === 'coral' ? '#FFFFFF' : COLORS.primary} />
         ) : (
           <>
-            <GoogleGLogo size={compact ? 18 : 22} />
-            <Text style={[styles.buttonText, compact && styles.compactButtonText]}>{title}</Text>
+            <View style={[styles.iconBadge, tone === 'coral' && styles.iconBadgeCoral]}>
+              <GoogleGLogo size={compact ? 17 : 20} />
+            </View>
+            <Text
+              style={[
+                styles.buttonText,
+                tone === 'warm' && styles.warmButtonText,
+                tone === 'coral' && styles.coralButtonText,
+                compact && styles.compactButtonText,
+              ]}
+            >
+              {title}
+            </Text>
           </>
         )}
       </TouchableOpacity>
 
-      {/* Hidden container for official GSI rendered button overlay */}
-      {Platform.OS === 'web' && (
+      {/* Hidden container for official GSI rendered button overlay (only when not purely onPress) */}
+      {Platform.OS === 'web' && !onPress && (
         <div
           ref={googleBtnContainerRef}
           style={{
@@ -206,25 +232,59 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    height: 52,
+    height: 50,
     backgroundColor: '#FFFFFF',
     borderWidth: 1.5,
-    borderColor: 'rgba(58, 103, 88, 0.15)',
+    borderColor: '#E5E7EB',
     borderRadius: RADIUS.full,
     paddingHorizontal: SPACING.lg,
-    gap: SPACING.md,
+    gap: 10,
     ...SHADOWS.soft,
+  },
+  warmButton: {
+    backgroundColor: '#FFF9F7',
+    borderColor: 'rgba(255, 107, 107, 0.28)',
+    shadowColor: '#FF6B6B',
+    shadowOpacity: 0.08,
+  },
+  coralButton: {
+    backgroundColor: COLORS.primary,
+    borderColor: 'transparent',
+    shadowColor: '#FF6B6B',
+    shadowOpacity: 0.25,
   },
   compactButton: {
     height: 44,
     paddingHorizontal: SPACING.md,
-    gap: SPACING.sm,
+    gap: 8,
+  },
+  iconBadge: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(0, 0, 0, 0.06)',
+  },
+  iconBadgeCoral: {
+    backgroundColor: '#FFFFFF',
+    borderColor: 'transparent',
   },
   buttonText: {
-    fontSize: 15,
+    fontSize: 14.5,
     fontWeight: '600',
-    color: '#3C4043',
+    color: '#374151',
     letterSpacing: 0.2,
+  },
+  warmButtonText: {
+    color: '#1F2937',
+    fontWeight: '700',
+  },
+  coralButtonText: {
+    color: '#FFFFFF',
+    fontWeight: '700',
   },
   compactButtonText: {
     fontSize: 13.5,

@@ -1,13 +1,13 @@
 // src/features/home/screens/HomeScreen.tsx
 import React from 'react';
-import { 
-  View, 
-  Text, 
-  StyleSheet, 
-  FlatList, 
-  Image, 
-  TouchableOpacity, 
-  TextInput 
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  Image,
+  TouchableOpacity,
+  TextInput
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -20,24 +20,25 @@ import ScreenContainer from '../../../components/layout/ScreenContainer';
 import Header from '../../../components/layout/Header';
 import Card from '../../../components/layout/Card';
 import EmptyState from '../../../components/common/EmptyState';
-import { 
-  Search, 
-  PlusCircle, 
+import {
+  Search,
+  PlusCircle,
   Plus,
   Sparkles,
-  MapPin, 
-  ToyBrick, 
-  BookOpen, 
-  GraduationCap, 
-  Shirt, 
-  Baby, 
-  Gift 
+  MapPin,
+  ToyBrick,
+  BookOpen,
+  GraduationCap,
+  Shirt,
+  Baby,
+  Gift
 } from 'lucide-react-native';
-import { DEFAULT_IMAGES } from '../../../utils/constants';
+import MascotIcon from '../../../components/common/MascotIcon';
 
 import { ScalePressable } from '../../../components/common/ScalePressable';
 import { PulseBadge } from '../../../components/common/PulseBadge';
 import { FadeInItem } from '../../../components/common/FadeInItem';
+import KindrCoin from '../../../components/common/KindrCoin';
 
 type NavigationProp = NativeStackNavigationProp<AppStackParamList>;
 type TabNavigationProp = NativeStackNavigationProp<MainTabParamList>;
@@ -56,7 +57,7 @@ export const HomeScreen = () => {
   const navigation = useNavigation<NavigationProp>();
   const tabNavigation = useNavigation<any>();
   const dispatch = useAppDispatch();
-  
+
   const products = useAppSelector((state) => state.home.products);
   const currentUser = useAppSelector((state) => state.auth.currentUser);
 
@@ -115,7 +116,7 @@ export const HomeScreen = () => {
             Đổi đồ chơi cũ lấy Xu, thêm niềm vui cho con
           </Text>
 
-          <ScalePressable 
+          <ScalePressable
             style={styles.bannerBtn}
             scaleTo={0.95}
             onPress={() => tabNavigation.navigate('Post')}
@@ -128,11 +129,7 @@ export const HomeScreen = () => {
         <View style={styles.bannerRight}>
           <PulseBadge scaleMin={0.97} scaleMax={1.04} duration={2400}>
             <View style={styles.mascotBadgeWrapper}>
-              <Image 
-                source={{ uri: DEFAULT_IMAGES.MASCOT }} 
-                style={styles.bannerMascot} 
-                resizeMode="cover"
-              />
+              <MascotIcon size={76} mood="happy" />
             </View>
           </PulseBadge>
         </View>
@@ -163,7 +160,7 @@ export const HomeScreen = () => {
       </View>
 
       {/* Sổ Tay Mẹ Bỉm Feature Card with Pulse Badge */}
-      <ScalePressable 
+      <ScalePressable
         style={styles.careHandbookCard}
         scaleTo={0.97}
         onPress={() => navigation.navigate('CareHandbook')}
@@ -173,13 +170,13 @@ export const HomeScreen = () => {
             <Baby size={22} color={COLORS.primary} />
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={styles.careHandbookTitle}>Sổ Tay Tiêm Chủng & Chuẩn WHO 👶</Text>
+            <Text style={styles.careHandbookTitle}>Sổ Tay Tiêm Chủng & Chuẩn WHO</Text>
             <Text style={styles.careHandbookSubtitle}>Nhắc lịch tiêm theo tháng & theo dõi cân nặng chuẩn</Text>
           </View>
         </View>
         <PulseBadge scaleMin={1.0} scaleMax={1.08} duration={1800}>
           <View style={styles.careHandbookBadge}>
-            <Text style={styles.careHandbookBadgeText}>Khám phá ✨</Text>
+            <Text style={styles.careHandbookBadgeText}>Khám phá</Text>
           </View>
         </PulseBadge>
       </ScalePressable>
@@ -234,7 +231,7 @@ export const HomeScreen = () => {
                     <Text style={styles.sellerName} numberOfLines={1}>{item.sellerName}</Text>
                   </View>
                   <View style={styles.priceBadge}>
-                    <Text style={styles.priceCoin}>🪙</Text>
+                    <KindrCoin size={13} />
                     <Text style={styles.priceText}>{item.price} Xu</Text>
                   </View>
                 </View>

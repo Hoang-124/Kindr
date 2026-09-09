@@ -1,13 +1,13 @@
 // src/features/profile/screens/ProfileScreen.tsx
 import React, { useState, useEffect } from 'react';
-import { 
-  ScrollView, 
-  View, 
-  Text, 
-  Image, 
-  StyleSheet, 
-  TouchableOpacity, 
-  Alert 
+import {
+  ScrollView,
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+  Alert
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -20,13 +20,13 @@ import ScreenContainer from '../../../components/layout/ScreenContainer';
 import Header from '../../../components/layout/Header';
 import Card from '../../../components/layout/Card';
 import MascotIcon from '../../../components/common/MascotIcon';
-import { 
-  Coins, 
-  Award, 
-  ChevronRight, 
-  Plus, 
-  TrendingUp, 
-  ShieldAlert, 
+import {
+  Coins,
+  Award,
+  ChevronRight,
+  Plus,
+  TrendingUp,
+  ShieldAlert,
   LogOut,
   FileText,
   Bell,
@@ -44,6 +44,7 @@ import {
   ExternalLink,
   Pencil,
   Settings,
+  Flame,
 } from 'lucide-react-native';
 import { formatXuToVND } from '../../../utils/helpers';
 import { formatFullDate } from '../../../utils/formatDate';
@@ -94,12 +95,12 @@ export const ProfileScreen = () => {
 
   const handleLogout = async () => {
     Alert.alert(
-      'Đăng xuất tài khoản 🚪',
+      'Đăng xuất tài khoản',
       'Mẹ có chắc chắn muốn đăng xuất khỏi tài khoản Kindr?',
       [
         { text: 'Hủy', style: 'cancel' },
-        { 
-          text: 'Đăng xuất', 
+        {
+          text: 'Đăng xuất',
           style: 'destructive',
           onPress: async () => {
             await dispatch(logoutAsync()).unwrap();
@@ -138,7 +139,10 @@ export const ProfileScreen = () => {
         {currentUser.isLocked && (
           <View style={styles.lockedBanner}>
             <MascotIcon size={50} mood="sleeping" dialogue="Tài khoản tạm ngưng do vi phạm khiếu nại quá 3 lần." />
-            <Text style={styles.lockedTitle}>⚠️ Tài Khoản Tạm Khóa Giao Dịch</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4 }}>
+              <ShieldAlert size={18} color="#D97706" />
+              <Text style={styles.lockedTitle}>Tài Khoản Tạm Khóa Giao Dịch</Text>
+            </View>
             <Text style={styles.lockedSub}>Vui lòng liên hệ BQT Kindr qua Zalo/Email để hỗ trợ mở khóa.</Text>
           </View>
         )}
@@ -236,7 +240,7 @@ export const ProfileScreen = () => {
               </View>
               <Text style={styles.bentoCardTitle}>Điểm Văn Minh</Text>
             </View>
-            
+
             <View style={styles.civScoreRow}>
               <Text style={styles.civScoreBig}>{currentUser.civilizationPoints}</Text>
               <Text style={styles.civScoreMax}>/100</Text>
@@ -323,7 +327,10 @@ export const ProfileScreen = () => {
               <View style={styles.actionTextContainer}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                   <Text style={styles.actionLabel}>Sổ tay mẹ bỉm (Tiêm & WHO)</Text>
-                  <View style={styles.hotBadge}><Text style={styles.hotBadgeText}>Hot 🔥</Text></View>
+                  <View style={styles.hotBadge}>
+                    <Flame size={10} color="#EF4444" />
+                    <Text style={styles.hotBadgeText}>Hot</Text>
+                  </View>
                 </View>
                 <Text style={styles.actionSubLabel}>Nhắc lịch tiêm chủng & chuẩn cân nặng WHO</Text>
               </View>
@@ -366,7 +373,7 @@ export const ProfileScreen = () => {
                 <ShieldAlert size={22} color="#FFFFFF" />
                 <View style={{ marginLeft: 10, flex: 1 }}>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                    <Text style={styles.adminPortalTitle}>Bảng Quản Trị Admin 🛡️</Text>
+                    <Text style={styles.adminPortalTitle}>Bảng Quản Trị Admin</Text>
                     <View style={styles.adminActiveBadge}>
                       <Text style={styles.adminActiveBadgeText}>QUẢN TRỊ VIÊN</Text>
                     </View>
@@ -422,7 +429,10 @@ export const ProfileScreen = () => {
                       <Image source={{ uri: tx.productImage }} style={styles.txImg} />
                       <View style={styles.txDetails}>
                         <Text style={styles.txName} numberOfLines={1}>{tx.productName}</Text>
-                        <Text style={styles.txStatusText}>🔒 {tx.status === 'in_safeful_time' ? 'Bảo chứng 6h kiểm định' : 'Tạm khóa Escrow'}</Text>
+                        <View style={styles.txStatusRow}>
+                          <Lock size={11} color="#D97706" />
+                          <Text style={styles.txStatusText}>{tx.status === 'in_safeful_time' ? 'Bảo chứng 6h kiểm định' : 'Tạm khóa Escrow'}</Text>
+                        </View>
                       </View>
                       <ChevronRight size={16} color={COLORS.outline} />
                     </ScalePressable>
@@ -447,7 +457,10 @@ export const ProfileScreen = () => {
                         <Text style={styles.txName} numberOfLines={1}>{tx.productName}</Text>
                         <Text style={styles.txDate}>{formatFullDate(tx.finalizedAt || tx.createdAt)}</Text>
                       </View>
-                      <Text style={styles.txSuccessTag}>Đã Xong ✅</Text>
+                      <View style={styles.txSuccessBadge}>
+                        <CheckCircle2 size={13} color={COLORS.primary} />
+                        <Text style={styles.txSuccessTag}>Đã Xong</Text>
+                      </View>
                     </ScalePressable>
                   </FadeInItem>
                 ))
@@ -924,6 +937,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 6,
     paddingVertical: 1,
     borderRadius: 6,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
   },
   hotBadgeText: {
     fontSize: 9,
@@ -1118,16 +1134,26 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: COLORS.onSurface,
   },
+  txStatusRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginTop: 2,
+  },
   txStatusText: {
     fontSize: 11,
     color: '#D97706',
     fontWeight: '600',
-    marginTop: 2,
   },
   txDate: {
     fontSize: 10,
     color: COLORS.outline,
     marginTop: 2,
+  },
+  txSuccessBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
   },
   txSuccessTag: {
     fontSize: 11,

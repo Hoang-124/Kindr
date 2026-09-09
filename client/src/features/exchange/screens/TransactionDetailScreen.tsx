@@ -23,6 +23,7 @@ import Header from '../../../components/layout/Header';
 import Button from '../../../components/common/Button';
 import Card from '../../../components/layout/Card';
 import MascotIcon from '../../../components/common/MascotIcon';
+import KindrCoin from '../../../components/common/KindrCoin';
 import ModalConfirm from '../../../components/common/ModalConfirm';
 import { 
   Lock, 
@@ -103,7 +104,7 @@ export const TransactionDetailScreen = () => {
   // Handover confirmation ("Đã nhận hàng" -> triggers 6h Safeful Time)
   const handleHandoverConfirm = () => {
     Alert.alert(
-      'Xác nhận nhận đồ P2P 📦',
+      'Xác nhận nhận đồ P2P',
       'Mẹ đã gặp mặt nhận đồ trực tiếp hoặc từ shipper? Hệ thống sẽ kích hoạt ngay khung giờ 6 tiếng kiểm định tại nhà!',
       [
         { text: 'Hủy', style: 'cancel' },
@@ -115,7 +116,7 @@ export const TransactionDetailScreen = () => {
             } catch (e) {
               dispatch(confirmHandover({ transactionId: tx.id }));
             }
-            Alert.alert('Đã kích hoạt 6h Bảo Chứng! ⏱️', 'Mẹ có 6 tiếng kiểm tra bánh xe, chi tiết đồ dùng tại nhà.');
+            Alert.alert('Đã kích hoạt 6h Bảo Chứng', 'Mẹ có 6 tiếng kiểm tra bánh xe, chi tiết đồ dùng tại nhà.');
           }
         }
       ]
@@ -125,7 +126,7 @@ export const TransactionDetailScreen = () => {
   // Immediate manual confirmation without waiting 6h
   const handleImmediateComplete = () => {
     Alert.alert(
-      'Xác nhận hài lòng 100% ✨',
+      'Xác nhận hài lòng 100%',
       'Mẹ xác nhận món đồ hoàn toàn đúng mô tả và đồng ý giải phóng Xu ngay cho người bán?',
       [
         { text: 'Chờ hết 6h', style: 'cancel' },
@@ -142,8 +143,8 @@ export const TransactionDetailScreen = () => {
               dispatch(adjustCivilizationPoints({ userId: tx.sellerId, points: 5, reason: 'Đồ dùng đúng 100% mô tả' }));
             }
 
-            Alert.alert('Giao dịch thành công! 🎉', 'Xu đã vào ví người bán.', [
-              { text: 'Đánh giá 5 sao ⭐', onPress: () => navigation.navigate('RatingReview', { transactionId: tx.id }) }
+            Alert.alert('Giao dịch thành công', 'Xu đã vào ví người bán.', [
+              { text: 'Đánh giá 5 sao', onPress: () => navigation.navigate('RatingReview', { transactionId: tx.id }) }
             ]);
           }
         }
@@ -164,7 +165,7 @@ export const TransactionDetailScreen = () => {
       dispatch(fileDispute({ transactionId: tx.id, reason: disputeReasonText }));
     }
     setDisputeModalVisible(false);
-    Alert.alert('Đã nộp Khiếu Nại ⚠️', 'Bộ phận Trust & Safety sẽ liên hệ đối soát chứng cứ trong vòng 24h.');
+    Alert.alert('Đã nộp Khiếu Nại', 'Bộ phận Trust & Safety sẽ liên hệ đối soát chứng cứ trong vòng 24h.');
   };
 
   // Report submission
@@ -180,7 +181,7 @@ export const TransactionDetailScreen = () => {
     }));
 
     setReportModalVisible(false);
-    Alert.alert('Đã gửi báo cáo 🛡️', 'Kindr cảm ơn mẹ đã đóng góp xây dựng môi trường an toàn.');
+    Alert.alert('Đã gửi báo cáo', 'Kindr cảm ơn mẹ đã đóng góp xây dựng môi trường an toàn.');
   };
 
   return (
@@ -205,9 +206,9 @@ export const TransactionDetailScreen = () => {
 
           <View style={styles.statusTextContainer}>
             <Text style={styles.statusTitle}>
-              {tx.status === 'awaiting_handover' ? '🔒 ĐANG TẠM KHÓA XU KÝ QUỸ' :
-               tx.status === 'in_safeful_time' ? '⏱️ BẢO CHỨNG 6 GIỜ KIỂM ĐỊNH' :
-               tx.status === 'completed' ? '✅ GIAO DỊCH THÀNH CÔNG' : '⚠️ TRANH CHẤP ĐANG XỬ LÝ'}
+              {tx.status === 'awaiting_handover' ? 'ĐANG TẠM KHÓA XU KÝ QUỸ' :
+               tx.status === 'in_safeful_time' ? 'BẢO CHỨNG 6 GIỜ KIỂM ĐỊNH' :
+               tx.status === 'completed' ? 'GIAO DỊCH THÀNH CÔNG' : 'TRANH CHẤP ĐANG XỬ LÝ'}
             </Text>
             <Text style={styles.statusSub}>
               {tx.status === 'awaiting_handover' ? 'Xu cả 2 bên được bảo hộ an toàn trong Rương Escrow.' :
@@ -222,7 +223,10 @@ export const TransactionDetailScreen = () => {
           <Image source={{ uri: tx.productImage }} style={styles.prodImg} />
           <View style={styles.prodDetails}>
             <Text style={styles.prodName} numberOfLines={2}>{tx.productName}</Text>
-            <Text style={styles.prodPrice}>🪙 Giá đổi: {tx.productPrice} Xu</Text>
+            <View style={styles.prodPriceRow}>
+              <KindrCoin size={14} />
+              <Text style={styles.prodPrice}>Giá đổi: {tx.productPrice} Xu</Text>
+            </View>
           </View>
         </Card>
 
@@ -239,7 +243,10 @@ export const TransactionDetailScreen = () => {
 
         {/* Unlocked Contact Information (SĐT / Zalo) */}
         <Card style={styles.contactCard}>
-          <Text style={styles.contactTitle}>📞 Thông tin liên hệ trực tiếp (Đã mở khóa)</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+            <Phone size={16} color={COLORS.primary} />
+            <Text style={styles.contactTitle}>Thông tin liên hệ trực tiếp (Đã mở khóa)</Text>
+          </View>
           <Text style={styles.contactSub}>Dùng để hai bên tự thỏa thuận giao nhận P2P tiện đường đi chợ/đón con</Text>
           
           <View style={styles.contactRow}>
@@ -274,7 +281,7 @@ export const TransactionDetailScreen = () => {
         {/* Dynamic Action Buttons */}
         {tx.status === 'awaiting_handover' && isSeller && (
           <Button
-            title="📱 Mở mã QR Bàn Giao Đồ"
+            title="Mở mã QR Bàn Giao Đồ"
             onPress={() => setQrModalVisible(true)}
             style={styles.actionBtn}
           />
@@ -282,7 +289,7 @@ export const TransactionDetailScreen = () => {
 
         {tx.status === 'awaiting_handover' && isBuyer && (
           <Button
-            title="🤝 Đã gặp mặt / Nhận đồ P2P (Bắt đầu 6h)"
+            title="Đã gặp mặt / Nhận đồ P2P (Bắt đầu 6h)"
             onPress={handleHandoverConfirm}
             style={styles.actionBtn}
           />
@@ -296,14 +303,17 @@ export const TransactionDetailScreen = () => {
               style={styles.actionBtn}
             />
             <ScalePressable style={styles.disputeBtn} scaleTo={0.96} onPress={() => setDisputeModalVisible(true)}>
-              <Text style={styles.disputeBtnText}>⚠️ Báo lỗi / Khiếu nại chất lượng</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                <ShieldAlert size={15} color="#DC2626" />
+                <Text style={styles.disputeBtnText}>Báo lỗi / Khiếu nại chất lượng</Text>
+              </View>
             </ScalePressable>
           </View>
         )}
 
         {tx.status === 'completed' && (
           <Button
-            title="Đánh giá Mẹ Bỉm Văn Minh ⭐"
+            title="Đánh giá Mẹ Bỉm Văn Minh"
             onPress={() => navigation.navigate('RatingReview', { transactionId: tx.id })}
             style={styles.actionBtn}
           />
@@ -322,7 +332,7 @@ export const TransactionDetailScreen = () => {
         visible={qrModalVisible}
         onClose={() => setQrModalVisible(false)}
         onConfirm={() => setQrModalVisible(false)}
-        title="📱 Mã QR Bàn Giao Đồ An Toàn"
+        title="Mã QR Bàn Giao Đồ An Toàn"
         confirmTitle="Đã xong"
         confirmVariant="primary"
         description="Mẹ hãy đưa mã này cho người mua kiểm tra hoặc quét khi gặp mặt nhận đồ để kích hoạt bảo chứng."
@@ -352,7 +362,7 @@ export const TransactionDetailScreen = () => {
         onClose={() => setDisputeModalVisible(false)}
         onConfirm={handleFileDispute}
         loading={loading}
-        title="⚠️ Nộp khiếu nại chất lượng"
+        title="Nộp khiếu nại chất lượng"
         confirmTitle="Gửi khiếu nại"
         confirmVariant="error"
         description="Nhập lý do chi tiết (ví dụ: đồ chơi hư bánh, sách rách trang...). Trạm tạm khóa sẽ đóng băng Xu để đối soát chứng cứ."
@@ -373,7 +383,7 @@ export const TransactionDetailScreen = () => {
         visible={reportModalVisible}
         onClose={() => setReportModalVisible(false)}
         onConfirm={handleFileReport}
-        title="🛡️ Báo cáo vi phạm đối tác"
+        title="Báo cáo vi phạm đối tác"
         confirmTitle="Gửi báo cáo"
         confirmVariant="primary"
         description="Mô tả vi phạm của tài khoản này (spam, thái độ không văn minh, hét giá ngoài app...)"
@@ -408,7 +418,8 @@ const styles = StyleSheet.create({
   prodImg: { width: 56, height: 56, borderRadius: 10, backgroundColor: COLORS.surfaceContainer },
   prodDetails: { flex: 1 },
   prodName: { fontSize: 13, fontWeight: '700', color: COLORS.onSurface },
-  prodPrice: { fontSize: 12, fontWeight: '700', color: COLORS.primary, marginTop: 2 },
+  prodPriceRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 3 },
+  prodPrice: { fontSize: 12, fontWeight: '700', color: COLORS.primary },
   mascotBox: { alignItems: 'center', marginVertical: SPACING.xs },
   contactCard: { marginBottom: SPACING.md, backgroundColor: COLORS.surfaceContainerLow },
   contactTitle: { fontSize: 13, fontWeight: '700', color: COLORS.onSurface, marginBottom: 2 },

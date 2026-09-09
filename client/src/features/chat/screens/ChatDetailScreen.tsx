@@ -206,10 +206,10 @@ export const ChatDetailScreen = () => {
         <View style={styles.quickChipsContainer}>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.quickChipsContent}>
             {[
-              'Đồ này còn mới không mẹ ơi? 👶',
-              'Mẹ có tiện freeship gần nhà không? 🛵',
-              'Em muốn qua xem trực tiếp nhé! ✨',
-              'Bé nhà mình dùng thích lắm ạ ❤️'
+              'Đồ này còn mới không mẹ ơi?',
+              'Mẹ có tiện freeship gần nhà không?',
+              'Em muốn qua xem trực tiếp nhé!',
+              'Bé nhà mình dùng thích lắm ạ.'
             ].map((chip, idx) => (
               <ScalePressable
                 key={idx}
