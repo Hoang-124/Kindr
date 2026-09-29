@@ -9,8 +9,7 @@ import {
   Alert 
 } from 'react-native';
 import { useAppSelector, useAppDispatch } from '../../../app/store/hooks';
-import { updateUserBalance } from '../../auth/store/authSlice';
-import { updateTransactionStatus } from '../../exchange/store/exchangeSlice';
+import { resolveDispute, fetchMyTransactionsAsync } from '../../exchange/store/exchangeSlice';
 import { api } from '../../../services/api';
 import { COLORS, SPACING, RADIUS, TYPOGRAPHY, SHADOWS } from '../../../theme';
 import { ShieldAlert, UserCheck, ArrowLeftRight, CheckSquare } from 'lucide-react-native';
@@ -24,74 +23,81 @@ export const ManageDisputesScreen = () => {
   // Filter only disputed transactions from Redux
   const localDisputedTx = transactions.filter(t => t.status === 'disputed');
   const [apiDisputes, setApiDisputes] = useState<any[] | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const loadDisputes = async () => {
+    try {
+      setRefreshing(true);
+      const res = await api.get('/admin/disputes');
+      const list = res.data.disputes || res.data;
+      if (Array.isArray(list)) {
+        setApiDisputes(list);
+      }
+    } catch (e) {
+      console.warn('Failed to fetch admin disputes:', e);
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   useEffect(() => {
-    api.get('/admin/disputes')
-      .then(res => {
-        const list = res.data.disputes || res.data;
-        if (Array.isArray(list)) {
-          setApiDisputes(list);
-        }
-      })
-      .catch(() => {});
+    loadDisputes();
   }, []);
 
   const disputedTx = apiDisputes !== null ? apiDisputes : localDisputedTx;
 
-  const handleResolveForBuyer = async (tx: any) => {
+  const handleResolveForBuyer = (tx: any) => {
+    const txId = tx.id || tx._id;
+    const buyerName = tx.buyerName || tx.buyerId?.name || 'Mẹ mua';
+    const sellerName = tx.sellerName || tx.sellerId?.name || 'Mẹ bán';
+
     Alert.alert(
-      'Phán Quyết Hoàn Trả Người Mua',
-      `Bạn phán quyết phần thắng thuộc về Người mua (${tx.buyerName || tx.buyerId?.name})?\n\n• Hoàn lại ${tx.buyerEscrowFrozen} Xu cho Mẹ mua.\n• Giải tỏa trả lại ${tx.sellerEscrowFrozen} Xu cọc cho Mẹ bán.`,
+      'Phán Quyết Chấp Thuận Khiếu Nại',
+      `Bạn xác nhận phán quyết chấp thuận khiếu nại cho ${buyerName}?\n\n• Hoàn trả ${tx.buyerEscrowFrozen} Xu cho ${buyerName}.\n• Khấu trừ ${tx.sellerEscrowFrozen} Xu Safe Fee của ${sellerName}.\n• Phạt 15 Điểm văn minh của ${sellerName}.\n• Hệ thống sẽ gửi thông báo và cập nhật số dư tức thì đến cả 2 bên.`,
       [
         { text: 'Hủy', style: 'cancel' },
         { 
-          text: 'Hoàn tiền Mẹ mua', 
+          text: 'Xác nhận hoàn Xu', 
+          style: 'destructive',
           onPress: async () => {
-            const txId = tx.id || tx._id;
             try {
-              await api.put(`/admin/disputes/${txId}/resolve`, { outcome: 'resolved_buyer' });
+              const res = await api.put(`/admin/disputes/${txId}/resolve`, { outcome: 'resolved_buyer' });
               setApiDisputes(prev => prev ? prev.filter(d => (d.id || d._id) !== txId) : null);
-            } catch (e) {}
-
-            dispatch(updateUserBalance({ userId: tx.buyerId?.id || tx.buyerId, amount: tx.buyerEscrowFrozen }));
-            dispatch(updateUserBalance({ userId: tx.sellerId?.id || tx.sellerId, amount: tx.sellerEscrowFrozen }));
-            dispatch(updateTransactionStatus({ 
-              transactionId: txId, 
-              status: 'completed',
-              finalizedAt: new Date().toISOString()
-            }));
-
-            Alert.alert('Thành công', 'Đã phân xử hoàn trả xu cho Người mua và giải phóng cọc Người bán.');
+              dispatch(resolveDispute({ transactionId: txId, outcome: 'resolved_buyer' }));
+              dispatch(fetchMyTransactionsAsync());
+              Alert.alert('Thành công 🎉', res.data?.message || 'Đã phân xử hoàn trả Xu cho Người mua và gửi thông báo tức thì đến cả 2 bên.');
+            } catch (err: any) {
+              Alert.alert('Lỗi', err.response?.data?.error || 'Không thể giải quyết tranh chấp.');
+            }
           }
         }
       ]
     );
   };
 
-  const handleResolveForSeller = async (tx: any) => {
+  const handleResolveForSeller = (tx: any) => {
+    const txId = tx.id || tx._id;
+    const buyerName = tx.buyerName || tx.buyerId?.name || 'Mẹ mua';
+    const sellerName = tx.sellerName || tx.sellerId?.name || 'Mẹ bán';
+    const totalXu = (tx.buyerEscrowFrozen || 0) + (tx.sellerEscrowFrozen || 0);
+
     Alert.alert(
-      'Phán Quyết Thanh Toán Người Bán',
-      `Bạn phán quyết phần thắng thuộc về Người bán (${tx.sellerName || tx.sellerId?.name})?\n\n• Giải ngân ${tx.productPrice + tx.sellerEscrowFrozen} Xu cho Mẹ bán.\n• Hoàn lại cọc bảo chứng cho Mẹ mua.`,
+      'Phán Quyết Công Nhận Người Bán',
+      `Bạn xác nhận sản phẩm của ${sellerName} đạt chuẩn?\n\n• Giải ngân ${totalXu} Xu (gồm tiền hàng + hoàn cọc Safe Fee) cho ${sellerName}.\n• Đóng khiếu nại của ${buyerName} và hoàn tất đơn hàng.\n• Hệ thống sẽ gửi thông báo và cập nhật số dư tức thì đến cả 2 bên.`,
       [
         { text: 'Hủy', style: 'cancel' },
         { 
-          text: 'Thanh toán Mẹ bán', 
+          text: 'Xác nhận giải ngân', 
           onPress: async () => {
-            const txId = tx.id || tx._id;
             try {
-              await api.put(`/admin/disputes/${txId}/resolve`, { outcome: 'resolved_seller' });
+              const res = await api.put(`/admin/disputes/${txId}/resolve`, { outcome: 'resolved_seller' });
               setApiDisputes(prev => prev ? prev.filter(d => (d.id || d._id) !== txId) : null);
-            } catch (e) {}
-
-            dispatch(updateUserBalance({ userId: tx.sellerId?.id || tx.sellerId, amount: tx.productPrice + tx.sellerEscrowFrozen }));
-            dispatch(updateUserBalance({ userId: tx.buyerId?.id || tx.buyerId, amount: tx.buyerEscrowFrozen - tx.productPrice }));
-            dispatch(updateTransactionStatus({ 
-              transactionId: txId, 
-              status: 'completed',
-              finalizedAt: new Date().toISOString()
-            }));
-
-            Alert.alert('Thành công', 'Đã phân xử thanh toán tiền cho Người bán và giải phóng cọc cho Người mua.');
+              dispatch(resolveDispute({ transactionId: txId, outcome: 'resolved_seller' }));
+              dispatch(fetchMyTransactionsAsync());
+              Alert.alert('Thành công 🎉', res.data?.message || 'Đã phân xử giải ngân Xu cho Người bán và gửi thông báo tức thì đến cả 2 bên.');
+            } catch (err: any) {
+              Alert.alert('Lỗi', err.response?.data?.error || 'Không thể giải quyết tranh chấp.');
+            }
           }
         }
       ]
@@ -104,7 +110,9 @@ export const ManageDisputesScreen = () => {
       
       <FlatList
         data={disputedTx}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.id || item._id || String(Math.random())}
+        refreshing={refreshing}
+        onRefresh={loadDisputes}
         contentContainerStyle={styles.listContent}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>

@@ -16,6 +16,7 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
+import ImagePickerModal from '../../../components/common/ImagePickerModal';
 import {
   Camera,
   User as UserIcon,
@@ -61,6 +62,7 @@ export const EditProfileScreen = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showDistrictModal, setShowDistrictModal] = useState(false);
   const [showWardModal, setShowWardModal] = useState(false);
+  const [isAvatarPickerVisible, setIsAvatarPickerVisible] = useState(false);
 
   // Errors
   const [nameError, setNameError] = useState('');
@@ -131,11 +133,7 @@ export const EditProfileScreen = () => {
   };
 
   const showAvatarPickerOptions = () => {
-    Alert.alert('Đổi ảnh đại diện', 'Mẹ muốn chọn ảnh từ đâu?', [
-      { text: 'Chụp ảnh mới', onPress: handleTakePhoto },
-      { text: 'Chọn từ thư viện', onPress: handlePickImage },
-      { text: 'Hủy', style: 'cancel' },
-    ]);
+    setIsAvatarPickerVisible(true);
   };
 
   // Validate inputs
@@ -446,6 +444,15 @@ export const EditProfileScreen = () => {
           </View>
         </View>
       </Modal>
+
+      <ImagePickerModal
+        visible={isAvatarPickerVisible}
+        onClose={() => setIsAvatarPickerVisible(false)}
+        onSelectCamera={handleTakePhoto}
+        onSelectLibrary={handlePickImage}
+        title="Đổi ảnh đại diện"
+        subtitle="Chọn ảnh đại diện thật của mẹ để tạo sự tin cậy khi trao đổi đồ nhé."
+      />
     </ScreenContainer>
   );
 };

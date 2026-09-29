@@ -4,6 +4,7 @@ import {
   StyleSheet, 
   View, 
   ViewStyle, 
+  StyleProp,
   TouchableOpacity 
 } from 'react-native';
 import { COLORS, RADIUS, SPACING, SHADOWS } from '../../theme';
@@ -11,8 +12,8 @@ import { COLORS, RADIUS, SPACING, SHADOWS } from '../../theme';
 interface CardProps {
   children: ReactNode;
   onPress?: () => void;
-  style?: ViewStyle;
-  contentStyle?: ViewStyle;
+  style?: StyleProp<ViewStyle>;
+  contentStyle?: StyleProp<ViewStyle>;
 }
 
 export const Card = ({ children, onPress, style, contentStyle }: CardProps) => {

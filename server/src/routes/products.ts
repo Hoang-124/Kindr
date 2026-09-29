@@ -8,6 +8,7 @@ import { Product } from '../models/Product';
 import { User } from '../models/User';
 import { requireAuth, optionalAuth, AuthRequest } from '../middleware/auth';
 import { validateObjectId } from '../middleware/validateObjectId';
+import { sendNotification, notifyAdmins } from '../services/notificationHelper';
 
 const router = Router();
 
@@ -68,8 +69,8 @@ router.get('/', optionalAuth, async (req: AuthRequest, res: Response): Promise<v
     // Build filter query
     const filter: Record<string, any> = { status: 'available' };
 
-    // Exclude own products if logged in
-    if (req.userId) {
+    // Exclude own products only if explicitly requested by query
+    if (req.userId && req.query.excludeOwn === 'true') {
       filter.sellerId = { $ne: req.userId };
     }
 
@@ -105,6 +106,7 @@ router.get('/', optionalAuth, async (req: AuthRequest, res: Response): Promise<v
 
     const [rawProducts, total] = await Promise.all([
       Product.find(filter)
+        .populate('sellerId', 'name avatar phone')
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limitNum)
@@ -113,13 +115,21 @@ router.get('/', optionalAuth, async (req: AuthRequest, res: Response): Promise<v
     ]);
 
     let products = rawProducts.map((p: any) => {
+      const seller = p.sellerId && typeof p.sellerId === 'object' ? p.sellerId : null;
+      const formatted = {
+        ...p,
+        id: p._id?.toString() || p.id,
+        sellerId: seller?._id?.toString() || p.sellerId?.toString() || p.sellerId,
+        sellerName: seller?.name || p.sellerName || 'Thành viên Kindr',
+        sellerAvatar: seller?.avatar || p.sellerAvatar || '',
+      };
       if (userLat && userLng) {
         const pLat = p.coordinates?.latitude || 16.0748;
         const pLng = p.coordinates?.longitude || 108.2240;
         const d = calculateHaversineKm(userLat, userLng, pLat, pLng);
-        return { ...p, distance: `${d} km`, distanceKm: d };
+        return { ...formatted, distance: `${d} km`, distanceKm: d };
       }
-      return p;
+      return formatted;
     });
 
     if (maxRadius && userLat && userLng) {
@@ -168,14 +178,25 @@ router.get('/my', requireAuth, async (req: AuthRequest, res: Response): Promise<
  */
 router.get('/:id', validateObjectId('id'), optionalAuth, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const product = await Product.findById(req.params.id).lean();
-    if (!product) {
+    const rawProduct: any = await Product.findById(req.params.id)
+      .populate('sellerId', 'name avatar phone')
+      .lean();
+    if (!rawProduct) {
       res.status(404).json({ error: 'Không tìm thấy sản phẩm.' });
       return;
     }
 
-    // Mask seller phone if viewer is not matched
-    if (req.userId !== product.sellerId.toString()) {
+    const seller = rawProduct.sellerId && typeof rawProduct.sellerId === 'object' ? rawProduct.sellerId : null;
+    const product = {
+      ...rawProduct,
+      sellerId: seller?._id?.toString() || rawProduct.sellerId?.toString() || rawProduct.sellerId,
+      sellerName: seller?.name || rawProduct.sellerName || 'Thành viên Kindr',
+      sellerAvatar: seller?.avatar || rawProduct.sellerAvatar || '',
+      sellerPhone: rawProduct.sellerPhone || seller?.phone || '',
+    };
+
+    // Mask seller phone if viewer is not matched and not admin
+    if (req.userId !== product.sellerId && req.userRole !== 'admin') {
       if (product.sellerPhone) {
         product.sellerPhone = product.sellerPhone.replace(/(\d{4})\d{3}(\d{3})/, '$1***$2');
       }
@@ -213,19 +234,41 @@ router.post('/', requireAuth, async (req: AuthRequest, res: Response): Promise<v
 
     const data = parsed.data;
 
-    // Calculate SafeFee 10% (minimum 1 Xu, charity = 0)
-    const isCharity = data.category === 'charity' || data.category === 'tu_thien' || data.price === 0;
-    const safeFee = isCharity ? 0 : Math.max(1, Math.ceil(data.price * 0.1));
+    // Chống ngáo giá: Kiểm tra biên độ giá tối đa cho phép theo danh mục
+    const MAX_PRICE_BY_CATEGORY: Record<string, number> = {
+      charity: 0,
+      tu_thien: 0,
+      book: 5,
+      sach_truyen: 5,
+      toy_small: 10,
+      do_choi: 10,
+      quan_ao: 10,
+      do_hoc_tap: 10,
+      toy_large: 20,
+      xe_noi: 50,
+    };
 
-    // Check balance for SafeFee
-    if (safeFee > 0 && seller.xuBalance < safeFee) {
+    const maxAllowedPrice = MAX_PRICE_BY_CATEGORY[data.category] ?? 30;
+    if (data.price > maxAllowedPrice) {
       res.status(400).json({
-        error: `Số dư ví không đủ để ký quỹ ${safeFee} Xu Safe Fee (10%). Số dư hiện tại: ${seller.xuBalance} Xu.`,
+        error: `Mức giá ${data.price} Xu vượt quá khung định giá cho phép của danh mục này (tối đa ${maxAllowedPrice} Xu). Kindr áp dụng khung định giá cố định để chống ngáo giá.`,
       });
       return;
     }
 
-    // Create product
+    // Calculate SafeFee 10% (minimum 1 Xu, charity = 0)
+    const isCharity = data.category === 'charity' || data.category === 'tu_thien' || data.price === 0;
+    const safeFee = isCharity ? 0 : Math.max(1, Math.ceil(data.price * 0.1));
+
+    // Check balance for SafeFee (standard Xu balance)
+    if (safeFee > 0 && seller.xuBalance < safeFee) {
+      res.status(400).json({
+        error: `Số dư ví không đủ để ký quỹ ${safeFee} Xu Safe Fee (10%). Số dư hiện tại: ${seller.xuBalance} Xu. Hãy nạp thêm Xu để đăng đồ nhé!`,
+      });
+      return;
+    }
+
+    // Create product - Community-driven & asset-light: auto-available with 10% Safe Fee collateral
     const product = await Product.create({
       ...data,
       coordinates: data.coordinates || { latitude: 16.0748, longitude: 108.2240 },
@@ -240,15 +283,36 @@ router.post('/', requireAuth, async (req: AuthRequest, res: Response): Promise<v
 
     // Deduct SafeFee from balance, add to frozen
     if (safeFee > 0) {
-      seller.xuBalance -= safeFee;
-      seller.xuFrozen += safeFee;
-      await seller.save();
+      const updatedSeller = await User.findOneAndUpdate(
+        { _id: seller._id, xuBalance: { $gte: safeFee }, isLocked: { $ne: true } },
+        { $inc: { xuBalance: -safeFee, xuFrozen: safeFee } },
+        { new: true }
+      );
+      if (!updatedSeller) {
+        await Product.findByIdAndDelete(product._id);
+        res.status(400).json({
+          error: `Số dư ví không đủ để ký quỹ ${safeFee} Xu Safe Fee (10%).`,
+        });
+        return;
+      }
+    }
+
+    // Trigger real-time notifications
+    try {
+      sendNotification({
+        userId: seller._id,
+        type: 'post_approved',
+        title: 'Đăng tin thành công! 🎉',
+        body: `Món đồ "${data.name}" đã được hiển thị trực tiếp trên sàn Kindr.`,
+        relatedProductId: product._id,
+        data: { productId: product._id.toString() },
+      });
+    } catch (notifErr) {
+      console.warn('Create product notification warning:', notifErr);
     }
 
     res.status(201).json({
-      message: isCharity
-        ? `Đã đăng lên Trạm Tặng Đồ (0 Xu)`
-        : `Đăng đồ thành công! Đã tạm khóa ${safeFee} Xu Safe Fee.`,
+      message: `Đăng đồ thành công! Món đồ "${data.name}" đã được hiển thị trên sàn Kindr.`,
       product,
     });
   } catch (error) {

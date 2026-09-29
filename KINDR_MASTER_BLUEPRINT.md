@@ -208,6 +208,8 @@ d:\Kindr\src/
 
 ## 8. LỘ TRÌNH MỞ RỘNG 3 NĂM (SCALABILITY ROADMAP)
 
+> 🗺️ **Tài liệu chiến lược chi tiết:** Xem toàn bộ chiến lược phân kỳ, OKRs/KPIs, kiến trúc nâng cấp và phân bổ nguồn lực tại [PRODUCT_ROADMAP.md](PRODUCT_ROADMAP.md).
+
 * **Năm 1 (MVP & Product-Market Fit tại Đà Nẵng):**
   * Tập trung cốt lõi vào danh mục Đồ chơi & Sách truyện tại các quận Hải Châu, Thanh Khê, Sơn Trà.
   * Hoàn thiện 100% luồng Double Escrow, nạp VietQR và hệ thống Điểm uy tín.

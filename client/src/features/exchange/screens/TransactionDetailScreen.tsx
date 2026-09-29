@@ -14,8 +14,12 @@ import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AppStackParamList } from '../../../app/navigation/navigationTypes';
 import { useAppSelector, useAppDispatch } from '../../../app/store/hooks';
-import { confirmHandover, finalizeSafefulTime, fileDispute, confirmHandoverAsync, completeTransactionAsync, fileDisputeAsync } from '../store/exchangeSlice';
+import { confirmHandover, finalizeSafefulTime, fileDispute, confirmHandoverAsync, completeTransactionAsync, fileDisputeAsync, upsertTransaction, fetchMyTransactionsAsync } from '../store/exchangeSlice';
 import { updateUserBalance, adjustCivilizationPoints, updateUserReputation, addStrikeToUser, refreshWalletBalance } from '../../auth/store/authSlice';
+import * as transactionService from '../../../services/transactionService';
+import * as chatService from '../../../services/chatService';
+import { upsertChatSession } from '../../chat/store/chatSlice';
+import { Transaction } from '../../../types/common';
 import { submitReport } from '../../trust-safety/store/reportSlice';
 import { COLORS, SPACING, RADIUS, TYPOGRAPHY, SHADOWS } from '../../../theme';
 import ScreenContainer from '../../../components/layout/ScreenContainer';
@@ -53,7 +57,51 @@ export const TransactionDetailScreen = () => {
   const transactions = useAppSelector((state) => state.exchange.transactions);
   const currentUser = useAppSelector((state) => state.auth.currentUser);
 
-  const tx = transactions.find(t => t.id === id);
+  // Search in Redux first by transaction ID or product ID
+  const storeTx = transactions.find(t => t.id === id || (t.productId && t.productId === id));
+  const [localTx, setLocalTx] = useState<Transaction | null>(null);
+  const [fetching, setFetching] = useState(!storeTx);
+
+  const tx = storeTx || localTx;
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadTx = async () => {
+      try {
+        if (!storeTx) {
+          setFetching(true);
+        }
+        // 1. Fetch from server by id (server supports transactionId or productId)
+        const data = await transactionService.getTransactionById(id);
+        if (isMounted && data) {
+          setLocalTx(data);
+          dispatch(upsertTransaction(data));
+        }
+      } catch (err) {
+        // 2. Fallback: try fetching all user transactions from server
+        try {
+          const list = await transactionService.getMyTransactions();
+          if (isMounted && Array.isArray(list)) {
+            const matched = list.find(t => t.id === id || (t.productId && t.productId === id));
+            if (matched) {
+              setLocalTx(matched);
+              dispatch(upsertTransaction(matched));
+            }
+          }
+        } catch (e2) {
+          console.warn('Fallback transactions fetch error:', e2);
+        }
+      } finally {
+        if (isMounted) setFetching(false);
+      }
+    };
+
+    loadTx();
+    return () => {
+      isMounted = false;
+    };
+  }, [id, dispatch]);
 
   // Dispute & Report Modal State
   const [disputeModalVisible, setDisputeModalVisible] = useState(false);
@@ -89,17 +137,62 @@ export const TransactionDetailScreen = () => {
     return () => clearInterval(interval);
   }, [tx?.safefulTimeExpiresAt, tx?.status]);
 
-  if (!tx) {
+  if (fetching && !tx) {
     return (
-      <ScreenContainer loading={false} style={styles.errorContainer}>
-        <Header showBack />
-        <Text style={styles.errorText}>Không tìm thấy thông tin giao dịch.</Text>
+      <ScreenContainer loading={true} style={styles.errorContainer}>
+        <Header showBack title="Chi tiết giao dịch" />
       </ScreenContainer>
     );
   }
 
-  const isBuyer = tx.buyerId === currentUser?.id;
-  const isSeller = tx.sellerId === currentUser?.id;
+  if (!tx) {
+    return (
+      <ScreenContainer loading={false} style={styles.errorContainer}>
+        <Header showBack title="Chi tiết giao dịch" />
+        <View style={styles.emptyCard}>
+          <AlertTriangle size={48} color={COLORS.error} style={{ marginBottom: SPACING.sm }} />
+          <Text style={styles.errorTitle}>Không tìm thấy thông tin giao dịch</Text>
+          <Text style={styles.errorSubText}>
+            Giao dịch này có thể chưa kịp đồng bộ hoặc đã hoàn tất trước đó. Mẹ hãy kiểm tra lại kết nối mạng hoặc thử tải lại nhé!
+          </Text>
+          <Button
+            title="Thử tải lại"
+            onPress={async () => {
+              setFetching(true);
+              try {
+                const data = await transactionService.getTransactionById(id);
+                if (data) {
+                  setLocalTx(data);
+                  dispatch(upsertTransaction(data));
+                }
+              } catch {
+                try {
+                  const list = await transactionService.getMyTransactions();
+                  const matched = list.find(t => t.id === id || (t.productId && t.productId === id));
+                  if (matched) {
+                    setLocalTx(matched);
+                    dispatch(upsertTransaction(matched));
+                  }
+                } catch {}
+              } finally {
+                setFetching(false);
+              }
+            }}
+            style={{ marginTop: SPACING.md, width: '100%' }}
+          />
+          <Button
+            title="Về màn hình chính"
+            variant="outline"
+            onPress={() => navigation.navigate('Main')}
+            style={{ marginTop: SPACING.xs, width: '100%' }}
+          />
+        </View>
+      </ScreenContainer>
+    );
+  }
+
+  const isBuyer = String(tx.buyerId) === String(currentUser?.id);
+  const isSeller = String(tx.sellerId) === String(currentUser?.id);
 
   // Handover confirmation ("Đã nhận hàng" -> triggers 6h Safeful Time)
   const handleHandoverConfirm = () => {
@@ -159,13 +252,18 @@ export const TransactionDetailScreen = () => {
       return;
     }
 
+    setLoading(true);
+    const txId = tx.id || (tx as any)._id;
     try {
-      await dispatch(fileDisputeAsync({ transactionId: tx.id, reason: disputeReasonText.trim() })).unwrap();
-    } catch (e) {
-      dispatch(fileDispute({ transactionId: tx.id, reason: disputeReasonText }));
+      await dispatch(fileDisputeAsync({ transactionId: txId, reason: disputeReasonText.trim() })).unwrap();
+      dispatch(fetchMyTransactionsAsync());
+      setDisputeModalVisible(false);
+      setLoading(false);
+      Alert.alert('Đã nộp Khiếu Nại thành công 🎉', 'Bộ phận Trust & Safety Kindr đã ghi nhận và tạm khóa bảo chứng đơn hàng để phân xử.');
+    } catch (e: any) {
+      setLoading(false);
+      Alert.alert('Lỗi nộp khiếu nại', e || 'Không thể gửi khiếu nại lên máy chủ.');
     }
-    setDisputeModalVisible(false);
-    Alert.alert('Đã nộp Khiếu Nại', 'Bộ phận Trust & Safety sẽ liên hệ đối soát chứng cứ trong vòng 24h.');
   };
 
   // Report submission
@@ -193,11 +291,14 @@ export const TransactionDetailScreen = () => {
         <View style={[
           styles.statusBanner,
           tx.status === 'completed' ? styles.statusCompleted :
+          tx.status === 'refunded' ? styles.statusRefunded :
           tx.status === 'disputed' ? styles.statusDisputed :
           tx.status === 'in_safeful_time' ? styles.statusSafeful : styles.statusFrozen
         ]}>
           {tx.status === 'completed' ? (
             <ShieldCheck size={26} color="#FFF" />
+          ) : tx.status === 'refunded' ? (
+            <CheckCircle2 size={26} color="#FFF" />
           ) : tx.status === 'disputed' ? (
             <ShieldAlert size={26} color="#FFF" />
           ) : (
@@ -208,12 +309,15 @@ export const TransactionDetailScreen = () => {
             <Text style={styles.statusTitle}>
               {tx.status === 'awaiting_handover' ? 'ĐANG TẠM KHÓA XU KÝ QUỸ' :
                tx.status === 'in_safeful_time' ? 'BẢO CHỨNG 6 GIỜ KIỂM ĐỊNH' :
-               tx.status === 'completed' ? 'GIAO DỊCH THÀNH CÔNG' : 'TRANH CHẤP ĐANG XỬ LÝ'}
+               tx.status === 'completed' ? (tx.disputeStatus === 'resolved_seller' ? 'TRANH CHẤP ĐÃ GIẢI QUYẾT' : 'GIAO DỊCH THÀNH CÔNG') :
+               tx.status === 'refunded' ? 'KHIẾU NẠI ĐÃ HOÀN TRẢ XU' : 'TRANH CHẤP ĐANG XỬ LÝ'}
             </Text>
             <Text style={styles.statusSub}>
               {tx.status === 'awaiting_handover' ? 'Xu cả 2 bên được bảo hộ an toàn trong Rương Escrow.' :
                tx.status === 'in_safeful_time' ? `Đếm ngược kiểm định tại nhà: ${timeLeftStr}` :
-               tx.status === 'completed' ? 'Xu đã tự động giải phóng vào ví người bán.' : 'Ban quản trị Kindr đang kiểm tra chứng cứ.'}
+               tx.status === 'completed' ? (tx.disputeStatus === 'resolved_seller' ? 'BQT Kindr xác nhận đồ đạt chuẩn. Đã giải ngân Xu cho người bán.' : 'Xu đã tự động giải phóng vào ví người bán.') :
+               tx.status === 'refunded' ? 'BQT Kindr đã hoàn trả 100% Xu ký quỹ vào ví của người mua.' :
+               'Ban quản trị Kindr đang kiểm tra chứng cứ và sẽ có phán quyết sớm.'}
             </Text>
           </View>
         </View>
@@ -230,14 +334,83 @@ export const TransactionDetailScreen = () => {
           </View>
         </Card>
 
+        {/* Dispute Status & Verdict Card */}
+        {(tx.status === 'disputed' || tx.disputeStatus) && (
+          <Card style={[
+            styles.disputeCard,
+            tx.status === 'disputed' ? styles.disputeCardWarning : styles.disputeCardResolved
+          ]}>
+            <View style={styles.disputeHeaderRow}>
+              <View style={[
+                styles.disputeIconCircle,
+                tx.status === 'disputed' ? styles.disputeIconWarning : styles.disputeIconSuccess
+              ]}>
+                {tx.status === 'disputed' ? (
+                  <ShieldAlert size={20} color="#DC2626" />
+                ) : (
+                  <ShieldCheck size={20} color="#10B981" />
+                )}
+              </View>
+              <View style={{ flex: 1 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 6 }}>
+                  <Text style={styles.disputeCardTitle}>
+                    {tx.status === 'disputed' ? 'Đang Xử Lý Khiếu Nại' : 'Kết Quả Phán Quyết BQT'}
+                  </Text>
+                  <View style={[
+                    styles.disputeBadgePill,
+                    tx.status === 'disputed' ? styles.disputeBadgeWarning : styles.disputeBadgeSuccess
+                  ]}>
+                    <Text style={[
+                      styles.disputeBadgeText,
+                      tx.status === 'disputed' ? styles.disputeBadgeTextWarning : styles.disputeBadgeTextSuccess
+                    ]}>
+                      {tx.status === 'disputed' ? 'Chờ phán quyết' : tx.disputeStatus === 'resolved_buyer' ? 'Chấp thuận khiếu nại' : 'Đồ đạt chuẩn'}
+                    </Text>
+                  </View>
+                </View>
+                <Text style={styles.disputeVerdictSummary}>
+                  {tx.status === 'disputed' 
+                    ? 'Ban quản trị Kindr đã tạm khóa toàn bộ Xu bảo chứng và đang kiểm tra chứng cứ xác minh.'
+                    : tx.disputeStatus === 'resolved_buyer'
+                    ? `Hoàn trả ${tx.buyerEscrowFrozen} Xu vào ví Người mua. Khấu trừ Safe Fee của Người bán.`
+                    : `Sản phẩm đạt chuẩn mô tả. Đã giải ngân toàn bộ Xu cho Người bán.`}
+                </Text>
+              </View>
+            </View>
+
+            {tx.disputeReason ? (
+              <View style={styles.disputeReasonBox}>
+                <Text style={styles.disputeReasonLabel}>Nội dung khiếu nại:</Text>
+                <Text style={styles.disputeReasonContent}>"{tx.disputeReason}"</Text>
+              </View>
+            ) : null}
+
+            {tx.disputeEvidenceImages && tx.disputeEvidenceImages.length > 0 && (
+              <View style={styles.disputeImagesRow}>
+                {tx.disputeEvidenceImages.map((imgUri, idx) => (
+                  <Image key={idx} source={{ uri: imgUri }} style={styles.disputeThumbImg} />
+                ))}
+              </View>
+            )}
+          </Card>
+        )}
+
         {/* Mascot Escrow Dialogue */}
         <View style={styles.mascotBox}>
           <MascotIcon 
             size={56} 
-            mood={tx.status === 'completed' ? 'celebrate' : 'protective'} 
-            dialogue={tx.status === 'completed'
-              ? "Gấu Kindy đã giải phóng Xu thành công cho 2 mẹ nhé!"
-              : "Mẹ an tâm! Gấu đang giữ hộ Xu trong rương, kiểm tra 6 tiếng thoải mái nhe!"}
+            mood={tx.status === 'completed' || tx.status === 'refunded' ? 'celebrate' : 'protective'} 
+            dialogue={
+              tx.status === 'completed'
+                ? (tx.disputeStatus === 'resolved_seller'
+                    ? "BQT Kindr đã đối soát chứng cứ và giải phóng Xu cho người bán thành công!"
+                    : "Gấu Kindy đã giải phóng Xu thành công cho 2 mẹ nhé!")
+                : tx.status === 'refunded'
+                ? "Khiếu nại đã giải quyết! Gấu đã hoàn trả Xu về ví an toàn cho mẹ nhé!"
+                : tx.status === 'disputed'
+                ? "Gấu đang giữ khóa Xu an toàn trong khi Ban quản trị đối soát chứng cứ!"
+                : "Mẹ an tâm! Gấu đang giữ hộ Xu trong rương, kiểm tra 6 tiếng thoải mái nhe!"
+            }
           />
         </View>
 
@@ -250,19 +423,43 @@ export const TransactionDetailScreen = () => {
           <Text style={styles.contactSub}>Dùng để hai bên tự thỏa thuận giao nhận P2P tiện đường đi chợ/đón con</Text>
           
           <View style={styles.contactRow}>
-            <Text style={styles.contactLabel}>Đối tác giao dịch:</Text>
-            <Text style={styles.contactName}>{isBuyer ? tx.sellerName : tx.buyerName}</Text>
+            <Text style={styles.contactLabel}>{isBuyer ? 'Mẹ đăng bán:' : 'Mẹ yêu cầu đổi đồ:'}</Text>
+            <Text style={styles.contactNameHighlight}>{isBuyer ? tx.sellerName : tx.buyerName}</Text>
           </View>
 
           <View style={styles.contactRow}>
             <Phone size={16} color={COLORS.primary} />
-            <Text style={styles.contactValue}>{isBuyer ? (tx.sellerPhone || '0905234567') : (tx.buyerPhone || '0905123456')}</Text>
+            <Text style={styles.contactValue}>
+              {isBuyer ? (tx.sellerPhone || 'Chưa cập nhật') : (tx.buyerPhone || 'Chưa cập nhật')}
+            </Text>
           </View>
 
           <View style={styles.contactRow}>
             <MessageCircle size={16} color={COLORS.accentGold} />
-            <Text style={styles.contactValue}>Zalo: {isBuyer ? (tx.sellerZalo || '0905234567') : (tx.buyerZalo || '0905123456')}</Text>
+            <Text style={styles.contactValue}>
+              Zalo: {isBuyer ? (tx.sellerZalo || tx.sellerPhone || 'Chưa cập nhật') : (tx.buyerZalo || tx.buyerPhone || 'Chưa cập nhật')}
+            </Text>
           </View>
+
+          <TouchableOpacity
+            style={styles.chatShortcutBtn}
+            onPress={async () => {
+              const partnerId = isBuyer ? tx.sellerId : tx.buyerId;
+              try {
+                const { chat } = await chatService.createChat(tx.productId, partnerId);
+                dispatch(upsertChatSession(chat));
+                navigation.navigate('ChatDetail', { chatId: chat.id });
+              } catch (e) {
+                navigation.navigate('ChatDetail', {
+                  chatId: `chat_${currentUser?.id}_${partnerId}_${tx.productId}`,
+                });
+              }
+            }}
+            activeOpacity={0.8}
+          >
+            <MessageCircle size={15} color={COLORS.primary} />
+            <Text style={styles.chatShortcutText}>Nhắn tin trao đổi ngay</Text>
+          </TouchableOpacity>
         </Card>
 
         {/* Double Escrow Values Box */}
@@ -302,10 +499,29 @@ export const TransactionDetailScreen = () => {
               onPress={handleImmediateComplete}
               style={styles.actionBtn}
             />
-            <ScalePressable style={styles.disputeBtn} scaleTo={0.96} onPress={() => setDisputeModalVisible(true)}>
+            <ScalePressable
+              style={styles.disputeBtn}
+              scaleTo={0.96}
+              onPress={() => navigation.navigate('DisputeForm', { transactionId: tx.id || (tx as any)._id })}
+            >
               <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
                 <ShieldAlert size={15} color="#DC2626" />
                 <Text style={styles.disputeBtnText}>Báo lỗi / Khiếu nại chất lượng</Text>
+              </View>
+            </ScalePressable>
+          </View>
+        )}
+
+        {tx.status === 'in_safeful_time' && isSeller && (
+          <View style={styles.buyerActionGroup}>
+            <ScalePressable
+              style={styles.disputeBtn}
+              scaleTo={0.96}
+              onPress={() => navigation.navigate('DisputeForm', { transactionId: tx.id || (tx as any)._id })}
+            >
+              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                <ShieldAlert size={15} color="#DC2626" />
+                <Text style={styles.disputeBtnText}>Báo lỗi / Khiếu nại giao dịch</Text>
               </View>
             </ScalePressable>
           </View>
@@ -403,13 +619,38 @@ export const TransactionDetailScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  errorContainer: { alignItems: 'center', justifyContent: 'center' },
+  errorContainer: { alignItems: 'center', justifyContent: 'flex-start' },
+  emptyCard: {
+    alignItems: 'center',
+    padding: SPACING.xl,
+    backgroundColor: '#FFFFFF',
+    borderRadius: RADIUS.lg,
+    borderWidth: 1,
+    borderColor: COLORS.outlineVariant,
+    marginHorizontal: SPACING.containerPadding,
+    marginTop: SPACING.xl,
+    width: '92%',
+  },
+  errorTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: COLORS.onSurface,
+    marginBottom: SPACING.xs,
+    textAlign: 'center',
+  },
+  errorSubText: {
+    fontSize: 13,
+    color: COLORS.outline,
+    textAlign: 'center',
+    lineHeight: 20,
+  },
   errorText: { fontSize: 14, color: COLORS.error, marginTop: SPACING.xl },
   scrollContent: { paddingHorizontal: SPACING.containerPadding, paddingTop: SPACING.sm, paddingBottom: 60 },
   statusBanner: { flexDirection: 'row', alignItems: 'center', padding: SPACING.md, borderRadius: RADIUS.default, gap: SPACING.md, marginBottom: SPACING.md },
   statusFrozen: { backgroundColor: COLORS.tertiary },
   statusSafeful: { backgroundColor: COLORS.primary },
-  statusCompleted: { backgroundColor: COLORS.primary },
+  statusCompleted: { backgroundColor: '#10B981' },
+  statusRefunded: { backgroundColor: '#059669' },
   statusDisputed: { backgroundColor: COLORS.error },
   statusTextContainer: { flex: 1 },
   statusTitle: { fontSize: 13, fontWeight: '700', color: '#FFF' },
@@ -427,7 +668,25 @@ const styles = StyleSheet.create({
   contactRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 },
   contactLabel: { fontSize: 12, color: COLORS.outline },
   contactName: { fontSize: 12, fontWeight: '700', color: COLORS.onSurface },
+  contactNameHighlight: { fontSize: 13, fontWeight: '800', color: COLORS.primary },
   contactValue: { fontSize: 13, fontWeight: '700', color: COLORS.primary },
+  chatShortcutBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#FFF0F0',
+    borderWidth: 1,
+    borderColor: '#FECACA',
+    borderRadius: RADIUS.sm,
+    paddingVertical: 8,
+    marginTop: SPACING.sm,
+    gap: 6,
+  },
+  chatShortcutText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: COLORS.primary,
+  },
   escrowBox: { flexDirection: 'row', backgroundColor: COLORS.surfaceContainer, borderRadius: RADIUS.default, padding: SPACING.md, marginBottom: SPACING.lg, alignItems: 'center' },
   escrowColumn: { flex: 1, alignItems: 'center' },
   escrowRole: { fontSize: 11, color: COLORS.outline },
@@ -445,6 +704,102 @@ const styles = StyleSheet.create({
   qrCodeText: { fontSize: 13, color: COLORS.onSurface, fontWeight: '600', marginBottom: 4 },
   qrCodeHighlight: { color: COLORS.primary, fontWeight: '800' },
   qrSubText: { fontSize: 11, color: COLORS.outline, textAlign: 'center', paddingHorizontal: SPACING.sm },
+  disputeCard: {
+    padding: SPACING.md,
+    borderRadius: RADIUS.md,
+    borderWidth: 1,
+    marginBottom: SPACING.md,
+  },
+  disputeCardWarning: {
+    backgroundColor: '#FFF8F8',
+    borderColor: 'rgba(239, 68, 68, 0.3)',
+  },
+  disputeCardResolved: {
+    backgroundColor: '#F0FDF4',
+    borderColor: 'rgba(16, 185, 129, 0.3)',
+  },
+  disputeHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: SPACING.sm,
+  },
+  disputeIconCircle: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  disputeIconWarning: {
+    backgroundColor: '#FEE2E2',
+  },
+  disputeIconSuccess: {
+    backgroundColor: '#D1FAE5',
+  },
+  disputeCardTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: COLORS.onSurface,
+    flex: 1,
+  },
+  disputeBadgePill: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: RADIUS.full,
+  },
+  disputeBadgeWarning: {
+    backgroundColor: '#FEE2E2',
+  },
+  disputeBadgeSuccess: {
+    backgroundColor: '#D1FAE5',
+  },
+  disputeBadgeText: {
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  disputeBadgeTextWarning: {
+    color: '#DC2626',
+  },
+  disputeBadgeTextSuccess: {
+    color: '#059669',
+  },
+  disputeVerdictSummary: {
+    fontSize: 12,
+    color: COLORS.outline,
+    marginTop: 3,
+    lineHeight: 16,
+  },
+  disputeReasonBox: {
+    marginTop: SPACING.sm,
+    padding: SPACING.sm,
+    backgroundColor: 'rgba(0, 0, 0, 0.03)',
+    borderRadius: RADIUS.sm,
+    borderLeftWidth: 3,
+    borderLeftColor: COLORS.primary,
+  },
+  disputeReasonLabel: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: COLORS.outline,
+    marginBottom: 2,
+  },
+  disputeReasonContent: {
+    fontSize: 12,
+    color: COLORS.onSurface,
+    fontStyle: 'italic',
+    lineHeight: 16,
+  },
+  disputeImagesRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: SPACING.sm,
+  },
+  disputeThumbImg: {
+    width: 50,
+    height: 50,
+    borderRadius: 8,
+    backgroundColor: COLORS.surfaceContainer,
+  },
 });
 
 export default TransactionDetailScreen;

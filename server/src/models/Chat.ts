@@ -7,8 +7,10 @@ export interface IChat extends Document {
   productImage: string;
   buyerId: Types.ObjectId;
   buyerName: string;
+  buyerAvatar: string;
   sellerId: Types.ObjectId;
   sellerName: string;
+  sellerAvatar: string;
   lastMessageText: string;
   lastMessageTime: Date;
   buyerUnreadCount: number;
@@ -23,8 +25,10 @@ const ChatSchema = new Schema<IChat>({
   productImage: { type: String, default: '' },
   buyerId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
   buyerName: { type: String, required: true },
+  buyerAvatar: { type: String, default: '' },
   sellerId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
   sellerName: { type: String, required: true },
+  sellerAvatar: { type: String, default: '' },
   lastMessageText: { type: String, default: '' },
   lastMessageTime: { type: Date, default: Date.now },
   buyerUnreadCount: { type: Number, default: 0 },

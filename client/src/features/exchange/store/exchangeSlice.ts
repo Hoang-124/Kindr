@@ -31,6 +31,18 @@ export const fetchMyTransactionsAsync = createAsyncThunk(
   }
 );
 
+export const fetchTransactionByIdAsync = createAsyncThunk(
+  'exchange/fetchTransactionByIdAsync',
+  async (id: string, { rejectWithValue }) => {
+    try {
+      const tx = await transactionService.getTransactionById(id);
+      return tx;
+    } catch (err: any) {
+      return rejectWithValue(err.response?.data?.error || 'Không thể tải thông tin giao dịch');
+    }
+  }
+);
+
 export const initiateExchangeAsync = createAsyncThunk(
   'exchange/initiateExchangeAsync',
   async (productId: string, { rejectWithValue }) => {
@@ -102,6 +114,15 @@ const exchangeSlice = createSlice({
         newTx.id,
         newTx.productId
       );
+    },
+
+    upsertTransaction: (state, action: PayloadAction<Transaction>) => {
+      const idx = state.transactions.findIndex(t => t.id === action.payload.id || (action.payload.productId && t.productId === action.payload.productId));
+      if (idx >= 0) {
+        state.transactions[idx] = { ...state.transactions[idx], ...action.payload };
+      } else {
+        state.transactions.unshift(action.payload);
+      }
     },
 
     updateTransactionStatus: (state, action: PayloadAction<{ transactionId: string; status: Transaction['status']; finalizedAt?: string }>) => {
@@ -266,6 +287,16 @@ const exchangeSlice = createSlice({
         tx.disputeStatus = 'open';
       }
     });
+
+    // fetchTransactionByIdAsync
+    builder.addCase(fetchTransactionByIdAsync.fulfilled, (state, action) => {
+      const idx = state.transactions.findIndex(t => t.id === action.payload.id);
+      if (idx >= 0) {
+        state.transactions[idx] = action.payload;
+      } else {
+        state.transactions.unshift(action.payload);
+      }
+    });
   },
 });
 
@@ -277,7 +308,8 @@ export const {
   fileDispute, 
   resolveDispute, 
   markRated, 
-  hydrateTransactions 
+  hydrateTransactions,
+  upsertTransaction
 } = exchangeSlice.actions;
 
 export default exchangeSlice.reducer;

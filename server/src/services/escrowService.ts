@@ -8,8 +8,11 @@ import { User } from '../models/User';
 import { Product } from '../models/Product';
 import { Transaction, TransactionStatus } from '../models/Transaction';
 import { Notification } from '../models/Notification';
+import { Chat } from '../models/Chat';
+import { Message } from '../models/Message';
 import { emitToUser } from '../socket';
 import { sendPushToUser } from './pushNotificationService';
+import { notifyAdmins } from './notificationHelper';
 
 /**
  * Calculate Safe Fee (10% of price, minimum 1 Xu, charity = 0)
@@ -282,18 +285,78 @@ export async function finalizeTransaction(transactionId: string): Promise<{
 }
 
 /**
+ * Post an automated system message into the chat conversation between buyer and seller
+ */
+async function postSystemChatMessage(
+  buyerId: any,
+  sellerId: any,
+  productId: any,
+  content: string
+): Promise<void> {
+  try {
+    const chat = await Chat.findOne({
+      productId,
+      $or: [
+        { buyerId, sellerId },
+        { buyerId: sellerId, sellerId: buyerId },
+      ],
+    });
+    if (!chat) return;
+
+    const systemMsg = await Message.create({
+      chatId: chat._id,
+      senderId: buyerId,
+      senderName: 'Hệ thống Kindr',
+      senderAvatar: 'https://cdn-icons-png.flaticon.com/512/9422/9422833.png',
+      content,
+      isRead: false,
+    });
+
+    chat.lastMessageText = content;
+    chat.lastMessageTime = new Date();
+    await chat.save();
+
+    const payload = {
+      chatId: chat._id.toString(),
+      message: {
+        id: systemMsg._id.toString(),
+        senderId: 'system',
+        senderName: 'Hệ thống Kindr',
+        senderAvatar: 'https://cdn-icons-png.flaticon.com/512/9422/9422833.png',
+        content,
+        timestamp: systemMsg.createdAt.toISOString(),
+      },
+    };
+
+    emitToUser(buyerId.toString(), 'message_received', payload);
+    emitToUser(sellerId.toString(), 'message_received', payload);
+  } catch (err) {
+    console.warn('postSystemChatMessage error:', err);
+  }
+}
+
+/**
  * File dispute → Freeze all, open dispute.
  */
 export async function fileDispute(
   transactionId: string,
-  buyerId: string,
+  userId: string,
   reason: string,
   evidenceImages: string[] = []
 ): Promise<{ success: boolean; error?: string }> {
   const tx = await Transaction.findById(transactionId);
   if (!tx) return { success: false, error: 'Giao dịch không tồn tại.' };
-  if (tx.buyerId.toString() !== buyerId) return { success: false, error: 'Chỉ người mua mới được khiếu nại.' };
-  if (tx.status !== 'in_safeful_time') return { success: false, error: 'Chỉ khiếu nại được trong 6h Safeful Time.' };
+
+  const isBuyer = tx.buyerId.toString() === userId;
+  const isSeller = tx.sellerId.toString() === userId;
+
+  if (!isBuyer && !isSeller) {
+    return { success: false, error: 'Chỉ người mua hoặc người bán trong đơn hàng mới có quyền khiếu nại.' };
+  }
+
+  if (tx.status !== 'in_safeful_time' && tx.status !== 'awaiting_handover') {
+    return { success: false, error: 'Giao dịch không ở trạng thái có thể khiếu nại.' };
+  }
 
   tx.status = 'disputed';
   tx.disputeReason = reason;
@@ -301,20 +364,70 @@ export async function fileDispute(
   tx.disputeStatus = 'open';
   await tx.save();
 
-  // Notify seller
+  const txIdStr = tx._id.toString();
+  const sellerIdStr = tx.sellerId.toString();
+  const buyerIdStr = tx.buyerId.toString();
+  const filerRole = isBuyer ? 'Người mua' : 'Người bán';
+  const targetIdStr = isBuyer ? sellerIdStr : buyerIdStr;
+
+  // 1a. Notify the counterparty
   const notif = await Notification.create({
-    userId: tx.sellerId,
+    userId: targetIdStr,
     type: 'dispute_opened',
-    title: 'Có khiếu nại mới cho đơn hàng',
-    body: `Người mua đã báo lỗi món "${tx.productName}". Đội ngũ Kindr đang kiểm tra chứng cứ.`,
+    title: 'Có khiếu nại mới cho đơn hàng ⚠️',
+    body: `${filerRole} đã khiếu nại món "${tx.productName}": "${reason}". Đội ngũ Kindr đang kiểm tra chứng cứ.`,
     relatedTransactionId: tx._id,
+    data: { transactionId: txIdStr },
   });
-  emitToUser(tx.sellerId.toString(), 'notification_new', notif);
-  sendPushToUser(tx.sellerId, {
+  const notifObj = notif.toObject ? notif.toObject() : notif;
+  (notifObj as any).id = notif._id.toString();
+  emitToUser(targetIdStr, 'notification_new', notifObj);
+  emitToUser(targetIdStr, 'notification', notifObj);
+  sendPushToUser(targetIdStr, {
     title: notif.title,
     body: notif.body,
-    data: { type: 'dispute_opened', transactionId: tx._id.toString() },
+    data: { type: 'dispute_opened', transactionId: txIdStr },
   }).catch(() => {});
+
+  // 1b. Notify the filer (confirmation)
+  const filerNotif = await Notification.create({
+    userId: userId,
+    type: 'dispute_opened',
+    title: 'Đã gửi khiếu nại thành công ⚠️',
+    body: `Mẹ đã gửi khiếu nại cho đơn "${tx.productName}". Đội ngũ Kindr đã tạm khóa bảo chứng và đang kiểm tra chứng cứ để phân xử.`,
+    relatedTransactionId: tx._id,
+    data: { transactionId: txIdStr },
+  });
+  const filerNotifObj = filerNotif.toObject ? filerNotif.toObject() : filerNotif;
+  (filerNotifObj as any).id = filerNotif._id.toString();
+  emitToUser(userId, 'notification_new', filerNotifObj);
+  emitToUser(userId, 'notification', filerNotifObj);
+  sendPushToUser(userId, {
+    title: filerNotif.title,
+    body: filerNotif.body,
+    data: { type: 'dispute_opened', transactionId: txIdStr },
+  }).catch(() => {});
+
+  // 1c. Insert automated system message into their chat
+  postSystemChatMessage(
+    tx.buyerId,
+    tx.sellerId,
+    tx.productId,
+    `⚠️ [HỆ THỐNG KINDR] ${filerRole} đã gửi khiếu nại cho đơn hàng "${tx.productName}": "${reason}". Đội ngũ Kindr đã tạm khóa bảo chứng để phân xử.`
+  ).catch(() => {});
+
+  // 2. Broadcast to Admin moderators
+  notifyAdmins({
+    type: 'dispute_opened',
+    title: 'Tranh chấp mới cần xử lý ⚠️',
+    body: `Đơn "${tx.productName}" vừa có khiếu nại từ ${filerRole}: "${reason}". Vui lòng kiểm tra và phân xử.`,
+    relatedTransactionId: tx._id,
+    data: { transactionId: txIdStr },
+  }).catch(() => {});
+
+  // 3. Real-time transaction state update for both parties
+  emitToUser(sellerIdStr, 'transaction_updated', { transactionId: txIdStr, status: 'disputed', disputeStatus: 'open' });
+  emitToUser(buyerIdStr, 'transaction_updated', { transactionId: txIdStr, status: 'disputed', disputeStatus: 'open' });
 
   return { success: true };
 }
@@ -322,6 +435,7 @@ export async function fileDispute(
 /**
  * Resolve dispute → Either refund buyer or complete to seller.
  * Idempotent: Only resolves once if status is 'disputed'.
+ * Broadcasts real-time notifications, push notifications, and wallet events to BOTH parties.
  */
 export async function resolveDispute(
   transactionId: string,
@@ -336,65 +450,211 @@ export async function resolveDispute(
         finalizedAt: new Date(),
       },
     },
-    { new: false }
+    { new: true }
   );
   if (!tx) return { success: false, error: 'Giao dịch không tồn tại hoặc không ở trạng thái khiếu nại.' };
 
+  const buyerIdStr = tx.buyerId.toString();
+  const sellerIdStr = tx.sellerId.toString();
+  const txIdStr = tx._id.toString();
+
   if (outcome === 'resolved_buyer') {
-    // Refund buyer's escrow, confiscate seller's SafeFee
-    await User.findByIdAndUpdate(tx.buyerId, {
-      $inc: { xuBalance: tx.buyerEscrowFrozen, xuFrozen: -tx.buyerEscrowFrozen },
-    });
-    // Seller loses SafeFee
-    await User.findByIdAndUpdate(tx.sellerId, {
-      $inc: {
-        xuFrozen: -tx.sellerEscrowFrozen,
-        civilizationPoints: -15,
-        disputeStrikeCount: 1,
+    // 1. Refund buyer's escrow, confiscate seller's SafeFee
+    const updatedBuyer = await User.findByIdAndUpdate(
+      tx.buyerId,
+      {
+        $inc: { xuBalance: tx.buyerEscrowFrozen, xuFrozen: -tx.buyerEscrowFrozen },
       },
-    });
+      { new: true }
+    );
+
+    // Seller loses SafeFee + penalty -15 points + 1 dispute strike
+    const updatedSeller = await User.findByIdAndUpdate(
+      tx.sellerId,
+      {
+        $inc: {
+          xuFrozen: -tx.sellerEscrowFrozen,
+          civilizationPoints: -15,
+          disputeStrikeCount: 1,
+        },
+      },
+      { new: true }
+    );
+
     // Update Product status
     await Product.findByIdAndUpdate(tx.productId, { status: 'cancelled' });
 
-    // Push notification to buyer
+    // 2. Push notification to buyer
     const buyerNotif = await Notification.create({
       userId: tx.buyerId,
       type: 'dispute_resolved',
-      title: 'Khiếu nại được chấp thuận',
+      title: 'Khiếu nại được chấp thuận 🎉',
       body: `BQT Kindr đã hoàn trả ${tx.buyerEscrowFrozen} Xu vào ví của mẹ cho đơn "${tx.productName}".`,
       relatedTransactionId: tx._id,
+      data: {
+        transactionId: txIdStr,
+        outcome: 'resolved_buyer',
+        refundedXu: tx.buyerEscrowFrozen,
+      },
     });
-    emitToUser(tx.buyerId.toString(), 'notification_new', buyerNotif);
+    const buyerNotifObj = buyerNotif.toObject ? buyerNotif.toObject() : buyerNotif;
+    (buyerNotifObj as any).id = buyerNotif._id.toString();
+    emitToUser(buyerIdStr, 'notification_new', buyerNotifObj);
+    emitToUser(buyerIdStr, 'notification', buyerNotifObj);
+    sendPushToUser(tx.buyerId, {
+      title: buyerNotif.title,
+      body: buyerNotif.body,
+      data: { type: 'dispute_resolved', transactionId: txIdStr, outcome: 'resolved_buyer' },
+    }).catch(() => {});
 
-    // Push notification to seller
+    // 3. Push notification to seller
     const sellerNotif = await Notification.create({
       userId: tx.sellerId,
       type: 'dispute_resolved',
-      title: 'Kết quả giải quyết khiếu nại',
-      body: `Khiếu nại đơn "${tx.productName}" đã được xử lý: Khấu trừ Safe Fee và hoàn Xu cho người mua.`,
+      title: 'Kết quả giải quyết khiếu nại ⚠️',
+      body: `Khiếu nại đơn "${tx.productName}" đã có phán quyết: Khấu trừ ${tx.sellerEscrowFrozen} Xu Safe Fee và trừ 15 điểm văn minh do sản phẩm không đúng cam kết.`,
       relatedTransactionId: tx._id,
+      data: {
+        transactionId: txIdStr,
+        outcome: 'resolved_buyer',
+        confiscatedSafeFee: tx.sellerEscrowFrozen,
+      },
     });
-    emitToUser(tx.sellerId.toString(), 'notification_new', sellerNotif);
+    const sellerNotifObj = sellerNotif.toObject ? sellerNotif.toObject() : sellerNotif;
+    (sellerNotifObj as any).id = sellerNotif._id.toString();
+    emitToUser(sellerIdStr, 'notification_new', sellerNotifObj);
+    emitToUser(sellerIdStr, 'notification', sellerNotifObj);
+    sendPushToUser(tx.sellerId, {
+      title: sellerNotif.title,
+      body: sellerNotif.body,
+      data: { type: 'dispute_resolved', transactionId: txIdStr, outcome: 'resolved_buyer' },
+    }).catch(() => {});
+
+    // 3b. Automated system message in chat
+    postSystemChatMessage(
+      tx.buyerId,
+      tx.sellerId,
+      tx.productId,
+      `⚖️ [PHÁN QUYẾT KINDR] Ban quản trị đã chấp thuận khiếu nại cho đơn hàng "${tx.productName}". Đã hoàn trả ${tx.buyerEscrowFrozen} Xu về ví Người mua.`
+    ).catch(() => {});
+
+    // 4. Real-time wallet balance & transaction update events for both parties
+    emitToUser(buyerIdStr, 'wallet_updated', {
+      xuBalance: updatedBuyer?.xuBalance,
+      xuFrozen: updatedBuyer?.xuFrozen,
+      reason: 'dispute_refund',
+    });
+    emitToUser(buyerIdStr, 'transaction_updated', {
+      transactionId: txIdStr,
+      status: 'refunded',
+      disputeStatus: 'resolved_buyer',
+    });
+
+    emitToUser(sellerIdStr, 'wallet_updated', {
+      xuBalance: updatedSeller?.xuBalance,
+      xuFrozen: updatedSeller?.xuFrozen,
+      reason: 'dispute_penalty',
+    });
+    emitToUser(sellerIdStr, 'transaction_updated', {
+      transactionId: txIdStr,
+      status: 'refunded',
+      disputeStatus: 'resolved_buyer',
+    });
+
   } else {
-    // Seller wins: complete as normal
+    // Seller wins: complete transaction, release all frozen escrow to seller
     const totalXu = tx.buyerEscrowFrozen + tx.sellerEscrowFrozen;
-    await User.findByIdAndUpdate(tx.sellerId, {
-      $inc: { xuBalance: totalXu, xuFrozen: -tx.sellerEscrowFrozen },
-    });
-    await User.findByIdAndUpdate(tx.buyerId, {
-      $inc: { xuFrozen: -tx.buyerEscrowFrozen },
-    });
+    const updatedSeller = await User.findByIdAndUpdate(
+      tx.sellerId,
+      {
+        $inc: { xuBalance: totalXu, xuFrozen: -tx.sellerEscrowFrozen },
+      },
+      { new: true }
+    );
+    const updatedBuyer = await User.findByIdAndUpdate(
+      tx.buyerId,
+      {
+        $inc: { xuFrozen: -tx.buyerEscrowFrozen },
+      },
+      { new: true }
+    );
     await Product.findByIdAndUpdate(tx.productId, { status: 'completed' });
 
-    // Push notification to seller
+    // 1. Push notification to seller
     const sellerNotif = await Notification.create({
       userId: tx.sellerId,
       type: 'dispute_resolved',
-      title: 'Khiếu nại đã giải quyết',
-      body: `BQT Kindr xác nhận đồ đạt chuẩn. Đã giải ngân ${totalXu} Xu vào ví của mẹ.`,
+      title: 'Khiếu nại đã giải quyết - Đã giải ngân Xu 🎉',
+      body: `BQT Kindr xác nhận đồ đạt chuẩn. Đã giải ngân ${totalXu} Xu (bao gồm hoàn cọc Safe Fee) vào ví của mẹ cho đơn "${tx.productName}".`,
       relatedTransactionId: tx._id,
+      data: {
+        transactionId: txIdStr,
+        outcome: 'resolved_seller',
+        releasedXu: totalXu,
+      },
     });
-    emitToUser(tx.sellerId.toString(), 'notification_new', sellerNotif);
+    const sellerNotifObj = sellerNotif.toObject ? sellerNotif.toObject() : sellerNotif;
+    (sellerNotifObj as any).id = sellerNotif._id.toString();
+    emitToUser(sellerIdStr, 'notification_new', sellerNotifObj);
+    emitToUser(sellerIdStr, 'notification', sellerNotifObj);
+    sendPushToUser(tx.sellerId, {
+      title: sellerNotif.title,
+      body: sellerNotif.body,
+      data: { type: 'dispute_resolved', transactionId: txIdStr, outcome: 'resolved_seller' },
+    }).catch(() => {});
+
+    // 2. Push notification to buyer (MANDATORY FIX: Inform buyer of verdict)
+    const buyerNotif = await Notification.create({
+      userId: tx.buyerId,
+      type: 'dispute_resolved',
+      title: 'Kết quả giải quyết khiếu nại',
+      body: `BQT Kindr đã xem xét khiếu nại đơn "${tx.productName}": Sản phẩm được xác định đạt chuẩn và đúng thỏa thuận trao đổi. Giao dịch đã hoàn tất.`,
+      relatedTransactionId: tx._id,
+      data: {
+        transactionId: txIdStr,
+        outcome: 'resolved_seller',
+      },
+    });
+    const buyerNotifObj = buyerNotif.toObject ? buyerNotif.toObject() : buyerNotif;
+    (buyerNotifObj as any).id = buyerNotif._id.toString();
+    emitToUser(buyerIdStr, 'notification_new', buyerNotifObj);
+    emitToUser(buyerIdStr, 'notification', buyerNotifObj);
+    sendPushToUser(tx.buyerId, {
+      title: buyerNotif.title,
+      body: buyerNotif.body,
+      data: { type: 'dispute_resolved', transactionId: txIdStr, outcome: 'resolved_seller' },
+    }).catch(() => {});
+
+    // 2b. Automated system message in chat
+    postSystemChatMessage(
+      tx.buyerId,
+      tx.sellerId,
+      tx.productId,
+      `⚖️ [PHÁN QUYẾT KINDR] Ban quản trị xác nhận món đồ "${tx.productName}" đạt chuẩn cam kết. Đã giải ngân ${totalXu} Xu cho Người bán và hoàn tất đơn hàng.`
+    ).catch(() => {});
+
+    // 3. Real-time wallet balance & transaction update events for both parties
+    emitToUser(sellerIdStr, 'wallet_updated', {
+      xuBalance: updatedSeller?.xuBalance,
+      xuFrozen: updatedSeller?.xuFrozen,
+      reason: 'dispute_payout',
+    });
+    emitToUser(sellerIdStr, 'transaction_updated', {
+      transactionId: txIdStr,
+      status: 'completed',
+      disputeStatus: 'resolved_seller',
+    });
+
+    emitToUser(buyerIdStr, 'wallet_updated', {
+      xuBalance: updatedBuyer?.xuBalance,
+      xuFrozen: updatedBuyer?.xuFrozen,
+      reason: 'dispute_finalized',
+    });
+    emitToUser(buyerIdStr, 'transaction_updated', {
+      transactionId: txIdStr,
+      status: 'completed',
+      disputeStatus: 'resolved_seller',
+    });
   }
 
   return { success: true };

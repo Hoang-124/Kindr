@@ -20,6 +20,7 @@ import ScreenContainer from '../../../components/layout/ScreenContainer';
 import Header from '../../../components/layout/Header';
 import Card from '../../../components/layout/Card';
 import MascotIcon from '../../../components/common/MascotIcon';
+import { AdminProfileView } from '../../admin/components/AdminProfileView';
 import {
   Coins,
   Award,
@@ -50,6 +51,7 @@ import { formatFullDate } from '../../../utils/formatDate';
 import { ScalePressable } from '../../../components/common/ScalePressable';
 import { PulseBadge } from '../../../components/common/PulseBadge';
 import { FadeInItem } from '../../../components/common/FadeInItem';
+import Avatar from '../../../components/common/Avatar';
 
 type NavigationProp = NativeStackNavigationProp<AppStackParamList>;
 
@@ -73,12 +75,16 @@ export const ProfileScreen = () => {
 
   if (!currentUser) return null;
 
+  if (currentUser.role === 'admin') {
+    return <AdminProfileView />;
+  }
+
   const userTransactions = transactions.filter(
     tx => tx.buyerId === currentUser.id || tx.sellerId === currentUser.id
   );
 
   const activeEscrowTx = userTransactions.filter(
-    tx => tx.status === 'frozen' || tx.status === 'shipped' || tx.status === 'in_safeful_time' || tx.status === 'disputed'
+    tx => tx.status === 'awaiting_handover' || tx.status === 'in_safeful_time' || tx.status === 'disputed' || tx.status === 'frozen' || tx.status === 'shipped'
   );
 
   const completedTx = userTransactions.filter(
@@ -150,15 +156,13 @@ export const ProfileScreen = () => {
         <View style={styles.profileCard}>
           <View style={styles.profileTopRow}>
             <View style={styles.avatarWrapper}>
-              {currentUser.avatar && currentUser.avatar.startsWith('http') ? (
-                <Image source={{ uri: currentUser.avatar }} style={styles.avatar} />
-              ) : (
-                <View style={styles.avatarPlaceholder}>
-                  <Text style={styles.avatarInitial}>
-                    {(currentUser.name || 'M')[0].toUpperCase()}
-                  </Text>
-                </View>
-              )}
+              <Avatar
+                uri={currentUser.avatar}
+                name={currentUser.name}
+                size={74}
+                showBorder
+                borderColor="#78C2AD"
+              />
               <View style={styles.verifiedBadge}>
                 <Sparkles size={11} color="#FFFFFF" />
               </View>
@@ -343,30 +347,6 @@ export const ProfileScreen = () => {
           </View>
         </View>
 
-        {/* Admin Portal Section - Only for Authorized Admins */}
-        {currentUser.role === 'admin' && (
-          <View style={styles.adminSectionContainer}>
-            <TouchableOpacity
-              style={styles.adminPortalCard}
-              activeOpacity={0.8}
-              onPress={() => navigateTo('AdminDashboard')}
-            >
-              <View style={styles.adminPortalLeft}>
-                <ShieldAlert size={22} color="#FFFFFF" />
-                <View style={{ marginLeft: 10, flex: 1 }}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                    <Text style={styles.adminPortalTitle}>Bảng Quản Trị Admin</Text>
-                    <View style={styles.adminActiveBadge}>
-                      <Text style={styles.adminActiveBadgeText}>QUẢN TRỊ VIÊN</Text>
-                    </View>
-                  </View>
-                  <Text style={styles.adminPortalSubtitle}>Duyệt bài đăng, kiểm duyệt rút tiền & xử lý tranh chấp</Text>
-                </View>
-              </View>
-              <ChevronRight size={18} color="#FFFFFF" />
-            </TouchableOpacity>
-          </View>
-        )}
 
         {/* History Tabs with Segmented Control */}
         <View style={styles.historySection}>

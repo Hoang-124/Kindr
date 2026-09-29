@@ -67,8 +67,14 @@ export function setupSocketIO(httpServer: HttpServer): Server {
  * Emit a notification to a specific user.
  * Call this from any route/service to push real-time notifications.
  */
-export function emitToUser(userId: string, event: string, data: any): void {
+export function emitToUser(userId: string | any, event: string, data: any): void {
   if (io) {
-    io.to(`user:${userId}`).emit(event, data);
+    const uid = typeof userId === 'string' ? userId : userId?.toString?.() || String(userId);
+    const room = `user:${uid}`;
+    const sockets = io.sockets.adapter.rooms.get(room);
+    console.log(`📡 emitToUser: ${event} → room=${room}, connected_sockets=${sockets?.size || 0}`);
+    io.to(room).emit(event, data);
+  } else {
+    console.warn('⚠️ emitToUser called but Socket.IO not initialized');
   }
 }

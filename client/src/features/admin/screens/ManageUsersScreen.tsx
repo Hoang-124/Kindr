@@ -51,7 +51,7 @@ export const ManageUsersScreen = () => {
           phone: u.phone || 'Chưa cập nhật',
           email: u.email || '',
           role: u.role || 'user',
-          avatar: u.avatar || 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150',
+          avatar: u.avatar || '',
           tradesCount: u.tradesCount || u.successfulTrades || 0,
           ratingAverage: u.reputationScore || 5.0,
           civilizationPoints: u.civilizationPoints ?? 100,

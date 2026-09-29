@@ -9,7 +9,16 @@ export type NotificationType =
   | 'dispute_opened'
   | 'dispute_resolved'
   | 'post_approved'
-  | 'welcome_credit';
+  | 'post_rejected'
+  | 'post_pending_admin'
+  | 'post_submitted'
+  | 'topup_success'
+  | 'withdraw_approved'
+  | 'withdraw_rejected'
+  | 'rating_received'
+  | 'welcome_credit'
+  | 'system'
+  | string;
 
 export interface Notification {
   id: string;
@@ -20,5 +29,6 @@ export interface Notification {
   isRead: boolean;
   relatedTransactionId?: string;
   relatedProductId?: string;
+  data?: Record<string, any>;
   createdAt: string;
 }

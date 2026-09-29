@@ -7,8 +7,8 @@ function normalizeNotification(raw: any): Notification {
     ...raw,
     id: raw.id || raw._id?.toString(),
     userId: raw.userId?._id?.toString() || raw.userId?.toString() || raw.userId,
-    relatedTransactionId: raw.relatedTransactionId?._id?.toString() || raw.relatedTransactionId?.toString() || raw.relatedTransactionId,
-    relatedProductId: raw.relatedProductId?._id?.toString() || raw.relatedProductId?.toString() || raw.relatedProductId,
+    relatedTransactionId: raw.relatedTransactionId?._id?.toString() || raw.relatedTransactionId?.toString() || raw.data?.transactionId || raw.relatedTransactionId,
+    relatedProductId: raw.relatedProductId?._id?.toString() || raw.relatedProductId?.toString() || raw.data?.productId || raw.relatedProductId,
     createdAt: raw.createdAt || new Date().toISOString(),
   };
 }

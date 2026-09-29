@@ -105,7 +105,7 @@ export const LoginScreen = () => {
         {/* Brand Logo & Header */}
         <View style={styles.header}>
           <View style={styles.mascotWrapper}>
-            <Image source={KINDR_LOGO} style={styles.mascot} resizeMode="cover" />
+            <Image source={KINDR_LOGO} style={styles.mascot} resizeMode="contain" />
           </View>
           <Text style={styles.brandName}>Kindr</Text>
           <Text style={styles.title}>Chào mừng mẹ!</Text>
@@ -246,9 +246,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: SPACING.xs,
     ...SHADOWS.ambient,
-    borderWidth: 2,
-    borderColor: '#D4EBE3',
-    overflow: 'hidden',
   },
   mascot: {
     width: 92,

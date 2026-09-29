@@ -1,9 +1,11 @@
-// src/app/navigation/AppNavigator.tsx
-import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
+import React, { useEffect } from 'react';
+import { NavigationContainer, createNavigationContainerRef } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { AppStackParamList } from './navigationTypes';
 import { useAuth } from '../providers/AuthProvider';
+import InAppNotificationBanner, { registerNotificationNavigator, registerTransactionNavigator } from '../../components/common/InAppNotificationBanner';
+
+export const navigationRef = createNavigationContainerRef<AppStackParamList>();
 
 // Import Navigators
 import AuthNavigator from './AuthNavigator';
@@ -42,8 +44,21 @@ const Stack = createNativeStackNavigator<AppStackParamList>();
 export const AppNavigator = () => {
   const { currentUser } = useAuth();
 
+  useEffect(() => {
+    registerNotificationNavigator((chatId: string) => {
+      if (navigationRef.isReady()) {
+        navigationRef.navigate('ChatDetail', { chatId });
+      }
+    });
+    registerTransactionNavigator((transactionId: string) => {
+      if (navigationRef.isReady()) {
+        navigationRef.navigate('TransactionDetail', { id: transactionId });
+      }
+    });
+  }, []);
+
   return (
-    <NavigationContainer>
+    <NavigationContainer ref={navigationRef}>
       <Stack.Navigator
         screenOptions={{
           headerShown: false,
@@ -82,6 +97,7 @@ export const AppNavigator = () => {
           </>
         )}
       </Stack.Navigator>
+      <InAppNotificationBanner />
     </NavigationContainer>
   );
 };

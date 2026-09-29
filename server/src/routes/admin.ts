@@ -12,6 +12,7 @@ import { Report } from '../models/Report';
 import { Notification } from '../models/Notification';
 import { emitToUser } from '../socket';
 import { sendPushToUser } from '../services/pushNotificationService';
+import { sendNotification } from '../services/notificationHelper';
 import { requireAuth, requireAdmin, AuthRequest } from '../middleware/auth';
 import * as escrowService from '../services/escrowService';
 
@@ -43,27 +44,40 @@ router.get('/dashboard', async (_req: AuthRequest, res: Response): Promise<void>
       totalProducts,
       totalTransactions,
       activeProducts,
+      pendingProducts,
       pendingDisputes,
       pendingWithdraws,
       openReports,
+      escrowTx,
     ] = await Promise.all([
       User.countDocuments(),
       Product.countDocuments(),
       Transaction.countDocuments(),
       Product.countDocuments({ status: 'available' }),
+      Product.countDocuments({ status: 'pending_approval' }),
       Transaction.countDocuments({ status: 'disputed' }),
       WithdrawRequest.countDocuments({ status: 'pending' }),
       Report.countDocuments({ status: 'open' }),
+      Transaction.find({ status: { $in: ['frozen', 'shipped', 'in_safeful_time'] } })
+        .select('buyerEscrowFrozen sellerEscrowFrozen')
+        .lean(),
     ]);
+
+    const escrowLockedXu = escrowTx.reduce(
+      (sum: number, tx: any) => sum + (tx.buyerEscrowFrozen || 0) + (tx.sellerEscrowFrozen || 0),
+      0
+    );
 
     res.json({
       totalUsers,
       totalProducts,
       totalTransactions,
       activeProducts,
+      pendingProducts,
       pendingDisputes,
       pendingWithdraws,
       openReports,
+      escrowLockedXu,
     });
   } catch (error) {
     console.error('Admin dashboard error:', error);
@@ -203,10 +217,26 @@ router.get('/products', async (req: AuthRequest, res: Response): Promise<void> =
     const limitNum = Math.min(50, Math.max(1, parseInt(limit as string, 10)));
     const skip = (pageNum - 1) * limitNum;
 
-    const [products, total] = await Promise.all([
-      Product.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limitNum).lean(),
+    const [rawProducts, total] = await Promise.all([
+      Product.find(filter)
+        .populate('sellerId', 'name avatar phone email')
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limitNum)
+        .lean(),
       Product.countDocuments(filter),
     ]);
+
+    const products = rawProducts.map((p: any) => {
+      const seller = p.sellerId && typeof p.sellerId === 'object' ? p.sellerId : null;
+      return {
+        ...p,
+        sellerId: seller?._id?.toString() || p.sellerId?.toString() || p.sellerId,
+        sellerName: seller?.name || p.sellerName || 'Thành viên Kindr',
+        sellerAvatar: seller?.avatar || p.sellerAvatar || '',
+        sellerPhone: seller?.phone || p.sellerPhone || '',
+      };
+    });
 
     res.json({
       products,
@@ -247,9 +277,59 @@ router.delete('/products/:id', async (req: AuthRequest, res: Response): Promise<
     product.status = 'removed';
     await product.save();
 
+    // Notify seller
+    try {
+      await sendNotification({
+        userId: product.sellerId,
+        type: 'post_rejected',
+        title: 'Tin đăng chưa được duyệt / đã gỡ ⚠️',
+        body: `Tin đăng "${product.name}" của mẹ chưa đạt tiêu chuẩn kiểm duyệt hoặc đã được gỡ. Tiền cọc Safe Fee ${product.safeFeeLocked > 0 ? `(${product.safeFeeLocked} Xu) ` : ''}đã được hoàn trả đầy đủ vào ví của mẹ.`,
+        relatedProductId: product._id,
+        data: { productId: product._id.toString() },
+      });
+    } catch (notifErr) {
+      console.warn('Reject notification error:', notifErr);
+    }
+
     res.json({ message: 'Đã gỡ sản phẩm vi phạm khỏi sàn.' });
   } catch (error) {
     console.error('Admin delete product error:', error);
+    res.status(500).json({ error: 'Lỗi hệ thống.' });
+  }
+});
+
+/**
+ * PUT /api/admin/products/:id/approve
+ * Admin approves a product listing
+ */
+router.put('/products/:id/approve', async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const product = await Product.findById(req.params.id);
+    if (!product) {
+      res.status(404).json({ error: 'Sản phẩm không tồn tại.' });
+      return;
+    }
+
+    product.status = 'available';
+    await product.save();
+
+    // Notify seller
+    try {
+      await sendNotification({
+        userId: product.sellerId,
+        type: 'post_approved',
+        title: 'Tin đăng đã được duyệt! 🎉',
+        body: `Món đồ "${product.name}" của mẹ đã được Ban Quản Trị kiểm duyệt và đang hiển thị trên sàn.`,
+        relatedProductId: product._id,
+        data: { productId: product._id.toString() },
+      });
+    } catch (notifErr) {
+      console.warn('Approve notification error:', notifErr);
+    }
+
+    res.json({ message: 'Đã duyệt tin đăng hiển thị trên sàn.', product });
+  } catch (error) {
+    console.error('Admin approve product error:', error);
     res.status(500).json({ error: 'Lỗi hệ thống.' });
   }
 });

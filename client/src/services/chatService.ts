@@ -10,15 +10,20 @@ function normalizeChat(raw: any): ChatSession {
     productImage: raw.productImage || '',
     buyerId: raw.buyerId?._id?.toString() || raw.buyerId?.toString() || raw.buyerId,
     buyerName: raw.buyerName,
+    buyerAvatar: raw.buyerAvatar || raw.buyerId?.avatar || '',
     sellerId: raw.sellerId?._id?.toString() || raw.sellerId?.toString() || raw.sellerId,
     sellerName: raw.sellerName,
+    sellerAvatar: raw.sellerAvatar || raw.sellerId?.avatar || '',
     unreadCount: raw.unreadCount || 0,
     lastMessageText: raw.lastMessageText || '',
     lastMessageTime: raw.lastMessageTime || new Date().toISOString(),
     messages: (raw.messages || []).map((m: any) => ({
       id: m.id || m._id?.toString(),
       senderId: m.senderId?._id?.toString() || m.senderId?.toString() || m.senderId,
+      senderName: m.senderName,
+      senderAvatar: m.senderAvatar,
       content: m.content,
+      tempId: m.tempId,
       timestamp: m.createdAt || m.timestamp || new Date().toISOString(),
     })),
   };
@@ -34,13 +39,31 @@ export async function getMessages(chatId: string, page = 1, limit = 50): Promise
   const messages: Message[] = (data.messages || []).map((m: any) => ({
     id: m.id || m._id?.toString(),
     senderId: m.senderId?._id?.toString() || m.senderId?.toString() || m.senderId,
+    senderName: m.senderName,
+    senderAvatar: m.senderAvatar,
     content: m.content,
+    tempId: m.tempId,
     timestamp: m.createdAt || new Date().toISOString(),
   }));
 
   return {
     messages,
     pagination: data.pagination,
+  };
+}
+
+export async function getChatById(chatId: string): Promise<ChatSession> {
+  const { data } = await api.get(`/chats/${chatId}`);
+  return normalizeChat(data.chat);
+}
+
+export async function sendMessage(chatId: string, content: string, tempId?: string): Promise<Message> {
+  const { data } = await api.post(`/chats/${chatId}/messages`, { content, tempId });
+  return {
+    id: data.message.id || data.message._id?.toString(),
+    senderId: data.message.senderId?.toString(),
+    content: data.message.content,
+    timestamp: data.message.timestamp || data.message.createdAt || new Date().toISOString(),
   };
 }
 

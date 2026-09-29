@@ -31,8 +31,8 @@ export const ManageWithdrawsScreen = () => {
         if (Array.isArray(list)) {
           const mapped = list.map((w: any) => ({
             id: w.id || w._id,
-            userId: w.userId?.id || w.userId,
-            userName: w.accountHolder || w.userId?.name || 'Mẹ Bỉm',
+            userId: w.userId?.id || w.userId?._id || w.userId,
+            userName: w.accountHolder || w.userId?.name || w.userName || 'Thành viên Kindr',
             xuAmount: w.xuAmount,
             bankName: w.bankName,
             accountNumber: w.accountNumber,

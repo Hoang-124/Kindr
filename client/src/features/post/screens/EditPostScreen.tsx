@@ -1,4 +1,3 @@
-// src/features/post/screens/EditPostScreen.tsx
 import React, { useState, useEffect } from 'react';
 import { 
   View, 
@@ -6,13 +5,14 @@ import {
   StyleSheet, 
   ScrollView, 
   TouchableOpacity, 
-  Alert 
+  Alert,
+  Image 
 } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { useAppSelector, useAppDispatch } from '../../../app/store/hooks';
-import { hydrateProducts } from '../../home/store/homeSlice';
+import { updateProduct, hydrateProducts } from '../../home/store/homeSlice';
 import { COLORS, TYPOGRAPHY, SPACING, RADIUS, SHADOWS } from '../../../theme';
-import { Tag, Edit, Archive, UserCheck, HelpCircle } from 'lucide-react-native';
+import { Tag, Edit, Archive, Check } from 'lucide-react-native';
 import ScreenContainer from '../../../components/layout/ScreenContainer';
 import Header from '../../../components/layout/Header';
 import Input from '../../../components/common/Input';
@@ -83,8 +83,8 @@ export const EditPostScreen = () => {
       return;
     }
 
-    if (name.length < 10) {
-      setError('Tên đồ dùng nên chi tiết một chút (tối thiểu 10 ký tự).');
+    if (name.length < 5) {
+      setError('Tên đồ dùng nên chi tiết một chút (tối thiểu 5 ký tự).');
       return;
     }
 
@@ -93,7 +93,7 @@ export const EditPostScreen = () => {
       return;
     }
 
-    const price = parseInt(priceStr);
+    const price = parseInt(priceStr, 10);
     if (isNaN(price) || price < 0) {
       setError('Vui lòng nhập giá Xu hợp lệ (nhập 0 nếu mẹ muốn tặng đồ).');
       return;
@@ -104,7 +104,13 @@ export const EditPostScreen = () => {
     const conditionLabel = CONDITIONS.find(c => c.id === condition)?.label || 'Khá tốt';
 
     try {
-      await productService.updateProduct(postId, { name, description });
+      await productService.updateProduct(postId, {
+        name,
+        description,
+        price,
+        category: category as any,
+        condition: condition as any,
+      });
     } catch (apiErr) {
       // Offline fallback
     }
@@ -116,13 +122,12 @@ export const EditPostScreen = () => {
       name,
       description,
       price,
-      category,
+      category: category as any,
       condition: condition as any,
       conditionLabel,
     };
 
-    const updatedProductsList = products.map(p => p.id === postId ? updatedProduct : p);
-    dispatch(hydrateProducts(updatedProductsList));
+    dispatch(updateProduct(updatedProduct));
 
     Alert.alert(
       'Thành công',
@@ -140,6 +145,41 @@ export const EditPostScreen = () => {
         contentContainerStyle={styles.contentContainer}
         showsVerticalScrollIndicator={false}
       >
+        {/* Product Quick Info Card */}
+        <View style={styles.productCard}>
+          {product.image ? (
+            <Image source={{ uri: product.image }} style={styles.productThumb} resizeMode="cover" />
+          ) : (
+            <View style={[styles.productThumb, styles.productThumbPlaceholder]}>
+              <Archive size={24} color={COLORS.outline} />
+            </View>
+          )}
+          <View style={styles.productInfo}>
+            <View style={styles.statusRow}>
+              <View style={[
+                styles.statusBadge, 
+                { backgroundColor: product.status === 'available' ? '#ECFDF5' : '#FFFBEB' }
+              ]}>
+                <View style={[
+                  styles.statusDot, 
+                  { backgroundColor: product.status === 'available' ? '#10B981' : '#F59E0B' }
+                ]} />
+                <Text style={[
+                  styles.statusText, 
+                  { color: product.status === 'available' ? '#047857' : '#B45309' }
+                ]}>
+                  {product.status === 'available' ? 'Đang hiển thị' : 'Chờ trao đổi'}
+                </Text>
+              </View>
+              <Text style={styles.productIdText}>#{product.id.slice(-6).toUpperCase()}</Text>
+            </View>
+            <Text style={styles.previewName} numberOfLines={1}>{product.name}</Text>
+            <Text style={styles.previewMeta}>
+              {product.price === 0 ? 'Tặng từ thiện' : `${product.price} Xu`} • {product.locationName?.split(',')[0] || 'Gần bạn'}
+            </Text>
+          </View>
+        </View>
+
         <FormError message={error} />
 
         <Input
@@ -157,7 +197,8 @@ export const EditPostScreen = () => {
           onChangeText={setDescription}
           multiline
           numberOfLines={4}
-          style={styles.descInput}
+          inputContainerStyle={styles.descInputContainer}
+          inputStyle={styles.descInput}
           icon={<Archive size={20} color={COLORS.outline} />}
         />
 
@@ -180,8 +221,9 @@ export const EditPostScreen = () => {
                 key={cat.id}
                 style={[styles.badge, isSelected && styles.badgeSelected]}
                 onPress={() => setCategory(cat.id)}
-                activeOpacity={0.8}
+                activeOpacity={0.7}
               >
+                {isSelected && <Check size={14} color={COLORS.primary} style={{ marginRight: 4 }} />}
                 <Text style={[styles.badgeText, isSelected && styles.badgeTextSelected]}>
                   {cat.name}
                 </Text>
@@ -200,8 +242,9 @@ export const EditPostScreen = () => {
                 key={cond.id}
                 style={[styles.badge, isSelected && styles.badgeSelected]}
                 onPress={() => setCondition(cond.id)}
-                activeOpacity={0.8}
+                activeOpacity={0.7}
               >
+                {isSelected && <Check size={14} color={COLORS.primary} style={{ marginRight: 4 }} />}
                 <Text style={[styles.badgeText, isSelected && styles.badgeTextSelected]}>
                   {cond.label}
                 </Text>
@@ -228,8 +271,72 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     paddingHorizontal: SPACING.containerPadding,
-    paddingTop: SPACING.md,
+    paddingTop: SPACING.sm,
     paddingBottom: 40,
+  },
+  productCard: {
+    flexDirection: 'row',
+    backgroundColor: COLORS.surface,
+    borderRadius: RADIUS.md,
+    padding: SPACING.sm + 2,
+    marginBottom: SPACING.md,
+    borderWidth: 1,
+    borderColor: 'rgba(0, 0, 0, 0.06)',
+    alignItems: 'center',
+    gap: 12,
+    ...SHADOWS.soft,
+  },
+  productThumb: {
+    width: 60,
+    height: 60,
+    borderRadius: RADIUS.sm,
+    backgroundColor: COLORS.surfaceVariant,
+  },
+  productThumbPlaceholder: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  productInfo: {
+    flex: 1,
+  },
+  statusRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 4,
+  },
+  statusBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: RADIUS.full,
+    gap: 5,
+  },
+  statusDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+  },
+  statusText: {
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  productIdText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: COLORS.outline,
+  },
+  previewName: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: COLORS.onSurface,
+    marginBottom: 2,
+  },
+  previewMeta: {
+    fontSize: 12,
+    color: COLORS.onSurfaceVariant,
+    fontWeight: '500',
   },
   errorContainer: {
     flex: 1,
@@ -242,10 +349,16 @@ const styles = StyleSheet.create({
     color: COLORS.error,
     fontWeight: '600',
   },
+  descInputContainer: {
+    minHeight: 120,
+    alignItems: 'flex-start',
+    paddingVertical: SPACING.sm + 2,
+  },
   descInput: {
-    height: 100,
+    minHeight: 100,
     textAlignVertical: 'top',
-    paddingTop: SPACING.sm,
+    fontSize: 14,
+    lineHeight: 22,
   },
   pickerLabel: {
     fontSize: 13,
@@ -261,20 +374,24 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
   },
   badge: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: COLORS.surfaceContainerLowest,
     borderWidth: 1,
     borderColor: COLORS.outlineVariant,
-    borderRadius: 12,
+    borderRadius: 14,
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.xs + 2,
+    minHeight: 44, // Touch ergonomics >= 44pt
     ...SHADOWS.soft,
   },
   badgeSelected: {
-    backgroundColor: COLORS.primaryContainer + '30',
+    backgroundColor: '#FFF1F1',
     borderColor: COLORS.primary,
+    borderWidth: 1.5,
   },
   badgeText: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '600',
     color: COLORS.outline,
   },
@@ -283,7 +400,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   submitBtn: {
-    marginTop: SPACING.lg,
+    marginTop: SPACING.md,
     height: 52,
   },
 });

@@ -24,7 +24,7 @@ export async function generateAIAssistance(
   // Keyword analysis for category detection
   let detectedCategory: CategoryType = 'toy_small';
   let detectedAge = '1-3y';
-  let suggestedXu = 4;
+  let suggestedXu = 2;
 
   if (lowerName.includes('xe') || lowerName.includes('nôi') || lowerName.includes('cũi') || lowerName.includes('stroller')) {
     detectedCategory = 'xe_noi';

@@ -103,10 +103,7 @@ export const SearchScreen = () => {
 
   // Perform filtering locally
   const filteredProducts = products.filter((product) => {
-    // 1. Exclude self
-    if (product.sellerId === currentUser?.id) return false;
-    
-    // 2. Filter available items only
+    // 1. Filter available items only
     if (product.status !== 'available') return false;
 
     // 3. Category Filter

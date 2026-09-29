@@ -17,6 +17,14 @@ import { triggerCustomAlert } from './src/components/common/CustomAlert';
 
 // Web global CSS reset to eliminate default browser focus rings (yellow/blue boxes) on inputs
 if (typeof document !== 'undefined') {
+  // Fix Google User Content (lh3.googleusercontent.com) 403 Forbidden / ORB block on web
+  if (!document.querySelector('meta[name="referrer"]')) {
+    const meta = document.createElement('meta');
+    meta.name = 'referrer';
+    meta.content = 'no-referrer';
+    document.head.appendChild(meta);
+  }
+
   const style = document.createElement('style');
   style.id = 'kindr-web-focus-reset';
   style.textContent = `

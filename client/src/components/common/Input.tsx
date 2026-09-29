@@ -37,6 +37,9 @@ export const Input = ({
   compact = false,
   name,
   id,
+  multiline,
+  numberOfLines,
+  style,
   ...props
 }: InputProps) => {
   const [isFocused, setIsFocused] = useState(false);
@@ -52,22 +55,40 @@ export const Input = ({
       <View style={[
         styles.inputContainer,
         compact && styles.compactInputContainer,
+        multiline && styles.multilineInputContainer,
         inputContainerStyle,
         isFocused && styles.focusedBorder,
         error ? styles.errorBorder : null
       ]}>
-        {icon && <View style={[styles.iconContainer, compact && styles.compactIconContainer]}>{icon}</View>}
+        {icon && (
+          <View style={[
+            styles.iconContainer, 
+            compact && styles.compactIconContainer,
+            multiline && styles.multilineIconContainer
+          ]}>
+            {icon}
+          </View>
+        )}
         
         <TextInput
           id={id}
           {...({ name } as any)}
-          style={[styles.input, compact && styles.compactInput, inputStyle]}
+          multiline={multiline}
+          numberOfLines={numberOfLines}
+          textAlignVertical={multiline ? 'top' : 'center'}
           placeholderTextColor={COLORS.outline}
           secureTextEntry={isSecure}
           underlineColorAndroid="transparent"
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
           {...props}
+          style={[
+            styles.input,
+            compact && styles.compactInput,
+            multiline && styles.multilineInput,
+            inputStyle,
+            style,
+          ]}
         />
 
         {showPasswordToggle && (
@@ -125,6 +146,12 @@ const styles = StyleSheet.create({
     borderRadius: RADIUS.sm,
     overflow: 'hidden',
   },
+  multilineInputContainer: {
+    height: undefined,
+    minHeight: 110,
+    alignItems: 'flex-start',
+    paddingVertical: SPACING.sm,
+  },
   input: {
     flex: 1,
     height: '100%',
@@ -136,6 +163,18 @@ const styles = StyleSheet.create({
       outlineStyle: 'none',
       outlineWidth: 0,
       boxShadow: 'none',
+    } as any) : {}),
+  },
+  multilineInput: {
+    height: undefined,
+    minHeight: 85,
+    textAlignVertical: 'top',
+    paddingTop: 0,
+    paddingBottom: 0,
+    lineHeight: 22,
+    ...(Platform.OS === 'web' ? ({
+      resize: 'none',
+      boxSizing: 'border-box',
     } as any) : {}),
   },
   compactInput: {
@@ -152,6 +191,10 @@ const styles = StyleSheet.create({
   iconContainer: {
     marginRight: SPACING.sm,
     flexShrink: 0,
+  },
+  multilineIconContainer: {
+    marginTop: Platform.OS === 'ios' ? 2 : 4,
+    alignSelf: 'flex-start',
   },
   compactIconContainer: {
     marginRight: 6,

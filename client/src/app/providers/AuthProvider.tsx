@@ -1,5 +1,6 @@
 // src/app/providers/AuthProvider.tsx
 import React, { createContext, useContext, ReactNode, useEffect } from 'react';
+import { Alert } from 'react-native';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import {
   loginUser,
@@ -17,6 +18,12 @@ import {
 import { User } from '../../types/user';
 import { socketService } from '../../services/socketService';
 import { registerPushNotifications, unregisterPushNotifications } from '../../services/pushNotificationClient';
+import { setUnreadCount, addNotification, setNotifications } from '../../features/notification/store/notificationSlice';
+import { fetchMyTransactionsAsync } from '../../features/exchange/store/exchangeSlice';
+import * as notificationService from '../../services/notificationService';
+import * as chatService from '../../services/chatService';
+import { hydrateChats, receiveIncomingMessage, setLatestUnreadSender } from '../../features/chat/store/chatSlice';
+import { Notification } from '../../types/notification';
 
 interface AuthContextType {
   currentUser: User | null;
@@ -46,16 +53,192 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   // Check current session & auto-connect Socket + register Push Token on mount
   useEffect(() => {
-    dispatch(fetchCurrentUser())
-      .unwrap()
-      .then(() => {
-        socketService.connect();
+    const initSession = async () => {
+      try {
+        await dispatch(fetchCurrentUser()).unwrap();
+        await socketService.connect();
         registerPushNotifications();
+      } catch {
+        // Fallback: If local demo user is present, socket connects if token is stored
+      }
+    };
+    initSession();
+  }, [dispatch]);
+
+  // Global Real-time Notification Subscriber & Chat Unread Sync
+  useEffect(() => {
+    if (!currentUser) return;
+
+    let isSubscribed = true;
+    const processedIds = new Set<string>();
+
+    // 1. Fetch initial transactions, notifications, and chats to hydrate badges immediately
+    dispatch(fetchMyTransactionsAsync());
+
+    // Hydrate chat list & unread count on startup
+    chatService.getChats()
+      .then((apiChats) => {
+        if (isSubscribed && apiChats && apiChats.length > 0) {
+          dispatch(hydrateChats(apiChats));
+        }
+      })
+      .catch(() => {});
+
+    notificationService.getNotifications(1, 20)
+      .then(({ notifications: items }) => {
+        if (isSubscribed) {
+          dispatch(setNotifications(items));
+        }
       })
       .catch(() => {
-        // Fallback: If local demo user is present, socket connects if token is stored
+        notificationService.getUnreadCount()
+          .then((count) => {
+            if (isSubscribed) {
+              dispatch(setUnreadCount(count));
+            }
+          })
+          .catch(() => {});
       });
-  }, [dispatch]);
+
+    // Ensure socket is connected for active user
+    socketService.connect().catch(() => {});
+
+    // 2. Global listener for incoming chat messages across the entire app
+    const handleIncomingMessageGlobal = (payload: any) => {
+      const msg = payload.message || payload;
+      const targetChatId = payload.chatId || msg.chatId;
+      if (targetChatId) {
+        const rawSenderId = msg.senderId?._id?.toString() || msg.senderId?.toString() || msg.senderId;
+        // Ignore own messages in global handler (ChatDetailScreen already handles local optimistic sending)
+        if (rawSenderId && rawSenderId === currentUser.id) {
+          return;
+        }
+
+        const normalizedMsg = {
+          id: msg.id || msg._id || ('m_' + Date.now()),
+          senderId: rawSenderId,
+          senderName: msg.senderName,
+          senderAvatar: msg.senderAvatar,
+          content: msg.content,
+          tempId: payload.tempId || msg.tempId,
+          timestamp: msg.createdAt || msg.timestamp || new Date().toISOString(),
+        };
+
+        dispatch(receiveIncomingMessage({
+          chatId: targetChatId,
+          message: normalizedMsg,
+          currentUserId: currentUser.id,
+          tempId: payload.tempId || msg.tempId,
+        }));
+      }
+    };
+
+    // 3. Global listener for real-time notification pushes
+    const handleGlobalNotification = (notif: any) => {
+      const notifId = notif.id || notif._id?.toString();
+      if (notifId && processedIds.has(notifId)) {
+        return; // Skip duplicate event fired across multiple socket channels
+      }
+      if (notifId) {
+        processedIds.add(notifId);
+        setTimeout(() => processedIds.delete(notifId), 60000);
+      }
+
+      console.log('🔔 [Client] Received notification event:', notif);
+      const normalized: Notification = {
+        id: notif.id || notif._id?.toString() || 'n_' + Date.now(),
+        userId: notif.userId?.toString() || currentUser.id,
+        title: notif.title || 'Thông báo mới',
+        body: notif.body || '',
+        type: notif.type || 'system',
+        isRead: false,
+        relatedProductId: notif.relatedProductId?._id?.toString() || notif.relatedProductId?.toString() || notif.data?.productId,
+        relatedTransactionId: notif.relatedTransactionId?._id?.toString() || notif.relatedTransactionId?.toString() || notif.data?.transactionId,
+        data: notif.data,
+        createdAt: notif.createdAt || new Date().toISOString(),
+      };
+      dispatch(addNotification(normalized));
+
+      // Handle chat message notifications
+      if (normalized.type === 'chat_message') {
+        const targetChatId = notif.data?.chatId;
+        if (targetChatId && notif.data?.senderId !== currentUser.id) {
+          dispatch(setLatestUnreadSender({
+            senderId: notif.data.senderId,
+            senderName: notif.data.senderName || notif.title?.replace('Tin nhắn từ ', '') || 'Mẹ bỉm',
+            senderAvatar: notif.data.senderAvatar || '',
+            content: notif.body || 'Đã gửi một tin nhắn mới',
+            chatId: targetChatId,
+            timestamp: notif.createdAt || new Date().toISOString(),
+          }));
+
+          // Re-sync chat metadata
+          chatService.getChats()
+            .then((freshChats) => {
+              if (isSubscribed && freshChats) {
+                dispatch(hydrateChats(freshChats));
+              }
+            })
+            .catch(() => {});
+        }
+        return; // Don't show system Alert popup for chat messages
+      }
+
+      // Refresh transactions and wallet balance if notification relates to an exchange or dispute
+      if (['match_request', 'trade', 'safeful_time_started', 'xu_released', 'dispute_opened', 'dispute_resolved'].includes(normalized.type)) {
+        dispatch(fetchMyTransactionsAsync());
+        dispatch(fetchCurrentUser());
+      }
+
+      // Immediate Alert popup for high-priority notifications (match_request, trade, dispute)
+      if (['match_request', 'trade', 'safeful_time_started', 'xu_released', 'post_approved', 'dispute_opened', 'dispute_resolved'].includes(normalized.type)) {
+        Alert.alert(
+          normalized.title,
+          normalized.body,
+          [{ text: 'Đồng ý' }]
+        );
+      }
+    };
+
+    // 4. Real-time wallet & transaction sync listeners
+    const handleWalletUpdated = (payload: any) => {
+      console.log('💰 [Client] Wallet updated event received:', payload);
+      dispatch(fetchCurrentUser());
+    };
+
+    const handleTransactionUpdated = (payload: any) => {
+      console.log('🔄 [Client] Transaction updated event received:', payload);
+      dispatch(fetchMyTransactionsAsync());
+    };
+
+    socketService.on('message_received', handleIncomingMessageGlobal);
+    socketService.on('notification_new', handleGlobalNotification);
+    socketService.on('notification', handleGlobalNotification);
+    socketService.on('wallet_updated', handleWalletUpdated);
+    socketService.on('transaction_updated', handleTransactionUpdated);
+
+    return () => {
+      isSubscribed = false;
+      socketService.off('message_received', handleIncomingMessageGlobal);
+      socketService.off('notification_new', handleGlobalNotification);
+      socketService.off('notification', handleGlobalNotification);
+      socketService.off('wallet_updated', handleWalletUpdated);
+      socketService.off('transaction_updated', handleTransactionUpdated);
+    };
+  }, [currentUser, dispatch]);
+
+  // Polling fallback: sync unread notification count every 30s
+  useEffect(() => {
+    if (!currentUser) return;
+
+    const pollInterval = setInterval(() => {
+      notificationService.getUnreadCount()
+        .then((count) => dispatch(setUnreadCount(count)))
+        .catch(() => {});
+    }, 30000);
+
+    return () => clearInterval(pollInterval);
+  }, [currentUser, dispatch]);
 
   const login = (userId: string) => {
     dispatch(loginUser(userId));
@@ -63,12 +246,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const loginWithCredentials = async (phone: string, password: string) => {
     const res = await dispatch(loginAsync({ phone, password })).unwrap();
+    await socketService.connect();
     registerPushNotifications();
     return res;
   };
 
   const loginWithGoogle = async (googleData: { credential?: string; idToken?: string; email?: string; name?: string; avatar?: string; googleId?: string }) => {
     const res = await dispatch(loginGoogleAsync(googleData)).unwrap();
+    await socketService.connect();
     registerPushNotifications();
     return res;
   };
@@ -84,6 +269,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }) => {
     const res = await dispatch(registerAsync(payload)).unwrap();
     if (!res?.needsActivation) {
+      await socketService.connect();
       registerPushNotifications();
     }
     return res;
@@ -91,12 +277,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const activateAccount = async (email: string, otp: string) => {
     const res = await dispatch(activateAccountAsync({ email, otp })).unwrap();
-    socketService.connect();
+    await socketService.connect();
     registerPushNotifications();
     return res;
   };
 
   const logout = async () => {
+    socketService.disconnect();
     await unregisterPushNotifications();
     await dispatch(logoutAsync()).unwrap();
   };

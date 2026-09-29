@@ -1,5 +1,4 @@
-// src/features/post/screens/PostItemScreen.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   ScrollView, 
   View, 
@@ -12,7 +11,7 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useAppSelector, useAppDispatch } from '../../../app/store/hooks';
-import { addProduct, createProductAsync } from '../../home/store/homeSlice';
+import { addProduct, createProductAsync, fetchProducts } from '../../home/store/homeSlice';
 import { updateUserFrozenXu, refreshWalletBalance } from '../../auth/store/authSlice';
 import { COLORS, SPACING, RADIUS, TYPOGRAPHY, SHADOWS } from '../../../theme';
 import ScreenContainer from '../../../components/layout/ScreenContainer';
@@ -23,14 +22,16 @@ import Button from '../../../components/common/Button';
 import FormError from '../../../components/form/FormError';
 import MascotIcon from '../../../components/common/MascotIcon';
 import KindrCoin from '../../../components/common/KindrCoin';
-import { Image as ImageIcon, Sparkles, X, Lightbulb, MapPin, Camera } from 'lucide-react-native';
+import { Image as ImageIcon, Sparkles, X, Lightbulb, MapPin, Camera, Plus, ShieldCheck } from 'lucide-react-native';
 import * as ImagePicker from 'expo-image-picker';
+import ImagePickerModal from '../../../components/common/ImagePickerModal';
 import { DEFAULT_IMAGES } from '../../../utils/constants';
 import { 
   getSuggestedXu, 
   calculateSafeFee, 
   getConditionLabel, 
   getSmartPricingNudge,
+  getPriceBounds,
   CategoryType, 
   ConditionType 
 } from '../../../utils/pricing';
@@ -44,17 +45,19 @@ export const PostItemScreen = () => {
   const navigation = useNavigation<any>();
   const dispatch = useAppDispatch();
   const currentUser = useAppSelector((state) => state.auth.currentUser);
+  const scrollViewRef = useRef<ScrollView>(null);
 
   // Form Fields
   const [name, setName] = useState('');
   const [category, setCategory] = useState<CategoryType>('toy_small');
   const [condition, setCondition] = useState<ConditionType>('90');
   const [ageRange, setAgeRange] = useState('1-3y');
-  const [xuPrice, setXuPrice] = useState('4');
+  const [xuPrice, setXuPrice] = useState('2');
   const [selectedDistrictId, setSelectedDistrictId] = useState('dn_haichau');
   const [selectedWardId, setSelectedWardId] = useState('hc_thachthang');
   const [description, setDescription] = useState('');
   const [imageUri, setImageUri] = useState('');
+  const [additionalImages, setAdditionalImages] = useState<string[]>([]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
@@ -100,8 +103,8 @@ export const PostItemScreen = () => {
     if (category === 'charity') {
       setXuPrice('0');
     } else {
-      const suggested = getSuggestedXu(category, condition);
-      setXuPrice(suggested.toString());
+      const b = getPriceBounds(category, condition);
+      setXuPrice(b.suggested.toString());
     }
   }, [category, condition]);
 
@@ -113,54 +116,96 @@ export const PostItemScreen = () => {
     }
   }, [selectedDistrictId]);
 
-  const handlePickImage = async () => {
-    Alert.alert(
-      'Chọn hình ảnh món đồ',
-      'Mẹ muốn chụp ảnh mới hay chọn từ bộ sưu tập ảnh trên máy?',
-      [
-        { text: 'Hủy', style: 'cancel' },
-        {
-          text: 'Chụp ảnh mới',
-          onPress: async () => {
-            const { status } = await ImagePicker.requestCameraPermissionsAsync();
-            if (status !== 'granted') {
-              Alert.alert('Quyền truy cập', 'Kindr cần quyền truy cập camera để chụp ảnh món đồ.');
-              return;
-            }
-            const result = await ImagePicker.launchCameraAsync({
-              mediaTypes: ['images'],
-              allowsEditing: true,
-              aspect: [4, 3],
-              quality: 0.8,
-            });
-            if (!result.canceled && result.assets && result.assets.length > 0) {
-              setImageUri(result.assets[0].uri);
-            }
-          },
-        },
-        {
-          text: 'Chọn từ thư viện',
-          onPress: async () => {
-            const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-            if (status !== 'granted') {
-              Alert.alert('Quyền truy cập', 'Kindr cần quyền truy cập thư viện ảnh để chọn ảnh món đồ.');
-              return;
-            }
-            const result = await ImagePicker.launchImageLibraryAsync({
-              mediaTypes: ['images'],
-              allowsEditing: true,
-              aspect: [4, 3],
-              quality: 0.8,
-            });
-            if (!result.canceled && result.assets && result.assets.length > 0) {
-              setImageUri(result.assets[0].uri);
-            }
-          },
-        },
-      ]
-    );
+  // Image picker modal state
+  const [pickerModal, setPickerModal] = useState<{
+    visible: boolean;
+    isAdditional: boolean;
+    title: string;
+    subtitle: string;
+  }>({
+    visible: false,
+    isAdditional: false,
+    title: '',
+    subtitle: '',
+  });
+
+  const handlePickImage = () => {
+    setPickerModal({
+      visible: true,
+      isAdditional: false,
+      title: 'Ảnh chính (Trực diện món đồ)',
+      subtitle: 'Mẹ hãy chụp ảnh bao quát trực diện món đồ để bé đổi đồ ưng ý nhất.',
+    });
   };
 
+  const handlePickAdditionalImage = () => {
+    if (additionalImages.length >= 2) {
+      Alert.alert('Đã đủ góc ảnh', 'Mẹ có thể tải tối đa 3 ảnh (1 ảnh chính và 2 ảnh phụ chụp cận cảnh/vết xước).');
+      return;
+    }
+    setPickerModal({
+      visible: true,
+      isAdditional: true,
+      title: 'Thêm ảnh chi tiết / vết xước',
+      subtitle: 'Chụp góc tem mác, độ mới hoặc chi tiết lỗi/hao mòn để đảm bảo độ tin cậy.',
+    });
+  };
+
+  const executeCameraPick = async () => {
+    try {
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Quyền truy cập', 'Kindr cần quyền truy cập camera để chụp ảnh món đồ.');
+        return;
+      }
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ['images'],
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 0.8,
+      });
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        if (pickerModal.isAdditional) {
+          setAdditionalImages((prev) => [...prev, result.assets[0].uri]);
+        } else {
+          setImageUri(result.assets[0].uri);
+        }
+      }
+    } catch (e) {
+      console.warn('Camera pick error:', e);
+    }
+  };
+
+  const executeLibraryPick = async () => {
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Quyền truy cập', 'Kindr cần quyền truy cập thư viện ảnh để chọn ảnh món đồ.');
+        return;
+      }
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 0.8,
+      });
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        if (pickerModal.isAdditional) {
+          setAdditionalImages((prev) => [...prev, result.assets[0].uri]);
+        } else {
+          setImageUri(result.assets[0].uri);
+        }
+      }
+    } catch (e) {
+      console.warn('Library pick error:', e);
+    }
+  };
+
+  const handleRemoveAdditionalImage = (indexToRemove: number) => {
+    setAdditionalImages((prev) => prev.filter((_, idx) => idx !== indexToRemove));
+  };
+
+  const bounds = getPriceBounds(category, condition);
   const priceNum = parseInt(xuPrice || '0', 10);
   const safeFee = calculateSafeFee(priceNum);
   const pricingNudge = getSmartPricingNudge(category, condition);
@@ -180,7 +225,9 @@ export const PostItemScreen = () => {
       setCategory(result.category);
       setAgeRange(result.ageRange);
       if (category !== 'charity') {
-        setXuPrice(result.suggestedXu.toString());
+        const b = getPriceBounds(result.category, condition);
+        const clampedPrice = Math.min(Math.max(result.suggestedXu, b.min), b.max);
+        setXuPrice(clampedPrice.toString());
       }
       setDescription(result.description);
       Alert.alert(
@@ -195,15 +242,59 @@ export const PostItemScreen = () => {
   };
 
   const handlePost = async () => {
-    if (!name.trim() || !category || !condition || !description.trim()) {
-      setError('Vui lòng điền đầy đủ tất cả các trường có dấu *.');
+    setError('');
+
+    if (!currentUser) {
+      Alert.alert('Chưa đăng nhập', 'Mẹ vui lòng đăng nhập tài khoản trước khi đăng đồ nhé!');
       return;
     }
 
-    if (!currentUser) return;
+    if (!name.trim()) {
+      const msg = 'Mẹ ơi, vui lòng nhập Tên món đồ cần trao đổi nhé!';
+      setError(msg);
+      Alert.alert('Thiếu thông tin', msg);
+      scrollViewRef.current?.scrollTo({ y: 0, animated: true });
+      return;
+    }
+
+    if (name.trim().length < 5) {
+      const msg = 'Tên món đồ nên chi tiết một chút (tối thiểu 5 ký tự) để các mẹ khác dễ tìm kiếm nhé!';
+      setError(msg);
+      Alert.alert('Tên đồ dùng quá ngắn', msg);
+      scrollViewRef.current?.scrollTo({ y: 0, animated: true });
+      return;
+    }
+
+    if (!description.trim()) {
+      const msg = 'Mẹ ơi, vui lòng điền Mô tả món đồ để các mẹ khác yên tâm nhận đồ nhé!';
+      setError(msg);
+      Alert.alert('Thiếu thông tin', msg);
+      return;
+    }
+
+    if (description.trim().length < 10) {
+      const msg = 'Mô tả chi tiết cần tối thiểu 10 ký tự để đảm bảo độ tin cậy mẹ nhé!';
+      setError(msg);
+      Alert.alert('Mô tả quá ngắn', msg);
+      return;
+    }
+
+    // Chống ngáo giá: Kiểm tra biên độ giá hợp lệ
+    if (category !== 'charity') {
+      if (isNaN(priceNum) || priceNum < bounds.min || priceNum > bounds.max) {
+        const msg = bounds.min === bounds.max
+          ? `Mẹ ơi, để chống chênh lệch giá, Kindr quy định mức cố định ${bounds.suggested} Xu cho món đồ này.`
+          : `Mẹ ơi, để chống ngáo giá, Kindr giới hạn mức Xu cho món đồ này từ ${bounds.min} đến ${bounds.max} Xu (Giá gợi ý chuẩn: ${bounds.suggested} Xu).`;
+        setError(msg);
+        Alert.alert('Giá chưa phù hợp', msg);
+        return;
+      }
+    }
 
     if (category !== 'charity' && safeFee > currentUser.xuBalance) {
-      setError(`Mẹ ơi, số dư ví hiện có ${currentUser.xuBalance} Xu không đủ ký quỹ ${safeFee} Xu Safe Fee (10%). Hãy nạp thêm Xu nhé!`);
+      const msg = `Mẹ ơi, số dư ví hiện có ${currentUser.xuBalance} Xu không đủ ký quỹ ${safeFee} Xu Safe Fee (10%). Hãy nạp thêm Xu nhé!`;
+      setError(msg);
+      Alert.alert('Số dư ví không đủ', msg);
       return;
     }
 
@@ -214,12 +305,23 @@ export const PostItemScreen = () => {
     const districtObj = VIETNAM_LOCATIONS.find(d => d.id === selectedDistrictId);
     const wardObj = districtObj?.wards.find(w => w.id === selectedWardId);
     const fullLocationName = `${wardObj?.name || 'Phường Thạch Thang'}, ${districtObj?.name || 'Quận Hải Châu'}, ${districtObj?.city || 'Đà Nẵng'}`;
+    
     let finalImage = DEFAULT_IMAGES.PRODUCT_FALLBACK;
     if (imageUri) {
       try {
         finalImage = await uploadImageToCloud(imageUri, 'kindr/products');
       } catch {
         finalImage = imageUri;
+      }
+    }
+
+    const finalAdditionalImages: string[] = [];
+    for (const uri of additionalImages) {
+      try {
+        const uploaded = await uploadImageToCloud(uri, 'kindr/products');
+        finalAdditionalImages.push(uploaded);
+      } catch {
+        finalAdditionalImages.push(uri);
       }
     }
 
@@ -236,23 +338,28 @@ export const PostItemScreen = () => {
         wardId: selectedWardId,
         districtId: selectedDistrictId,
         image: finalImage,
+        additionalImages: finalAdditionalImages,
         description: description.trim(),
       })).unwrap();
 
+      dispatch(fetchProducts());
       dispatch(refreshWalletBalance());
       setLoading(false);
 
-      const msg = category === 'charity'
-        ? `Món đồ "${name}" của mẹ đã được đăng lên Trạm Tặng Đồ (0 Xu) cho gia đình cần nhận.`
-        : `Món đồ "${name}" của mẹ đã được duyệt đăng lên sàn! Hệ thống tạm khóa ${safeFee} Xu Safe Fee bảo chứng chất lượng.`;
+      const feeExplanation = safeFee > 0
+        ? `Hệ thống đã tạm giữ ${safeFee} Xu Safe Fee bảo chứng chất lượng (sẽ hoàn trả 100% khi giao dịch hoàn tất).`
+        : '';
+
+      const msg = `Món đồ "${name}" đã được đăng thành công và hiển thị trực tiếp trên sàn! ${feeExplanation}`;
 
       Alert.alert('Đăng đồ thành công', msg, [
         {
-          text: 'Đồng ý',
+          text: 'Xem trên sàn',
           onPress: () => {
             setName('');
             setDescription('');
             setImageUri('');
+            setAdditionalImages([]);
             navigation.navigate('Home');
           }
         }
@@ -274,6 +381,7 @@ export const PostItemScreen = () => {
         timeAgo: 'Vừa xong',
         createdAt: new Date().toISOString(),
         image: finalImage,
+        additionalImages: finalAdditionalImages,
         description,
         sellerId: currentUser.id,
         sellerName: currentUser.name,
@@ -281,7 +389,7 @@ export const PostItemScreen = () => {
         sellerPhone: currentUser.phone,
         sellerZalo: currentUser.phone,
         safeFeeLocked: safeFee,
-        status: 'available' as const,
+        status: 'available' as any,
       };
 
       dispatch(addProduct(newProduct));
@@ -290,19 +398,23 @@ export const PostItemScreen = () => {
         dispatch(updateUserFrozenXu({ userId: currentUser.id, amount: safeFee }));
       }
 
+      dispatch(fetchProducts());
       setLoading(false);
 
-      const msg = category === 'charity'
-        ? `Món đồ "${name}" của mẹ đã được đăng lên Trạm Tặng Đồ (0 Xu) cho gia đình cần nhận.`
-        : `Món đồ "${name}" của mẹ đã được duyệt đăng lên sàn! Hệ thống tạm khóa ${safeFee} Xu Safe Fee bảo chứng chất lượng.`;
+      const feeExplanation = safeFee > 0
+        ? `Hệ thống đã tạm giữ ${safeFee} Xu Safe Fee bảo chứng chất lượng (sẽ hoàn trả 100% khi giao dịch hoàn tất).`
+        : '';
 
-      Alert.alert('Đăng đồ thành công', msg, [
+      const fallbackMsg = `Món đồ "${name}" đã được đăng thành công và hiển thị trực tiếp trên sàn! ${feeExplanation}`;
+
+      Alert.alert('Đăng đồ thành công', fallbackMsg, [
         {
-          text: 'Đồng ý',
+          text: 'Xem trên sàn',
           onPress: () => {
             setName('');
             setDescription('');
             setImageUri('');
+            setAdditionalImages([]);
             navigation.navigate('Home');
           }
         }
@@ -310,50 +422,88 @@ export const PostItemScreen = () => {
     }
   };
 
+  const getMascotDialogue = () => {
+    if (category === 'charity') {
+      return "Tặng đồ 0 Xu từ thiện được miễn hoàn toàn Safe Fee mẹ nhé!";
+    }
+    return `Mẹ tạm gửi ${safeFee} Xu Safe Fee vào rương bảo vệ để đảm bảo đồ sạch sẽ và đúng chất lượng nhé! (Sẽ hoàn trả 100% khi giao dịch hoàn tất)`;
+  };
+
   return (
     <ScreenContainer scrollable={false}>
       <Header title="Đăng đồ trao đổi" />
 
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView ref={scrollViewRef} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* Mascot Dialogue Banner */}
         <View style={styles.mascotBanner}>
           <MascotIcon 
             size={52} 
-            mood="protective" 
-            dialogue={category === 'charity' 
-              ? "Tặng đồ 0 Xu từ thiện được miễn hoàn toàn Safe Fee mẹ nhé!"
-              : `Mẹ tạm gửi ${safeFee} Xu Safe Fee vào rương bảo vệ để đảm bảo đồ chất lượng nhé!`}
+            mood={category === 'charity' ? 'celebrate' : 'protective'} 
+            dialogue={getMascotDialogue()}
           />
         </View>
 
         <View style={styles.form}>
           <FormError message={error} />
 
-          {/* Photo picker */}
-          <Text style={styles.sectionLabel}>Hình ảnh thật món đồ *</Text>
-          <View style={styles.photoContainer}>
-            <TouchableOpacity 
-              style={styles.addPhotoBtn}
-              activeOpacity={0.8}
-              onPress={handlePickImage}
-            >
-              <ImageIcon size={26} color={COLORS.primary} />
-              <Text style={styles.addPhotoText}>Chụp / Chọn ảnh</Text>
-            </TouchableOpacity>
-
-            {imageUri ? (
-              <View style={styles.photoPreviewWrapper}>
-                <Image source={{ uri: imageUri }} style={styles.photoPreview} />
-                <TouchableOpacity style={styles.deletePhotoBtn} onPress={() => setImageUri('')}>
-                  <X size={14} color={COLORS.onSurface} />
-                </TouchableOpacity>
-              </View>
-            ) : (
-              <View style={styles.photoPlaceholder}>
-                <ImageIcon size={24} color={COLORS.outlineVariant} />
-              </View>
-            )}
+          {/* Photo picker with multi-angle support */}
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: SPACING.xs }}>
+            <Text style={styles.sectionLabel}>Hình ảnh thực tế món đồ (Tối đa 3 góc) *</Text>
+            <Text style={styles.photoCountText}>{1 + additionalImages.length}/3 ảnh</Text>
           </View>
+          
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.photoContainer}>
+            {/* Primary Photo */}
+            <View style={styles.photoSlot}>
+              {imageUri ? (
+                <View style={styles.photoPreviewWrapper}>
+                  <Image source={{ uri: imageUri }} style={styles.photoPreview} />
+                  <TouchableOpacity style={styles.deletePhotoBtn} onPress={() => setImageUri('')}>
+                    <X size={14} color={COLORS.onSurface} />
+                  </TouchableOpacity>
+                  <View style={styles.photoBadgePrimary}>
+                    <Text style={styles.photoBadgeText}>Mặt chính</Text>
+                  </View>
+                </View>
+              ) : (
+                <TouchableOpacity 
+                  style={styles.addPhotoBtn}
+                  activeOpacity={0.8}
+                  onPress={handlePickImage}
+                >
+                  <Camera size={24} color={COLORS.primary} />
+                  <Text style={styles.addPhotoText}>Ảnh trực diện *</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+
+            {/* Additional Photos */}
+            {additionalImages.map((uri, idx) => (
+              <View key={`add_img_${idx}`} style={styles.photoSlot}>
+                <View style={styles.photoPreviewWrapper}>
+                  <Image source={{ uri }} style={styles.photoPreview} />
+                  <TouchableOpacity style={styles.deletePhotoBtn} onPress={() => handleRemoveAdditionalImage(idx)}>
+                    <X size={14} color={COLORS.onSurface} />
+                  </TouchableOpacity>
+                  <View style={styles.photoBadgeDetail}>
+                    <Text style={styles.photoBadgeText}>{idx === 0 ? 'Chi tiết' : 'Góc xước'}</Text>
+                  </View>
+                </View>
+              </View>
+            ))}
+
+            {/* Add more button */}
+            {imageUri && additionalImages.length < 2 && (
+              <TouchableOpacity
+                style={styles.addMorePhotoBtn}
+                activeOpacity={0.8}
+                onPress={handlePickAdditionalImage}
+              >
+                <Plus size={20} color={COLORS.primary} />
+                <Text style={styles.addMorePhotoText}>Thêm góc</Text>
+              </TouchableOpacity>
+            )}
+          </ScrollView>
 
           <Input
             label="Tên món đồ *"
@@ -417,6 +567,13 @@ export const PostItemScreen = () => {
                   editable={category !== 'charity'}
                 />
               </View>
+              {category !== 'charity' && (
+                <Text style={styles.boundsHelperText}>
+                  {bounds.min === bounds.max
+                    ? `Khung quy định: Cố định ${bounds.suggested} Xu`
+                    : `Khung quy định: ${bounds.min} - ${bounds.max} Xu (Chuẩn: ${bounds.suggested} Xu)`}
+                </Text>
+              )}
             </View>
           </View>
 
@@ -426,12 +583,12 @@ export const PostItemScreen = () => {
             <Text style={styles.nudgeText}>{pricingNudge}</Text>
           </View>
 
-          {/* Safe Fee Box Summary */}
+          {/* Safe Fee Box */}
           {category !== 'charity' && (
             <View style={styles.safeFeeBox}>
-              <Sparkles size={16} color={COLORS.tertiary} />
+              <ShieldCheck size={16} color={COLORS.tertiary} />
               <Text style={styles.safeFeeText}>
-                Tự động ký quỹ Phí Cam Kết 10%: <Text style={styles.safeFeeHighlight}>{safeFee} Xu</Text> (mở lại ví sau khi người mua nhận đồ 6 giờ).
+                Tự động ký quỹ Phí Cam Kết 10%: <Text style={styles.safeFeeHighlight}>{safeFee} Xu</Text> (hoàn trả 100% về ví sau khi giao dịch hoàn tất).
               </Text>
             </View>
           )}
@@ -462,20 +619,39 @@ export const PostItemScreen = () => {
             label="Mô tả món đồ *"
             placeholder="Mô tả kỹ tình trạng món đồ, nguồn gốc mua, bé đã dùng mấy tháng..."
             value={description}
-            onChangeText={setDescription}
+            onChangeText={(text) => {
+              setDescription(text);
+              if (error) setError('');
+            }}
             multiline
-            numberOfLines={3}
+            numberOfLines={4}
+            inputContainerStyle={styles.descInputContainer}
             inputStyle={styles.descriptionInput}
           />
 
+          {error ? <FormError message={error} /> : null}
+
           <Button
-            title={category === 'charity' ? 'Tặng đồ ngay (0 Xu)' : `Đăng đồ ngay (Ký quỹ ${safeFee} Xu)`}
+            title={
+              category === 'charity' 
+                ? 'Tặng đồ ngay (0 Xu)' 
+                : `Đăng đồ ngay (Ký quỹ ${safeFee} Xu Safe Fee)`
+            }
             onPress={handlePost}
             loading={loading}
             style={styles.submitBtn}
           />
         </View>
       </ScrollView>
+
+      <ImagePickerModal
+        visible={pickerModal.visible}
+        onClose={() => setPickerModal((prev) => ({ ...prev, visible: false }))}
+        onSelectCamera={executeCameraPick}
+        onSelectLibrary={executeLibraryPick}
+        title={pickerModal.title}
+        subtitle={pickerModal.subtitle}
+      />
     </ScreenContainer>
   );
 };
@@ -587,15 +763,58 @@ const styles = StyleSheet.create({
   },
   safeFeeText: { fontSize: 12, color: COLORS.onSurfaceVariant, flex: 1, lineHeight: 16 },
   safeFeeHighlight: { fontWeight: '700', color: COLORS.tertiary },
+  photoCountText: { fontSize: 11, color: COLORS.outline, fontWeight: '500' },
+  photoSlot: { marginRight: SPACING.sm },
+  photoBadgePrimary: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: 'rgba(91, 154, 139, 0.85)',
+    paddingVertical: 2,
+    alignItems: 'center',
+  },
+  photoBadgeDetail: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: 'rgba(61, 61, 61, 0.75)',
+    paddingVertical: 2,
+    alignItems: 'center',
+  },
+  photoBadgeText: { fontSize: 9, color: '#FFF', fontWeight: '700' },
+  addMorePhotoBtn: {
+    width: 85,
+    height: 85,
+    borderWidth: 1.5,
+    borderStyle: 'dashed',
+    borderColor: COLORS.primary,
+    borderRadius: RADIUS.sm,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F0FDF4',
+  },
+  addMorePhotoText: { fontSize: 10, fontWeight: '600', color: COLORS.primary, marginTop: 4 },
+  boundsHelperText: { fontSize: 11, color: COLORS.primary, marginTop: 4, fontWeight: '600' },
+
   locationSection: {
     marginBottom: SPACING.sm,
   },
+  descInputContainer: {
+    minHeight: 110,
+    alignItems: 'flex-start',
+    paddingVertical: SPACING.sm,
+    marginBottom: SPACING.sm,
+  },
   descriptionInput: {
-    minHeight: 80,
+    minHeight: 85,
     textAlignVertical: 'top',
+    fontSize: 14,
+    lineHeight: 22,
   },
   submitBtn: {
-    marginTop: SPACING.md,
+    marginTop: SPACING.sm,
     marginBottom: SPACING.xxl,
   },
 });

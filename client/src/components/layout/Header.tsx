@@ -9,21 +9,27 @@ import { useAuth } from '../../app/providers/AuthProvider';
 import { ScalePressable } from '../common/ScalePressable';
 import { PulseBadge } from '../common/PulseBadge';
 import KindrCoin from '../common/KindrCoin';
+import NotificationBell from '../common/NotificationBell';
+import Avatar from '../common/Avatar';
 
 const KINDR_LOGO = require('../../../assets/images/kindr-logo.png');
 
 interface HeaderProps {
   title?: string;
+  titleElement?: React.ReactNode;
   showBack?: boolean;
   showProfileSummary?: boolean;
+  showNotificationBell?: boolean;
   onBackPress?: () => void;
   rightElement?: React.ReactNode;
 }
 
 export const Header = ({
   title,
+  titleElement,
   showBack = false,
   showProfileSummary = false,
+  showNotificationBell = true,
   onBackPress,
   rightElement,
 }: HeaderProps) => {
@@ -57,7 +63,13 @@ export const Header = ({
             scaleTo={0.97}
             onPress={() => (navigation as any).navigate('Profile')}
           >
-            <Image source={{ uri: currentUser.avatar }} style={styles.avatar} />
+            <Avatar
+              uri={currentUser.avatar}
+              name={currentUser.name}
+              size={38}
+              showBorder
+              borderColor="#78C2AD"
+            />
             <View style={styles.welcomeTextContainer}>
               <Text style={styles.greeting}>Chào mẹ,</Text>
               <Text style={styles.username} numberOfLines={1}>{currentUser.name}</Text>
@@ -74,9 +86,9 @@ export const Header = ({
       </View>
 
       {/* Center Slot - only on sub-screens with showBack for centered detail title */}
-      {showBack && title ? (
+      {showBack && (titleElement || title) ? (
         <View style={styles.centerSlot}>
-          <Text style={styles.titleText} numberOfLines={1}>{title}</Text>
+          {titleElement ? titleElement : <Text style={styles.titleText} numberOfLines={1}>{title}</Text>}
         </View>
       ) : null}
 
@@ -85,17 +97,22 @@ export const Header = ({
         {rightElement ? (
           rightElement
         ) : showProfileSummary && currentUser ? (
-          <ScalePressable
-            scaleTo={0.93}
-            onPress={() => navigation.navigate('Wallet')}
-          >
-            <View style={styles.walletContainer}>
-              <PulseBadge scaleMin={0.92} scaleMax={1.1} duration={2000}>
-                <KindrCoin size={15} />
-              </PulseBadge>
-              <Text style={styles.walletBalance}>{currentUser.xuBalance} Xu</Text>
-            </View>
-          </ScalePressable>
+          <View style={styles.headerRightActions}>
+            <ScalePressable
+              scaleTo={0.93}
+              onPress={() => navigation.navigate('Wallet')}
+            >
+              <View style={styles.walletContainer}>
+                <PulseBadge scaleMin={0.92} scaleMax={1.1} duration={2000}>
+                  <KindrCoin size={15} />
+                </PulseBadge>
+                <Text style={styles.walletBalance}>{currentUser.xuBalance} Xu</Text>
+              </View>
+            </ScalePressable>
+            {showNotificationBell && <NotificationBell />}
+          </View>
+        ) : showNotificationBell && currentUser ? (
+          <NotificationBell />
         ) : showBack ? (
           // Spacer matching backButton size to ensure true center alignment
           <View style={styles.spacer} />
@@ -158,6 +175,21 @@ const styles = StyleSheet.create({
     borderRadius: 19,
     backgroundColor: COLORS.surfaceDim,
   },
+  avatarFallback: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: '#EBF8F5',
+    borderWidth: 1.5,
+    borderColor: '#78C2AD',
+    justifyContent: 'center',
+    alignItems: 'center',
+    overflow: 'hidden',
+  },
+  avatarFallbackLogo: {
+    width: 32,
+    height: 32,
+  },
   welcomeTextContainer: {
     justifyContent: 'center',
   },
@@ -212,6 +244,11 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '700',
     color: '#8C6500',
+  },
+  headerRightActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
   },
   spacer: {
     width: 40,

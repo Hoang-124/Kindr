@@ -11,6 +11,8 @@ import {
 import { COLORS, SPACING, RADIUS, SHADOWS, TYPOGRAPHY } from '../../theme';
 import Button from './Button';
 
+import { ShieldCheck, AlertCircle } from 'lucide-react-native';
+
 interface ModalConfirmProps {
   visible: boolean;
   onClose: () => void;
@@ -31,11 +33,14 @@ export const ModalConfirm = ({
   title,
   description,
   confirmTitle = 'Xác nhận',
-  cancelTitle = 'Hủy',
+  cancelTitle = 'Hủy bỏ',
   confirmVariant = 'primary',
   loading = false,
   children,
 }: ModalConfirmProps) => {
+  const isEscrow = title.toLowerCase().includes('ký quỹ') || title.toLowerCase().includes('đổi đồ');
+  const isDanger = confirmVariant === 'error';
+
   return (
     <Modal
       transparent
@@ -47,19 +52,28 @@ export const ModalConfirm = ({
         <View style={styles.overlay}>
           <TouchableWithoutFeedback onPress={() => {}}>
             <View style={styles.modalContainer}>
+              {/* Header Icon */}
+              <View style={[
+                styles.iconBadgeWrap, 
+                isDanger ? styles.iconBadgeDanger : isEscrow ? styles.iconBadgeEscrow : styles.iconBadgePrimary
+              ]}>
+                {isDanger ? (
+                  <AlertCircle size={24} color={COLORS.error} strokeWidth={2.4} />
+                ) : (
+                  <ShieldCheck size={24} color={isEscrow ? '#D97706' : COLORS.primary} strokeWidth={2.4} />
+                )}
+              </View>
+
               <Text style={styles.title}>{title}</Text>
-              <Text style={styles.description}>{description}</Text>
+              
+              <View style={styles.descriptionBox}>
+                <Text style={styles.description}>{description}</Text>
+              </View>
+
               {children}
               
-              <View style={styles.buttonContainer}>
-                <TouchableOpacity 
-                  onPress={onClose} 
-                  disabled={loading}
-                  style={styles.cancelBtn}
-                >
-                  <Text style={styles.cancelText}>{cancelTitle}</Text>
-                </TouchableOpacity>
-                
+              {/* Actions Stack: Primary on top, cancel link underneath */}
+              <View style={styles.buttonStack}>
                 <Button
                   title={confirmTitle}
                   onPress={onConfirm}
@@ -67,6 +81,15 @@ export const ModalConfirm = ({
                   loading={loading}
                   style={styles.confirmBtn}
                 />
+
+                <TouchableOpacity 
+                  onPress={onClose} 
+                  disabled={loading}
+                  style={styles.cancelBtn}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.cancelText}>{cancelTitle}</Text>
+                </TouchableOpacity>
               </View>
             </View>
           </TouchableWithoutFeedback>
@@ -79,50 +102,85 @@ export const ModalConfirm = ({
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(34, 26, 17, 0.4)', // Muted dark overlay
+    backgroundColor: 'rgba(15, 23, 42, 0.65)',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: SPACING.lg,
+    padding: 20,
   },
   modalContainer: {
     width: '100%',
-    maxWidth: 340,
-    backgroundColor: COLORS.surface,
-    borderRadius: RADIUS.lg,
-    padding: SPACING.lg,
+    maxWidth: 360,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    paddingHorizontal: 22,
+    paddingTop: 24,
+    paddingBottom: 16,
+    alignItems: 'center',
     ...SHADOWS.ambient,
+    borderWidth: 1,
+    borderColor: 'rgba(0, 0, 0, 0.06)',
+  },
+  iconBadgeWrap: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 14,
+  },
+  iconBadgePrimary: {
+    backgroundColor: COLORS.primaryContainer,
+  },
+  iconBadgeEscrow: {
+    backgroundColor: '#FEF3C7',
+  },
+  iconBadgeDanger: {
+    backgroundColor: '#FEE2E2',
   },
   title: {
-    ...TYPOGRAPHY.headlineSm,
-    color: COLORS.onBackground,
-    marginBottom: SPACING.sm,
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#0F172A',
+    marginBottom: 10,
     textAlign: 'center',
+    letterSpacing: -0.2,
+  },
+  descriptionBox: {
+    backgroundColor: '#F8FAFC',
+    borderRadius: 16,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: '#EEF2F6',
+    width: '100%',
+    marginBottom: 18,
   },
   description: {
-    ...TYPOGRAPHY.bodySm,
-    color: COLORS.onSurfaceVariant,
+    fontSize: 13.5,
+    color: '#334155',
     lineHeight: 20,
-    marginBottom: SPACING.lg,
     textAlign: 'center',
   },
-  buttonContainer: {
-    flexDirection: 'row',
+  buttonStack: {
+    width: '100%',
     alignItems: 'center',
-    justifyContent: 'flex-end',
-    gap: SPACING.md,
-  },
-  cancelBtn: {
-    paddingVertical: SPACING.sm,
-    paddingHorizontal: SPACING.md,
-  },
-  cancelText: {
-    color: COLORS.outline,
-    fontSize: 14,
-    fontWeight: '600',
+    gap: 4,
   },
   confirmBtn: {
-    flex: 1,
+    width: '100%',
+    height: 50,
+    borderRadius: 25,
+  },
+  cancelBtn: {
+    width: '100%',
     height: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 4,
+  },
+  cancelText: {
+    color: '#64748B',
+    fontSize: 14,
+    fontWeight: '600',
   },
 });
 export default ModalConfirm;

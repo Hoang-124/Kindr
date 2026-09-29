@@ -1,5 +1,5 @@
 // src/features/home/screens/HomeScreen.tsx
-import React from 'react';
+import React, { useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -9,12 +9,11 @@ import {
   TouchableOpacity,
   TextInput
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AppStackParamList, MainTabParamList } from '../../../app/navigation/navigationTypes';
 import { useAppSelector, useAppDispatch } from '../../../app/store/hooks';
 import { setSelectedCategory, resetFilters, resetProducts, fetchProducts } from '../store/homeSlice';
-import { useEffect } from 'react';
 import { COLORS, SPACING, RADIUS, TYPOGRAPHY, SHADOWS } from '../../../theme';
 import ScreenContainer from '../../../components/layout/ScreenContainer';
 import Header from '../../../components/layout/Header';
@@ -31,14 +30,19 @@ import {
   GraduationCap,
   Shirt,
   Baby,
-  Gift
+  Gift,
+  Package,
+  ChevronRight
 } from 'lucide-react-native';
 import MascotIcon from '../../../components/common/MascotIcon';
 
 import { ScalePressable } from '../../../components/common/ScalePressable';
 import { PulseBadge } from '../../../components/common/PulseBadge';
 import { FadeInItem } from '../../../components/common/FadeInItem';
+import { DEFAULT_IMAGES } from '../../../utils/constants';
 import KindrCoin from '../../../components/common/KindrCoin';
+import Avatar from '../../../components/common/Avatar';
+import { fetchMyTransactionsAsync } from '../../exchange/store/exchangeSlice';
 
 type NavigationProp = NativeStackNavigationProp<AppStackParamList>;
 type TabNavigationProp = NativeStackNavigationProp<MainTabParamList>;
@@ -60,14 +64,29 @@ export const HomeScreen = () => {
 
   const products = useAppSelector((state) => state.home.products);
   const currentUser = useAppSelector((state) => state.auth.currentUser);
+  const transactions = useAppSelector((state) => state.exchange.transactions);
 
   useEffect(() => {
     dispatch(fetchProducts());
+    dispatch(fetchMyTransactionsAsync());
   }, [dispatch]);
 
-  // Filter available products, excluding items listed by the current user
+  useFocusEffect(
+    useCallback(() => {
+      dispatch(fetchProducts());
+      dispatch(fetchMyTransactionsAsync());
+    }, [dispatch])
+  );
+
+  // Active exchange transactions needing action
+  const pendingExchangeTx = transactions.filter(
+    tx => (tx.buyerId === currentUser?.id || tx.sellerId === currentUser?.id) &&
+      (tx.status === 'awaiting_handover' || tx.status === 'in_safeful_time' || tx.status === 'disputed')
+  );
+
+  // Filter all available products for the feed
   const feedProducts = products.filter(
-    p => p.status === 'available' && p.sellerId !== currentUser?.id
+    p => p.status === 'available'
   );
 
   const handleCategoryPress = (catId: string) => {
@@ -127,13 +146,52 @@ export const HomeScreen = () => {
         </View>
 
         <View style={styles.bannerRight}>
-          <PulseBadge scaleMin={0.97} scaleMax={1.04} duration={2400}>
+          <PulseBadge scaleMin={0.98} scaleMax={1.02} duration={2400}>
             <View style={styles.mascotBadgeWrapper}>
               <MascotIcon size={76} mood="happy" />
             </View>
           </PulseBadge>
         </View>
       </View>
+
+      {/* Active Ongoing Exchange Alert Banner */}
+      {pendingExchangeTx.length > 0 && (
+        <View style={styles.activeExchangeContainer}>
+          <View style={styles.activeExchangeHeader}>
+            <View style={styles.activeExchangeBadge}>
+              <Package size={13} color="#D97706" />
+              <Text style={styles.activeExchangeBadgeText}>GIAO DỊCH CẦN XỬ LÝ ({pendingExchangeTx.length})</Text>
+            </View>
+            <TouchableOpacity onPress={() => navigation.navigate('TransactionDetail', { id: pendingExchangeTx[0].id })}>
+              <Text style={styles.viewDetailLink}>Xem chi tiết</Text>
+            </TouchableOpacity>
+          </View>
+          {pendingExchangeTx.slice(0, 2).map((tx) => {
+            const isSeller = tx.sellerId === currentUser?.id;
+            return (
+              <ScalePressable
+                key={tx.id}
+                style={styles.activeExchangeCard}
+                scaleTo={0.97}
+                onPress={() => navigation.navigate('TransactionDetail', { id: tx.id })}
+              >
+                <Image source={{ uri: tx.productImage || DEFAULT_IMAGES.PRODUCT_FALLBACK }} style={styles.activeExchangeImage} />
+                <View style={styles.activeExchangeBody}>
+                  <Text style={styles.activeExchangeTitle} numberOfLines={1}>
+                    {isSeller ? `Có mẹ đổi món: ${tx.productName}` : `Mẹ đang đổi món: ${tx.productName}`}
+                  </Text>
+                  <Text style={styles.activeExchangeSub} numberOfLines={1}>
+                    {tx.status === 'awaiting_handover' 
+                      ? (isSeller ? `Mã nhận: ${tx.handoverCode || 'Chờ mã'} • Hẹn gặp giao đồ` : `Mã của bạn: ${tx.handoverCode || 'Chờ mã'}`) 
+                      : 'Đang trong 6 Giờ Kiểm Định Tại Nhà'}
+                  </Text>
+                </View>
+                <ChevronRight size={18} color={COLORS.primary} />
+              </ScalePressable>
+            );
+          })}
+        </View>
+      )}
 
       {/* Grid Categories (Bento style with Tactile Physics) */}
       <View style={styles.categoriesSection}>
@@ -186,37 +244,55 @@ export const HomeScreen = () => {
             onActionPress={() => tabNavigation.navigate('Post')}
           />
         }
-        renderItem={({ item, index }) => (
-          <FadeInItem index={index} delay={45} style={styles.itemCardWrapper}>
-            <ScalePressable
-              style={styles.itemCard}
-              scaleTo={0.95}
-              onPress={() => handleProductPress(item.id)}
-            >
-              <View style={styles.imageContainer}>
-                <Image source={{ uri: item.image }} style={styles.itemImage} />
-                <View style={styles.distanceBadge}>
-                  <MapPin size={10} color={COLORS.primary} />
-                  <Text style={styles.distanceText}>{item.distance || '1 km'} • {item.locationName.split(',')[0]}</Text>
+        renderItem={({ item, index }) => {
+          const isOwn = item.sellerId === currentUser?.id;
+          return (
+            <FadeInItem index={index} delay={45} style={styles.itemCardWrapper}>
+              <ScalePressable
+                style={styles.itemCard}
+                scaleTo={0.95}
+                onPress={() => handleProductPress(item.id)}
+              >
+                <View style={styles.imageContainer}>
+                  <Image 
+                    source={{ uri: item.image || DEFAULT_IMAGES.PRODUCT_FALLBACK }} 
+                    style={styles.itemImage} 
+                  />
+                  {isOwn ? (
+                    <View style={styles.ownPostBadge}>
+                      <Text style={styles.ownPostBadgeText}>Tin của bạn</Text>
+                    </View>
+                  ) : (
+                    <View style={styles.distanceBadge}>
+                      <MapPin size={10} color={COLORS.primary} />
+                      <Text style={styles.distanceText}>{item.distance || '1 km'} • {item.locationName.split(',')[0]}</Text>
+                    </View>
+                  )}
                 </View>
-              </View>
 
-              <View style={styles.itemDetails}>
-                <Text style={styles.itemName} numberOfLines={2}>{item.name}</Text>
-                <View style={styles.priceRow}>
-                  <View style={styles.sellerRow}>
-                    <Image source={{ uri: item.sellerAvatar }} style={styles.sellerAvatar} />
-                    <Text style={styles.sellerName} numberOfLines={1}>{item.sellerName}</Text>
-                  </View>
-                  <View style={styles.priceBadge}>
-                    <KindrCoin size={13} />
-                    <Text style={styles.priceText}>{item.price} Xu</Text>
+                <View style={styles.itemDetails}>
+                  <Text style={styles.itemName} numberOfLines={2}>{item.name}</Text>
+                  <View style={styles.priceRow}>
+                    <View style={styles.sellerRow}>
+                      <Avatar 
+                        uri={item.sellerAvatar} 
+                        name={item.sellerName} 
+                        size={18} 
+                      />
+                      <Text style={styles.sellerName} numberOfLines={1}>
+                        {isOwn ? 'Bạn' : item.sellerName}
+                      </Text>
+                    </View>
+                    <View style={styles.priceBadge}>
+                      <KindrCoin size={13} />
+                      <Text style={styles.priceText}>{item.price} Xu</Text>
+                    </View>
                   </View>
                 </View>
-              </View>
-            </ScalePressable>
-          </FadeInItem>
-        )}
+              </ScalePressable>
+            </FadeInItem>
+          );
+        }}
       />
     </ScreenContainer>
   );
@@ -252,10 +328,11 @@ const styles = StyleSheet.create({
   },
   bannerCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 20,
+    borderRadius: 22,
     borderWidth: 1,
-    borderColor: 'rgba(255, 107, 107, 0.18)',
-    padding: SPACING.md,
+    borderColor: 'rgba(255, 107, 107, 0.16)',
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.md,
     marginBottom: SPACING.lg,
     flexDirection: 'row',
     alignItems: 'center',
@@ -265,6 +342,7 @@ const styles = StyleSheet.create({
   bannerLeft: {
     flex: 1,
     paddingRight: SPACING.sm,
+    justifyContent: 'center',
   },
   bannerTag: {
     flexDirection: 'row',
@@ -316,24 +394,24 @@ const styles = StyleSheet.create({
   bannerRight: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingLeft: 4,
+    paddingLeft: SPACING.sm,
+    paddingRight: SPACING.xs,
   },
   mascotBadgeWrapper: {
-    width: 82,
-    height: 82,
-    borderRadius: 41,
-    backgroundColor: '#FFFFFF',
-    borderWidth: 2,
-    borderColor: '#FFE4E6',
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'hidden',
-    ...SHADOWS.soft,
-  },
-  bannerMascot: {
     width: 80,
     height: 80,
     borderRadius: 40,
+    overflow: 'hidden',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#FFFFFF',
+    borderWidth: 2,
+    borderColor: '#78C2AD',
+    shadowColor: 'rgba(120, 194, 173, 0.35)',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.18,
+    shadowRadius: 6,
+    elevation: 3,
   },
   categoriesSection: {
     marginBottom: SPACING.lg,
@@ -418,6 +496,22 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: COLORS.text,
   },
+  ownPostBadge: {
+    position: 'absolute',
+    top: SPACING.xs,
+    left: SPACING.xs,
+    backgroundColor: '#ECFDF5',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#A7F3D0',
+  },
+  ownPostBadgeText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#059669',
+  },
   itemDetails: {
     padding: SPACING.sm,
     justifyContent: 'space-between',
@@ -474,6 +568,71 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '800',
     color: '#8C6500',
+  },
+  activeExchangeContainer: {
+    backgroundColor: '#FFFBEB',
+    borderWidth: 1.5,
+    borderColor: '#FCD34D',
+    borderRadius: RADIUS.lg,
+    padding: SPACING.md,
+    marginTop: SPACING.md,
+  },
+  activeExchangeHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: SPACING.xs,
+  },
+  activeExchangeBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    backgroundColor: '#FEF3C7',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: RADIUS.full,
+  },
+  activeExchangeBadgeText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#B45309',
+    letterSpacing: 0.5,
+  },
+  viewDetailLink: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: COLORS.primary,
+  },
+  activeExchangeCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: RADIUS.md,
+    padding: SPACING.sm,
+    marginTop: SPACING.xs,
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+  },
+  activeExchangeImage: {
+    width: 44,
+    height: 44,
+    borderRadius: RADIUS.sm,
+    backgroundColor: COLORS.surfaceVariant,
+  },
+  activeExchangeBody: {
+    flex: 1,
+    marginHorizontal: SPACING.sm,
+  },
+  activeExchangeTitle: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: COLORS.text,
+  },
+  activeExchangeSub: {
+    fontSize: 11,
+    fontWeight: '500',
+    color: '#D97706',
+    marginTop: 2,
   },
 });
 export default HomeScreen;

@@ -21,11 +21,11 @@ export const MascotIcon: React.FC<MascotIconProps> = ({
   return (
     <View style={styles.container}>
       {renderMode === 'image' && mood !== 'sleeping' ? (
-        <View style={[styles.imageWrapper, { width: size, height: size, borderRadius: size / 2 }]}>
+        <View style={[styles.imageWrapper, { width: size, height: size, borderRadius: size / 2, overflow: 'hidden' }]}>
           <Image 
             source={MASCOT_IMAGE} 
             style={{ width: size, height: size, borderRadius: size / 2 }} 
-            resizeMode="cover"
+            resizeMode="contain"
           />
         </View>
       ) : (
@@ -107,15 +107,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   imageWrapper: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 9999,
     overflow: 'hidden',
     backgroundColor: '#FFFFFF',
-    borderWidth: 2,
-    borderColor: '#D4EBE3',
-    shadowColor: 'rgba(0, 0, 0, 0.08)',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.12,
-    shadowRadius: 6,
-    elevation: 2,
   },
   speechBubble: {
     backgroundColor: '#FFFFFF',

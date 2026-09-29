@@ -20,6 +20,7 @@ interface ButtonProps {
   style?: StyleProp<ViewStyle>;
   textStyle?: StyleProp<TextStyle>;
   disabled?: boolean;
+  containerStyle?: StyleProp<ViewStyle>;
 }
 
 import { ScalePressable } from './ScalePressable';
@@ -32,6 +33,7 @@ export const Button = ({
   style,
   textStyle,
   disabled = false,
+  containerStyle,
 }: ButtonProps) => {
   const isButtonDisabled = disabled || loading || variant === 'disabled';
 
@@ -68,7 +70,7 @@ export const Button = ({
       onPress={onPress}
       disabled={isButtonDisabled}
       scaleTo={0.97}
-      containerStyle={{ width: '100%' }}
+      containerStyle={[{ width: '100%' }, containerStyle]}
       style={[styles.button, getButtonStyle(), style]}
     >
       {loading ? (

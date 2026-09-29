@@ -50,7 +50,7 @@ export const ManageReportsScreen = () => {
             id: r.id || r._id,
             productId: r.productId?.id || r.productId?._id || r.productId || 'prod_1',
             productName: r.productId?.name || 'Món đồ báo cáo',
-            reportedBy: r.reporterId?.name || 'Mẹ Bỉm',
+            reportedBy: r.reporterName || r.reporterId?.name || 'Thành viên Kindr',
             reason: r.reason || 'Vi phạm chính sách cộng đồng',
             createdAt: r.createdAt || new Date().toISOString(),
           }));

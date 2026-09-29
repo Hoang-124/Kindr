@@ -18,9 +18,9 @@ export const PRICING_MATRIX: Record<string, Record<string, number>> = {
   book: { '90': 2, '80': 1, '70': 1, 'new': 2, 'like_new': 2, 'good': 1, 'fair': 1 },
   sach_truyen: { '90': 2, '80': 1, '70': 1, 'new': 2, 'like_new': 2, 'good': 1, 'fair': 1 },
 
-  // Đồ chơi nhỏ (Búp bê, xe mô hình, flashcard): 70% (2 Xu), 80% (3 Xu), 90% (4 Xu)
-  toy_small: { '90': 4, '80': 3, '70': 2, 'new': 4, 'like_new': 3, 'good': 2, 'fair': 2 },
-  do_choi: { '90': 4, '80': 3, '70': 2, 'new': 4, 'like_new': 3, 'good': 2, 'fair': 2 },
+  // Đồ chơi nhỏ (Búp bê, xe mô hình, flashcard): Chuẩn 2 Xu (20.000 VNĐ) cố định để chống chênh lệch giá
+  toy_small: { '90': 2, '80': 2, '70': 2, 'new': 2, 'like_new': 2, 'good': 2, 'fair': 2 },
+  do_choi: { '90': 2, '80': 2, '70': 2, 'new': 2, 'like_new': 2, 'good': 2, 'fair': 2 },
 
   // Đồ chơi lớn (Lego, xe chòi chân, bảng vẽ): 70% (5 Xu), 80% (8 Xu), 90% (10 Xu)
   toy_large: { '90': 10, '80': 8, '70': 5, 'new': 10, 'like_new': 8, 'good': 5, 'fair': 5 },
@@ -110,4 +110,42 @@ export function getSmartPricingNudge(category: CategoryType, condition: Conditio
     return 'Món đồ này sẽ được đăng tại Trạm Tặng Đồ với 0 Xu dành tặng các bé có hoàn cảnh khó khăn.';
   }
   return `Mẹo từ Kindr: Các mẹ khác thường sẵn sàng đổi món đồ này với giá ${suggested} Xu (~${(suggested * 10).toLocaleString('vi-VN')}k). Đặt giá này giúp mẹ tăng 85% cơ hội đổi đồ thành công trong vòng 24 giờ!`;
+}
+
+/**
+ * Cấu trúc biên độ giá cho phép (Price Anchoring Bounds)
+ * Nhằm triệt tiêu tình trạng "ngáo giá" trên sàn
+ */
+export interface PriceBounds {
+  min: number;
+  max: number;
+  suggested: number;
+}
+
+/**
+ * Lấy khung biên độ giá cho phép theo Danh mục và Độ mới
+ */
+export function getPriceBounds(category: CategoryType, condition: ConditionType): PriceBounds {
+  if (category === 'charity' || category === 'tu_thien') {
+    return { min: 0, max: 0, suggested: 0 };
+  }
+  const suggested = getSuggestedXu(category, condition);
+  let spread = 1;
+  if (category === 'xe_noi') {
+    spread = 6;
+  } else if (category === 'toy_large') {
+    spread = 3;
+  } else if (category === 'toy_small' || category === 'do_choi') {
+    spread = 0; // Cố định 2 Xu, triệt tiêu hoàn toàn khoảng chênh lệch giá 2 - 6 Xu
+  } else if (category === 'quan_ao' || category === 'do_hoc_tap') {
+    spread = 1; // Giảm biên độ xuống ±1 để tránh chênh lệch giá lớn
+  } else {
+    spread = 1;
+  }
+
+  return {
+    min: Math.max(1, suggested - spread),
+    max: suggested + spread,
+    suggested,
+  };
 }

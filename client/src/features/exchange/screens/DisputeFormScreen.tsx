@@ -1,5 +1,5 @@
 // src/features/exchange/screens/DisputeFormScreen.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   View, 
   Text, 
@@ -7,14 +7,17 @@ import {
   ScrollView, 
   TouchableOpacity, 
   Alert,
-  Image
+  Image,
+  ActivityIndicator
 } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { useAppSelector, useAppDispatch } from '../../../app/store/hooks';
-import { fileDispute, fileDisputeAsync } from '../store/exchangeSlice';
+import { fileDispute, fileDisputeAsync, fetchMyTransactionsAsync, upsertTransaction } from '../store/exchangeSlice';
+import * as transactionService from '../../../services/transactionService';
 import { COLORS, TYPOGRAPHY, SPACING, RADIUS, SHADOWS } from '../../../theme';
 import { ShieldAlert, AlertTriangle, Camera, Check, X } from 'lucide-react-native';
 import * as ImagePicker from 'expo-image-picker';
+import ImagePickerModal from '../../../components/common/ImagePickerModal';
 import ScreenContainer from '../../../components/layout/ScreenContainer';
 import Header from '../../../components/layout/Header';
 import Input from '../../../components/common/Input';
@@ -34,12 +37,43 @@ export const DisputeFormScreen = () => {
 
   const { transactionId } = route.params || {};
   const transactions = useAppSelector((state) => state.exchange.transactions);
-  const tx = transactions.find(t => t.id === transactionId);
+  const storeTx = transactions.find(t => t.id === transactionId || (t as any)._id === transactionId);
+  const [localTx, setLocalTx] = useState<any>(null);
+  const [fetching, setFetching] = useState(!storeTx);
+
+  const tx = storeTx || localTx;
+
+  useEffect(() => {
+    if (!storeTx && transactionId) {
+      setFetching(true);
+      transactionService.getTransactionById(transactionId)
+        .then((data) => {
+          if (data) {
+            setLocalTx(data);
+            dispatch(upsertTransaction(data));
+          }
+        })
+        .catch((e) => console.warn('DisputeForm loadTx error:', e))
+        .finally(() => setFetching(false));
+    }
+  }, [transactionId, storeTx, dispatch]);
 
   const [selectedReason, setSelectedReason] = useState(REASONS[0]);
   const [details, setDetails] = useState('');
   const [evidenceImages, setEvidenceImages] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
+
+  if (fetching && !tx) {
+    return (
+      <ScreenContainer scrollable={false}>
+        <Header title="Tải thông tin đơn hàng" showBack />
+        <View style={styles.errorContainer}>
+          <ActivityIndicator size="large" color={COLORS.primary} />
+          <Text style={[styles.errorText, { marginTop: 12 }]}>Đang kết nối đơn bảo chứng...</Text>
+        </View>
+      </ScreenContainer>
+    );
+  }
 
   if (!tx) {
     return (
@@ -52,57 +86,56 @@ export const DisputeFormScreen = () => {
     );
   }
 
+  const [isEvidencePickerVisible, setIsEvidencePickerVisible] = useState(false);
+
   const handleAddPhoto = () => {
     if (evidenceImages.length >= 3) {
       Alert.alert('Giới hạn', 'Mẹ chỉ có thể đăng tối đa 3 ảnh bằng chứng.');
       return;
     }
+    setIsEvidencePickerVisible(true);
+  };
 
-    Alert.alert(
-      'Chụp ảnh bằng chứng lỗi',
-      'Mẹ muốn chụp ảnh vết lỗi trực tiếp hay chọn từ thư viện ảnh?',
-      [
-        { text: 'Hủy', style: 'cancel' },
-        {
-          text: 'Chụp ảnh mới',
-          onPress: async () => {
-            const { status } = await ImagePicker.requestCameraPermissionsAsync();
-            if (status !== 'granted') {
-              Alert.alert('Quyền truy cập', 'Kindr cần quyền truy cập camera để chụp bằng chứng.');
-              return;
-            }
-            const result = await ImagePicker.launchCameraAsync({
-              mediaTypes: ['images'],
-              allowsEditing: true,
-              aspect: [4, 3],
-              quality: 0.8,
-            });
-            if (!result.canceled && result.assets && result.assets.length > 0) {
-              setEvidenceImages(prev => [...prev, result.assets[0].uri]);
-            }
-          },
-        },
-        {
-          text: 'Chọn từ thư viện',
-          onPress: async () => {
-            const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-            if (status !== 'granted') {
-              Alert.alert('Quyền truy cập', 'Kindr cần quyền truy cập thư viện ảnh để chọn bằng chứng.');
-              return;
-            }
-            const result = await ImagePicker.launchImageLibraryAsync({
-              mediaTypes: ['images'],
-              allowsEditing: true,
-              aspect: [4, 3],
-              quality: 0.8,
-            });
-            if (!result.canceled && result.assets && result.assets.length > 0) {
-              setEvidenceImages(prev => [...prev, result.assets[0].uri]);
-            }
-          },
-        },
-      ]
-    );
+  const executeCameraPick = async () => {
+    try {
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Quyền truy cập', 'Kindr cần quyền truy cập camera để chụp bằng chứng.');
+        return;
+      }
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ['images'],
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 0.8,
+      });
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        setEvidenceImages(prev => [...prev, result.assets[0].uri]);
+      }
+    } catch (e) {
+      console.warn('Camera pick error:', e);
+    }
+  };
+
+  const executeLibraryPick = async () => {
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Quyền truy cập', 'Kindr cần quyền truy cập thư viện ảnh để chọn bằng chứng.');
+        return;
+      }
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 0.8,
+      });
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        setEvidenceImages(prev => [...prev, result.assets[0].uri]);
+      }
+    } catch (e) {
+      console.warn('Library pick error:', e);
+    }
   };
 
   const handleSubmitDispute = async () => {
@@ -114,28 +147,27 @@ export const DisputeFormScreen = () => {
     setLoading(true);
 
     const fullReason = `${selectedReason}\nChi tiết: ${details}`;
+    const txId = tx.id || tx._id;
 
     try {
       await dispatch(fileDisputeAsync({
-        transactionId: tx.id,
+        transactionId: txId,
         reason: fullReason,
         evidenceImages: evidenceImages,
       })).unwrap();
-    } catch (e) {
-      dispatch(fileDispute({
-        transactionId: tx.id,
-        reason: fullReason,
-        evidenceImages: evidenceImages,
-      }));
+
+      dispatch(fetchMyTransactionsAsync());
+      setLoading(false);
+
+      Alert.alert(
+        'Đã gửi khiếu nại thành công 🎉',
+        'Hệ thống đã ghi nhận khiếu nại bảo chứng của mẹ và chuyển giao dịch sang trạng thái Tranh chấp. Số Xu giao dịch vẫn đang được bảo vệ an toàn trong rương Escrow.\n\nBan quản trị Kindr sẽ làm trọng tài kiểm tra bằng chứng và phân xử trong vòng 24h.',
+        [{ text: 'Đồng ý', onPress: () => navigation.navigate('Main' as any) }]
+      );
+    } catch (err: any) {
+      setLoading(false);
+      Alert.alert('Không thể gửi khiếu nại', err || 'Có lỗi xảy ra khi kết nối máy chủ.');
     }
-
-    setLoading(false);
-
-    Alert.alert(
-      'Đã gửi khiếu nại thành công',
-      'Hệ thống đã ghi nhận khiếu nại bảo chứng của mẹ. Số xu giao dịch vẫn sẽ được tạm khóa an toàn.\n\nBan quản trị Kindr sẽ làm trọng tài kiểm tra bằng chứng và liên hệ phân xử trong vòng 24h.',
-      [{ text: 'Đồng ý', onPress: () => navigation.navigate('Main' as any) }]
-    );
   };
 
   return (
@@ -189,7 +221,8 @@ export const DisputeFormScreen = () => {
           onChangeText={setDetails}
           multiline
           numberOfLines={4}
-          style={styles.detailsInput}
+          inputContainerStyle={styles.detailsInputContainer}
+          inputStyle={styles.detailsInput}
           icon={<AlertTriangle size={20} color={COLORS.outline} />}
         />
 
@@ -231,6 +264,15 @@ export const DisputeFormScreen = () => {
           style={styles.submitBtn}
         />
       </ScrollView>
+
+      <ImagePickerModal
+        visible={isEvidencePickerVisible}
+        onClose={() => setIsEvidencePickerVisible(false)}
+        onSelectCamera={executeCameraPick}
+        onSelectLibrary={executeLibraryPick}
+        title="Chụp ảnh bằng chứng lỗi"
+        subtitle="Chụp rõ nhãn mác, vết xước hoặc chi tiết lỗi để ban quản trị đối soát công tâm."
+      />
     </ScreenContainer>
   );
 };
@@ -325,10 +367,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  detailsInputContainer: {
+    minHeight: 110,
+    alignItems: 'flex-start',
+    paddingVertical: SPACING.sm,
+  },
   detailsInput: {
-    height: 90,
+    minHeight: 85,
     textAlignVertical: 'top',
-    paddingTop: SPACING.sm,
   },
   photoUploadRow: {
     flexDirection: 'row',

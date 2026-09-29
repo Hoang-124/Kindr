@@ -23,7 +23,7 @@ export const KindrLogo: React.FC<KindrLogoProps> = ({
 
   return (
     <View style={[styles.container, isHorizontal && styles.containerHorizontal, style]}>
-      <View style={[styles.logoWrapper, { width: size, height: size, borderRadius: size / 2 }]}>
+      <View style={[styles.logoWrapper, { width: size, height: size, borderRadius: size / 2, overflow: 'hidden' }]}>
         <Image 
           source={LOGO_IMAGE} 
           style={{ width: size, height: size, borderRadius: size / 2 }} 
@@ -58,13 +58,14 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   logoWrapper: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 9999,
     overflow: 'hidden',
     backgroundColor: '#FFFFFF',
-    borderWidth: 2.5,
-    borderColor: '#D4EBE3',
-    shadowColor: 'rgba(0, 0, 0, 0.08)',
+    shadowColor: 'rgba(120, 194, 173, 0.35)',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
+    shadowOpacity: 0.25,
     shadowRadius: 8,
     elevation: 3,
   },

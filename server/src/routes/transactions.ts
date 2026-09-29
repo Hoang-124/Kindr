@@ -4,7 +4,9 @@
 // ========================================
 import { Router, Response } from 'express';
 import { z } from 'zod';
+import mongoose from 'mongoose';
 import { Transaction } from '../models/Transaction';
+import { User } from '../models/User';
 import { requireAuth, AuthRequest } from '../middleware/auth';
 import { validateObjectId } from '../middleware/validateObjectId';
 import * as escrowService from '../services/escrowService';
@@ -18,7 +20,7 @@ const CreateTransactionSchema = z.object({
 });
 
 const DisputeSchema = z.object({
-  reason: z.string().min(5, 'Lý do khiếu nại phải từ 5 ký tự trở lên'),
+  reason: z.string().min(2, 'Lý do khiếu nại phải từ 2 ký tự trở lên'),
   evidenceImages: z.array(z.string()).optional(),
 });
 
@@ -58,11 +60,19 @@ router.post('/', requireAuth, async (req: AuthRequest, res: Response): Promise<v
  */
 router.get('/my', requireAuth, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const transactions = await Transaction.find({
+    const rawTxs = await Transaction.find({
       $or: [{ buyerId: req.userId }, { sellerId: req.userId }],
     })
       .sort({ createdAt: -1 })
       .lean();
+
+    const transactions = rawTxs.map((t: any) => ({
+      ...t,
+      id: t._id?.toString() || t.id,
+      productId: t.productId?._id?.toString() || t.productId?.toString() || t.productId,
+      buyerId: t.buyerId?._id?.toString() || t.buyerId?.toString() || t.buyerId,
+      sellerId: t.sellerId?._id?.toString() || t.sellerId?.toString() || t.sellerId,
+    }));
 
     res.json({ transactions });
   } catch (error) {
@@ -74,18 +84,44 @@ router.get('/my', requireAuth, async (req: AuthRequest, res: Response): Promise<
 /**
  * GET /api/transactions/:id
  * Get single transaction details (unmasks contact info for participants)
+ * Supports lookup by Transaction ID or Product ID
  */
-router.get('/:id', validateObjectId('id'), requireAuth, async (req: AuthRequest, res: Response): Promise<void> => {
+router.get('/:id', requireAuth, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const transaction = await Transaction.findById(req.params.id).lean();
+    const id = (Array.isArray(req.params.id) ? req.params.id[0] : req.params.id) as string;
+    if (!id) {
+      res.status(400).json({ error: 'Thiếu mã giao dịch.' });
+      return;
+    }
+    let transaction: any = null;
+
+    if (mongoose.Types.ObjectId.isValid(id)) {
+      transaction = await Transaction.findById(id).lean();
+      if (!transaction) {
+        // Also check if id is a productId for active user
+        transaction = await Transaction.findOne({
+          productId: id,
+          $or: [{ buyerId: req.userId }, { sellerId: req.userId }],
+        }).sort({ createdAt: -1 }).lean();
+      }
+    } else {
+      transaction = await Transaction.findOne({
+        $or: [
+          { _id: id as any },
+          { productId: id as any },
+          { handoverCode: id.toUpperCase() },
+        ],
+      }).lean().catch(() => null);
+    }
+
     if (!transaction) {
       res.status(404).json({ error: 'Không tìm thấy giao dịch.' });
       return;
     }
 
     const isParticipant =
-      transaction.buyerId.toString() === req.userId ||
-      transaction.sellerId.toString() === req.userId ||
+      transaction.buyerId?.toString() === req.userId ||
+      transaction.sellerId?.toString() === req.userId ||
       req.userRole === 'admin';
 
     if (!isParticipant) {
@@ -93,7 +129,25 @@ router.get('/:id', validateObjectId('id'), requireAuth, async (req: AuthRequest,
       return;
     }
 
-    res.json({ transaction });
+    // Enrich contact details from User model if missing
+    const buyer = await User.findById(transaction.buyerId).select('name phone avatar').lean();
+    const seller = await User.findById(transaction.sellerId).select('name phone avatar').lean();
+
+    const formattedTx = {
+      ...transaction,
+      id: transaction._id?.toString() || transaction.id,
+      productId: transaction.productId?._id?.toString() || transaction.productId?.toString() || transaction.productId,
+      buyerId: transaction.buyerId?._id?.toString() || transaction.buyerId?.toString() || transaction.buyerId,
+      sellerId: transaction.sellerId?._id?.toString() || transaction.sellerId?.toString() || transaction.sellerId,
+      buyerName: transaction.buyerName || buyer?.name || 'Thành viên Kindr',
+      buyerPhone: transaction.buyerPhone || buyer?.phone || '',
+      buyerZalo: transaction.buyerZalo || transaction.buyerPhone || buyer?.phone || '',
+      sellerName: transaction.sellerName || seller?.name || 'Thành viên Kindr',
+      sellerPhone: transaction.sellerPhone || seller?.phone || '',
+      sellerZalo: transaction.sellerZalo || transaction.sellerPhone || seller?.phone || '',
+    };
+
+    res.json({ transaction: formattedTx });
   } catch (error) {
     console.error('Get transaction detail error:', error);
     res.status(500).json({ error: 'Lỗi hệ thống.' });

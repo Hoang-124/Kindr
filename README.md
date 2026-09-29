@@ -24,8 +24,9 @@
 
 ## 📖 Mục Lục
 1. [Bối Cảnh & Tầm Nhìn Dự Án](#-1-bối-cảnh--tầm-nhìn-dự-án)
-2. [Cơ Chế Cốt Lõi & Tính Năng Nổi Bật](#-2-cơ-chế-cốt-lõi--tính-năng-nổi-bật)
-3. [Luồng Nghiệp Vụ Double Escrow](#-3-luồng-nghiệp-vụ-double-escrow)
+2. [Lộ Trình Phát Triển Sản Phẩm (Product Roadmap 2026–2028)](PRODUCT_ROADMAP.md)
+3. [Cơ Chế Cốt Lõi & Tính Năng Nổi Bật](#-2-cơ-chế-cốt-lõi--tính-năng-nổi-bật)
+4. [Luồng Nghiệp Vụ Double Escrow](#-3-luồng-nghiệp-vụ-double-escrow)
 4. [Công Nghệ Chính (Tech Stack)](#-4-công-nghệ-chính-tech-stack)
 5. [Cấu Trúc Thư Mục (Monorepo Architecture)](#-5-cấu-trúc-thư-mục-monorepo-architecture)
 6. [Hướng Dẫn Cài Đặt & Khởi Chạy](#-6-hướng-dẫn-cài-đặt--khởi-chạy)

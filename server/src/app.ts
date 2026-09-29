@@ -14,6 +14,17 @@ async function startServer() {
   // 1. Connect to MongoDB
   await connectDB();
 
+  // Auto-activate any legacy pending_approval products to available
+  try {
+    const { Product } = await import('./models/Product');
+    const migrated = await Product.updateMany({ status: 'pending_approval' }, { status: 'available' });
+    if (migrated.modifiedCount > 0) {
+      console.log(`✅ Auto-approved ${migrated.modifiedCount} pending products to available feed.`);
+    }
+  } catch (err) {
+    console.warn('Migration pending_approval warning:', err);
+  }
+
   // 2. Start Background Cron Jobs
   initCronJobs();
 

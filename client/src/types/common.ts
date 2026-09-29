@@ -92,8 +92,11 @@ export interface Transaction {
 export interface Message {
   id: string;
   senderId: string;
+  senderName?: string;
+  senderAvatar?: string;
   content: string;
   timestamp: string;
+  tempId?: string;
 }
 
 export interface ChatSession {
@@ -103,8 +106,10 @@ export interface ChatSession {
   productImage: string;
   buyerId: string;
   buyerName: string;
+  buyerAvatar?: string;
   sellerId: string;
   sellerName: string;
+  sellerAvatar?: string;
   messages: Message[];
   unreadCount: number;
   lastMessageText: string;

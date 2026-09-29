@@ -19,6 +19,7 @@ import Header from '../../../components/layout/Header';
 import EmptyState from '../../../components/common/EmptyState';
 import { timeAgo } from '../../../utils/formatDate';
 import { MessageSquare } from 'lucide-react-native';
+import { Avatar } from '../../../components/common/Avatar';
 
 type NavigationProp = NativeStackNavigationProp<AppStackParamList>;
 
@@ -57,6 +58,7 @@ export const ChatListScreen = () => {
         renderItem={({ item }) => {
           const isSellerOfChat = item.sellerId === currentUser?.id;
           const otherPartyName = isSellerOfChat ? item.buyerName : item.sellerName;
+          const otherPartyAvatar = isSellerOfChat ? item.buyerAvatar : item.sellerAvatar;
           
           return (
             <TouchableOpacity
@@ -64,7 +66,18 @@ export const ChatListScreen = () => {
               onPress={() => navigation.navigate('ChatDetail', { chatId: item.id })}
               activeOpacity={0.9}
             >
-              <Image source={{ uri: item.productImage }} style={styles.prodImg} />
+              <View style={styles.cardAvatarCol}>
+                <Avatar 
+                  uri={otherPartyAvatar} 
+                  name={otherPartyName} 
+                  size={48} 
+                  showBorder 
+                  borderColor={COLORS.surfaceVariant}
+                />
+                {item.productImage ? (
+                  <Image source={{ uri: item.productImage }} style={styles.prodThumbBadge} />
+                ) : null}
+              </View>
               
               <View style={styles.chatInfo}>
                 <View style={styles.chatHeader}>
@@ -75,7 +88,9 @@ export const ChatListScreen = () => {
                 <Text style={styles.prodName} numberOfLines={1}>Đồ dùng: {item.productName}</Text>
                 
                 <View style={styles.chatFooter}>
-                  <Text style={styles.lastMessage} numberOfLines={1}>{item.lastMessageText}</Text>
+                  <Text style={[styles.lastMessage, item.unreadCount > 0 && styles.lastMessageUnread]} numberOfLines={1}>
+                    {item.lastMessageText}
+                  </Text>
                   {item.unreadCount > 0 && (
                     <View style={styles.unreadBadge}>
                       <Text style={styles.unreadText}>{item.unreadCount}</Text>
@@ -108,11 +123,27 @@ const styles = StyleSheet.create({
     ...SHADOWS.soft,
     gap: SPACING.md,
   },
-  prodImg: {
-    width: 60,
-    height: 60,
-    borderRadius: 12,
+  cardAvatarCol: {
+    position: 'relative',
+    width: 48,
+    height: 48,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  prodThumbBadge: {
+    position: 'absolute',
+    bottom: -2,
+    right: -2,
+    width: 20,
+    height: 20,
+    borderRadius: 6,
+    borderWidth: 1.5,
+    borderColor: '#FFFFFF',
     backgroundColor: COLORS.surfaceContainer,
+  },
+  lastMessageUnread: {
+    fontWeight: '700',
+    color: COLORS.onSurface,
   },
   chatInfo: {
     flex: 1,

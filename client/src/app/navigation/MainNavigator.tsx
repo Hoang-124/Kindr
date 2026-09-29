@@ -3,7 +3,8 @@ import React from 'react';
 import { View, Text, StyleSheet, Platform } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { MainTabParamList } from './navigationTypes';
-import { Home, Search, Plus, MessageCircle, User } from 'lucide-react-native';
+import { Home, Search, Plus, MessageCircle, User, Shield } from 'lucide-react-native';
+import { useAppSelector } from '../store/hooks';
 import { COLORS } from '../../theme';
 
 // Import Screens
@@ -12,10 +13,13 @@ import SearchScreen from '../../features/home/screens/SearchScreen';
 import PostItemScreen from '../../features/post/screens/PostItemScreen';
 import ChatListScreen from '../../features/chat/screens/ChatListScreen';
 import ProfileScreen from '../../features/profile/screens/ProfileScreen';
+import ChatTabBadgeIcon from '../../features/chat/components/ChatTabBadgeIcon';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
 export const MainNavigator = () => {
+  const currentUser = useAppSelector((state) => state.auth.currentUser);
+  const isAdmin = currentUser?.role === 'admin';
   return (
     <Tab.Navigator
       screenOptions={{
@@ -34,6 +38,7 @@ export const MainNavigator = () => {
           shadowOffset: { width: 0, height: -4 },
           shadowOpacity: 0.06,
           shadowRadius: 12,
+          overflow: 'visible',
         },
         tabBarLabelStyle: {
           fontSize: 11,
@@ -75,17 +80,28 @@ export const MainNavigator = () => {
       <Tab.Screen
         name="ChatList"
         component={ChatListScreen}
-        options={{
+        options={({ navigation }) => ({
           tabBarLabel: 'Tin nhắn',
-          tabBarIcon: ({ color }) => <MessageCircle size={22} color={color} strokeWidth={2.2} />,
-        }}
+          tabBarIcon: ({ color, focused }) => (
+            <ChatTabBadgeIcon 
+              color={color} 
+              size={22} 
+              focused={focused} 
+              onPressTooltip={() => navigation.navigate('ChatList')}
+            />
+          ),
+        })}
       />
       <Tab.Screen
         name="Profile"
         component={ProfileScreen}
         options={{
-          tabBarLabel: 'Cá nhân',
-          tabBarIcon: ({ color }) => <User size={22} color={color} strokeWidth={2.2} />,
+          tabBarLabel: isAdmin ? 'Quản trị' : 'Cá nhân',
+          tabBarIcon: ({ color }) => isAdmin ? (
+            <Shield size={22} color={color} strokeWidth={2.2} />
+          ) : (
+            <User size={22} color={color} strokeWidth={2.2} />
+          ),
         }}
       />
     </Tab.Navigator>

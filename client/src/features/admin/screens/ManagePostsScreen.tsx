@@ -12,16 +12,28 @@ import { useAppSelector, useAppDispatch } from '../../../app/store/hooks';
 import { hydrateProducts } from '../../home/store/homeSlice';
 import { api } from '../../../services/api';
 import { COLORS, SPACING, RADIUS, TYPOGRAPHY, SHADOWS } from '../../../theme';
-import { Check, X, ShieldAlert, AlertTriangle, MapPin } from 'lucide-react-native';
+import { Check, X, ShieldAlert, AlertTriangle, MapPin, ChevronRight, Eye } from 'lucide-react-native';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { AppStackParamList } from '../../../app/navigation/navigationTypes';
 import ScreenContainer from '../../../components/layout/ScreenContainer';
 import Header from '../../../components/layout/Header';
 
+import { DEFAULT_IMAGES } from '../../../utils/constants';
+
+const KINDR_LOGO = require('../../../../assets/images/kindr-logo.png');
+
+type NavigationProp = NativeStackNavigationProp<AppStackParamList>;
+
 export const ManagePostsScreen = () => {
+  const navigation = useNavigation<NavigationProp>();
   const dispatch = useAppDispatch();
   const products = useAppSelector((state) => state.home.products);
   const [apiPosts, setApiPosts] = useState<any[] | null>(null);
 
-  useEffect(() => {
+  const [statusFilter, setStatusFilter] = useState<'pending' | 'available' | 'all'>('pending');
+
+  const fetchAdminProducts = () => {
     api.get('/admin/products')
       .then(res => {
         const list = res.data.products || res.data;
@@ -35,24 +47,63 @@ export const ManagePostsScreen = () => {
             category: p.category,
             image: p.image || p.images?.[0] || 'https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?w=400',
             description: p.description,
-            sellerId: p.sellerId?.id || p.sellerId,
-            sellerName: p.sellerId?.name || 'Mẹ Bỉm',
-            sellerAvatar: p.sellerId?.avatar || 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150',
+            sellerId: p.sellerId?._id || p.sellerId?.id || p.sellerId,
+            sellerName: p.sellerName || p.sellerId?.name || 'Thành viên Kindr',
+            sellerAvatar: p.sellerAvatar || p.sellerId?.avatar || '',
             locationName: p.locationName || 'Đà Nẵng',
             timeAgo: 'Vừa xong',
-            status: p.status,
+            status: p.status || 'available',
           }));
           setApiPosts(mapped);
         }
       })
       .catch(() => {});
+  };
+
+  useEffect(() => {
+    fetchAdminProducts();
   }, []);
 
-  const displayProducts = apiPosts !== null ? apiPosts : products;
+  const allItems = apiPosts !== null ? apiPosts : products;
+  const pendingCount = allItems.filter(p => p.status === 'pending_approval').length;
+  const availableCount = allItems.filter(p => p.status === 'available').length;
 
-  const handleApprove = async (name: string) => {
+  // Auto-switch to 'all' if no pending items exist to avoid blank initial screen
+  useEffect(() => {
+    if (pendingCount === 0 && availableCount > 0 && statusFilter === 'pending') {
+      setStatusFilter('all');
+    }
+  }, [pendingCount, availableCount]);
+
+  const displayProducts = allItems.filter(p => {
+    if (statusFilter === 'pending') return p.status === 'pending_approval';
+    if (statusFilter === 'available') return p.status === 'available';
+    return p.status !== 'removed';
+  });
+
+  const handleViewDetail = (productId: string) => {
+    try {
+      navigation.navigate('ProductDetail', { id: productId });
+    } catch {
+      (navigation as any).getParent()?.navigate('ProductDetail', { id: productId });
+    }
+  };
+
+  const handleApprove = async (productId: string, name: string) => {
     Alert.alert('Duyệt tin đăng', `Xác nhận duyệt tin đăng "${name}" hiển thị trên trang chủ?`, [
-      { text: 'Đồng ý', onPress: () => Alert.alert('Thành công', 'Tin đăng đã được duyệt hoạt động.') }
+      { text: 'Hủy', style: 'cancel' },
+      { 
+        text: 'Duyệt bài', 
+        onPress: async () => {
+          try {
+            await api.put(`/admin/products/${productId}/approve`);
+            setApiPosts(prev => prev ? prev.map(p => p.id === productId ? { ...p, status: 'available' } : p) : null);
+            Alert.alert('Thành công', 'Tin đăng đã được duyệt hoạt động trên sàn.');
+          } catch (e: any) {
+            Alert.alert('Lỗi', e?.response?.data?.error || 'Không thể duyệt tin đăng.');
+          }
+        }
+      }
     ]);
   };
 
@@ -82,6 +133,41 @@ export const ManagePostsScreen = () => {
   return (
     <ScreenContainer scrollable={false}>
       <Header title="Quản Lý Tin Đăng" showBack />
+
+      {/* Filter Tabs */}
+      <View style={styles.tabBar}>
+        <TouchableOpacity
+          style={[styles.tabItem, statusFilter === 'pending' && styles.tabItemActive]}
+          onPress={() => setStatusFilter('pending')}
+        >
+          <Text style={[styles.tabItemText, statusFilter === 'pending' && styles.tabItemTextActive]}>
+            Chờ duyệt
+          </Text>
+          {pendingCount > 0 && (
+            <View style={styles.badgeCount}>
+              <Text style={styles.badgeCountText}>{pendingCount}</Text>
+            </View>
+          )}
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.tabItem, statusFilter === 'available' && styles.tabItemActive]}
+          onPress={() => setStatusFilter('available')}
+        >
+          <Text style={[styles.tabItemText, statusFilter === 'available' && styles.tabItemTextActive]}>
+            Đang hiển thị ({availableCount})
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.tabItem, statusFilter === 'all' && styles.tabItemActive]}
+          onPress={() => setStatusFilter('all')}
+        >
+          <Text style={[styles.tabItemText, statusFilter === 'all' && styles.tabItemTextActive]}>
+            Tất cả ({allItems.length})
+          </Text>
+        </TouchableOpacity>
+      </View>
       
       <FlatList
         data={displayProducts}
@@ -90,63 +176,140 @@ export const ManagePostsScreen = () => {
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <AlertTriangle size={48} color={COLORS.outline} />
-            <Text style={styles.emptyText}>Không có tin đăng nào trong hệ thống.</Text>
+            <Text style={styles.emptyText}>
+              {statusFilter === 'pending' 
+                ? 'Không có tin đăng nào đang chờ duyệt.' 
+                : 'Không có tin đăng nào trong hệ thống.'}
+            </Text>
           </View>
         }
-        renderItem={({ item }) => (
-          <View style={styles.postCard}>
-            <View style={styles.cardHeader}>
-              <Image source={{ uri: item.sellerAvatar }} style={styles.sellerAvatar} />
-              <View style={styles.sellerInfo}>
-                <Text style={styles.sellerName}>{item.sellerName}</Text>
-                <Text style={styles.timeAgo}>{item.timeAgo}</Text>
-              </View>
-              <View style={styles.priceBadge}>
-                <Text style={styles.priceText}>{item.price === 0 ? 'Tặng 0 Xu' : `${item.price} Xu`}</Text>
-              </View>
-            </View>
+        renderItem={({ item }) => {
+          const isPending = item.status === 'pending_approval';
 
-            <View style={styles.cardBody}>
-              <Image source={{ uri: item.image }} style={styles.postImg} />
-              <View style={styles.postDetails}>
-                <Text style={styles.postTitle} numberOfLines={1}>{item.name}</Text>
-                <Text style={styles.postDesc} numberOfLines={2}>{item.description}</Text>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3, marginTop: 4 }}>
-                  <MapPin size={11} color={COLORS.outline} />
-                  <Text style={styles.postLocation}>{item.locationName}</Text>
+          return (
+            <View style={styles.postCard}>
+              <TouchableOpacity 
+                activeOpacity={0.7}
+                onPress={() => handleViewDetail(item.id)}
+              >
+                <View style={styles.cardHeader}>
+                  {item.sellerAvatar ? (
+                    <Image source={{ uri: item.sellerAvatar }} style={styles.sellerAvatar} />
+                  ) : (
+                    <Image source={KINDR_LOGO} style={styles.sellerAvatar} resizeMode="contain" />
+                  )}
+                  <View style={styles.sellerInfo}>
+                    <Text style={styles.sellerName}>{item.sellerName}</Text>
+                    <Text style={styles.timeAgo}>{item.timeAgo}</Text>
+                  </View>
+
+                  <View style={styles.headerRight}>
+                    <View style={styles.priceBadge}>
+                      <Text style={styles.priceText}>{item.price === 0 ? 'Tặng 0 Xu' : `${item.price} Xu`}</Text>
+                    </View>
+                    <View style={[styles.statusTag, isPending ? styles.statusTagPending : styles.statusTagAvailable]}>
+                      <Text style={[styles.statusTagText, isPending ? styles.statusTagTextPending : styles.statusTagTextAvailable]}>
+                        {isPending ? 'Chờ duyệt' : 'Đang hiển thị'}
+                      </Text>
+                    </View>
+                  </View>
                 </View>
+
+                <View style={styles.cardBody}>
+                  <Image source={{ uri: item.image || DEFAULT_IMAGES.PRODUCT_FALLBACK }} style={styles.postImg} />
+                  <View style={styles.postDetails}>
+                    <Text style={styles.postTitle} numberOfLines={1}>{item.name}</Text>
+                    <Text style={styles.postDesc} numberOfLines={2}>{item.description}</Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3, marginTop: 4 }}>
+                      <MapPin size={11} color={COLORS.outline} />
+                      <Text style={styles.postLocation}>{item.locationName}</Text>
+                    </View>
+                    <View style={styles.viewDetailHintRow}>
+                      <Eye size={12} color={COLORS.primary} />
+                      <Text style={styles.viewDetailHintText}>Xem chi tiết bài đăng →</Text>
+                    </View>
+                  </View>
+                </View>
+              </TouchableOpacity>
+
+              <View style={styles.divider} />
+
+              <View style={styles.cardActions}>
+                {isPending ? (
+                  <TouchableOpacity 
+                    style={[styles.actionBtn, styles.approveBtn]}
+                    onPress={() => handleApprove(item.id, item.name)}
+                    activeOpacity={0.8}
+                  >
+                    <Check size={15} color="#ffffff" />
+                    <Text style={styles.btnTextApprove}>Duyệt bài đăng</Text>
+                  </TouchableOpacity>
+                ) : (
+                  <View style={styles.approvedIndicator}>
+                    <Check size={14} color="#10b981" strokeWidth={2.5} />
+                    <Text style={styles.approvedText}>Đã duyệt hoạt động</Text>
+                  </View>
+                )}
+
+                <TouchableOpacity 
+                  style={[styles.actionBtn, styles.rejectBtn]}
+                  onPress={() => handleRemove(item.id, item.name)}
+                  activeOpacity={0.8}
+                >
+                  <X size={14} color={COLORS.error} />
+                  <Text style={styles.btnTextReject}>{isPending ? 'Từ chối' : 'Gỡ vi phạm'}</Text>
+                </TouchableOpacity>
               </View>
             </View>
-
-            <View style={styles.divider} />
-
-            <View style={styles.cardActions}>
-              <TouchableOpacity 
-                style={[styles.actionBtn, styles.approveBtn]}
-                onPress={() => handleApprove(item.name)}
-                activeOpacity={0.8}
-              >
-                <Check size={14} color="#ffffff" />
-                <Text style={styles.btnTextApprove}>Duyệt bài</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity 
-                style={[styles.actionBtn, styles.rejectBtn]}
-                onPress={() => handleRemove(item.id, item.name)}
-                activeOpacity={0.8}
-              >
-                <X size={14} color={COLORS.error} />
-                <Text style={styles.btnTextReject}>Gỡ vi phạm</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        )}
+          );
+        }}
       />
     </ScreenContainer>
   );
 };
 
 const styles = StyleSheet.create({
+  tabBar: {
+    flexDirection: 'row',
+    paddingHorizontal: SPACING.containerPadding,
+    paddingVertical: SPACING.sm,
+    backgroundColor: COLORS.surface,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(0,0,0,0.06)',
+    gap: 8,
+  },
+  tabItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: RADIUS.full,
+    backgroundColor: COLORS.surfaceDim,
+  },
+  tabItemActive: {
+    backgroundColor: COLORS.primary,
+  },
+  tabItemText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: COLORS.textMuted,
+  },
+  tabItemTextActive: {
+    color: '#FFFFFF',
+    fontWeight: '700',
+  },
+  badgeCount: {
+    backgroundColor: '#EF4444',
+    paddingHorizontal: 6,
+    paddingVertical: 1,
+    borderRadius: RADIUS.full,
+  },
+  badgeCountText: {
+    color: '#FFFFFF',
+    fontSize: 10,
+    fontWeight: '700',
+  },
   listContent: {
     paddingHorizontal: SPACING.containerPadding,
     paddingTop: SPACING.md,
@@ -160,12 +323,13 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: COLORS.outline,
     textAlign: 'center',
+    marginTop: SPACING.sm,
   },
   postCard: {
     backgroundColor: COLORS.surfaceContainerLowest,
     borderWidth: 1,
-    borderColor: COLORS.surfaceVariant,
-    borderRadius: 20,
+    borderColor: 'rgba(0,0,0,0.07)',
+    borderRadius: 16,
     padding: SPACING.md,
     marginBottom: SPACING.md,
     ...SHADOWS.soft,
@@ -194,16 +358,41 @@ const styles = StyleSheet.create({
     fontSize: 10,
     color: COLORS.outline,
   },
+  headerRight: {
+    alignItems: 'flex-end',
+    gap: 4,
+  },
   priceBadge: {
-    backgroundColor: COLORS.tertiaryContainer + '50',
+    backgroundColor: '#FFF8E1',
     paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8,
+    paddingVertical: 3,
+    borderRadius: RADIUS.full,
   },
   priceText: {
     fontSize: 11,
     fontWeight: '700',
-    color: COLORS.tertiary,
+    color: '#B45309',
+  },
+  statusTag: {
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: RADIUS.full,
+  },
+  statusTagPending: {
+    backgroundColor: '#FEF3C7',
+  },
+  statusTagAvailable: {
+    backgroundColor: '#ECFDF5',
+  },
+  statusTagText: {
+    fontSize: 10,
+    fontWeight: '700',
+  },
+  statusTagTextPending: {
+    color: '#D97706',
+  },
+  statusTagTextAvailable: {
+    color: '#059669',
   },
   cardBody: {
     flexDirection: 'row',
@@ -211,9 +400,9 @@ const styles = StyleSheet.create({
     marginVertical: SPACING.xs,
   },
   postImg: {
-    width: 60,
-    height: 60,
-    borderRadius: 8,
+    width: 64,
+    height: 64,
+    borderRadius: 10,
     backgroundColor: COLORS.surfaceContainer,
   },
   postDetails: {
@@ -226,51 +415,71 @@ const styles = StyleSheet.create({
     color: COLORS.onSurface,
   },
   postDesc: {
-    fontSize: 10,
-    color: COLORS.onSurfaceVariant,
-    lineHeight: 14,
+    fontSize: 12,
+    color: COLORS.textMuted,
+    lineHeight: 16,
     marginTop: 2,
   },
   postLocation: {
-    fontSize: 9,
+    fontSize: 11,
     color: COLORS.outline,
-    fontWeight: '600',
   },
   divider: {
     height: 1,
-    backgroundColor: COLORS.surfaceVariant,
-    marginVertical: SPACING.md,
+    backgroundColor: 'rgba(0,0,0,0.05)',
+    marginVertical: SPACING.sm,
   },
   cardActions: {
     flexDirection: 'row',
-    gap: SPACING.sm,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
   },
   actionBtn: {
-    flex: 1,
-    height: 34,
-    borderRadius: 10,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
     gap: 4,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: RADIUS.full,
   },
   approveBtn: {
-    backgroundColor: COLORS.primary,
+    backgroundColor: '#10B981',
   },
   btnTextApprove: {
-    fontSize: 11,
+    color: '#FFFFFF',
+    fontSize: 12,
     fontWeight: '700',
-    color: '#ffffff',
   },
   rejectBtn: {
-    borderWidth: 1.5,
-    borderColor: COLORS.error,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#FEE2E2',
   },
   btnTextReject: {
+    color: COLORS.error,
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  approvedIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+  },
+  approvedText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#10B981',
+  },
+  viewDetailHintRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginTop: 6,
+    paddingTop: 4,
+  },
+  viewDetailHintText: {
     fontSize: 11,
     fontWeight: '700',
-    color: COLORS.error,
+    color: COLORS.primary,
   },
 });
 
