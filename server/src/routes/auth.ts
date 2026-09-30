@@ -255,6 +255,59 @@ router.post('/login', async (req: AuthRequest, res: Response): Promise<void> => 
 });
 
 /**
+ * POST /api/auth/demo-login
+ * Instant 1-click login for Step 4 MVP visitors. Zero-friction onboarding.
+ */
+router.post('/demo-login', async (_req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    let demoUser = await User.findOne({ phone: '0905888888' });
+    if (!demoUser) {
+      const passwordHash = await bcrypt.hash('123456', 10);
+      demoUser = await User.create({
+        name: 'Mẹ Trải Nghiệm (Demo)',
+        phone: '0905888888',
+        email: 'demo@kindr.vn',
+        passwordHash,
+        avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150',
+        location: { districtId: 'dn_haichau', districtName: 'Quận Hải Châu', addressDetail: '123 Bạch Đằng' },
+        xuBalance: 100,
+        xuFrozen: 0,
+        welcomeCreditRemaining: 10,
+        civilizationPoints: 100,
+        tradesCount: 3,
+        reputationScore: 5.0,
+        ratingCount: 3,
+        role: 'user',
+        isActivated: true,
+      });
+    } else {
+      if (demoUser.xuBalance < 30) {
+        demoUser.xuBalance = 100;
+        demoUser.xuFrozen = 0;
+        await demoUser.save();
+      }
+    }
+
+    const accessToken = generateAccessToken(demoUser._id.toString(), demoUser.role);
+    const refreshToken = generateRefreshToken(demoUser._id.toString(), demoUser.role);
+
+    demoUser.refreshTokens = [...demoUser.refreshTokens.slice(-4), refreshToken];
+    await demoUser.save();
+
+    res.json({
+      message: 'Chào mừng mẹ đến với bản Demo trải nghiệm Kindr!',
+      user: demoUser.toJSON(),
+      accessToken,
+      refreshToken,
+      isDemo: true,
+    });
+  } catch (error) {
+    console.error('Demo login error:', error);
+    res.status(500).json({ error: 'Lỗi hệ thống khi đăng nhập demo.' });
+  }
+});
+
+/**
  * POST /api/auth/refresh
  * Refresh access token using refresh token.
  */

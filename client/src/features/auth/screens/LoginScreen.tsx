@@ -18,7 +18,7 @@ import Input from '../../../components/common/Input';
 import Button from '../../../components/common/Button';
 import FormError from '../../../components/form/FormError';
 import GoogleSignInButton from '../../../components/common/GoogleSignInButton';
-import { Mail, Lock, Phone } from 'lucide-react-native';
+import { Mail, Lock, Phone, Sparkles, ChevronRight } from 'lucide-react-native';
 
 const KINDR_LOGO = require('../../../../assets/images/kindr-logo.png');
 
@@ -26,7 +26,7 @@ type NavigationProp = NativeStackNavigationProp<AuthStackParamList, 'Login'>;
 
 export const LoginScreen = () => {
   const navigation = useNavigation<NavigationProp>();
-  const { loginWithCredentials, loginWithGoogle } = useAuth();
+  const { loginWithCredentials, loginWithGoogle, loginDemo } = useAuth();
   
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -91,6 +91,18 @@ export const LoginScreen = () => {
     }
   };
 
+  const handleDemoLogin = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      await loginDemo();
+    } catch (apiErr: any) {
+      setError(typeof apiErr === 'string' ? apiErr : 'Không thể kết nối đến máy chủ demo.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <ScrollView 
       style={styles.container}
@@ -111,6 +123,27 @@ export const LoginScreen = () => {
           <Text style={styles.title}>Chào mừng mẹ!</Text>
           <Text style={styles.subtitle}>Cùng Kindr tiếp tục hành trình chia sẻ yêu thương.</Text>
         </View>
+
+        {/* Step 4 Funnel: Instant 1-Click Demo MVP Access */}
+        <TouchableOpacity
+          style={styles.demoCardBtn}
+          onPress={handleDemoLogin}
+          activeOpacity={0.88}
+        >
+          <View style={styles.demoIconBadge}>
+            <Sparkles size={20} color="#D97706" />
+          </View>
+          <View style={{ flex: 1 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <Text style={styles.demoBtnTitle}>Trải Nghiệm Thử MVP (1-Click) ⭐</Text>
+              <View style={styles.demoPill}>
+                <Text style={styles.demoPillText}>Demo</Text>
+              </View>
+            </View>
+            <Text style={styles.demoBtnSub}>Có sẵn 100 Xu trong ví để thử đổi đồ ngay</Text>
+          </View>
+          <ChevronRight size={18} color="#D97706" />
+        </TouchableOpacity>
 
         {/* Credentials Form */}
         <View style={styles.form}>
@@ -340,6 +373,48 @@ const styles = StyleSheet.create({
     color: '#007A78',
     fontWeight: '600',
     lineHeight: 18,
+  },
+  demoCardBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFBEB',
+    borderWidth: 1.5,
+    borderColor: '#FCD34D',
+    borderRadius: RADIUS.lg,
+    padding: SPACING.md,
+    marginBottom: SPACING.md,
+    gap: SPACING.sm,
+    ...SHADOWS.card,
+  },
+  demoIconBadge: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: '#FEF3C7',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  demoBtnTitle: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#92400E',
+  },
+  demoPill: {
+    backgroundColor: '#FDE68A',
+    paddingHorizontal: 6,
+    paddingVertical: 1,
+    borderRadius: RADIUS.full,
+  },
+  demoPillText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#92400E',
+  },
+  demoBtnSub: {
+    fontSize: 11,
+    color: '#B45309',
+    marginTop: 2,
+    fontWeight: '500',
   },
 });
 

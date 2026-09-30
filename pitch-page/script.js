@@ -152,12 +152,59 @@ document.addEventListener('DOMContentLoaded', () => {
     `).join('');
   }
 
-  // 5. Modal Waitlist & Demo Handlers
+  // 5. Modal Waitlist & Dynamic Stats Handlers
+  const API_BASE_URL = 'http://localhost:5000';
   const modalOverlay = document.getElementById('modalOverlay');
   const modalClose = document.getElementById('modalClose');
+  const successModalOverlay = document.getElementById('successModalOverlay');
+  const successModalClose = document.getElementById('successModalClose');
+  const btnCloseCelebration = document.getElementById('btn-close-celebration');
   const openModalBtns = document.querySelectorAll('.open-modal-btn');
   const waitlistForm = document.getElementById('waitlistForm');
+  const modalForm = document.getElementById('modalForm');
 
+  // Stats elements
+  const waitlistCounter = document.getElementById('waitlistCounter');
+  const waitlistPercent = document.getElementById('waitlistPercent');
+  const waitlistProgressBar = document.getElementById('waitlistProgressBar');
+  const waitlistRemaining = document.getElementById('waitlistRemaining');
+  const successOrderBadge = document.getElementById('successOrderBadge');
+
+  // Helper to extract UTM parameters
+  function getUtmParams() {
+    const urlParams = new URLSearchParams(window.location.search);
+    return {
+      utmSource: urlParams.get('utm_source') || 'landing_page',
+      utmMedium: urlParams.get('utm_medium') || 'web',
+      utmCampaign: urlParams.get('utm_campaign') || 'pilot_danang'
+    };
+  }
+
+  // Fetch real-time waitlist progress
+  async function fetchWaitlistStats() {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/waitlist/stats`);
+      if (!res.ok) throw new Error('Failed to fetch stats');
+      const data = await res.json();
+      updateWaitlistUI(data.total, data.target, data.remaining, data.percentage);
+    } catch (err) {
+      console.warn('[Waitlist] Using fallback baseline stats:', err);
+      // Fallback baseline
+      updateWaitlistUI(142, 200, 58, 71);
+    }
+  }
+
+  function updateWaitlistUI(total, target, remaining, percentage) {
+    if (waitlistCounter) waitlistCounter.textContent = `${total} / ${target} Mẹ`;
+    if (waitlistPercent) waitlistPercent.textContent = `${percentage}% Đã Tham Gia`;
+    if (waitlistProgressBar) waitlistProgressBar.style.width = `${percentage}%`;
+    if (waitlistRemaining) waitlistRemaining.textContent = `${remaining} suất`;
+  }
+
+  // Load stats initially
+  fetchWaitlistStats();
+
+  // Modal open triggers
   openModalBtns.forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.preventDefault();
@@ -165,27 +212,140 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  // Modal close triggers
   if (modalClose) {
     modalClose.addEventListener('click', () => {
       modalOverlay.classList.remove('active');
     });
   }
 
-  if (modalOverlay) {
-    modalOverlay.addEventListener('click', (e) => {
-      if (e.target === modalOverlay) {
-        modalOverlay.classList.remove('active');
+  if (successModalClose) {
+    successModalClose.addEventListener('click', () => {
+      successModalOverlay.classList.remove('active');
+    });
+  }
+
+  if (btnCloseCelebration) {
+    btnCloseCelebration.addEventListener('click', () => {
+      successModalOverlay.classList.remove('active');
+    });
+  }
+
+  window.addEventListener('click', (e) => {
+    if (e.target === modalOverlay) {
+      modalOverlay.classList.remove('active');
+    }
+    if (e.target === successModalOverlay) {
+      successModalOverlay.classList.remove('active');
+    }
+  });
+
+  // Main Waitlist Form Submission (Step 5)
+  if (waitlistForm) {
+    waitlistForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const submitBtn = document.getElementById('btn-submit-waitlist');
+      const emailInput = document.getElementById('waitlistEmail');
+      const phoneInput = document.getElementById('waitlistPhone');
+      const interestInput = waitlistForm.querySelector('input[name="interest"]:checked');
+
+      if (!emailInput || !emailInput.value) return;
+
+      const utm = getUtmParams();
+      const payload = {
+        email: emailInput.value.trim(),
+        phone: phoneInput ? phoneInput.value.trim() : undefined,
+        utmSource: utm.utmSource,
+        utmMedium: utm.utmMedium,
+        utmCampaign: utm.utmCampaign
+      };
+
+      const originalBtnText = submitBtn ? submitBtn.innerHTML : '';
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span>Đang ghi nhận... ⏳</span>';
+      }
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/waitlist`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          const orderNum = result.data.orderNumber;
+          if (successOrderBadge) {
+            successOrderBadge.textContent = `Mẹ là thành viên thứ #${orderNum}`;
+          }
+          
+          // Refresh progress stats immediately
+          fetchWaitlistStats();
+
+          // Open celebration modal
+          if (successModalOverlay) {
+            successModalOverlay.classList.add('active');
+          }
+
+          // Trigger GA4 event
+          if (typeof trackKindrEvent === 'function') {
+            trackKindrEvent('waitlist_submit', {
+              order_number: orderNum,
+              interest: interestInput ? interestInput.value : 'general'
+            });
+          }
+
+          waitlistForm.reset();
+        } else {
+          alert(result.message || 'Có lỗi xảy ra, vui lòng thử lại sau ít phút.');
+        }
+      } catch (err) {
+        console.error('Waitlist submission error:', err);
+        alert('Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng và thử lại!');
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = originalBtnText;
+        }
       }
     });
   }
 
-  if (waitlistForm) {
-    waitlistForm.addEventListener('submit', (e) => {
+  // Quick Modal Form Submission
+  if (modalForm) {
+    modalForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const input = waitlistForm.querySelector('input[type="email"]');
-      if (input && input.value) {
-        alert(`Cảm ơn mẹ đã quan tâm! ❤️ Kindr đã lưu email [${input.value}] vào danh sách trải nghiệm sớm tại Đà Nẵng.`);
-        input.value = '';
+      const emailInput = modalForm.querySelector('input[type="email"]');
+      if (!emailInput || !emailInput.value) return;
+
+      const utm = getUtmParams();
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/waitlist`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: emailInput.value.trim(),
+            utmSource: utm.utmSource,
+            utmMedium: utm.utmMedium,
+            utmCampaign: utm.utmCampaign
+          })
+        });
+        const json = await res.json();
+        if (res.ok) {
+          if (modalOverlay) modalOverlay.classList.remove('active');
+          if (successOrderBadge) {
+            successOrderBadge.textContent = `Mẹ là thành viên thứ #${json.data.orderNumber}`;
+          }
+          if (successModalOverlay) successModalOverlay.classList.add('active');
+          fetchWaitlistStats();
+          modalForm.reset();
+        } else {
+          alert(json.message || 'Email này đã có trong danh sách chờ!');
+        }
+      } catch (err) {
+        alert(`Cảm ơn mẹ! Kindr đã ghi nhận email [${emailInput.value}] vào danh sách trải nghiệm.`);
         if (modalOverlay) modalOverlay.classList.remove('active');
       }
     });

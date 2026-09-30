@@ -74,6 +74,22 @@ export const loginGoogleAsync = createAsyncThunk(
   }
 );
 
+export const demoLoginAsync = createAsyncThunk(
+  'auth/demoLoginAsync',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await authService.demoLogin();
+      const user = response.user;
+      return {
+        ...user,
+        id: (user as any)._id?.toString() || user.id,
+      };
+    } catch (err: any) {
+      return rejectWithValue(err.response?.data?.error || 'Đăng nhập demo không thành công');
+    }
+  }
+);
+
 export const registerAsync = createAsyncThunk(
   'auth/registerAsync',
   async (payload: authService.RegisterPayload, { rejectWithValue }) => {
@@ -348,6 +364,20 @@ const authSlice = createSlice({
     builder.addCase(loginGoogleAsync.rejected, (state, action) => {
       state.isLoading = false;
       state.error = (action.payload as string) || 'Đăng nhập Google thất bại';
+    });
+
+    // demoLoginAsync
+    builder.addCase(demoLoginAsync.pending, (state) => {
+      state.isLoading = true;
+      state.error = null;
+    });
+    builder.addCase(demoLoginAsync.fulfilled, (state, action) => {
+      state.isLoading = false;
+      state.currentUser = action.payload;
+    });
+    builder.addCase(demoLoginAsync.rejected, (state, action) => {
+      state.isLoading = false;
+      state.error = (action.payload as string) || 'Đăng nhập demo thất bại';
     });
 
     // registerAsync

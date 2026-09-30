@@ -9,6 +9,7 @@ import {
   fetchCurrentUser,
   loginAsync,
   loginGoogleAsync,
+  demoLoginAsync,
   registerAsync,
   activateAccountAsync,
   logoutAsync,
@@ -33,6 +34,7 @@ interface AuthContextType {
   login: (userId: string) => void;
   loginWithCredentials: (phone: string, password: string) => Promise<any>;
   loginWithGoogle: (googleData: { credential?: string; idToken?: string; email?: string; name?: string; avatar?: string; googleId?: string }) => Promise<any>;
+  loginDemo: () => Promise<any>;
   register: (name: string, phone: string, email: string, districtId: string, addressDetail: string) => void;
   registerWithCredentials: (payload: { name: string; phone: string; password: string; email?: string; districtId?: string; districtName?: string; addressDetail?: string }) => Promise<any>;
   activateAccount: (email: string, otp: string) => Promise<any>;
@@ -258,6 +260,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return res;
   };
 
+  const loginDemo = async () => {
+    const res = await dispatch(demoLoginAsync()).unwrap();
+    await socketService.connect();
+    registerPushNotifications();
+    return res;
+  };
+
   const registerWithCredentials = async (payload: {
     name: string;
     phone: string;
@@ -346,6 +355,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         login,
         loginWithCredentials,
         loginWithGoogle,
+        loginDemo,
         register,
         registerWithCredentials,
         activateAccount,

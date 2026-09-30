@@ -13,6 +13,26 @@
   
   <!-- CSS Design System -->
   <link rel="stylesheet" href="styles.css">
+
+  <!-- Google Analytics 4 (GA4) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-KINDR2026MOM"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-KINDR2026MOM');
+    
+    // Custom GA4 Event Dispatcher
+    function trackKindrEvent(eventName, params = {}) {
+      if (typeof gtag === 'function') {
+        gtag('event', eventName, {
+          ...params,
+          timestamp: new Date().toISOString()
+        });
+      }
+      console.log(`[GA4 Event] ${eventName}:`, params);
+    }
+  </script>
 </head>
 <body>
 
@@ -20,7 +40,6 @@
   <header class="navbar" id="navbar">
     <div class="container navbar-container">
       <a href="#" class="logo" id="main-logo">
-        <!-- PLACEHOLDER: Logo chính thức của Kindr - Hiện dùng SVG mascot + wordmark -->
         <div class="logo-icon">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
@@ -34,16 +53,14 @@
           <li><a href="#about" class="nav-link" id="nav-about">Ý tưởng</a></li>
           <li><a href="#how-it-works" class="nav-link" id="nav-how">Cách vận hành</a></li>
           <li><a href="#escrow" class="nav-link" id="nav-escrow">Ký quỹ Escrow</a></li>
-          <li><a href="#usps" class="nav-link" id="nav-usps">3 USP Cốt lõi</a></li>
-          <li><a href="#value" class="nav-link" id="nav-value">Giá trị</a></li>
-          <li><a href="#comparison" class="nav-link" id="nav-comparison">So sánh</a></li>
-          <li><a href="#roadmap" class="nav-link" id="nav-roadmap">Lộ trình</a></li>
+          <li><a href="#mvp-trial" class="nav-link highlight-nav" id="nav-mvp">Dùng thử MVP ⭐</a></li>
+          <li><a href="#waitlist" class="nav-link" id="nav-waitlist">Waitlist 200 🎁</a></li>
           <li><a href="#team" class="nav-link" id="nav-team">Đội ngũ</a></li>
         </ul>
       </nav>
 
       <div class="nav-actions">
-        <button class="btn btn-primary btn-sm open-modal-btn" id="btn-header-join">Tham gia ngay ❤️</button>
+        <a href="http://localhost:8081" target="_blank" class="btn btn-primary btn-sm" id="btn-header-join" onclick="trackKindrEvent('demo_start', { source: 'header_nav' })">Dùng thử MVP ⭐</a>
         <button class="mobile-toggle" id="mobileToggle" aria-label="Menu">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="3" y1="12" x2="21" y2="12"></line>
@@ -63,7 +80,7 @@
     <div class="container hero-grid">
       <div class="hero-content reveal">
         <div class="hero-badge">
-          <span>🧸 Dự án Khởi nghiệp Sinh viên FPT University</span>
+          <span>🧸 Slogan: Swap baby items. Save money. Build a kinder future.</span>
         </div>
         
         <h1 class="hero-title" id="hero-main-title">
@@ -76,11 +93,11 @@
         </p>
 
         <div class="hero-cta-group">
-          <button class="btn btn-primary open-modal-btn" id="btn-hero-cta">
-            <span>Tham Gia Trải Nghiệm Sớm</span>
+          <a href="http://localhost:8081" target="_blank" class="btn btn-primary" id="btn-hero-cta" onclick="trackKindrEvent('demo_start', { source: 'hero_primary_cta' })">
+            <span>⭐ Trải Nghiệm Thử MVP (1-Click)</span>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          </button>
-          <a href="#how-it-works" class="btn btn-secondary" id="btn-hero-secondary">Xem Cách Vận Hành</a>
+          </a>
+          <a href="#waitlist" class="btn btn-secondary" id="btn-hero-secondary" onclick="trackKindrEvent('waitlist_scroll', { source: 'hero_secondary_cta' })">🎁 Đăng Ký Danh Sách Chờ (Mốc 200)</a>
         </div>
 
         <div class="hero-stats">
@@ -353,6 +370,77 @@
               <span style="font-size: 0.75rem; color: var(--text-light);">Số Xu trong Hộp:</span>
               <div id="simVaultAmount" style="font-weight: 700; color: var(--primary); font-size: 1.1rem;">15 Xu</div>
             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= STEP 4: MVP TRIAL ZERO-FRICTION ================= -->
+  <section class="section mvp-trial-section" id="mvp-trial">
+    <div class="container">
+      <div class="section-header reveal">
+        <div class="section-tag orange">⭐ Bước 4 Lộ Trình: Trải Nghiệm MVP Dùng Thử</div>
+        <h2 class="section-title">Thử Nghiệm Trực Tiếp Nền Tảng <span>Chỉ Với 1 Chạm</span></h2>
+        <p class="section-subtitle">
+          Không cần tải app phức tạp, không cần đăng ký tài khoản hay chờ OTP. Kindr tặng ngay <strong>100 Xu trong ví demo</strong> để mẹ trực tiếp trải nghiệm toàn bộ luồng đổi đồ &amp; ký quỹ an toàn.
+        </p>
+      </div>
+
+      <div class="mvp-grid">
+        <div class="mvp-step-card reveal">
+          <div class="mvp-card-badge">Bước 1</div>
+          <div class="mvp-card-icon">⚡</div>
+          <h3>Đăng Nhập 1-Click</h3>
+          <p>Nhấn nút trải nghiệm để nhận ngay tài khoản <strong>Mẹ Trải Nghiệm</strong> với <strong>100 Xu</strong> sẵn sàng trong ví. Bỏ qua 100% rào cản đăng ký rườm rà.</p>
+          <div class="mvp-card-footer">
+            <span class="mvp-tag">⏱️ Tốc độ: 1 Giây</span>
+            <span class="mvp-tag">🪙 Có sẵn 100 Xu</span>
+          </div>
+        </div>
+
+        <div class="mvp-step-card reveal">
+          <div class="mvp-card-badge">Bước 2</div>
+          <div class="mvp-card-icon">🧸</div>
+          <h3>Khám Phá Sàn Tuyển Chọn</h3>
+          <p>Lướt xem danh mục đồ chơi Montessori, quần áo Nous, xe chòi chân... được chọn lọc kỹ càng, phân loại tình trạng từ 70% – 90% siêu thực tế.</p>
+          <div class="mvp-card-footer">
+            <span class="mvp-tag">📍 Siêu cục bộ Đà Nẵng</span>
+            <span class="mvp-tag">🔍 Lọc danh mục thông minh</span>
+          </div>
+        </div>
+
+        <div class="mvp-step-card reveal">
+          <div class="mvp-card-badge">Bước 3</div>
+          <div class="mvp-card-icon">🛡️</div>
+          <h3>Ký Quỹ &amp; 6H Kiểm Định</h3>
+          <p>Bấm đổi món đồ ưng ý. Xem hệ thống tạm khóa Xu ký quỹ an toàn, cấp mã nhận đồ và kích hoạt đếm ngược <strong>6 Giờ Safeful Time</strong> kiểm tra tại nhà.</p>
+          <div class="mvp-card-footer">
+            <span class="mvp-tag">🔒 Double Escrow</span>
+            <span class="mvp-tag">⏱️ 6h Bảo chứng</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- MVP Interactive Launch Box -->
+      <div class="mvp-launch-box reveal">
+        <div class="mvp-launch-content">
+          <div class="mvp-launch-tag">🚀 ZERO-FRICTION WEB DEMO</div>
+          <h3>Trải Nghiệm Bản Thử Nghiệm Ngay Bây Giờ!</h3>
+          <p>Khám phá giao diện React Native thân thiện, tương tác như ứng dụng di động thật ngay trên trình duyệt của bạn.</p>
+          <div class="mvp-launch-actions">
+            <a href="http://localhost:8081" target="_blank" class="btn btn-primary btn-large" id="btn-launch-demo" onclick="trackKindrEvent('demo_start', { source: 'mvp_section_launch_box' })">
+              <span>🚀 Mở Bản Demo Web (Có 100 Xu)</span>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </a>
+            <a href="#waitlist" class="btn btn-secondary" onclick="trackKindrEvent('waitlist_scroll', { source: 'mvp_section_sub_cta' })">
+              🎁 Đăng Ký Nhận 50 Xu Khi Ra Mắt
+            </a>
+          </div>
+          <div class="mvp-launch-notes">
+            <span>✨ Không yêu cầu thẻ visa</span>
+            <span>📱 Tương thích cả máy tính &amp; điện thoại</span>
+            <span>🧸 Tự do đổi thử mọi món đồ</span>
           </div>
         </div>
       </div>
@@ -706,15 +794,96 @@
     </div>
   </section>
 
-  <!-- ================= CTA BANNER & FOOTER ================= -->
-  <section class="section" style="padding-bottom: 0;">
+  <!-- ================= STEP 5: WAITLIST MILESTONE 200 ================= -->
+  <section class="section waitlist-section" id="waitlist">
     <div class="container">
-      <div class="cta-banner reveal">
-        <h2>Sẵn Sàng Đồng Hành Cùng Kindr? ❤️</h2>
-        <p>Đăng ký email ngay hôm nay để trở thành một trong những bà mẹ bỉm sữa đầu tiên trải nghiệm ứng dụng hoán đổi đồ cũ an toàn nhất tại Việt Nam.</p>
-        <form class="cta-form" id="waitlistForm">
-          <input type="email" class="cta-input" placeholder="Nhập địa chỉ Email của mẹ..." required>
-          <button type="submit" class="btn btn-primary" style="background: var(--text-main); color: white;">Đăng Ký Sớm</button>
+      <div class="waitlist-card reveal">
+        <div class="waitlist-badge">
+          <span>🎯 CHIẾN DỊCH KHỞI ĐỘNG CỘNG ĐỒNG ĐÀ NẴNG (MỐC 200)</span>
+        </div>
+
+        <h2 class="waitlist-title">Cùng Kindr Cán Mốc <span>200 Mẹ Bỉm Tiên Phong</span></h2>
+        <p class="waitlist-subtitle">
+          Đạt mốc 200 lượt đăng ký, Kindr sẽ chính thức kích hoạt mạng lưới <strong>Kindr Hub</strong> giao nhận cục bộ tại Đà Nẵng và tặng ngay <strong>50 Xu khởi động (tương đương 500.000 VNĐ)</strong> vào ví mẹ bỉm!
+        </p>
+
+        <!-- Real-time Progress Bar towards 200 -->
+        <div class="waitlist-progress-box">
+          <div class="waitlist-progress-header">
+            <div class="waitlist-counter-group">
+              <span class="waitlist-counter-label">Tiến độ gia nhập:</span>
+              <strong class="waitlist-counter-value" id="waitlistCounter">142 / 200 Mẹ</strong>
+            </div>
+            <div class="waitlist-percent-badge" id="waitlistPercent">71% Đã Tham Gia</div>
+          </div>
+
+          <div class="waitlist-progress-track">
+            <div class="waitlist-progress-fill" id="waitlistProgressBar" style="width: 71%;"></div>
+          </div>
+
+          <div class="waitlist-milestones">
+            <div class="milestone-mark reached">
+              <div class="milestone-dot"></div>
+              <span>50 Mẹ (Q. Hải Châu)</span>
+            </div>
+            <div class="milestone-mark reached">
+              <div class="milestone-dot"></div>
+              <span>100 Mẹ (Q. Thanh Khê &amp; Sơn Trà)</span>
+            </div>
+            <div class="milestone-mark target">
+              <div class="milestone-dot"></div>
+              <span>200 Mẹ (Mở toàn Đà Nẵng) 🚀</span>
+            </div>
+          </div>
+
+          <div class="waitlist-alert" id="waitlistAlert">
+            ⚡ Chỉ còn <strong id="waitlistRemaining">58 suất</strong> nhận gói quà khởi động 50 Xu chào mừng!
+          </div>
+        </div>
+
+        <!-- Waitlist Form (Connected to POST /api/waitlist) -->
+        <form class="waitlist-form" id="waitlistForm">
+          <div class="waitlist-form-row">
+            <div class="form-group flex-2">
+              <label for="waitlistEmail">Địa chỉ Email của mẹ <span class="req">*</span></label>
+              <input type="email" id="waitlistEmail" name="email" class="waitlist-input" placeholder="ví dụ: phuongthao@gmail.com" required>
+            </div>
+            <div class="form-group flex-1">
+              <label for="waitlistPhone">Số điện thoại / Zalo <span class="opt">(tùy chọn)</span></label>
+              <input type="tel" id="waitlistPhone" name="phone" class="waitlist-input" placeholder="0905 xxx xxx">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label-title">Món đồ mẹ quan tâm đổi nhất:</label>
+            <div class="waitlist-chips">
+              <label class="chip-item">
+                <input type="radio" name="interest" value="do_choi" checked>
+                <span>🧸 Đồ chơi bé</span>
+              </label>
+              <label class="chip-item">
+                <input type="radio" name="interest" value="xe_day">
+                <span>🚲 Xe đẩy &amp; Ghế ăn</span>
+              </label>
+              <label class="chip-item">
+                <input type="radio" name="interest" value="quan_ao">
+                <span>👕 Quần áo &amp; Giày dép</span>
+              </label>
+              <label class="chip-item">
+                <input type="radio" name="interest" value="sach">
+                <span>📚 Sách truyện</span>
+              </label>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary waitlist-submit-btn" id="btn-submit-waitlist">
+            <span>🎁 Đăng Ký Giữ Chỗ &amp; Nhận 50 Xu Tiên Phong</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+
+          <p class="waitlist-privacy">
+            🔒 Kindr cam kết 100% không gửi thư rác. Thông tin chỉ dùng để thông báo khi ứng dụng chính thức kích hoạt.
+          </p>
         </form>
       </div>
     </div>
@@ -737,7 +906,8 @@
             <li><a href="#about">Ý tưởng dự án</a></li>
             <li><a href="#how-it-works">4 Bước vận hành</a></li>
             <li><a href="#escrow">Ký quỹ Double Escrow</a></li>
-            <li><a href="#usps">3 USP nổi bật</a></li>
+            <li><a href="#mvp-trial">Dùng thử MVP ⭐</a></li>
+            <li><a href="#waitlist">Waitlist Mốc 200 🎁</a></li>
           </ul>
         </div>
 
@@ -745,7 +915,7 @@
           <h4>Về Đội Ngũ</h4>
           <ul class="footer-links">
             <li><a href="#team">5 Thành viên FPT</a></li>
-            <li><a href="#roadmap">Lộ trình 3 giai đoạn</a></li>
+            <li><a href="#roadmap">Lộ trình phát triển</a></li>
             <li><a href="#tech">Kiến trúc công nghệ</a></li>
           </ul>
         </div>
@@ -754,27 +924,47 @@
           <h4>Mã Nguồn Repo</h4>
           <ul class="footer-links">
             <li><a href="https://github.com/Hoang-124/Kindr" target="_blank" rel="noopener">GitHub: Hoang-124/Kindr ↗</a></li>
-            <!-- PLACEHOLDER: Link Fanpage / Zalo Group (Bổ sung khi có) -->
-            <li><a href="#" class="open-modal-btn">Nhóm Zalo Mẹ Bỉm (Sắp mở)</a></li>
+            <li><a href="http://localhost:8081" target="_blank">Web Demo App (1-Click) ↗</a></li>
           </ul>
         </div>
       </div>
 
       <div class="footer-bottom">
         <p>© 2026 Kindr Startup Project — FPT University Student Project. All rights reserved.</p>
-        <p style="color: #9C8C8F;">Thiết kế với tinh thần Emotional Design ❤️ Ấm áp – Trực quan – Đồng hành</p>
+        <p style="color: #9C8C8F;">Slogan: Swap baby items. Save money. Build a kinder future. ❤️</p>
       </div>
     </div>
   </footer>
 
-  <!-- MODAL DIALOG FOR WAITLIST / DEMO -->
+  <!-- CELEBRATION MODAL FOR WAITLIST SUCCESS -->
+  <div class="modal-overlay" id="successModalOverlay">
+    <div class="modal-box celebration-box">
+      <button class="modal-close" id="successModalClose">&times;</button>
+      <div style="font-size: 3rem; margin-bottom: 0.5rem;">🎉🧸</div>
+      <h3 style="font-size: 1.6rem; color: var(--primary); margin-bottom: 0.5rem;">Chúc Mừng Mẹ Tiên Phong!</h3>
+      <div class="celebration-order-badge" id="successOrderBadge">Mẹ là thành viên thứ #143</div>
+      <p style="font-size: 0.95rem; color: var(--text-secondary); margin: 1rem 0; line-height: 1.6;">
+        Kindr đã ghi nhận thông tin của mẹ vào danh sách chờ cán mốc 200. Gói quà <strong>50 Xu Chào Mừng</strong> đã được khóa bảo lưu và sẽ gửi thẳng vào ví tài khoản của mẹ khi hệ thống chính thức mở cửa!
+      </p>
+      <div style="display: flex; flex-direction: column; gap: 0.75rem; margin-top: 1rem;">
+        <a href="http://localhost:8081" target="_blank" class="btn btn-primary" style="width: 100%;" onclick="trackKindrEvent('demo_start', { source: 'celebration_modal' })">
+          ⭐ Khám Phá Thử Bản Demo Ngay (Có 100 Xu)
+        </a>
+        <button type="button" class="btn btn-secondary" id="btn-close-celebration" style="width: 100%;">
+          Đóng &amp; Tiếp Tục Xem Trang
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DIALOG FOR QUICK DEMO / WAITLIST -->
   <div class="modal-overlay" id="modalOverlay">
     <div class="modal-box">
       <button class="modal-close" id="modalClose">&times;</button>
       <div style="font-size: 3rem; margin-bottom: 0.5rem;">🧸</div>
       <h3 style="font-size: 1.5rem; margin-bottom: 0.5rem; color: var(--primary);">Tham Gia Danh Sách Chờ Kindr</h3>
       <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1.5rem;">
-        Cảm ơn mẹ đã quan tâm! Điền email dưới đây để nhận thông báo ra mắt ứng dụng bản Beta tại Đà Nẵng &amp; tặng ngay <strong>50 Xu chào mừng</strong> vào ví nhé!
+        Cảm ơn mẹ đã quan tâm! Điền email dưới đây để nhận thông báo ra mắt ứng dụng tại Đà Nẵng &amp; tặng ngay <strong>50 Xu chào mừng</strong> vào ví nhé!
       </p>
       <form id="modalForm" style="display: flex; flex-direction: column; gap: 0.75rem;">
         <input type="email" placeholder="Email của mẹ..." class="cta-input" style="border: 1px solid var(--border-light); background: var(--bg-main);" required>

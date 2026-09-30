@@ -15,6 +15,7 @@ import ratingRoutes from './routes/ratings';
 import reportRoutes from './routes/reports';
 import adminRoutes from './routes/admin';
 import uploadRoutes from './routes/upload';
+import waitlistRoutes from './routes/waitlist';
 
 export function createApp(): Express {
   const app = express();
@@ -68,6 +69,7 @@ export function createApp(): Express {
   app.use('/api/reports', reportRoutes);
   app.use('/api/admin', adminRoutes);
   app.use('/api/upload', uploadRoutes);
+  app.use('/api/waitlist', waitlistRoutes);
 
   // 5. Global error handler
   app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {

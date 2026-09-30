@@ -119,6 +119,39 @@ export const HomeScreen = () => {
         <Text style={styles.searchText}>Mẹ muốn tìm món gì cho bé?</Text>
       </ScalePressable>
 
+      {/* Step 4 MVP Demo Guide Banner */}
+      {currentUser?.email === 'demo@kindr.vn' && (
+        <View style={styles.demoGuideBanner}>
+          <View style={styles.demoGuideHeader}>
+            <View style={styles.demoGuideBadge}>
+              <Sparkles size={12} color="#FFFFFF" />
+              <Text style={styles.demoGuideBadgeText}>TRẢI NGHIỆM MVP (DEMO)</Text>
+            </View>
+            <View style={styles.demoCoinPill}>
+              <Text style={styles.demoCoinPillText}>🪙 100 Xu trong ví</Text>
+            </View>
+          </View>
+          <Text style={styles.demoGuideTitle}>Chào mừng Mẹ Trải Nghiệm! 👋</Text>
+          <Text style={styles.demoGuideDesc}>
+            Mẹ đã vào chế độ trải nghiệm 1-click. Mẹ có thể nhấn vào bất kỳ món đồ nào bên dưới để thử nghiệm luồng ký quỹ và đổi đồ P2P thực tế:
+          </Text>
+          <View style={styles.demoStepsRow}>
+            <View style={styles.demoStepChip}>
+              <Text style={styles.demoStepNum}>1</Text>
+              <Text style={styles.demoStepText}>Chọn đồ cần đổi</Text>
+            </View>
+            <View style={styles.demoStepChip}>
+              <Text style={styles.demoStepNum}>2</Text>
+              <Text style={styles.demoStepText}>Ký quỹ an toàn</Text>
+            </View>
+            <View style={styles.demoStepChip}>
+              <Text style={styles.demoStepNum}>3</Text>
+              <Text style={styles.demoStepText}>6h kiểm định tại nhà</Text>
+            </View>
+          </View>
+        </View>
+      )}
+
       {/* Declutter Banner with Synchronized Mascot Card */}
       <View style={styles.bannerCard}>
         <View style={styles.bannerLeft}>
@@ -633,6 +666,99 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: '#D97706',
     marginTop: 2,
+  },
+  demoGuideBanner: {
+    backgroundColor: '#FFF7ED',
+    borderWidth: 1.5,
+    borderColor: '#FDBA74',
+    borderRadius: RADIUS.lg,
+    padding: SPACING.md,
+    marginTop: SPACING.sm,
+    marginBottom: SPACING.xs,
+    shadowColor: '#EA580C',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  demoGuideHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  demoGuideBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    backgroundColor: '#EA580C',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: RADIUS.full,
+  },
+  demoGuideBadgeText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#FFFFFF',
+    letterSpacing: 0.5,
+  },
+  demoCoinPill: {
+    backgroundColor: '#FEF3C7',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: RADIUS.full,
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+  },
+  demoCoinPillText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#B45309',
+  },
+  demoGuideTitle: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#9A3412',
+    marginBottom: 4,
+  },
+  demoGuideDesc: {
+    fontSize: 12,
+    lineHeight: 18,
+    color: '#7C2D12',
+    marginBottom: 10,
+  },
+  demoStepsRow: {
+    flexDirection: 'row',
+    gap: 6,
+  },
+  demoStepChip: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    paddingVertical: 6,
+    paddingHorizontal: 6,
+    borderRadius: RADIUS.sm,
+    borderWidth: 1,
+    borderColor: '#FFEDD5',
+    gap: 4,
+  },
+  demoStepNum: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: '#EA580C',
+    color: '#FFFFFF',
+    fontSize: 10,
+    fontWeight: '800',
+    textAlign: 'center',
+    lineHeight: 16,
+  },
+  demoStepText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#431407',
+    flexShrink: 1,
   },
 });
 export default HomeScreen;

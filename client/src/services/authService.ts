@@ -36,6 +36,13 @@ export async function login(phone: string, password: string): Promise<AuthRespon
   return data;
 }
 
+export async function demoLogin(): Promise<AuthResponse> {
+  const { data } = await api.post<AuthResponse>('/auth/demo-login');
+  await setAuthTokens(data.accessToken, data.refreshToken);
+  await socketService.connect();
+  return data;
+}
+
 export async function loginGoogle(googleData: { credential?: string; idToken?: string; email?: string; name?: string; avatar?: string; googleId?: string }): Promise<AuthResponse> {
   const { data } = await api.post<AuthResponse>('/auth/google', googleData);
   await setAuthTokens(data.accessToken, data.refreshToken);
