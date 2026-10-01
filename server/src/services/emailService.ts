@@ -538,6 +538,61 @@ export async function sendWaitlistWelcomeEmail(
 </html>
 `;
 
+  // 1. High-speed HTTPS API delivery (Port 443 - NEVER blocked by cloud firewalls like Render Free)
+  const resendKey = process.env.RESEND_API_KEY || (ENV as any).RESEND_API_KEY;
+  if (resendKey) {
+    try {
+      const response = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${resendKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          from: 'Kindr Ecosystem <onboarding@resend.dev>',
+          to: [toEmail],
+          subject,
+          html: htmlContent,
+        }),
+      });
+      const data: any = await response.json();
+      if (response.ok) {
+        console.log(`[EMAIL SERVICE] Resend HTTP email delivered to: ${toEmail} (${formattedCode})`);
+        return { success: true };
+      } else {
+        console.warn(`[EMAIL SERVICE] Resend API error:`, data);
+      }
+    } catch (err: any) {
+      console.error(`[EMAIL SERVICE] Resend fetch error:`, err?.message);
+    }
+  }
+
+  // 2. Brevo HTTPS API (Port 443)
+  const brevoKey = process.env.BREVO_API_KEY || (ENV as any).BREVO_API_KEY;
+  if (brevoKey) {
+    try {
+      const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+        method: 'POST',
+        headers: {
+          'api-key': brevoKey,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          sender: { name: 'Kindr Ecosystem', email: 'ht20041975@gmail.com' },
+          to: [{ email: toEmail }],
+          subject,
+          htmlContent,
+        }),
+      });
+      if (response.ok) {
+        console.log(`[EMAIL SERVICE] Brevo HTTP email delivered to: ${toEmail}`);
+        return { success: true };
+      }
+    } catch (err: any) {
+      console.error(`[EMAIL SERVICE] Brevo fetch error:`, err?.message);
+    }
+  }
+
   const transporter = createTransporter();
 
   if (transporter) {

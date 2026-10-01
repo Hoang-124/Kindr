@@ -120,18 +120,15 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
       const remaining = Math.max(0, target - total);
       const percentage = Math.min(100, Math.round((total / target) * 100));
 
-      // Fast race with 2.5s timeout so cloud SMTP port drops never cause slow page response
-      const emailPromise = sendWaitlistWelcomeEmail(email, existing.orderNumber, cleanPhone || existing.phone, userRole || existing.userRole, interest || existing.interest);
-      const timeoutPromise = new Promise<{ success: boolean; error?: string }>((resolve) =>
-        setTimeout(() => resolve({ success: false, error: 'Email dispatched in background' }), 2500)
-      );
-      const emailRes = await Promise.race([emailPromise, timeoutPromise]);
+      // Instant non-blocking email dispatch
+      sendWaitlistWelcomeEmail(email, existing.orderNumber, cleanPhone || existing.phone, userRole || existing.userRole, interest || existing.interest).catch((err) => {
+        console.warn(`[WAITLIST] Background email resend notice for ${email}:`, err?.message);
+      });
 
       res.json({
         success: true,
         alreadyRegistered: true,
-        emailSent: emailRes.success,
-        emailError: emailRes.error,
+        emailDispatched: true,
         message: `Mẹ/bạn đã đăng ký giữ chỗ trước đó rồi nhé! Bạn đang giữ số thứ tự ưu đãi #${existing.orderNumber}. Thư xác nhận đã được gửi đến hòm thư ${email}.`,
         orderNumber: existing.orderNumber,
         total,
@@ -167,19 +164,15 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
       orderNumber: newOrderNumber,
     });
 
-    // Fast race with 2.5s timeout so cloud SMTP port drops never cause slow page response
-    const emailPromise = sendWaitlistWelcomeEmail(email, newOrderNumber, cleanPhone, userRole, interest);
-    const timeoutPromise = new Promise<{ success: boolean; error?: string }>((resolve) =>
-      setTimeout(() => resolve({ success: false, error: 'Email dispatched in background' }), 2500)
-    );
-    const emailRes = await Promise.race([emailPromise, timeoutPromise]);
-    console.log(`[WAITLIST] Email dispatch to ${email} result:`, emailRes);
+    // Instant non-blocking email dispatch so UI responds in < 100ms
+    sendWaitlistWelcomeEmail(email, newOrderNumber, cleanPhone, userRole, interest).catch((err) => {
+      console.warn(`[WAITLIST] Background email dispatch notice for ${email}:`, err?.message);
+    });
 
     res.status(201).json({
       success: true,
       alreadyRegistered: false,
-      emailSent: emailRes.success,
-      emailError: emailRes.error,
+      emailDispatched: true,
       message: `Chúc mừng mẹ/bạn! Đã giữ chỗ thành công thành viên thứ #${newEntry.orderNumber} nhận 5 Xu Tiên Phong. Thư xác nhận đã được gửi đến email ${email}!`,
       orderNumber: newEntry.orderNumber,
       total: newOrderNumber,
