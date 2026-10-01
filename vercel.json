@@ -1,0 +1,18 @@
+{
+  "version": 2,
+  "cleanUrls": true,
+  "rewrites": [
+    {
+      "source": "/",
+      "destination": "/pitch-page/index.html"
+    },
+    {
+      "source": "/email-preview",
+      "destination": "/pitch-page/email-preview.html"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/pitch-page/$1"
+    }
+  ]
+}

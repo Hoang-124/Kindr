@@ -27,7 +27,7 @@ export const KindrLogo: React.FC<KindrLogoProps> = ({
         <Image 
           source={LOGO_IMAGE} 
           style={{ width: size, height: size, borderRadius: size / 2 }} 
-          resizeMode="cover"
+          resizeMode="contain"
         />
       </View>
       

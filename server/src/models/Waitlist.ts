@@ -4,6 +4,8 @@ import mongoose, { Schema, Document } from 'mongoose';
 export interface IWaitlist extends Document {
   email: string;
   phone?: string;
+  userRole?: string;
+  interest?: string;
   ip?: string;
   utmSource?: string;
   utmMedium?: string;
@@ -24,6 +26,16 @@ const WaitlistSchema = new Schema<IWaitlist>({
     type: String, 
     trim: true, 
     default: '' 
+  },
+  userRole: {
+    type: String,
+    trim: true,
+    default: 'mother'
+  },
+  interest: {
+    type: String,
+    trim: true,
+    default: 'Đồ chơi vận động'
   },
   ip: { 
     type: String, 
