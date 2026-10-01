@@ -120,8 +120,12 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
       const remaining = Math.max(0, target - total);
       const percentage = Math.min(100, Math.round((total / target) * 100));
 
-      // Await email sending to guarantee delivery
-      const emailRes = await sendWaitlistWelcomeEmail(email, existing.orderNumber, cleanPhone || existing.phone, userRole || existing.userRole, interest || existing.interest);
+      // Fast race with 2.5s timeout so cloud SMTP port drops never cause slow page response
+      const emailPromise = sendWaitlistWelcomeEmail(email, existing.orderNumber, cleanPhone || existing.phone, userRole || existing.userRole, interest || existing.interest);
+      const timeoutPromise = new Promise<{ success: boolean; error?: string }>((resolve) =>
+        setTimeout(() => resolve({ success: false, error: 'Email dispatched in background' }), 2500)
+      );
+      const emailRes = await Promise.race([emailPromise, timeoutPromise]);
 
       res.json({
         success: true,
@@ -163,8 +167,12 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
       orderNumber: newOrderNumber,
     });
 
-    // Await email delivery so server doesn't cut off before SMTP completes
-    const emailRes = await sendWaitlistWelcomeEmail(email, newOrderNumber, cleanPhone, userRole, interest);
+    // Fast race with 2.5s timeout so cloud SMTP port drops never cause slow page response
+    const emailPromise = sendWaitlistWelcomeEmail(email, newOrderNumber, cleanPhone, userRole, interest);
+    const timeoutPromise = new Promise<{ success: boolean; error?: string }>((resolve) =>
+      setTimeout(() => resolve({ success: false, error: 'Email dispatched in background' }), 2500)
+    );
+    const emailRes = await Promise.race([emailPromise, timeoutPromise]);
     console.log(`[WAITLIST] Email dispatch to ${email} result:`, emailRes);
 
     res.status(201).json({

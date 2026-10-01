@@ -15,6 +15,10 @@
     "build": "echo 'Landing page ready'",
     "typecheck": "npm --prefix client exec tsc --noEmit && npm --prefix server exec tsc --noEmit"
   },
+  "dependencies": {
+    "mongoose": "^8.24.4",
+    "nodemailer": "^6.10.1"
+  },
   "devDependencies": {
     "concurrently": "^9.2.4",
     "docx": "^9.7.1"

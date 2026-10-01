@@ -11,7 +11,7 @@
       "destination": "/pitch-page/email-preview.html"
     },
     {
-      "source": "/(.*)",
+      "source": "/((?!api/).*)",
       "destination": "/pitch-page/$1"
     }
   ]
