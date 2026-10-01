@@ -3966,3 +3966,266 @@ button {
     display: none;
   }
 }
+
+/* ================= 9. COMPREHENSIVE MOBILE RESPONSIVE ENGINE ================= */
+.nav-cta-mobile {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  /* Navbar */
+  .navbar {
+    height: 60px;
+  }
+  .navbar-container {
+    padding: 0 12px;
+  }
+  .brand-text {
+    font-size: 1.28rem;
+  }
+  .brand-symbol {
+    width: 38px;
+    height: 38px;
+  }
+
+  /* Hero Section */
+  .hero-stage {
+    padding-top: 1.5rem;
+    padding-bottom: 2.5rem;
+  }
+  .hero-eyebrow-row {
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 1.25rem;
+    width: 100%;
+  }
+  .award-chip,
+  .mascot-chip,
+  .tiktok-collab-chip {
+    font-size: 0.74rem;
+    padding: 4px 10px;
+    max-width: 100%;
+    justify-content: center;
+    text-align: center;
+  }
+  .hero-heading {
+    font-size: 2.2rem;
+    line-height: 1.2;
+    letter-spacing: -0.025em;
+    margin-bottom: 0.95rem;
+  }
+  .hero-lede {
+    font-size: 0.94rem;
+    line-height: 1.55;
+    margin-bottom: 1.35rem;
+    padding: 0 4px;
+  }
+  .hero-cta-cluster {
+    flex-direction: column;
+    width: 100%;
+    gap: 10px;
+  }
+  .hero-cta-cluster .btn {
+    width: 100%;
+    min-height: 48px;
+    font-size: 0.96rem;
+    justify-content: center;
+  }
+  .hero-stat-trio {
+    width: 100%;
+    padding: 12px 10px;
+    gap: 6px;
+    justify-content: space-around;
+    margin-top: 1.5rem;
+  }
+  .stat-bubble strong {
+    font-size: 1.15rem;
+  }
+  .stat-bubble span {
+    font-size: 0.72rem;
+  }
+
+  /* Smartphone Simulator on mobile: centered, proportional, no cramped text */
+  .hero-showcase-cluster {
+    flex-direction: column-reverse;
+    gap: 1rem;
+    width: 100%;
+    align-items: center;
+  }
+  .smartphone-mockup {
+    max-width: 325px;
+    width: 100%;
+    margin: 0 auto;
+  }
+  .phone-outer-frame {
+    border-radius: 46px;
+    padding: 4px;
+  }
+  .phone-inner-screen {
+    border-radius: 42px;
+  }
+  .phone-screen-viewport {
+    height: 480px;
+    max-height: 480px;
+  }
+
+  /* Flow narrator panel on mobile */
+  .flow-narrator-panel {
+    max-width: 325px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 14px 14px 12px 14px;
+  }
+  .flow-narrator-panel::after {
+    display: none;
+  }
+  .narrator-header-title {
+    font-size: 0.88rem;
+  }
+  .narrator-body-text {
+    font-size: 0.76rem;
+    margin-bottom: 10px;
+  }
+
+  /* Bento Grid & Action Cards */
+  .bento-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+  .bento-card {
+    padding: 1.25rem 1.1rem;
+  }
+  .mvp-action-card {
+    padding: 1.25rem 1.1rem;
+  }
+  .calculator-box {
+    padding: 1.25rem 1.1rem;
+  }
+
+  /* Founding Gold Card & Waitlist Form */
+  .founding-gold-card {
+    padding: 1.25rem 1.15rem;
+  }
+  .gold-card-header {
+    margin-bottom: 0.75rem;
+  }
+  .gold-amount {
+    font-size: 1.45rem;
+  }
+  .gold-fiat-val {
+    font-size: 0.8rem;
+    padding: 2px 8px;
+  }
+  .waitlist-form-card {
+    padding: 1.35rem 1.15rem;
+  }
+  .role-chips {
+    grid-template-columns: 1fr !important;
+    gap: 8px;
+  }
+  .form-submit-row .btn {
+    width: 100%;
+    min-height: 50px;
+    font-size: 0.98rem;
+  }
+
+  /* Floating Mascot Widget: never cover content on mobile */
+  .mascot-floating-widget {
+    bottom: 16px;
+    right: 14px;
+    gap: 8px;
+  }
+  .mascot-speech-bubble {
+    max-width: calc(100vw - 36px);
+    padding: 10px 12px;
+    font-size: 0.78rem;
+  }
+  .mascot-avatar-btn {
+    width: 48px;
+    height: 48px;
+  }
+  .mascot-avatar-frame {
+    width: 44px;
+    height: 44px;
+  }
+}
+
+@media (max-width: 580px) {
+  /* Navbar Compact Mobile CTA */
+  .nav-cta-desktop {
+    display: none;
+  }
+  .nav-cta-mobile {
+    display: inline;
+  }
+  .status-region-txt {
+    display: none;
+  }
+  .live-status-pill {
+    padding: 3px 8px;
+    font-size: 0.72rem;
+  }
+  .brand-text {
+    font-size: 1.2rem;
+  }
+  .brand-symbol {
+    width: 34px;
+    height: 34px;
+  }
+  #btn-header-waitlist {
+    min-height: 36px;
+    padding: 0 0.85rem;
+    font-size: 0.82rem;
+  }
+}
+
+@media (max-width: 420px) {
+  .hero-heading {
+    font-size: 1.85rem;
+    line-height: 1.22;
+  }
+  .smartphone-mockup {
+    max-width: 296px;
+  }
+  .phone-screen-viewport {
+    height: 450px;
+    max-height: 450px;
+  }
+  .flow-narrator-panel {
+    max-width: 296px;
+    padding: 12px;
+  }
+  .founding-gold-card {
+    padding: 1.15rem 1rem;
+  }
+  .gold-amount {
+    font-size: 1.35rem;
+  }
+  .gold-fiat-val {
+    font-size: 0.76rem;
+  }
+  .waitlist-form-card {
+    padding: 1.15rem 0.95rem;
+  }
+  .progress-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  .mascot-floating-widget {
+    bottom: 12px;
+    right: 10px;
+  }
+  .mascot-avatar-btn {
+    width: 44px;
+    height: 44px;
+  }
+  .mascot-avatar-frame {
+    width: 40px;
+    height: 40px;
+  }
+  .mascot-speech-bubble {
+    max-width: 260px;
+  }
+}

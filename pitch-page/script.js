@@ -628,6 +628,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 200);
   }
 
+  let bubbleAutoDismissTimeout = null;
+
   if (mascotAvatarBtn) {
     mascotAvatarBtn.addEventListener('click', () => {
       // Trigger wobble bounce animation
@@ -638,6 +640,13 @@ document.addEventListener('DOMContentLoaded', () => {
       if (mascotBubble) {
         if (mascotBubble.classList.contains('hidden')) {
           mascotBubble.classList.remove('hidden');
+          // On mobile, auto-dismiss after 5s so it never permanently blocks content
+          if (window.innerWidth <= 768) {
+            clearTimeout(bubbleAutoDismissTimeout);
+            bubbleAutoDismissTimeout = setTimeout(() => {
+              mascotBubble.classList.add('hidden');
+            }, 5000);
+          }
         } else {
           cycleMascotQuote();
         }
@@ -648,11 +657,19 @@ document.addEventListener('DOMContentLoaded', () => {
   if (bubbleCloseBtn && mascotBubble) {
     bubbleCloseBtn.addEventListener('click', (e) => {
       e.stopPropagation();
+      clearTimeout(bubbleAutoDismissTimeout);
       mascotBubble.classList.add('hidden');
     });
   }
 
-  // Auto-cycle quote occasionally
+  // On desktop only: gently show speech bubble after 3.5s to welcome user
+  if (window.innerWidth > 768 && mascotBubble) {
+    setTimeout(() => {
+      mascotBubble.classList.remove('hidden');
+    }, 3500);
+  }
+
+  // Auto-cycle quote occasionally when visible
   setInterval(() => {
     if (mascotBubble && !mascotBubble.classList.contains('hidden')) {
       cycleMascotQuote();
