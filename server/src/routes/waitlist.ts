@@ -29,7 +29,34 @@ const WaitlistSchema = z.object({
   utmCampaign: z.string().optional().default('mvp_launch'),
 });
 
-const BASE_OFFSET = 142; // Base offset representing early founding seed traction towards 200 milestone
+const BASE_OFFSET = 0; // Starts from 0 on deployment, increments 1 by 1 per real registration
+
+/**
+ * GET /api/waitlist/test-email
+ * Diagnostic endpoint to test live email delivery directly
+ */
+router.get('/test-email', async (req: Request, res: Response): Promise<void> => {
+  const targetEmail = (req.query.to as string) || 'ht20041975@gmail.com';
+  try {
+    const result = await sendWaitlistWelcomeEmail(targetEmail, 1, '0905123456', 'mother', 'Đồ chơi vận động');
+    res.json({ success: true, targetEmail, result });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+/**
+ * POST /api/waitlist/reset
+ * Reset waitlist counter back to 0
+ */
+router.post('/reset', async (_req: Request, res: Response): Promise<void> => {
+  try {
+    await Waitlist.deleteMany({});
+    res.json({ success: true, count: 0, message: 'Đã thiết lập lại danh sách chờ về 0.' });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
 
 /**
  * GET /api/waitlist/stats
@@ -93,14 +120,14 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
       const remaining = Math.max(0, target - total);
       const percentage = Math.min(100, Math.round((total / target) * 100));
 
-      // Asynchronously send/resend email confirmation
-      sendWaitlistWelcomeEmail(email, existing.orderNumber, cleanPhone || existing.phone, userRole || existing.userRole, interest || existing.interest).catch(e => {
-        console.warn(`[WAITLIST] Email resend warning for ${email}:`, e?.message);
-      });
+      // Await email sending to guarantee delivery
+      const emailRes = await sendWaitlistWelcomeEmail(email, existing.orderNumber, cleanPhone || existing.phone, userRole || existing.userRole, interest || existing.interest);
 
       res.json({
         success: true,
         alreadyRegistered: true,
+        emailSent: emailRes.success,
+        emailError: emailRes.error,
         message: `Mẹ/bạn đã đăng ký giữ chỗ trước đó rồi nhé! Bạn đang giữ số thứ tự ưu đãi #${existing.orderNumber}. Thư xác nhận đã được gửi đến hòm thư ${email}.`,
         orderNumber: existing.orderNumber,
         total,
@@ -136,14 +163,15 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
       orderNumber: newOrderNumber,
     });
 
-    // Send personalized confirmation & thank-you email
-    sendWaitlistWelcomeEmail(email, newOrderNumber, cleanPhone, userRole, interest).catch(e => {
-      console.warn(`[WAITLIST] Welcome email dispatch warning for ${email}:`, e?.message);
-    });
+    // Await email delivery so server doesn't cut off before SMTP completes
+    const emailRes = await sendWaitlistWelcomeEmail(email, newOrderNumber, cleanPhone, userRole, interest);
+    console.log(`[WAITLIST] Email dispatch to ${email} result:`, emailRes);
 
     res.status(201).json({
       success: true,
       alreadyRegistered: false,
+      emailSent: emailRes.success,
+      emailError: emailRes.error,
       message: `Chúc mừng mẹ/bạn! Đã giữ chỗ thành công thành viên thứ #${newEntry.orderNumber} nhận 5 Xu Tiên Phong. Thư xác nhận đã được gửi đến email ${email}!`,
       orderNumber: newEntry.orderNumber,
       total: newOrderNumber,

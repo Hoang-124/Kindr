@@ -16,26 +16,20 @@ function createTransporter() {
     return null;
   }
 
-  // Use built-in Gmail service if using gmail.com
-  if (host.includes('gmail.com') || user.includes('@gmail.com')) {
-    return nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user,
-        pass: pass.replace(/\s+/g, ''), // auto-remove spaces from Google App Password (e.g. "abcd efgh ijkl mnop")
-      },
-    });
-  }
-
   return nodemailer.createTransport({
-    host,
-    port,
-    secure: port === 465,
+    host: host || 'smtp.gmail.com',
+    port: port || 465,
+    secure: (port === 465 || !port),
     auth: {
       user,
-      pass,
+      pass: pass.replace(/\s+/g, ''),
     },
-  });
+    // Force IPv4 to prevent cloud timeouts
+    family: 4,
+    connectionTimeout: 15000,
+    greetingTimeout: 10000,
+    socketTimeout: 20000,
+  } as any);
 }
 
 /**
@@ -550,7 +544,7 @@ export async function sendWaitlistWelcomeEmail(
     const sender = (process.env.SMTP_USER || ENV.SMTP_USER || '').trim();
     try {
       await transporter.sendMail({
-        from: ENV.EMAIL_FROM || `Kindr <${sender}>`,
+        from: sender ? `"Kindr Ecosystem" <${sender}>` : (ENV.EMAIL_FROM || 'Kindr Ecosystem <ht20041975@gmail.com>'),
         to: toEmail,
         subject,
         text: `Xin chào ${roleName},\n\nCảm ơn bạn đã đăng ký nhận thông báo sớm của Kindr tại Đà Nẵng!\nSố thứ tự ưu đãi của bạn: ${formattedCode}.\nQuà tặng khởi động: 5 Xu Tiên Phong (tương đương 50.000 VNĐ) sẽ được kích hoạt vào ví tài khoản của bạn ngay khi ứng dụng chính thức ra mắt.\n\nTrân trọng,\nĐội ngũ Kindr Đà Nẵng`,

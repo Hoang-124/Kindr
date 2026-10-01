@@ -445,7 +445,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (waitlistProgressBar) waitlistProgressBar.style.width = `${percentage}%`;
     if (waitlistRemaining) waitlistRemaining.textContent = `${remaining} suất`;
     if (navWaitlistCount) navWaitlistCount.textContent = total;
-    if (goldCardSerial) goldCardSerial.textContent = `MÃ THẺ: #KD-${String(total).padStart(4, '0')}/${target}`;
+    const currentCardNum = total === 0 ? 1 : total;
+    if (goldCardSerial) goldCardSerial.textContent = `MÃ THẺ: #KD-${String(currentCardNum).padStart(4, '0')}/${target}`;
   }
 
   async function fetchStats() {
@@ -506,7 +507,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const json = await response.json();
 
         if (response.ok && json.success) {
-          const orderNum = json.orderNumber || json.data?.orderNumber || 144;
+          const orderNum = json.orderNumber || json.data?.orderNumber || 1;
           const newTotal = json.total || json.data?.total;
           const newTarget = json.target || json.data?.target || 200;
           const newRemaining = json.remaining ?? json.data?.remaining ?? (newTarget - newTotal);
