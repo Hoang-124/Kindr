@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const API_BASE_URL = window.KINDR_API_URL || 
     (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
       ? 'http://localhost:5000'
-      : 'https://kindr-api.onrender.com');
+      : 'https://kindr-backend-rl2t.onrender.com');
 
   // ================= 1. 4-STEP INTERACTIVE FLOW CONTROLLER =================
   let currentFlowStep = 1;
