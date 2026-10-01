@@ -2,7 +2,7 @@
 // ========================================
 // WALLET, TOP-UP & WITHDRAW ROUTES
 // ========================================
-import { Router, Response } from 'express';
+import { Router, Request, Response } from 'express';
 import { z } from 'zod';
 import { User } from '../models/User';
 import { TopupOrder } from '../models/TopupOrder';
@@ -197,7 +197,7 @@ router.post('/topup', requireAuth, async (req: AuthRequest, res: Response): Prom
  * Universal Webhook receiver for automated banking (SePay / Casso / PayOS / VietQR IPN).
  * Verifies secret header/key and credits Xu atomically upon real incoming bank transfer.
  */
-router.post('/webhook', async (req, res): Promise<void> => {
+router.post('/webhook', async (req: Request, res: Response): Promise<void> => {
   try {
     const webhookSecret = req.headers['x-webhook-secret'] ||
       req.headers['authorization'] ||
