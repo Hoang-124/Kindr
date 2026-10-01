@@ -12,6 +12,7 @@
     "server": "npm --prefix server run dev",
     "server:seed": "npm --prefix server run seed",
     "pitch": "npx serve pitch-page -p 3000",
+    "build": "echo 'Landing page ready'",
     "typecheck": "npm --prefix client exec tsc --noEmit && npm --prefix server exec tsc --noEmit"
   },
   "devDependencies": {
