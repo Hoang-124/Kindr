@@ -20,7 +20,7 @@ const WaitlistSchema = z.object({
     .default('')
     .refine(
       (val) => !val || /^(0[35789])[0-9]{8}$/.test(val.replace(/[\s.-]/g, '')),
-      'Số điện thoại / Zalo phải là 10 chữ số Việt Nam hợp lệ (ví dụ: 0905123456)'
+      'Số điện thoại liên hệ phải là 10 chữ số Việt Nam hợp lệ (ví dụ: 0905123456)'
     ),
   userRole: z.string().optional().default('mother'),
   interest: z.string().optional().default('Đồ chơi vận động'),
