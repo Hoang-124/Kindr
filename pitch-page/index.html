@@ -130,7 +130,7 @@
 
       <!-- Right Column: Interactive App Stage (iPhone Simulator + Side Companion) -->
       <div class="hero-right">
-        <div class="hero-showcase-cluster">
+        <div class="hero-showcase-cluster" id="interactive-simulator">
           <!-- Flow Narrator & Walkthrough Controller Box (Placed Beside Phone) -->
           <aside class="flow-narrator-panel" id="flowNarratorPanel">
             <div class="narrator-meta-row">
@@ -1097,7 +1097,7 @@
       </div>
 
       <!-- Right: Compact Top FAQ -->
-      <div class="faq-compact-box">
+      <div class="faq-compact-box" id="faq">
         <div class="section-pill">Hỏi Nhanh Đáp Gọn</div>
         <h3 class="faq-box-title">Giải Đáp Cốt Lõi</h3>
 
@@ -1136,22 +1136,105 @@
     </div>
   </section>
 
-  <!-- ================= COMPACT FOOTER ================= -->
-  <footer class="footer-compact">
-    <div class="container footer-row">
-      <div class="footer-left">
-        <div class="brand-logo">
-          <div class="brand-symbol">
-            <img src="kindr-mascot.png" alt="Kindr Bear Mascot" class="brand-mascot-img">
+  <!-- ================= EDITORIAL ARTISANAL FOOTER ================= -->
+  <footer class="site-footer" id="siteFooter">
+    <div class="footer-top-glow"></div>
+    <div class="container footer-content-wrap">
+      <!-- Main Footer Columns Grid -->
+      <div class="footer-main-grid">
+        <!-- Col 1: Brand & Origin -->
+        <div class="footer-brand-col">
+          <div class="footer-brand-header">
+            <div class="brand-symbol">
+              <img src="kindr-mascot.png" alt="Kindr Bear Mascot" class="brand-mascot-img">
+            </div>
+            <span class="brand-text">Kindr</span>
+            <span class="brand-badge-pill">Đà Nẵng Pilot 2026</span>
           </div>
-          <span class="brand-text">Kindr</span>
+          <p class="footer-mission-text">
+            Nền tảng hoán đổi đồ mẹ &amp; bé siêu cục bộ. Xóa bỏ mặc cả bằng <strong>Ví Xu nội bộ</strong>, triệt tiêu 100% rủi ro nhờ thuật toán <strong>Ký Quỹ Song Phương Double Escrow</strong> và <strong>6 Giờ kiểm định tại nhà</strong>.
+          </p>
+          <div class="footer-trust-chips">
+            <span class="trust-chip">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              100% Bảo Chứng Ký Quỹ
+            </span>
+            <span class="trust-chip">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              6H Safeful Time Tại Nhà
+            </span>
+            <span class="trust-chip">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="10" r="3"/><path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z"/></svg>
+              Bán Kính &lt; 1km Đà Nẵng
+            </span>
+          </div>
         </div>
-        <p class="footer-tagline">"Swap baby items. Save money. Build a kinder future." — Dự án Khởi nghiệp SV FPT University Đà Nẵng.</p>
+
+        <!-- Col 2: Core Solution Navigation -->
+        <div class="footer-nav-col">
+          <h4 class="footer-col-title">Giải Pháp &amp; Cơ Chế</h4>
+          <ul class="footer-nav-list">
+            <li><a href="#signature-bento">Ký Quỹ Kép (Double Escrow)</a></li>
+            <li><a href="#interactive-simulator">Quy Trình 4 Bước Hoán Đổi</a></li>
+            <li><a href="#founding-card">Gói Quà 5 Xu Tiên Phong</a></li>
+            <li><a href="#faq">Trạm 0 Xu &amp; 6H Safeful Time</a></li>
+            <li><a href="#waitlist">Đăng Ký Danh Sách Chờ 200 Mẹ</a></li>
+          </ul>
+        </div>
+
+        <!-- Col 3: Pilot Regions & Community -->
+        <div class="footer-nav-col">
+          <h4 class="footer-col-title">Khu Vực Triển Khai</h4>
+          <ul class="footer-nav-list">
+            <li><span class="footer-region-item"><strong>Mốc 50 Mẹ:</strong> Q. Hải Châu</span></li>
+            <li><span class="footer-region-item"><strong>Mốc 100 Mẹ:</strong> Sơn Trà &amp; Thanh Khê</span></li>
+            <li><span class="footer-region-item"><strong>Mốc 150 Mẹ:</strong> Ngũ Hành Sơn &amp; FPT City</span></li>
+            <li><span class="footer-region-item text-coral"><strong>Mốc 200 Mẹ:</strong> Mở App Toàn TP</span></li>
+            <li><a href="#waitlist" class="footer-region-cta">Góp 1 Suất Mở Mốc Sớm ↗</a></li>
+          </ul>
+        </div>
+
+        <!-- Col 4: Project Info & Attribution -->
+        <div class="footer-nav-col">
+          <h4 class="footer-col-title">Khởi Nghiệp Sinh Viên</h4>
+          <p class="footer-team-desc">
+            Dự án Khởi nghiệp Sáng tạo bởi sinh viên <strong>FPT University Đà Nẵng</strong> nhằm giải quyết áp lực kinh tế và rác thải đồ dùng mẹ bé.
+          </p>
+          <div class="footer-contact-links">
+            <a href="https://github.com/Hoang-124/Kindr" target="_blank" rel="noopener" class="footer-social-link">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+              <span>GitHub: Hoang-124/Kindr ↗</span>
+            </a>
+            <div class="footer-contact-item">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+              <span>Email: support@kindr.vn</span>
+            </div>
+            <div class="footer-contact-item">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 14 14"/></svg>
+              <span>Đà Nẵng, Việt Nam • 2026</span>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div class="footer-right">
-        <a href="https://github.com/Hoang-124/Kindr" target="_blank" rel="noopener">GitHub: Hoang-124/Kindr ↗</a>
-        <a href="#waitlist">Đăng Ký Danh Sách Chờ 200 Mẹ</a>
+      <!-- Footer Divider -->
+      <div class="footer-divider-line"></div>
+
+      <!-- Footer Bottom Copyright & Badges -->
+      <div class="footer-bottom-row">
+        <div class="footer-copy-text">
+          © 2026 <strong>Kindr Ecosystem</strong>. Dự án Khởi nghiệp SV FPT University Đà Nẵng — <em>"Swap baby items. Save money. Build a kinder future."</em>
+        </div>
+        <div class="footer-bottom-actions">
+          <span class="footer-security-pill">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            SSL 256-bit Encrypted
+          </span>
+          <a href="#navbar" class="footer-back-top-btn" id="btnBackToTop" aria-label="Cuộn lên đầu trang">
+            <span>Lên đầu trang</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>
+          </a>
+        </div>
       </div>
     </div>
   </footer>

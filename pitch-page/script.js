@@ -711,25 +711,19 @@ document.addEventListener('DOMContentLoaded', () => {
     requestAnimationFrame(step);
   }
 
-  // Animate stats when visible
-  let animatedStats = false;
-  const statTrio = document.querySelector('.hero-stat-trio');
-  if (statTrio && 'IntersectionObserver' in window) {
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting && !animatedStats) {
-          animatedStats = true;
-          const navCount = document.getElementById('navWaitlistCount');
-          if (navCount) {
-            animateValue(navCount, 0, 143, 1400);
-          }
-        }
-      });
-    }, { threshold: 0.2 });
-    observer.observe(statTrio);
-  }
-
   // ================= 10. CLOCK PULSE ON SAFEFUL TIME =================
   const clockIcons = document.querySelectorAll('.bento-clock-badge, .bento-clock-icon');
   clockIcons.forEach(icon => icon.classList.add('clock-pulse-active'));
+
+  // ================= 11. FOOTER BACK TO TOP SMOOTH SCROLL =================
+  const btnBackToTop = document.getElementById('btnBackToTop');
+  if (btnBackToTop) {
+    btnBackToTop.addEventListener('click', (e) => {
+      e.preventDefault();
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    });
+  }
 });
