@@ -542,6 +542,7 @@ export async function sendWaitlistWelcomeEmail(
   const resendKey = process.env.RESEND_API_KEY || (ENV as any).RESEND_API_KEY;
   if (resendKey) {
     try {
+      const resendFrom = process.env.RESEND_FROM || 'Kindr Ecosystem <onboarding@resend.dev>';
       const response = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: {
@@ -549,7 +550,7 @@ export async function sendWaitlistWelcomeEmail(
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          from: 'Kindr Ecosystem <onboarding@resend.dev>',
+          from: resendFrom,
           to: [toEmail],
           subject,
           html: htmlContent,
@@ -560,10 +561,32 @@ export async function sendWaitlistWelcomeEmail(
         console.log(`[EMAIL SERVICE] Resend HTTP email delivered to: ${toEmail} (${formattedCode})`);
         return { success: true };
       } else {
-        console.warn(`[EMAIL SERVICE] Resend API error:`, data);
+        console.warn(`[EMAIL SERVICE] Resend API error for ${toEmail}:`, data);
       }
     } catch (err: any) {
       console.error(`[EMAIL SERVICE] Resend fetch error:`, err?.message);
+    }
+  }
+
+  // 2. Google Apps Script Webhook (Port 443 HTTPS - Sends via personal Gmail to ANY recipient without domain verification)
+  const googleScriptUrl = process.env.GOOGLE_SCRIPT_URL;
+  if (googleScriptUrl) {
+    try {
+      const response = await fetch(googleScriptUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          to: toEmail,
+          subject,
+          html: htmlContent,
+        }),
+      });
+      if (response.ok) {
+        console.log(`[EMAIL SERVICE] Google Script Webhook delivered to: ${toEmail} (${formattedCode})`);
+        return { success: true };
+      }
+    } catch (err: any) {
+      console.error(`[EMAIL SERVICE] Google Script Webhook error:`, err?.message);
     }
   }
 
