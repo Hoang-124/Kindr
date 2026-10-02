@@ -331,6 +331,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const successModalOverlay = document.getElementById('successModalOverlay');
   const successModalClose = document.getElementById('successModalClose');
+  const successModalTitle = document.getElementById('successModalTitle');
+  const successModalDesc = document.getElementById('successModalDesc');
   const successOrderBadge = document.getElementById('successOrderBadge');
   const roleInputs = document.querySelectorAll('input[name="userRole"]');
   const labelEmail = document.getElementById('labelEmail');
@@ -513,8 +515,18 @@ document.addEventListener('DOMContentLoaded', () => {
           const newRemaining = json.remaining ?? json.data?.remaining ?? (newTarget - newTotal);
           const newPct = json.percentage ?? json.data?.percentage ?? Math.round((newTotal / newTarget) * 100);
 
-          if (successOrderBadge) {
-            successOrderBadge.textContent = `Mẹ/Bạn là thành viên thứ #${orderNum}`;
+          if (json.alreadyRegistered) {
+            if (successModalTitle) successModalTitle.textContent = 'Mẹ/Bạn Đã Đăng Ký Giữ Chỗ Trước Đó!';
+            if (successOrderBadge) successOrderBadge.textContent = `Số thứ tự ưu đãi của bạn: #${orderNum}`;
+            if (successModalDesc) {
+              successModalDesc.innerHTML = `Bạn đã giữ chỗ thành công trước đó với vị trí thành viên <strong>#${orderNum}</strong> (gói quà 5 Xu Tiên Phong đã được lưu trữ an toàn). Hiện tại cộng đồng đã có <strong>${newTotal}/200 Mẹ</strong> tham gia!`;
+            }
+          } else {
+            if (successModalTitle) successModalTitle.textContent = 'Chào Mừng Mẹ Tiên Phong!';
+            if (successOrderBadge) successOrderBadge.textContent = `Mẹ/Bạn là thành viên thứ #${orderNum}`;
+            if (successModalDesc) {
+              successModalDesc.innerHTML = `Kindr đã ghi nhận thông tin và gửi email xác nhận đến hòm thư của bạn! Gói quà <strong>5 Xu Tiên Phong</strong> đã được khóa bảo lưu và sẽ gửi thẳng vào ví tài khoản của bạn khi hệ thống chính thức mở cửa!`;
+            }
           }
 
           // Immediate real-time UI progression!
