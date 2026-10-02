@@ -45,8 +45,8 @@ document.addEventListener('DOMContentLoaded', () => {
     },
     3: {
       pill: 'Bước 3: Nhận Đồ',
-      title: 'Đang tạm khóa Xu ký quỹ & Mở khóa liên hệ SĐT/Zalo',
-      body: 'Hệ thống mở khóa số điện thoại và Zalo của Mẹ Mai Thảo để hai mẹ tự hẹn gặp giao nhận tiện đường. Nhận xong bấm Bắt đầu 6H.'
+      title: 'Đang tạm khóa Xu ký quỹ & Mở khóa số điện thoại liên hệ',
+      body: 'Hệ thống mở khóa số điện thoại của Mẹ Mai Thảo để hai mẹ tự hẹn gặp giao nhận tiện đường. Nhận xong bấm Bắt đầu 6H.'
     },
     4: {
       pill: 'Bước 4: 6H Kiểm Định',
@@ -388,7 +388,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     const vnPhoneRegex = /^(0[35789])[0-9]{8}$/;
     if (!vnPhoneRegex.test(trimmed)) {
-      setPhoneError('Số điện thoại / Zalo phải gồm 10 chữ số (ví dụ: 0905123456)');
+      setPhoneError('Số điện thoại phải gồm 10 chữ số (ví dụ: 0905123456)');
       return false;
     }
     setPhoneError('');
@@ -554,31 +554,6 @@ document.addEventListener('DOMContentLoaded', () => {
       } finally {
         submitBtn.disabled = false;
         submitBtn.innerHTML = origBtn;
-      }
-    });
-  }
-
-  // ================= ZALO SHARE BUTTON =================
-  const btnShareZalo = document.getElementById('btnShareZalo');
-  const zaloToast = document.getElementById('zaloToast');
-
-  if (btnShareZalo) {
-    btnShareZalo.addEventListener('click', () => {
-      const shareText = `Mẹ/chị ơi, con vừa đăng ký nhận thông báo và giữ chỗ nhận 5 Xu Tiên Phong (trị giá 50.000đ) trên nền tảng Kindr để đổi đồ dùng em bé an toàn tại Đà Nẵng nè! Con gửi mẹ xem thử nè: ${window.location.origin}`;
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(shareText).then(() => {
-          if (zaloToast) {
-            zaloToast.classList.add('show');
-            setTimeout(() => zaloToast.classList.remove('show'), 4000);
-          }
-          setTimeout(() => {
-            window.open('https://zalo.me', '_blank');
-          }, 500);
-        }).catch(() => {
-          window.open('https://zalo.me', '_blank');
-        });
-      } else {
-        window.open('https://zalo.me', '_blank');
       }
     });
   }
