@@ -145,7 +145,7 @@ export const ProfileScreen = () => {
           <View style={styles.lockedBanner}>
             <MascotIcon size={50} mood="sleeping" dialogue="Tài khoản tạm ngưng do vi phạm khiếu nại quá 3 lần." />
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4 }}>
-              <ShieldAlert size={18} color="#D97706" />
+              <ShieldAlert size={18} color={COLORS.warning} />
               <Text style={styles.lockedTitle}>Tài Khoản Tạm Khóa Giao Dịch</Text>
             </View>
             <Text style={styles.lockedSub}>Vui lòng liên hệ BQT Kindr qua Zalo/Email để hỗ trợ mở khóa.</Text>
@@ -161,10 +161,10 @@ export const ProfileScreen = () => {
                 name={currentUser.name}
                 size={74}
                 showBorder
-                borderColor="#78C2AD"
+                borderColor={COLORS.secondary}
               />
               <View style={styles.verifiedBadge}>
-                <Sparkles size={11} color="#FFFFFF" />
+                <Sparkles size={11} color={COLORS.surface} />
               </View>
             </View>
 
@@ -175,8 +175,10 @@ export const ProfileScreen = () => {
                   style={styles.editProfilePill}
                   scaleTo={0.93}
                   onPress={() => navigateTo('EditProfile')}
+                  accessibilityRole="button"
+                  accessibilityLabel="Chỉnh sửa thông tin cá nhân"
                 >
-                  <Pencil size={11} color={COLORS.primary} />
+                  <Pencil size={12} color={COLORS.primary} />
                   <Text style={styles.editProfilePillText}>Sửa</Text>
                 </ScalePressable>
               </View>
@@ -186,7 +188,7 @@ export const ProfileScreen = () => {
                   <Text style={styles.memberBadgeText}>Mẹ Bỉm Kindr</Text>
                 </View>
                 <View style={styles.ratingBadge}>
-                  <Star size={11} color={COLORS.accentGold} fill={COLORS.accentGold} />
+                  <Star size={12} color={COLORS.accentGold} fill={COLORS.accentGold} />
                   <Text style={styles.ratingScore}>{currentUser.reputationScore ? currentUser.reputationScore.toFixed(1) : '5.0'}</Text>
                   <Text style={styles.ratingCount}>({currentUser.ratingCount || 0})</Text>
                 </View>
@@ -199,14 +201,14 @@ export const ProfileScreen = () => {
               )}
 
               <View style={styles.metaRow}>
-                <Phone size={12} color={COLORS.textMuted} />
+                <Phone size={13} color={COLORS.textMuted} />
                 <Text style={[styles.phoneText, !currentUser.phone && styles.phonePlaceholder]}>
                   {displayPhone}
                 </Text>
               </View>
 
               <View style={styles.metaRow}>
-                <MapPin size={12} color={COLORS.primary} />
+                <MapPin size={13} color={COLORS.primary} />
                 <Text style={styles.locationText} numberOfLines={1}>
                   {displayLocation}
                 </Text>
@@ -255,7 +257,7 @@ export const ProfileScreen = () => {
             </View>
 
             <View style={styles.civBadgePill}>
-              <Sparkles size={11} color={COLORS.primary} />
+              <Sparkles size={12} color={COLORS.primary} />
               <Text style={styles.civBadgeText}>Tín nhiệm cao</Text>
             </View>
           </View>
@@ -264,7 +266,7 @@ export const ProfileScreen = () => {
           <View style={styles.bentoWalletCard}>
             <View style={styles.bentoHeader}>
               <View style={styles.bentoIconBgGold}>
-                <Coins size={18} color="#D97706" />
+                <Coins size={18} color={COLORS.warning} />
               </View>
               <Text style={styles.bentoCardTitle}>Ví Xu của mẹ</Text>
             </View>
@@ -280,8 +282,10 @@ export const ProfileScreen = () => {
                 style={styles.walletTopupBtn}
                 scaleTo={0.93}
                 onPress={() => navigateTo('TopUp')}
+                accessibilityRole="button"
+                accessibilityLabel="Nạp thêm Xu"
               >
-                <Plus size={13} color="#FFFFFF" strokeWidth={3} />
+                <Plus size={14} color={COLORS.surface} strokeWidth={3} />
                 <Text style={styles.walletTopupText}>Nạp Xu</Text>
               </ScalePressable>
 
@@ -289,8 +293,10 @@ export const ProfileScreen = () => {
                 style={styles.walletWithdrawBtn}
                 scaleTo={0.93}
                 onPress={() => navigateTo('Withdraw')}
+                accessibilityRole="button"
+                accessibilityLabel="Rút Xu về tài khoản"
               >
-                <TrendingUp size={13} color="#8C6500" strokeWidth={2.5} />
+                <TrendingUp size={14} color={COLORS.onTertiaryContainer} strokeWidth={2.5} />
                 <Text style={styles.walletWithdrawText}>Rút</Text>
               </ScalePressable>
             </View>
@@ -301,8 +307,14 @@ export const ProfileScreen = () => {
         <View style={styles.actionsPanel}>
           <Text style={styles.actionsTitle}>Tiện ích & Quản lý</Text>
           <View style={styles.actionsGrid}>
-            <ScalePressable style={styles.actionRow} scaleTo={0.98} onPress={() => navigateTo('MyPosts')}>
-              <View style={[styles.actionIconBox, { backgroundColor: '#FFE8E8' }]}>
+            <ScalePressable 
+              style={styles.actionRow} 
+              scaleTo={0.98} 
+              onPress={() => navigateTo('MyPosts')}
+              accessibilityRole="button"
+              accessibilityLabel="Xem bài đăng của mẹ"
+            >
+              <View style={[styles.actionIconBox, { backgroundColor: COLORS.primaryLight }]}>
                 <FileText size={18} color={COLORS.primary} />
               </View>
               <View style={styles.actionTextContainer}>
@@ -312,9 +324,15 @@ export const ProfileScreen = () => {
               <ChevronRight size={18} color={COLORS.outline} />
             </ScalePressable>
 
-            <ScalePressable style={styles.actionRow} scaleTo={0.98} onPress={() => navigateTo('Notification')}>
-              <View style={[styles.actionIconBox, { backgroundColor: '#E0F7F5' }]}>
-                <Bell size={18} color="#26A69A" />
+            <ScalePressable 
+              style={styles.actionRow} 
+              scaleTo={0.98} 
+              onPress={() => navigateTo('Notification')}
+              accessibilityRole="button"
+              accessibilityLabel="Xem thông báo của mẹ"
+            >
+              <View style={[styles.actionIconBox, { backgroundColor: COLORS.secondaryLight }]}>
+                <Bell size={18} color={COLORS.secondaryDark} />
               </View>
               <View style={styles.actionTextContainer}>
                 <Text style={styles.actionLabel}>Thông báo của mẹ</Text>
@@ -323,9 +341,15 @@ export const ProfileScreen = () => {
               <ChevronRight size={18} color={COLORS.outline} />
             </ScalePressable>
 
-            <ScalePressable style={styles.actionRow} scaleTo={0.98} onPress={() => navigateTo('DonationStation')}>
-              <View style={[styles.actionIconBox, { backgroundColor: '#FFF3D6' }]}>
-                <Gift size={18} color="#D97706" />
+            <ScalePressable 
+              style={styles.actionRow} 
+              scaleTo={0.98} 
+              onPress={() => navigateTo('DonationStation')}
+              accessibilityRole="button"
+              accessibilityLabel="Mở Trạm tặng đồ Kindr 0 Xu"
+            >
+              <View style={[styles.actionIconBox, { backgroundColor: COLORS.tertiaryContainer }]}>
+                <Gift size={18} color={COLORS.warning} />
               </View>
               <View style={styles.actionTextContainer}>
                 <Text style={styles.actionLabel}>Trạm tặng đồ Kindr (0 Xu)</Text>
@@ -334,9 +358,15 @@ export const ProfileScreen = () => {
               <ChevronRight size={18} color={COLORS.outline} />
             </ScalePressable>
 
-            <ScalePressable style={styles.actionRow} scaleTo={0.98} onPress={() => navigateTo('Settings')}>
-              <View style={[styles.actionIconBox, { backgroundColor: '#F1F5F9' }]}>
-                <Settings size={18} color="#475569" />
+            <ScalePressable 
+              style={styles.actionRow} 
+              scaleTo={0.98} 
+              onPress={() => navigateTo('Settings')}
+              accessibilityRole="button"
+              accessibilityLabel="Mở cài đặt và bảo mật"
+            >
+              <View style={[styles.actionIconBox, { backgroundColor: COLORS.surfaceSubtle }]}>
+                <Settings size={18} color={COLORS.textMuted} />
               </View>
               <View style={styles.actionTextContainer}>
                 <Text style={styles.actionLabel}>Cài đặt & Bảo mật</Text>
@@ -392,7 +422,7 @@ export const ProfileScreen = () => {
                       <View style={styles.txDetails}>
                         <Text style={styles.txName} numberOfLines={1}>{tx.productName}</Text>
                         <View style={styles.txStatusRow}>
-                          <Lock size={11} color="#D97706" />
+                          <Lock size={11} color={COLORS.warning} />
                           <Text style={styles.txStatusText}>{tx.status === 'in_safeful_time' ? 'Bảo chứng 6h kiểm định' : 'Tạm khóa Escrow'}</Text>
                         </View>
                       </View>
@@ -501,7 +531,8 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   lockedSub: {
-    fontSize: 11,
+    fontSize: 12,
+    lineHeight: 16,
     color: COLORS.onErrorContainer,
     textAlign: 'center',
     marginTop: 2,
@@ -531,7 +562,7 @@ const styles = StyleSheet.create({
     borderRadius: 31,
     backgroundColor: COLORS.surfaceDim,
     borderWidth: 2,
-    borderColor: '#FFE8E8',
+    borderColor: COLORS.primaryLight,
   },
   avatarPlaceholder: {
     width: 62,
@@ -541,25 +572,25 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
-    borderColor: '#FFE8E8',
+    borderColor: COLORS.primaryLight,
   },
   avatarInitial: {
     fontSize: 26,
     fontWeight: '800',
-    color: '#FFFFFF',
+    color: COLORS.surface,
   },
   verifiedBadge: {
     position: 'absolute',
     bottom: -2,
     right: -2,
-    backgroundColor: '#FF6B6B',
+    backgroundColor: COLORS.primary,
     width: 20,
     height: 20,
     borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
-    borderColor: '#FFFFFF',
+    borderColor: COLORS.surface,
   },
   profileMainInfo: {
     flex: 1,
@@ -583,23 +614,24 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 4,
     paddingHorizontal: 8,
-    paddingVertical: 3,
-    backgroundColor: '#FFE8E8',
+    paddingVertical: 4,
+    minHeight: 44,
+    backgroundColor: COLORS.primaryLight,
     borderRadius: RADIUS.full,
     borderWidth: 1,
     borderColor: 'rgba(255, 107, 107, 0.2)',
   },
   editProfilePillText: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '700',
     color: COLORS.primary,
   },
   bioSnippet: {
-    fontSize: 11,
+    fontSize: 12,
     fontStyle: 'italic',
     color: COLORS.textMuted,
     marginBottom: 6,
-    lineHeight: 16,
+    lineHeight: 18,
   },
   badgeRow: {
     flexDirection: 'row',
@@ -608,13 +640,13 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   memberBadge: {
-    backgroundColor: '#FFE8E8',
-    paddingHorizontal: 7,
-    paddingVertical: 2,
+    backgroundColor: COLORS.primaryLight,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
     borderRadius: RADIUS.full,
   },
   memberBadgeText: {
-    fontSize: 10,
+    fontSize: 12,
     fontWeight: '700',
     color: COLORS.primary,
   },
@@ -622,20 +654,20 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 3,
-    backgroundColor: '#FFF8E1',
+    backgroundColor: COLORS.coinBackground,
     borderWidth: 1,
     borderColor: 'rgba(255, 209, 102, 0.35)',
-    paddingHorizontal: 7,
-    paddingVertical: 2,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
     borderRadius: RADIUS.full,
   },
   ratingScore: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '700',
-    color: '#8C6500',
+    color: COLORS.onTertiaryContainer,
   },
   ratingCount: {
-    fontSize: 10,
+    fontSize: 12,
     color: COLORS.textMuted,
   },
   metaRow: {
@@ -645,7 +677,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   phoneText: {
-    fontSize: 11,
+    fontSize: 12,
     color: COLORS.textMuted,
     fontWeight: '500',
   },
@@ -654,7 +686,7 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
   },
   locationText: {
-    fontSize: 11,
+    fontSize: 12,
     color: COLORS.text,
     fontWeight: '500',
     flex: 1,
@@ -680,7 +712,7 @@ const styles = StyleSheet.create({
     color: COLORS.text,
   },
   statLabel: {
-    fontSize: 11,
+    fontSize: 12,
     color: COLORS.textMuted,
     fontWeight: '500',
     marginTop: 2,
@@ -699,7 +731,7 @@ const styles = StyleSheet.create({
   },
   bentoCivCard: {
     flex: 1,
-    backgroundColor: '#FFF7F7',
+    backgroundColor: COLORS.primaryLight,
     borderRadius: 18,
     borderWidth: 1,
     borderColor: 'rgba(255, 107, 107, 0.16)',
@@ -708,7 +740,7 @@ const styles = StyleSheet.create({
   },
   bentoWalletCard: {
     flex: 1,
-    backgroundColor: '#FFFDF5',
+    backgroundColor: COLORS.coinBackground,
     borderRadius: 18,
     borderWidth: 1,
     borderColor: 'rgba(255, 209, 102, 0.35)',
@@ -725,7 +757,7 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: '#FFE8E8',
+    backgroundColor: COLORS.surface,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -733,12 +765,12 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: '#FFF8E1',
+    backgroundColor: COLORS.surface,
     alignItems: 'center',
     justifyContent: 'center',
   },
   bentoCardTitle: {
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '700',
     color: COLORS.text,
   },
@@ -774,7 +806,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 3,
-    backgroundColor: '#FFE8E8',
+    backgroundColor: COLORS.surface,
     alignSelf: 'flex-start',
     paddingHorizontal: 8,
     paddingVertical: 3,
@@ -782,7 +814,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   civBadgeText: {
-    fontSize: 10,
+    fontSize: 12,
     fontWeight: '700',
     color: COLORS.primary,
   },
@@ -795,15 +827,15 @@ const styles = StyleSheet.create({
   walletXuBig: {
     fontSize: 24,
     fontWeight: '800',
-    color: '#B45309',
+    color: COLORS.onTertiaryContainer,
   },
   walletXuUnit: {
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '700',
-    color: '#D97706',
+    color: COLORS.warning,
   },
   walletVndEstimated: {
-    fontSize: 10,
+    fontSize: 12,
     color: COLORS.textMuted,
     fontWeight: '600',
     marginBottom: 8,
@@ -815,7 +847,7 @@ const styles = StyleSheet.create({
   },
   walletTopupBtn: {
     flex: 1,
-    height: 32,
+    minHeight: 44,
     borderRadius: RADIUS.full,
     backgroundColor: COLORS.primary,
     flexDirection: 'row',
@@ -825,15 +857,15 @@ const styles = StyleSheet.create({
     ...SHADOWS.btn,
   },
   walletTopupText: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: COLORS.surface,
   },
   walletWithdrawBtn: {
     flex: 1,
-    height: 32,
+    minHeight: 44,
     borderRadius: RADIUS.full,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: COLORS.surface,
     borderWidth: 1,
     borderColor: 'rgba(217, 119, 6, 0.3)',
     flexDirection: 'row',
@@ -842,9 +874,9 @@ const styles = StyleSheet.create({
     gap: 3,
   },
   walletWithdrawText: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '700',
-    color: '#8C6500',
+    color: COLORS.onTertiaryContainer,
   },
 
   // Actions Panel (Services & Features)
@@ -870,6 +902,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 10,
+    minHeight: 48,
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(0, 0, 0, 0.04)',
   },
@@ -885,31 +918,35 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   actionLabel: {
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '700',
     color: COLORS.text,
   },
   actionSubLabel: {
-    fontSize: 11,
+    fontSize: 12,
     color: COLORS.textMuted,
     marginTop: 2,
   },
   hotBadge: {
-    backgroundColor: '#FFE5EC',
+    backgroundColor: COLORS.primaryLight,
     paddingHorizontal: 6,
-    paddingVertical: 1,
+    paddingVertical: 2,
     borderRadius: 6,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 2,
   },
   hotBadgeText: {
-    fontSize: 9,
+    fontSize: 12,
     fontWeight: '700',
-    color: '#E63946',
+    color: COLORS.error,
   },
 
   headerSettingsBtn: {
+    minWidth: 44,
+    minHeight: 44,
+    justifyContent: 'center',
+    alignItems: 'center',
     padding: 6,
     borderRadius: RADIUS.full,
   },
@@ -919,9 +956,10 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
   },
   adminPortalCard: {
-    backgroundColor: '#D97706',
+    backgroundColor: COLORS.warning,
     borderRadius: 18,
     padding: SPACING.md,
+    minHeight: 52,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -935,61 +973,62 @@ const styles = StyleSheet.create({
   adminPortalTitle: {
     fontSize: 14,
     fontWeight: '800',
-    color: '#FFFFFF',
+    color: COLORS.surface,
   },
   adminActiveBadge: {
     backgroundColor: 'rgba(255, 255, 255, 0.25)',
     paddingHorizontal: 6,
-    paddingVertical: 1,
+    paddingVertical: 2,
     borderRadius: RADIUS.full,
   },
   adminActiveBadgeText: {
-    color: '#FFFFFF',
-    fontSize: 9,
+    color: COLORS.surface,
+    fontSize: 12,
     fontWeight: '800',
   },
   adminPortalSubtitle: {
-    fontSize: 11,
+    fontSize: 12,
     color: 'rgba(255, 255, 255, 0.9)',
     marginTop: 2,
   },
   adminPortalCardInactive: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: COLORS.surface,
     borderRadius: 18,
     padding: SPACING.md,
+    minHeight: 52,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     borderWidth: 1.5,
-    borderColor: '#FEF3C7',
+    borderColor: COLORS.tertiaryContainer,
     ...SHADOWS.card,
   },
   adminShieldIconBoxInactive: {
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: '#FEF3C7',
+    backgroundColor: COLORS.tertiaryContainer,
     justifyContent: 'center',
     alignItems: 'center',
   },
   adminPortalTitleInactive: {
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '800',
     color: COLORS.text,
   },
   adminInactiveBadge: {
-    backgroundColor: '#FEF3C7',
+    backgroundColor: COLORS.tertiaryContainer,
     paddingHorizontal: 6,
-    paddingVertical: 1,
+    paddingVertical: 2,
     borderRadius: RADIUS.full,
   },
   adminInactiveBadgeText: {
-    color: '#D97706',
-    fontSize: 9,
+    color: COLORS.warning,
+    fontSize: 12,
     fontWeight: '800',
   },
   adminPortalSubtitleInactive: {
-    fontSize: 10,
+    fontSize: 12,
     color: COLORS.textMuted,
     marginTop: 2,
   },
@@ -997,15 +1036,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 2,
-    backgroundColor: '#FFF5F5',
+    backgroundColor: COLORS.primaryLight,
     paddingHorizontal: 8,
     paddingVertical: 4,
+    minHeight: 44,
     borderRadius: RADIUS.full,
     borderWidth: 1,
     borderColor: 'rgba(255, 107, 107, 0.2)',
   },
   openAdminBtnPillText: {
-    fontSize: 10,
+    fontSize: 12,
     fontWeight: '700',
     color: COLORS.primary,
   },
@@ -1022,7 +1062,7 @@ const styles = StyleSheet.create({
   },
   tabHeader: {
     flexDirection: 'row',
-    backgroundColor: '#F8F9FA',
+    backgroundColor: COLORS.background,
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(0, 0, 0, 0.06)',
     paddingHorizontal: 4,
@@ -1030,6 +1070,7 @@ const styles = StyleSheet.create({
   },
   tabBtn: {
     flex: 1,
+    minHeight: 44,
     paddingVertical: 10,
     paddingHorizontal: 4,
     alignItems: 'center',
@@ -1038,12 +1079,12 @@ const styles = StyleSheet.create({
   tabBtnActive: {
     borderBottomWidth: 2.5,
     borderBottomColor: COLORS.primary,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: COLORS.surface,
     borderTopLeftRadius: 8,
     borderTopRightRadius: 8,
   },
   tabText: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '600',
     color: COLORS.outline,
     textAlign: 'center',
@@ -1062,22 +1103,23 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.md,
   },
   emptyTitle: {
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '700',
     color: COLORS.text,
     marginTop: 8,
     marginBottom: 4,
   },
   emptySub: {
-    fontSize: 11,
+    fontSize: 12,
     color: COLORS.textMuted,
     textAlign: 'center',
-    lineHeight: 16,
+    lineHeight: 18,
   },
   txRow: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 8,
+    minHeight: 48,
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(0, 0, 0, 0.05)',
     gap: SPACING.sm,
@@ -1092,7 +1134,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   txName: {
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '700',
     color: COLORS.onSurface,
   },
@@ -1103,12 +1145,12 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   txStatusText: {
-    fontSize: 11,
-    color: '#D97706',
+    fontSize: 12,
+    color: COLORS.warning,
     fontWeight: '600',
   },
   txDate: {
-    fontSize: 10,
+    fontSize: 12,
     color: COLORS.outline,
     marginTop: 2,
   },
@@ -1118,7 +1160,7 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   txSuccessTag: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '700',
     color: COLORS.primary,
   },
@@ -1133,7 +1175,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   reviewerName: {
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '700',
     color: COLORS.onSurface,
   },
@@ -1142,13 +1184,13 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   reviewComment: {
-    fontSize: 11,
+    fontSize: 12,
     color: COLORS.onSurfaceVariant,
     fontStyle: 'italic',
     marginTop: 3,
   },
   reviewDate: {
-    fontSize: 9,
+    fontSize: 12,
     color: COLORS.outline,
     marginTop: 2,
   },
@@ -1165,8 +1207,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
+    minHeight: 48,
     paddingVertical: 12,
-    backgroundColor: '#FFF5F5',
+    backgroundColor: COLORS.primaryLight,
     borderWidth: 1,
     borderColor: 'rgba(230, 57, 70, 0.2)',
     borderRadius: RADIUS.full,
@@ -1174,7 +1217,7 @@ const styles = StyleSheet.create({
     ...SHADOWS.soft,
   },
   logoutText: {
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '700',
     color: COLORS.error,
   },

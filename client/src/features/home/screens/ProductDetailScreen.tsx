@@ -292,8 +292,11 @@ export const ProductDetailScreen = () => {
           style={styles.headerCircleBtn} 
           onPress={() => navigation.goBack()}
           activeOpacity={0.8}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          accessibilityRole="button"
+          accessibilityLabel="Quay lại danh sách sản phẩm"
         >
-          <ArrowLeft size={20} color="#0F172A" strokeWidth={2.4} />
+          <ArrowLeft size={20} color={COLORS.text} strokeWidth={2.4} />
         </TouchableOpacity>
 
         <View style={styles.headerRightGroup}>
@@ -302,6 +305,9 @@ export const ProductDetailScreen = () => {
               style={[styles.headerCircleBtn, styles.headerTrashBtn]}
               onPress={handleAdminReject}
               activeOpacity={0.8}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              accessibilityRole="button"
+              accessibilityLabel="Xóa hoặc từ chối bài đăng"
             >
               <Trash2 size={18} color={COLORS.error} strokeWidth={2.2} />
             </TouchableOpacity>
@@ -311,11 +317,14 @@ export const ProductDetailScreen = () => {
             style={styles.headerCircleBtn}
             onPress={() => setIsFavorite(!isFavorite)}
             activeOpacity={0.8}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            accessibilityRole="button"
+            accessibilityLabel={isFavorite ? "Bỏ yêu thích sản phẩm" : "Thêm vào danh sách yêu thích"}
           >
             <Heart 
               size={20} 
-              color={isFavorite ? '#EF4444' : '#0F172A'} 
-              fill={isFavorite ? '#EF4444' : 'transparent'} 
+              color={isFavorite ? COLORS.error : COLORS.text} 
+              fill={isFavorite ? COLORS.error : 'transparent'} 
               strokeWidth={2.2}
             />
           </TouchableOpacity>
@@ -334,7 +343,7 @@ export const ProductDetailScreen = () => {
           {/* Multiple Images Indicator / Thumbnails */}
           {allImages.length > 1 && (
             <View style={styles.imageIndicatorBadge}>
-              <ImageIcon size={12} color="#FFFFFF" />
+              <ImageIcon size={12} color={COLORS.surface} />
               <Text style={styles.imageIndicatorText}>{selectedImageIndex + 1} / {allImages.length}</Text>
             </View>
           )}
@@ -352,6 +361,8 @@ export const ProductDetailScreen = () => {
                 ]}
                 onPress={() => setSelectedImageIndex(idx)}
                 activeOpacity={0.8}
+                accessibilityRole="button"
+                accessibilityLabel={`Xem ảnh thứ ${idx + 1}`}
               >
                 <Image source={{ uri: imgUri }} style={styles.thumbImage} resizeMode="cover" />
               </TouchableOpacity>
@@ -368,7 +379,7 @@ export const ProductDetailScreen = () => {
           {product.status === 'pending_approval' && (
             <View style={styles.pendingAdminBanner}>
               <View style={styles.pendingBadgeIconWrap}>
-                <ShieldAlert size={20} color="#D97706" />
+                <ShieldAlert size={20} color={COLORS.warning} />
               </View>
               <View style={{ flex: 1 }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 2 }}>
@@ -395,7 +406,7 @@ export const ProductDetailScreen = () => {
                   <Text style={styles.catMiniPillText}>{getCategoryLabel(product.category)}</Text>
                 </View>
                 <Text style={styles.dotSeparator}>•</Text>
-                <Clock size={12} color="#64748B" />
+                <Clock size={12} color={COLORS.textMuted} />
                 <Text style={styles.timeAgoText}>{product.timeAgo || 'Vừa đăng'}</Text>
               </View>
 
@@ -417,7 +428,7 @@ export const ProductDetailScreen = () => {
           <View style={styles.tagsContainer}>
             {/* Condition Tag */}
             <View style={styles.conditionTag}>
-              <Sparkles size={13} color="#059669" strokeWidth={2.2} />
+              <Sparkles size={13} color={COLORS.success} strokeWidth={2.2} />
               <Text style={styles.conditionText}>
                 Mới {product.condition}% • {product.condition === '90' ? 'Rất mới' : product.condition === '80' ? 'Dùng tốt' : 'Nguyên vẹn'}
               </Text>
@@ -426,14 +437,14 @@ export const ProductDetailScreen = () => {
             {/* Age Range Tag */}
             {Boolean(product.ageRange) && (
               <View style={styles.ageTag}>
-                <Smile size={13} color="#2563EB" strokeWidth={2.2} />
+                <Smile size={13} color={COLORS.secondary} strokeWidth={2.2} />
                 <Text style={styles.ageText}>Bé {product.ageRange}</Text>
               </View>
             )}
 
             {/* Location Tag */}
             <View style={styles.locationTag}>
-              <MapPin size={13} color="#E11D48" strokeWidth={2.2} />
+              <MapPin size={13} color={COLORS.primary} strokeWidth={2.2} />
               <Text style={styles.locationText} numberOfLines={1}>
                 {product.locationName.split(',')[0]} • {product.distance || '< 2 km'}
               </Text>
@@ -462,12 +473,12 @@ export const ProductDetailScreen = () => {
             <View style={styles.sellerInfo}>
               <View style={styles.sellerNameRow}>
                 <Text style={styles.sellerName}>{product.sellerName}</Text>
-                <BadgeCheck size={16} color="#0284C7" />
+                <BadgeCheck size={16} color={COLORS.secondary} />
               </View>
 
               <View style={styles.sellerMetaRow}>
                 <View style={styles.starRatingBadge}>
-                  <Star size={12} color="#F59E0B" fill="#F59E0B" />
+                  <Star size={12} color={COLORS.warning} fill={COLORS.warning} />
                   <Text style={styles.starRatingText}>4.9</Text>
                 </View>
 
@@ -477,7 +488,7 @@ export const ProductDetailScreen = () => {
               </View>
 
               <View style={styles.sellerSecurityRow}>
-                <Phone size={11} color="#64748B" />
+                <Phone size={12} color={COLORS.textMuted} />
                 <Text style={styles.sellerSecurityText}>
                   {currentUser?.role === 'admin' 
                     ? `SĐT: ${product.sellerPhone || 'Chưa cập nhật'} (Admin thấy)`
@@ -504,14 +515,14 @@ export const ProductDetailScreen = () => {
                 <View style={styles.escrowPointRow}>
                   <View style={styles.escrowPointDot} />
                   <Text style={styles.escrowPointText}>
-                    <Text style={{ fontWeight: '700', color: '#9A3412' }}>Người bán đã cọc:</Text> {sellerSafeFee} Xu Safe Fee (10%) cam kết chất lượng chuẩn mô tả.
+                    <Text style={{ fontWeight: '700', color: COLORS.onTertiaryContainer }}>Người bán đã cọc:</Text> {sellerSafeFee} Xu Safe Fee (10%) cam kết chất lượng chuẩn mô tả.
                   </Text>
                 </View>
 
                 <View style={styles.escrowPointRow}>
                   <View style={styles.escrowPointDot} />
                   <Text style={styles.escrowPointText}>
-                    <Text style={{ fontWeight: '700', color: '#9A3412' }}>6 Giờ Kiểm Định Tại Nhà:</Text> Mẹ nhận đồ mang về kiểm tra an toàn, hết 6h mới giải ngân Xu.
+                    <Text style={{ fontWeight: '700', color: COLORS.onTertiaryContainer }}>6 Giờ Kiểm Định Tại Nhà:</Text> Mẹ nhận đồ mang về kiểm tra an toàn, hết 6h mới giải ngân Xu.
                   </Text>
                 </View>
               </View>
@@ -529,6 +540,8 @@ export const ProductDetailScreen = () => {
                 style={[styles.adminActionBtn, styles.adminRejectBtn]}
                 onPress={handleAdminReject}
                 activeOpacity={0.8}
+                accessibilityRole="button"
+                accessibilityLabel="Từ chối duyệt bài đăng này"
               >
                 <X size={18} color={COLORS.error} />
                 <Text style={styles.adminRejectBtnText}>Từ chối tin</Text>
@@ -537,23 +550,25 @@ export const ProductDetailScreen = () => {
                 style={[styles.adminActionBtn, styles.adminApproveBtn]}
                 onPress={handleAdminApprove}
                 activeOpacity={0.8}
+                accessibilityRole="button"
+                accessibilityLabel="Phê duyệt bài đăng ngay"
               >
-                <Check size={18} color="#ffffff" strokeWidth={2.5} />
+                <Check size={18} color={COLORS.surface} strokeWidth={2.5} />
                 <Text style={styles.adminApproveBtnText}>Duyệt bài đăng ngay</Text>
               </TouchableOpacity>
             </View>
           ) : (
             <View style={styles.userPendingNotice}>
-              <ShieldAlert size={18} color="#D97706" />
+              <ShieldAlert size={18} color={COLORS.warning} />
               <Text style={styles.userPendingNoticeText}>Tin đăng đang chờ Kindr duyệt trước khi mở giao dịch.</Text>
             </View>
           )
         ) : currentUser?.id === product.sellerId ? (
           product.status === 'escrow' ? (
             <View style={styles.ownProductBottomRow}>
-              <View style={[styles.ownProductNotice, { backgroundColor: '#FEF3C7', borderColor: '#FDE68A' }]}>
-                <Sparkles size={16} color="#D97706" />
-                <Text style={[styles.ownProductNoticeText, { color: '#B45309', fontWeight: '700' }]}>
+              <View style={[styles.ownProductNotice, { backgroundColor: COLORS.tertiaryContainer, borderColor: COLORS.accentGold }]}>
+                <Sparkles size={16} color={COLORS.warning} />
+                <Text style={[styles.ownProductNoticeText, { color: COLORS.onTertiaryContainer, fontWeight: '700' }]}>
                   Đang trong giao dịch đổi đồ
                 </Text>
               </View>
@@ -561,15 +576,17 @@ export const ProductDetailScreen = () => {
                 style={[styles.editMyPostBtn, { backgroundColor: COLORS.primary }]}
                 onPress={() => navigation.navigate('TransactionDetail', { id: relatedTx?.id || product.id })}
                 activeOpacity={0.8}
+                accessibilityRole="button"
+                accessibilityLabel="Xem chi tiết giao dịch đang diễn ra"
               >
-                <Text style={[styles.editMyPostBtnText, { color: '#FFFFFF' }]}>Xem giao dịch</Text>
+                <Text style={[styles.editMyPostBtnText, { color: COLORS.surface }]}>Xem giao dịch</Text>
               </TouchableOpacity>
             </View>
           ) : product.status === 'completed' ? (
             <View style={styles.ownProductBottomRow}>
-              <View style={[styles.ownProductNotice, { backgroundColor: '#DCFCE7', borderColor: '#BBF7D0', flex: 1 }]}>
-                <Check size={16} color="#15803D" />
-                <Text style={[styles.ownProductNoticeText, { color: '#15803D', fontWeight: '700' }]}>
+              <View style={[styles.ownProductNotice, { backgroundColor: COLORS.secondaryLight, borderColor: COLORS.secondary, flex: 1 }]}>
+                <Check size={16} color={COLORS.success} />
+                <Text style={[styles.ownProductNoticeText, { color: COLORS.success, fontWeight: '700' }]}>
                   Món đồ này đã hoàn tất đổi đồ thành công
                 </Text>
               </View>
@@ -577,13 +594,15 @@ export const ProductDetailScreen = () => {
           ) : (
             <View style={styles.ownProductBottomRow}>
               <View style={styles.ownProductNotice}>
-                <Sparkles size={16} color="#059669" />
+                <Sparkles size={16} color={COLORS.success} />
                 <Text style={styles.ownProductNoticeText}>Món đồ này do bạn đăng bán</Text>
               </View>
               <TouchableOpacity
                 style={styles.editMyPostBtn}
                 onPress={() => navigation.navigate('EditPost', { postId: product.id })}
                 activeOpacity={0.8}
+                accessibilityRole="button"
+                accessibilityLabel="Chỉnh sửa bài đăng"
               >
                 <Text style={styles.editMyPostBtnText}>Chỉnh sửa tin</Text>
               </TouchableOpacity>
@@ -596,8 +615,10 @@ export const ProductDetailScreen = () => {
               style={styles.chatBtn}
               onPress={handleOpenChat}
               activeOpacity={0.8}
+              accessibilityRole="button"
+              accessibilityLabel="Nhắn tin với người bán"
             >
-              <MessageSquare size={18} color="#334155" strokeWidth={2.2} />
+              <MessageSquare size={18} color={COLORS.text} strokeWidth={2.2} />
               <Text style={styles.chatBtnText}>Nhắn tin</Text>
             </TouchableOpacity>
 
@@ -605,10 +626,10 @@ export const ProductDetailScreen = () => {
             <View
               style={[
                 styles.primaryExchangeBtn,
-                { backgroundColor: '#94A3B8', opacity: 0.95 }
+                { backgroundColor: COLORS.textDim, opacity: 0.95 }
               ]}
             >
-              <Lock size={16} color="#FFFFFF" strokeWidth={2.4} />
+              <Lock size={16} color={COLORS.surface} strokeWidth={2.4} />
               <Text style={styles.primaryExchangeBtnText}>
                 Đang trong bảo chứng (Đã có người đổi)
               </Text>
@@ -619,10 +640,10 @@ export const ProductDetailScreen = () => {
             <View
               style={[
                 styles.primaryExchangeBtn,
-                { backgroundColor: '#10B981', flex: 1 }
+                { backgroundColor: COLORS.success, flex: 1 }
               ]}
             >
-              <Check size={16} color="#FFFFFF" strokeWidth={2.4} />
+              <Check size={16} color={COLORS.surface} strokeWidth={2.4} />
               <Text style={styles.primaryExchangeBtnText}>
                 Món đồ đã được trao đổi
               </Text>
@@ -635,8 +656,10 @@ export const ProductDetailScreen = () => {
               style={styles.chatBtn}
               onPress={handleOpenChat}
               activeOpacity={0.8}
+              accessibilityRole="button"
+              accessibilityLabel="Nhắn tin với người bán"
             >
-              <MessageSquare size={18} color="#334155" strokeWidth={2.2} />
+              <MessageSquare size={18} color={COLORS.text} strokeWidth={2.2} />
               <Text style={styles.chatBtnText}>Nhắn tin</Text>
             </TouchableOpacity>
 
@@ -649,7 +672,7 @@ export const ProductDetailScreen = () => {
               onPress={handleRequestItem}
               activeOpacity={0.85}
             >
-              <Sparkles size={18} color="#FFFFFF" strokeWidth={2.4} />
+              <Sparkles size={18} color={COLORS.surface} strokeWidth={2.4} />
               <Text style={styles.primaryExchangeBtnText}>
                 {isCharity ? "Nhận Quà 0 Xu" : `Đổi Đồ Ngay • ${product.price} Xu`}
               </Text>
@@ -677,7 +700,7 @@ export const ProductDetailScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: COLORS.background,
   },
   errorContainer: {
     alignItems: 'center',
@@ -710,7 +733,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.94)',
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#0F172A',
+    shadowColor: COLORS.text,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.12,
     shadowRadius: 8,
@@ -719,8 +742,8 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255, 255, 255, 0.85)',
   },
   headerTrashBtn: {
-    backgroundColor: 'rgba(254, 226, 226, 0.95)',
-    borderColor: '#FCA5A5',
+    backgroundColor: COLORS.errorContainer,
+    borderColor: COLORS.onErrorContainer,
   },
   scrollContent: {
     paddingBottom: 220,
@@ -728,7 +751,7 @@ const styles = StyleSheet.create({
   heroContainer: {
     width: '100%',
     height: 360,
-    backgroundColor: '#E2E8F0',
+    backgroundColor: COLORS.surfaceDim,
     position: 'relative',
   },
   heroImage: {
@@ -742,7 +765,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 5,
-    backgroundColor: 'rgba(15, 23, 42, 0.75)',
+    backgroundColor: COLORS.scrim,
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12,
@@ -750,7 +773,7 @@ const styles = StyleSheet.create({
   imageIndicatorText: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: COLORS.surface,
   },
   thumbnailStrip: {
     flexDirection: 'row',
@@ -766,8 +789,8 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     overflow: 'hidden',
     borderWidth: 2,
-    borderColor: '#FFFFFF',
-    shadowColor: '#000',
+    borderColor: COLORS.surface,
+    shadowColor: COLORS.text,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.15,
     shadowRadius: 4,
@@ -782,14 +805,14 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   detailsCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: COLORS.surface,
     borderTopLeftRadius: 32,
     borderTopRightRadius: 32,
     marginTop: -26,
     paddingTop: 12,
     paddingHorizontal: 20,
     minHeight: 500,
-    shadowColor: '#0F172A',
+    shadowColor: COLORS.text,
     shadowOffset: { width: 0, height: -4 },
     shadowOpacity: 0.05,
     shadowRadius: 12,
@@ -799,7 +822,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 4,
     borderRadius: 2,
-    backgroundColor: '#E2E8F0',
+    backgroundColor: COLORS.border,
     alignSelf: 'center',
     marginBottom: 16,
   },
@@ -816,42 +839,42 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   catMiniPill: {
-    backgroundColor: '#F1F5F9',
+    backgroundColor: COLORS.surfaceSubtle,
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 6,
   },
   catMiniPillText: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '700',
-    color: '#475569',
+    color: COLORS.textMuted,
   },
   dotSeparator: {
     fontSize: 12,
-    color: '#94A3B8',
+    color: COLORS.textDim,
   },
   timeAgoText: {
     fontSize: 12,
-    color: '#64748B',
+    color: COLORS.textMuted,
     fontWeight: '500',
   },
   productTitle: {
     fontSize: 22,
     fontWeight: '800',
-    color: '#0F172A',
+    color: COLORS.text,
     letterSpacing: -0.3,
     lineHeight: 28,
   },
   priceCard: {
-    backgroundColor: '#FFFBEB',
+    backgroundColor: COLORS.coinBackground,
     borderWidth: 1.5,
-    borderColor: '#FDE68A',
+    borderColor: COLORS.coinBorder,
     borderRadius: 18,
     paddingHorizontal: 14,
     paddingVertical: 8,
     alignItems: 'flex-end',
     justifyContent: 'center',
-    shadowColor: '#D97706',
+    shadowColor: COLORS.warning,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
     shadowRadius: 6,
@@ -865,18 +888,18 @@ const styles = StyleSheet.create({
   priceNumText: {
     fontSize: 21,
     fontWeight: '900',
-    color: '#B45309',
+    color: COLORS.onTertiaryContainer,
   },
   priceUnitText: {
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '700',
-    color: '#B45309',
+    color: COLORS.onTertiaryContainer,
     marginTop: 2,
   },
   priceSubVnd: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '600',
-    color: '#D97706',
+    color: COLORS.warning,
     marginTop: 1,
   },
   tagsContainer: {
@@ -889,9 +912,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 5,
-    backgroundColor: '#ECFDF5',
+    backgroundColor: COLORS.secondaryLight,
     borderWidth: 1,
-    borderColor: '#A7F3D0',
+    borderColor: COLORS.secondary,
     paddingHorizontal: 11,
     paddingVertical: 6,
     borderRadius: 12,
@@ -899,15 +922,15 @@ const styles = StyleSheet.create({
   conditionText: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#065F46',
+    color: COLORS.secondaryContainer,
   },
   ageTag: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 5,
-    backgroundColor: '#EFF6FF',
+    backgroundColor: COLORS.surfaceSubtle,
     borderWidth: 1,
-    borderColor: '#BFDBFE',
+    borderColor: COLORS.border,
     paddingHorizontal: 11,
     paddingVertical: 6,
     borderRadius: 12,
@@ -915,15 +938,15 @@ const styles = StyleSheet.create({
   ageText: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#1D4ED8',
+    color: COLORS.secondary,
   },
   locationTag: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 5,
-    backgroundColor: '#FFF1F2',
+    backgroundColor: COLORS.primaryLight,
     borderWidth: 1,
-    borderColor: '#FECDD3',
+    borderColor: 'rgba(255, 107, 107, 0.25)',
     paddingHorizontal: 11,
     paddingVertical: 6,
     borderRadius: 12,
@@ -932,14 +955,14 @@ const styles = StyleSheet.create({
   locationText: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#BE123C',
+    color: COLORS.primaryDark,
   },
   descriptionSection: {
-    backgroundColor: '#F8FAFC',
+    backgroundColor: COLORS.background,
     borderRadius: 18,
     padding: 16,
     borderWidth: 1,
-    borderColor: '#EEF2F6',
+    borderColor: COLORS.divider,
     marginBottom: 18,
   },
   sectionHeaderRow: {
@@ -951,23 +974,23 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 14,
     fontWeight: '700',
-    color: '#334155',
+    color: COLORS.text,
   },
   descriptionText: {
     fontSize: 14,
     lineHeight: 22,
-    color: '#475569',
+    color: COLORS.textMuted,
   },
   sellerCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: COLORS.surface,
     borderRadius: 20,
     padding: 16,
     borderWidth: 1,
-    borderColor: '#F1F5F9',
+    borderColor: COLORS.border,
     marginBottom: 20,
-    shadowColor: '#0F172A',
+    shadowColor: COLORS.text,
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.04,
     shadowRadius: 10,
@@ -981,7 +1004,7 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: '#E2E8F0',
+    backgroundColor: COLORS.surfaceDim,
   },
   onlineBadge: {
     position: 'absolute',
@@ -990,9 +1013,9 @@ const styles = StyleSheet.create({
     width: 13,
     height: 13,
     borderRadius: 7,
-    backgroundColor: '#10B981',
+    backgroundColor: COLORS.success,
     borderWidth: 2,
-    borderColor: '#FFFFFF',
+    borderColor: COLORS.surface,
   },
   sellerInfo: {
     flex: 1,
@@ -1005,7 +1028,7 @@ const styles = StyleSheet.create({
   sellerName: {
     fontSize: 15,
     fontWeight: '800',
-    color: '#0F172A',
+    color: COLORS.text,
   },
   sellerMetaRow: {
     flexDirection: 'row',
@@ -1021,18 +1044,18 @@ const styles = StyleSheet.create({
   starRatingText: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#D97706',
+    color: COLORS.warning,
   },
   reputationPill: {
-    backgroundColor: '#FEF3C7',
+    backgroundColor: COLORS.tertiaryContainer,
     paddingHorizontal: 7,
     paddingVertical: 2,
     borderRadius: 6,
   },
   reputationPillText: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '700',
-    color: '#92400E',
+    color: COLORS.onTertiaryContainer,
   },
   sellerSecurityRow: {
     flexDirection: 'row',
@@ -1041,14 +1064,14 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   sellerSecurityText: {
-    fontSize: 11,
-    color: '#64748B',
+    fontSize: 12,
+    color: COLORS.textMuted,
     fontWeight: '500',
   },
   escrowCard: {
-    backgroundColor: '#FFF7ED',
+    backgroundColor: COLORS.coinBackground,
     borderWidth: 1.5,
-    borderColor: '#FED7AA',
+    borderColor: COLORS.coinBorder,
     borderRadius: 22,
     padding: 16,
     marginBottom: 28,
@@ -1063,23 +1086,23 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: '#FFEDD5',
+    backgroundColor: COLORS.surface,
     alignItems: 'center',
     justifyContent: 'center',
   },
   escrowTitle: {
     fontSize: 14,
     fontWeight: '800',
-    color: '#9A3412',
+    color: COLORS.onTertiaryContainer,
   },
   escrowSubtitle: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '500',
-    color: '#C2410C',
+    color: COLORS.warning,
     marginTop: 1,
   },
   escrowBody: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: COLORS.surface,
     borderRadius: 14,
     padding: 12,
     gap: 8,
@@ -1100,20 +1123,20 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 12,
     lineHeight: 18,
-    color: '#475569',
+    color: COLORS.textMuted,
   },
   bottomBar: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: 'rgba(255, 255, 255, 0.98)',
+    backgroundColor: COLORS.surface,
     paddingHorizontal: 16,
     paddingTop: 12,
     paddingBottom: Platform.OS === 'ios' ? 36 : 18,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(0, 0, 0, 0.06)',
-    shadowColor: '#0F172A',
+    borderTopColor: COLORS.border,
+    shadowColor: COLORS.text,
     shadowOffset: { width: 0, height: -4 },
     shadowOpacity: 0.06,
     shadowRadius: 10,
@@ -1127,24 +1150,26 @@ const styles = StyleSheet.create({
   },
   chatBtn: {
     height: 52,
+    minWidth: 44,
     paddingHorizontal: 20,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#F1F5F9',
+    backgroundColor: COLORS.surfaceSubtle,
     borderRadius: 26,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: COLORS.border,
     gap: 6,
   },
   chatBtnText: {
     fontSize: 14,
     fontWeight: '700',
-    color: '#334155',
+    color: COLORS.text,
   },
   primaryExchangeBtn: {
     flex: 1,
     height: 52,
+    minWidth: 44,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -1158,13 +1183,13 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   charityExchangeBtn: {
-    backgroundColor: '#10B981',
-    shadowColor: '#10B981',
+    backgroundColor: COLORS.success,
+    shadowColor: COLORS.success,
   },
   primaryExchangeBtnText: {
     fontSize: 15,
     fontWeight: '800',
-    color: '#FFFFFF',
+    color: COLORS.surface,
     letterSpacing: -0.2,
   },
   adminActionBar: {
@@ -1174,6 +1199,7 @@ const styles = StyleSheet.create({
   adminActionBtn: {
     flex: 1,
     height: 50,
+    minWidth: 44,
     borderRadius: 25,
     flexDirection: 'row',
     alignItems: 'center',
@@ -1181,9 +1207,9 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   adminRejectBtn: {
-    backgroundColor: '#FEE2E2',
+    backgroundColor: COLORS.errorContainer,
     borderWidth: 1,
-    borderColor: '#FCA5A5',
+    borderColor: COLORS.onErrorContainer,
   },
   adminRejectBtnText: {
     color: COLORS.error,
@@ -1191,10 +1217,10 @@ const styles = StyleSheet.create({
     fontSize: 13,
   },
   adminApproveBtn: {
-    backgroundColor: '#10B981',
+    backgroundColor: COLORS.success,
   },
   adminApproveBtnText: {
-    color: '#FFFFFF',
+    color: COLORS.surface,
     fontWeight: '700',
     fontSize: 13,
   },
@@ -1208,7 +1234,7 @@ const styles = StyleSheet.create({
   userPendingNoticeText: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#D97706',
+    color: COLORS.warning,
   },
   ownProductBottomRow: {
     gap: 10,
@@ -1217,9 +1243,9 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#ECFDF5',
+    backgroundColor: COLORS.secondaryLight,
     borderWidth: 1,
-    borderColor: '#A7F3D0',
+    borderColor: COLORS.secondary,
     paddingVertical: 12,
     paddingHorizontal: 14,
     borderRadius: RADIUS.full,
@@ -1228,10 +1254,11 @@ const styles = StyleSheet.create({
   ownProductNoticeText: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#059669',
+    color: COLORS.secondaryDark,
   },
   editMyPostBtn: {
     backgroundColor: COLORS.primary,
+    minHeight: 44,
     paddingVertical: 12,
     paddingHorizontal: 18,
     borderRadius: RADIUS.full,
@@ -1240,16 +1267,16 @@ const styles = StyleSheet.create({
     ...SHADOWS.btn,
   },
   editMyPostBtnText: {
-    color: '#ffffff',
+    color: COLORS.surface,
     fontSize: 13,
     fontWeight: '700',
   },
   pendingAdminBanner: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    backgroundColor: '#FFFBEB',
+    backgroundColor: COLORS.coinBackground,
     borderWidth: 1,
-    borderColor: '#FDE68A',
+    borderColor: COLORS.coinBorder,
     borderRadius: 18,
     padding: 14,
     gap: 12,
@@ -1259,30 +1286,30 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: '#FEF3C7',
+    backgroundColor: COLORS.tertiaryContainer,
     alignItems: 'center',
     justifyContent: 'center',
   },
   pendingAdminTitle: {
     fontSize: 14,
     fontWeight: '700',
-    color: '#92400E',
+    color: COLORS.onTertiaryContainer,
   },
   pendingPill: {
-    backgroundColor: '#FEF3C7',
+    backgroundColor: COLORS.tertiaryContainer,
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 10,
   },
   pendingPillText: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '700',
-    color: '#B45309',
+    color: COLORS.warning,
   },
   pendingAdminSubtitle: {
     fontSize: 12,
     lineHeight: 18,
-    color: '#78350F',
+    color: COLORS.onTertiaryContainer,
     marginTop: 2,
   },
 });

@@ -20,6 +20,7 @@ import { addMessage, markAsRead, upsertChatSession, setChatMessages } from '../s
 import * as chatService from '../../../services/chatService';
 import { socketService } from '../../../services/socketService';
 import { COLORS, SPACING, RADIUS, TYPOGRAPHY, SHADOWS } from '../../../theme';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ScreenContainer from '../../../components/layout/ScreenContainer';
 import Header from '../../../components/layout/Header';
 import { 
@@ -52,9 +53,15 @@ export const ChatDetailScreen = () => {
   // Redux store state
   const chats = useAppSelector((state) => state.chat.chats);
   const currentUser = useAppSelector((state) => state.auth.currentUser);
+  const insets = useSafeAreaInsets();
 
   // Find existing session in memory
   const chat = chats.find(c => c.id === chatId || c.productId === chatId);
+
+  const chatRef = useRef(chat);
+  chatRef.current = chat;
+  const currentUserRef = useRef(currentUser);
+  currentUserRef.current = currentUser;
 
   const [loading, setLoading] = useState<boolean>(!chat);
   const [error, setError] = useState<string | null>(null);
@@ -75,7 +82,7 @@ export const ChatDetailScreen = () => {
     let isMounted = true;
 
     const loadChatData = async () => {
-      if (!chat) {
+      if (!chatRef.current) {
         setLoading(true);
       }
       setError(null);
@@ -94,7 +101,7 @@ export const ChatDetailScreen = () => {
         }
       } catch (err: any) {
         console.warn('[ChatDetail] Failed to load chat:', err);
-        if (isMounted && !chat) {
+        if (isMounted && !chatRef.current) {
           setError('Không tìm thấy cuộc trò chuyện này hoặc hội thoại đã được lưu trữ.');
         }
       } finally {
@@ -110,16 +117,17 @@ export const ChatDetailScreen = () => {
 
     // Join Socket room
     socketService.emit('join_chat', { chatId });
-    if (chat?.id && chat.id !== chatId) {
-      socketService.emit('join_chat', { chatId: chat.id });
+    if (chatRef.current?.id && chatRef.current.id !== chatId) {
+      socketService.emit('join_chat', { chatId: chatRef.current.id });
     }
 
     // Listen to real-time incoming messages
     const handleIncomingMessage = (payload: any) => {
       const msg = payload.message || payload;
       const targetChatId = payload.chatId || msg.chatId;
+      const currentChat = chatRef.current;
 
-      if (targetChatId === chatId || (chat && targetChatId === chat.id)) {
+      if (targetChatId === chatId || (currentChat && targetChatId === currentChat.id)) {
         const rawSenderId = msg.senderId?._id?.toString() || msg.senderId?.toString() || msg.senderId;
         const newMsg: Message = {
           id: msg.id || msg._id || ('m_' + Date.now() + Math.random()),
@@ -131,7 +139,7 @@ export const ChatDetailScreen = () => {
         };
 
         dispatch(addMessage({
-          chatId: chat?.id || chatId,
+          chatId: currentChat?.id || chatId,
           message: newMsg,
           tempId: msg.tempId || payload.tempId,
         }));
@@ -141,7 +149,9 @@ export const ChatDetailScreen = () => {
 
     // Listen to typing indicators
     const handleUserTyping = (data: any) => {
-      if ((data.chatId === chatId || (chat && data.chatId === chat.id)) && data.userId !== currentUser?.id) {
+      const currentChat = chatRef.current;
+      const myId = currentUserRef.current?.id;
+      if ((data.chatId === chatId || (currentChat && data.chatId === currentChat.id)) && data.userId !== myId) {
         setIsPartnerTyping(true);
         if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
         typingTimeoutRef.current = setTimeout(() => {
@@ -151,7 +161,9 @@ export const ChatDetailScreen = () => {
     };
 
     const handleUserStopTyping = (data: any) => {
-      if ((data.chatId === chatId || (chat && data.chatId === chat.id)) && data.userId !== currentUser?.id) {
+      const currentChat = chatRef.current;
+      const myId = currentUserRef.current?.id;
+      if ((data.chatId === chatId || (currentChat && data.chatId === currentChat.id)) && data.userId !== myId) {
         setIsPartnerTyping(false);
         if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
       }
@@ -165,8 +177,9 @@ export const ChatDetailScreen = () => {
       isMounted = false;
       if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
       socketService.emit('leave_chat', { chatId });
-      if (chat?.id && chat.id !== chatId) {
-        socketService.emit('leave_chat', { chatId: chat.id });
+      const currentChat = chatRef.current;
+      if (currentChat?.id && currentChat.id !== chatId) {
+        socketService.emit('leave_chat', { chatId: currentChat.id });
       }
       socketService.off('message_received', handleIncomingMessage);
       socketService.off('user_typing', handleUserTyping);
@@ -237,6 +250,36 @@ export const ChatDetailScreen = () => {
     }
   };
 
+  // Determine roles & partner avatar
+  const isSellerOfChat = chat?.sellerId === currentUser?.id;
+  const otherPartyName = isSellerOfChat ? (chat?.buyerName || 'Mẹ bỉm') : (chat?.sellerName || 'Mẹ bỉm');
+  const otherPartyAvatar = isSellerOfChat ? chat?.buyerAvatar : chat?.sellerAvatar;
+  const roleLabel = isSellerOfChat ? 'Mẹ cho đồ' : 'Mẹ muốn đổi';
+
+  // Deduplicate messages for pristine rendering (prevents duplicate bubbles on echo)
+  const uniqueMessages = useMemo(() => {
+    const raw = chat?.messages || [];
+    const seenIds = new Set<string>();
+    const seenContentTime = new Map<string, number>();
+    const result: Message[] = [];
+
+    for (const m of raw) {
+      if (!m || !m.content) continue;
+      if (seenIds.has(m.id)) continue;
+      seenIds.add(m.id);
+
+      const contentKey = `${m.senderId}_${m.content.trim()}`;
+      const msgTime = new Date(m.timestamp).getTime();
+      const prevTime = seenContentTime.get(contentKey);
+      if (prevTime !== undefined && Math.abs(msgTime - prevTime) < 5000) {
+        continue;
+      }
+      seenContentTime.set(contentKey, msgTime);
+      result.push(m);
+    }
+    return result;
+  }, [chat?.messages]);
+
   // Loading State
   if (loading && !chat) {
     return (
@@ -276,36 +319,6 @@ export const ChatDetailScreen = () => {
       </ScreenContainer>
     );
   }
-
-  // Determine roles & partner avatar
-  const isSellerOfChat = chat.sellerId === currentUser?.id;
-  const otherPartyName = isSellerOfChat ? (chat.buyerName || 'Mẹ bỉm') : (chat.sellerName || 'Mẹ bỉm');
-  const otherPartyAvatar = isSellerOfChat ? chat.buyerAvatar : chat.sellerAvatar;
-  // Deduplicate messages for pristine rendering (prevents duplicate bubbles on echo)
-  const uniqueMessages = useMemo(() => {
-    const raw = chat.messages || [];
-    const seenIds = new Set<string>();
-    const seenContentTime = new Map<string, number>();
-    const result: Message[] = [];
-
-    for (const m of raw) {
-      if (!m || !m.content) continue;
-      if (seenIds.has(m.id)) continue;
-      seenIds.add(m.id);
-
-      const contentKey = `${m.senderId}_${m.content.trim()}`;
-      const msgTime = new Date(m.timestamp).getTime();
-      const prevTime = seenContentTime.get(contentKey);
-      if (prevTime !== undefined && Math.abs(msgTime - prevTime) < 5000) {
-        continue;
-      }
-      seenContentTime.set(contentKey, msgTime);
-      result.push(m);
-    }
-    return result;
-  }, [chat.messages]);
-
-  const roleLabel = isSellerOfChat ? 'Mẹ cho đồ' : 'Mẹ muốn đổi';
 
   return (
     <KeyboardAvoidingView 
@@ -470,11 +483,11 @@ export const ChatDetailScreen = () => {
             contentContainerStyle={styles.quickChipsContent}
           >
             {[
-              '👋 Chào mẹ, món này còn không ạ?',
-              '📍 Mẹ ở khu vực nào để tiện hẹn gặp?',
-              '🧸 Đồ dùng còn mới khoảng bao nhiêu % mom?',
-              '🛵 Mẹ có hỗ trợ gửi ship qua app không ạ?',
-              '🤝 Hẹn mẹ cuối tuần này trao đổi nhé!'
+              'Chào mẹ, món này còn không ạ?',
+              'Mẹ ở khu vực nào để tiện hẹn gặp?',
+              'Đồ dùng còn mới khoảng bao nhiêu % mom?',
+              'Mẹ có hỗ trợ gửi ship qua app không ạ?',
+              'Hẹn mẹ cuối tuần này trao đổi nhé!'
             ].map((chip, idx) => (
               <ScalePressable
                 key={idx}
@@ -489,7 +502,7 @@ export const ChatDetailScreen = () => {
         </View>
 
         {/* Input Bar */}
-        <View style={styles.inputBar}>
+        <View style={[styles.inputBar, { paddingBottom: Math.max(insets.bottom, SPACING.sm) }]}>
           <TextInput
             style={styles.textInput}
             placeholder="Nhắn tin trao đổi với mẹ..."
@@ -608,9 +621,9 @@ const styles = StyleSheet.create({
     width: 9,
     height: 9,
     borderRadius: 5,
-    backgroundColor: '#10B981',
+    backgroundColor: COLORS.success,
     borderWidth: 1.5,
-    borderColor: '#FFFFFF',
+    borderColor: COLORS.surface,
   },
   headerNameColumn: {
     justifyContent: 'center',
@@ -621,8 +634,8 @@ const styles = StyleSheet.create({
     color: COLORS.text,
   },
   headerOnlineText: {
-    fontSize: 10,
-    color: '#10B981',
+    fontSize: 12,
+    color: COLORS.success,
     fontWeight: '600',
   },
   msgAvatarWrapper: {
@@ -642,10 +655,10 @@ const styles = StyleSheet.create({
     width: 7,
     height: 7,
     borderRadius: 4,
-    backgroundColor: '#10B981',
+    backgroundColor: COLORS.success,
   },
   headerRoleText: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '700',
     color: COLORS.onPrimaryContainer,
   },
@@ -679,7 +692,7 @@ const styles = StyleSheet.create({
     color: COLORS.text,
   },
   ribbonSub: {
-    fontSize: 11,
+    fontSize: 12,
     color: COLORS.textMuted,
     marginTop: 2,
   },
@@ -693,7 +706,7 @@ const styles = StyleSheet.create({
     borderRadius: RADIUS.sm,
   },
   ribbonActionText: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '700',
     color: COLORS.primary,
   },
@@ -707,7 +720,7 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   escrowNoticeText: {
-    fontSize: 11,
+    fontSize: 12,
     color: COLORS.onSecondaryContainer,
     fontWeight: '600',
   },
@@ -755,7 +768,7 @@ const styles = StyleSheet.create({
     maxWidth: '90%',
   },
   systemMessageText: {
-    fontSize: 11,
+    fontSize: 12,
     color: COLORS.textMuted,
     fontWeight: '600',
     textAlign: 'center',
@@ -823,7 +836,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   timestampText: {
-    fontSize: 10,
+    fontSize: 12,
     fontWeight: '500',
   },
   myTimestampText: {
@@ -849,7 +862,7 @@ const styles = StyleSheet.create({
     borderRadius: RADIUS.full,
   },
   typingText: {
-    fontSize: 11,
+    fontSize: 12,
     color: COLORS.textMuted,
     fontStyle: 'italic',
   },
@@ -866,7 +879,7 @@ const styles = StyleSheet.create({
   chipBtn: {
     backgroundColor: COLORS.primaryLight,
     borderWidth: 1,
-    borderColor: '#FFA8A8',
+    borderColor: COLORS.primaryLight,
     borderRadius: RADIUS.full,
     paddingHorizontal: 12,
     paddingVertical: 6,
@@ -884,7 +897,6 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.surface,
     borderTopWidth: 1,
     borderTopColor: COLORS.surfaceVariant,
-    paddingBottom: Platform.OS === 'ios' ? 30 : SPACING.sm,
     gap: SPACING.sm,
   },
   textInput: {
@@ -898,9 +910,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   sendBtn: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     justifyContent: 'center',
     alignItems: 'center',
     ...SHADOWS.soft,

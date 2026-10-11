@@ -1,6 +1,6 @@
-// server/src/services/cronService.ts
 import cron from 'node-cron';
 import { Transaction } from '../models/Transaction';
+import { TopupOrder } from '../models/TopupOrder';
 import * as escrowService from './escrowService';
 
 /**
@@ -8,6 +8,8 @@ import * as escrowService from './escrowService';
  * 1. Double Escrow 6-Hour Safeful Time auto-finalizer:
  *    Scans for transactions in 'in_safeful_time' status whose timer has elapsed
  *    without dispute and automatically releases Xu to the seller.
+ * 2. Topup Orders Stale Expirer:
+ *    Scans for topup orders in 'pending' status older than 24 hours and marks them as 'expired'.
  */
 export function initCronJobs(): void {
   // Run every 5 minutes
@@ -40,5 +42,26 @@ export function initCronJobs(): void {
     }
   });
 
-  console.log('⏰ Background Cron Jobs initialized (Double Escrow 6h Auto-Finalizer active)');
+  // Run every 30 minutes: Expire pending topup orders > 24 hours
+  cron.schedule('*/30 * * * *', async () => {
+    try {
+      const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+      const res = await TopupOrder.updateMany(
+        {
+          status: 'pending',
+          createdAt: { $lte: twentyFourHoursAgo },
+        },
+        {
+          $set: { status: 'expired' },
+        }
+      );
+      if (res.modifiedCount > 0) {
+        console.log(`⏰ [CRON] Expired ${res.modifiedCount} stale pending topup orders (>24h).`);
+      }
+    } catch (error) {
+      console.error('❌ [CRON] Error expiring stale topup orders:', error);
+    }
+  });
+
+  console.log('⏰ Background Cron Jobs initialized (Double Escrow 6h Auto-Finalizer & 24h Order Expirer active)');
 }

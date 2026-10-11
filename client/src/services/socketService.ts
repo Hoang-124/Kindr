@@ -46,15 +46,21 @@ class SocketService {
         });
 
         socket.on('connect', () => {
-          console.log('[Socket] Connected successfully:', socket.id);
+          if (__DEV__) {
+            console.log('[Socket] Connected successfully:', socket.id);
+          }
         });
 
         socket.on('connect_error', (error) => {
-          console.warn('[Socket] Connection error:', error.message);
+          if (__DEV__) {
+            console.warn('[Socket] Connection error:', error.message);
+          }
         });
 
         socket.on('disconnect', (reason) => {
-          console.log('[Socket] Disconnected:', reason);
+          if (__DEV__) {
+            console.log('[Socket] Disconnected:', reason);
+          }
         });
 
         // Re-attach all registered listeners

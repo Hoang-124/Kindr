@@ -172,8 +172,10 @@ export const ManageDisputesScreen = () => {
                 style={[styles.btn, styles.buyerBtn]}
                 onPress={() => handleResolveForBuyer(item)}
                 activeOpacity={0.8}
+                accessibilityRole="button"
+                accessibilityLabel="Hoàn tiền cho mẹ mua"
               >
-                <UserCheck size={14} color="#ffffff" />
+                <UserCheck size={16} color={COLORS.onPrimary} />
                 <Text style={styles.btnText}>Hoàn Mẹ Mua</Text>
               </TouchableOpacity>
 
@@ -181,8 +183,10 @@ export const ManageDisputesScreen = () => {
                 style={[styles.btn, styles.sellerBtn]}
                 onPress={() => handleResolveForSeller(item)}
                 activeOpacity={0.8}
+                accessibilityRole="button"
+                accessibilityLabel="Trả tiền cho mẹ bán"
               >
-                <UserCheck size={14} color="#ffffff" />
+                <UserCheck size={16} color={COLORS.onPrimary} />
                 <Text style={styles.btnText}>Trả Mẹ Bán</Text>
               </TouchableOpacity>
             </View>
@@ -224,7 +228,7 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
   txId: {
-    fontSize: 11,
+    fontSize: 12,
     color: COLORS.outline,
     fontWeight: '700',
   },
@@ -235,21 +239,21 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
   disputeReasonBox: {
-    backgroundColor: COLORS.errorContainer + '15',
+    backgroundColor: COLORS.errorContainer,
     borderWidth: 1,
-    borderColor: COLORS.errorContainer + '40',
+    borderColor: COLORS.error,
     padding: SPACING.sm,
     borderRadius: 12,
     marginBottom: SPACING.md,
   },
   reasonHeader: {
-    fontSize: 10,
-    color: COLORS.error,
+    fontSize: 12,
+    color: COLORS.onErrorContainer,
     fontWeight: '700',
     marginBottom: 4,
   },
   reasonText: {
-    fontSize: 11,
+    fontSize: 12,
     color: COLORS.onSurface,
     lineHeight: 16,
     fontWeight: '500',
@@ -267,14 +271,14 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   escrowLabel: {
-    fontSize: 9,
+    fontSize: 12,
     color: COLORS.outline,
     fontWeight: '600',
   },
   escrowVal: {
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '800',
-    color: COLORS.tertiary,
+    color: COLORS.coinOrange,
     marginTop: 2,
   },
   divider: {
@@ -289,7 +293,7 @@ const styles = StyleSheet.create({
   },
   btn: {
     flex: 1,
-    height: 38,
+    height: 44,
     borderRadius: 12,
     flexDirection: 'row',
     alignItems: 'center',
@@ -301,15 +305,15 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.primary,
   },
   sellerBtn: {
-    backgroundColor: COLORS.tertiary,
+    backgroundColor: COLORS.secondary,
   },
   btnText: {
-    fontSize: 11,
+    fontSize: 13,
     fontWeight: '800',
-    color: '#ffffff',
+    color: COLORS.onPrimary,
   },
   evidenceHeader: {
-    fontSize: 10,
+    fontSize: 12,
     color: COLORS.outline,
     fontWeight: '700',
     marginBottom: 6,
@@ -334,12 +338,12 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   imgLabel: {
-    fontSize: 9,
+    fontSize: 12,
     fontWeight: '600',
     color: COLORS.outline,
   },
   noEvidenceText: {
-    fontSize: 11,
+    fontSize: 12,
     fontStyle: 'italic',
     color: COLORS.outline,
     alignSelf: 'center',

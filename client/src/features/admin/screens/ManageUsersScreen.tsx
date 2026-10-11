@@ -241,7 +241,7 @@ export const ManageUsersScreen = () => {
                     <Image source={{ uri: item.avatar }} style={styles.avatar} />
                     {isAdmin && (
                       <View style={styles.crownBadge}>
-                        <Crown size={12} color="#FFFFFF" />
+                        <Crown size={12} color={COLORS.surface} />
                       </View>
                     )}
                   </View>
@@ -309,11 +309,11 @@ export const ManageUsersScreen = () => {
                     disabled={isSelf}
                   >
                     {item.isLocked ? (
-                      <UserCheck size={14} color="#0D9488" />
+                      <UserCheck size={14} color={COLORS.success} />
                     ) : (
                       <UserX size={14} color={COLORS.error} />
                     )}
-                    <Text style={[styles.btnTextFreeze, item.isLocked && { color: '#0D9488' }]}>
+                    <Text style={[styles.btnTextFreeze, item.isLocked && { color: COLORS.success }]}>
                       {item.isLocked ? 'Mở khóa' : 'Khóa nick'}
                     </Text>
                   </TouchableOpacity>
@@ -337,7 +337,7 @@ export const ManageUsersScreen = () => {
                     >
                       {isAdmin ? (
                         <>
-                          <ShieldAlert size={14} color="#D97706" />
+                          <ShieldAlert size={14} color={COLORS.warning} />
                           <Text style={styles.demoteBtnText}>Thu Hồi Quyền Admin (Hạ về User)</Text>
                         </>
                       ) : (
@@ -371,7 +371,7 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: COLORS.surface,
     borderRadius: RADIUS.full,
     borderWidth: 1,
     borderColor: COLORS.surfaceVariant,
@@ -393,7 +393,7 @@ const styles = StyleSheet.create({
     ...SHADOWS.soft,
   },
   searchBtnText: {
-    color: '#FFFFFF',
+    color: COLORS.surface,
     fontWeight: '700',
     fontSize: 13,
   },
@@ -423,8 +423,8 @@ const styles = StyleSheet.create({
     ...SHADOWS.soft,
   },
   adminUserCard: {
-    borderColor: '#FCD34D',
-    backgroundColor: '#FFFDF7',
+    borderColor: COLORS.warning,
+    backgroundColor: COLORS.tertiaryContainer,
   },
   cardTop: {
     flexDirection: 'row',
@@ -443,14 +443,14 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: -2,
     right: -2,
-    backgroundColor: '#F59E0B',
+    backgroundColor: COLORS.warning,
     borderRadius: 10,
     width: 20,
     height: 20,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1.5,
-    borderColor: '#FFFFFF',
+    borderColor: COLORS.surface,
   },
   userInfo: {
     flex: 1,
@@ -469,52 +469,52 @@ const styles = StyleSheet.create({
     maxWidth: 140,
   },
   adminBadge: {
-    backgroundColor: '#FEF3C7',
+    backgroundColor: COLORS.tertiaryContainer,
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: RADIUS.full,
     borderWidth: 1,
-    borderColor: '#FCD34D',
+    borderColor: COLORS.warning,
   },
   adminBadgeText: {
-    color: '#D97706',
-    fontSize: 9,
+    color: COLORS.warning,
+    fontSize: 12,
     fontWeight: '800',
   },
   userBadge: {
-    backgroundColor: '#F1F5F9',
+    backgroundColor: COLORS.surfaceContainer,
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: RADIUS.full,
   },
   userBadgeText: {
-    color: '#64748B',
-    fontSize: 9,
+    color: COLORS.textMuted,
+    fontSize: 12,
     fontWeight: '700',
   },
   selfBadge: {
-    backgroundColor: '#ECFDF5',
+    backgroundColor: COLORS.primaryLight,
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: RADIUS.full,
   },
   selfBadgeText: {
-    color: '#059669',
-    fontSize: 9,
+    color: COLORS.success,
+    fontSize: 12,
     fontWeight: '700',
   },
   userPhone: {
-    fontSize: 11,
+    fontSize: 12,
     color: COLORS.outline,
     marginTop: 2,
   },
   userEmail: {
-    fontSize: 11,
+    fontSize: 12,
     color: COLORS.textMuted,
     marginTop: 1,
   },
   userStats: {
-    fontSize: 10,
+    fontSize: 12,
     color: COLORS.onSurfaceVariant,
     fontWeight: '600',
     marginTop: 3,
@@ -544,7 +544,7 @@ const styles = StyleSheet.create({
   },
   actionBtn: {
     flex: 1,
-    height: 38,
+    minHeight: 44, // Touch ergonomics >= 44pt
     borderRadius: 10,
     flexDirection: 'row',
     alignItems: 'center',
@@ -557,7 +557,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.primaryContainer + '15',
   },
   btnTextReward: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '700',
     color: COLORS.primary,
   },
@@ -566,7 +566,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.tertiaryContainer + '15',
   },
   btnTextPenalty: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '700',
     color: COLORS.tertiary,
   },
@@ -575,11 +575,11 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.errorContainer + '15',
   },
   unfreezeBtn: {
-    borderColor: '#0D948850',
-    backgroundColor: '#E0F7F5',
+    borderColor: COLORS.success,
+    backgroundColor: COLORS.secondaryLight,
   },
   btnTextFreeze: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '700',
     color: COLORS.error,
   },
@@ -592,11 +592,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 6,
     paddingVertical: 6,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: COLORS.surfaceContainer,
     borderRadius: 8,
   },
   selfNoticeText: {
-    fontSize: 11,
+    fontSize: 12,
     color: COLORS.textMuted,
     fontWeight: '600',
   },
@@ -605,13 +605,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 6,
-    height: 38,
+    minHeight: 44, // Touch ergonomics >= 44pt
     borderRadius: 10,
     borderWidth: 1,
   },
   promoteBtn: {
     borderColor: COLORS.primary + '60',
-    backgroundColor: '#FFF5F5',
+    backgroundColor: COLORS.errorContainer,
   },
   promoteBtnText: {
     fontSize: 12,
@@ -619,13 +619,13 @@ const styles = StyleSheet.create({
     color: COLORS.primary,
   },
   demoteBtn: {
-    borderColor: '#FCD34D',
-    backgroundColor: '#FEF3C7',
+    borderColor: COLORS.warning,
+    backgroundColor: COLORS.tertiaryContainer,
   },
   demoteBtnText: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#D97706',
+    color: COLORS.warning,
   },
 });
 

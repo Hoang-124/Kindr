@@ -24,6 +24,10 @@ const DisputeSchema = z.object({
   evidenceImages: z.array(z.string()).optional(),
 });
 
+const HandoverSchema = z.object({
+  handoverCode: z.string().trim().toUpperCase().length(6, 'Mã bàn giao phải gồm đúng 6 ký tự').optional(),
+});
+
 // ---- Routes ----
 
 /**
@@ -66,13 +70,21 @@ router.get('/my', requireAuth, async (req: AuthRequest, res: Response): Promise<
       .sort({ createdAt: -1 })
       .lean();
 
-    const transactions = rawTxs.map((t: any) => ({
-      ...t,
-      id: t._id?.toString() || t.id,
-      productId: t.productId?._id?.toString() || t.productId?.toString() || t.productId,
-      buyerId: t.buyerId?._id?.toString() || t.buyerId?.toString() || t.buyerId,
-      sellerId: t.sellerId?._id?.toString() || t.sellerId?.toString() || t.sellerId,
-    }));
+    const transactions = rawTxs.map((t: any) => {
+      const isBuyer = t.buyerId?.toString() === req.userId || req.userRole === 'admin';
+      const formatted = {
+        ...t,
+        id: t._id?.toString() || t.id,
+        productId: t.productId?._id?.toString() || t.productId?.toString() || t.productId,
+        buyerId: t.buyerId?._id?.toString() || t.buyerId?.toString() || t.buyerId,
+        sellerId: t.sellerId?._id?.toString() || t.sellerId?.toString() || t.sellerId,
+      };
+      if (!isBuyer) {
+        delete formatted.handoverCode;
+        delete formatted.qrCodePayload;
+      }
+      return formatted;
+    });
 
     res.json({ transactions });
   } catch (error) {
@@ -109,7 +121,6 @@ router.get('/:id', requireAuth, async (req: AuthRequest, res: Response): Promise
         $or: [
           { _id: id as any },
           { productId: id as any },
-          { handoverCode: id.toUpperCase() },
         ],
       }).lean().catch(() => null);
     }
@@ -133,7 +144,7 @@ router.get('/:id', requireAuth, async (req: AuthRequest, res: Response): Promise
     const buyer = await User.findById(transaction.buyerId).select('name phone avatar').lean();
     const seller = await User.findById(transaction.sellerId).select('name phone avatar').lean();
 
-    const formattedTx = {
+    const formattedTx: any = {
       ...transaction,
       id: transaction._id?.toString() || transaction.id,
       productId: transaction.productId?._id?.toString() || transaction.productId?.toString() || transaction.productId,
@@ -146,6 +157,13 @@ router.get('/:id', requireAuth, async (req: AuthRequest, res: Response): Promise
       sellerPhone: transaction.sellerPhone || seller?.phone || '',
       sellerZalo: transaction.sellerZalo || transaction.sellerPhone || seller?.phone || '',
     };
+
+    // Mask handoverCode & QR payload if viewer is NOT the buyer (nor admin)
+    const isBuyer = transaction.buyerId?.toString() === req.userId || req.userRole === 'admin';
+    if (!isBuyer) {
+      delete formattedTx.handoverCode;
+      delete formattedTx.qrCodePayload;
+    }
 
     res.json({ transaction: formattedTx });
   } catch (error) {
@@ -161,7 +179,13 @@ router.get('/:id', requireAuth, async (req: AuthRequest, res: Response): Promise
 router.post('/:id/handover', validateObjectId('id'), requireAuth, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const id = req.params.id as string;
-    const { handoverCode } = req.body || {};
+    const parsed = HandoverSchema.safeParse(req.body || {});
+    if (!parsed.success) {
+      res.status(400).json({ error: parsed.error.errors[0].message });
+      return;
+    }
+
+    const { handoverCode } = parsed.data;
     const result = await escrowService.confirmHandover(id, req.userId!, handoverCode);
     if (!result.success) {
       res.status(400).json({ error: result.error });

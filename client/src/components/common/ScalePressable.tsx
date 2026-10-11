@@ -2,13 +2,14 @@ import React, { useRef } from 'react';
 import {
   Animated,
   Pressable,
+  PressableProps,
   ViewStyle,
   StyleProp,
   GestureResponderEvent,
   Platform,
 } from 'react-native';
 
-interface ScalePressableProps {
+export interface ScalePressableProps extends Omit<PressableProps, 'style' | 'children'> {
   children: React.ReactNode;
   onPress?: (event: GestureResponderEvent) => void;
   onLongPress?: (event: GestureResponderEvent) => void;
@@ -30,10 +31,11 @@ export const ScalePressable: React.FC<ScalePressableProps> = ({
   containerStyle,
   scaleTo = 0.96,
   disabled = false,
+  ...rest
 }) => {
   const scaleAnim = useRef(new Animated.Value(1)).current;
 
-  const handlePressIn = () => {
+  const handlePressIn = (e: GestureResponderEvent) => {
     if (disabled) return;
     Animated.spring(scaleAnim, {
       toValue: scaleTo,
@@ -41,9 +43,10 @@ export const ScalePressable: React.FC<ScalePressableProps> = ({
       speed: 30,
       bounciness: 4,
     }).start();
+    rest.onPressIn?.(e);
   };
 
-  const handlePressOut = () => {
+  const handlePressOut = (e: GestureResponderEvent) => {
     if (disabled) return;
     Animated.spring(scaleAnim, {
       toValue: 1,
@@ -51,10 +54,12 @@ export const ScalePressable: React.FC<ScalePressableProps> = ({
       speed: 25,
       bounciness: 6,
     }).start();
+    rest.onPressOut?.(e);
   };
 
   return (
     <Pressable
+      {...rest}
       onPress={onPress}
       onLongPress={onLongPress}
       onPressIn={handlePressIn}
@@ -71,3 +76,6 @@ export const ScalePressable: React.FC<ScalePressableProps> = ({
     </Pressable>
   );
 };
+
+export { ScalePressable as PressableScale };
+export default ScalePressable;

@@ -3,6 +3,18 @@ import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
 import path from 'path';
 import { ENV } from '../config/env';
+import { escapeHtml } from '../utils/escapeHtml';
+
+/**
+ * Check if active email provider credentials are configured
+ */
+export function isEmailConfigured(): boolean {
+  dotenv.config({ path: path.resolve(__dirname, '../../.env') });
+  const user = (process.env.SMTP_USER || ENV.SMTP_USER || '').trim();
+  const pass = (process.env.SMTP_PASS || ENV.SMTP_PASS || '').trim();
+  const brevoKey = (process.env.BREVO_API_KEY || '').trim();
+  return Boolean((user && pass) || brevoKey);
+}
 
 // Initialize transporter helper
 function createTransporter() {
@@ -40,7 +52,9 @@ export async function sendPasswordResetOtpEmail(
   userName: string,
   otp: string
 ): Promise<{ success: boolean; simulated?: boolean; error?: string }> {
-  const subject = `[Kindr] Mã xác thực OTP khôi phục mật khẩu: ${otp}`;
+  const safeName = escapeHtml(userName || 'Mẹ Bỉm');
+  const safeOtp = escapeHtml(otp);
+  const subject = `[Kindr] Mã xác thực OTP khôi phục mật khẩu: ${safeOtp}`;
   
   const htmlContent = `
 <!DOCTYPE html>
@@ -80,7 +94,7 @@ export async function sendPasswordResetOtpEmail(
                 Khôi phục mật khẩu
               </h2>
               <p style="margin: 0 0 16px; font-size: 15px; line-height: 24px; color: #334155;">
-                Xin chào <strong>${userName || 'Mẹ Bỉm'}</strong>,
+                Xin chào <strong>${safeName}</strong>,
               </p>
               <p style="margin: 0 0 24px; font-size: 15px; line-height: 24px; color: #334155;">
                 Chúng tôi nhận được yêu cầu cấp lại mật khẩu cho tài khoản Kindr liên kết với email này. Vui lòng sử dụng mã OTP dưới đây để hoàn tất xác nhận mật khẩu mới:
@@ -88,7 +102,7 @@ export async function sendPasswordResetOtpEmail(
 
               <!-- OTP Code Display Card -->
               <div style="background-color: #E6F8F7; border: 2px dashed #0ABAB5; border-radius: 12px; padding: 20px; text-align: center; margin: 24px 0;">
-                <span style="font-size: 34px; font-weight: 800; letter-spacing: 8px; color: #007A78; font-family: monospace;">${otp}</span>
+                <span style="font-size: 34px; font-weight: 800; letter-spacing: 8px; color: #007A78; font-family: monospace;">${safeOtp}</span>
                 <p style="margin: 8px 0 0; font-size: 13px; color: #475569; font-weight: 500;">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#007A78" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 5px; display: inline-block;">
                     <circle cx="12" cy="12" r="10"></circle>
@@ -171,7 +185,10 @@ export async function sendAccountActivationOtpEmail(
   userName: string,
   otp: string
 ): Promise<{ success: boolean; simulated?: boolean; error?: string }> {
-  const subject = `[Kindr] Mã xác thực kích hoạt tài khoản của bạn: ${otp}`;
+  const safeName = escapeHtml(userName || 'Mẹ Bỉm');
+  const safeOtp = escapeHtml(otp);
+  const safeEmail = escapeHtml(toEmail);
+  const subject = `[Kindr] Mã xác thực kích hoạt tài khoản của bạn: ${safeOtp}`;
   
   const htmlContent = `
 <!DOCTYPE html>
@@ -212,10 +229,10 @@ export async function sendAccountActivationOtpEmail(
                 Kích hoạt tài khoản của bạn
               </h2>
               <p style="margin: 0 0 16px; font-size: 15px; line-height: 24px; color: #334155;">
-                Xin chào <strong>${userName || 'Mẹ Bỉm'}</strong>,
+                Xin chào <strong>${safeName}</strong>,
               </p>
               <p style="margin: 0 0 24px; font-size: 15px; line-height: 24px; color: #334155;">
-                Cảm ơn bạn đã đăng ký tài khoản Kindr với địa chỉ email <strong>${toEmail}</strong>. Vui lòng nhập mã xác thực 6 chữ số dưới đây vào ứng dụng để kích hoạt tài khoản của bạn:
+                Cảm ơn bạn đã đăng ký tài khoản Kindr với địa chỉ email <strong>${safeEmail}</strong>. Vui lòng nhập mã xác thực 6 chữ số dưới đây vào ứng dụng để kích hoạt tài khoản của bạn:
               </p>
 
               <!-- OTP Code Display Card -->
@@ -223,7 +240,7 @@ export async function sendAccountActivationOtpEmail(
                 <div style="font-size: 12px; font-weight: 700; color: #007A78; letter-spacing: 1px; margin-bottom: 6px; text-transform: uppercase;">
                   Mã kích hoạt tài khoản của bạn
                 </div>
-                <span style="font-size: 36px; font-weight: 800; letter-spacing: 8px; color: #007A78; font-family: monospace;">${otp}</span>
+                <span style="font-size: 36px; font-weight: 800; letter-spacing: 8px; color: #007A78; font-family: monospace;">${safeOtp}</span>
                 <p style="margin: 10px 0 0; font-size: 13px; color: #475569; font-weight: 500;">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#007A78" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 5px; display: inline-block;">
                     <circle cx="12" cy="12" r="10"></circle>
@@ -309,6 +326,12 @@ export async function sendWaitlistWelcomeEmail(
   const formattedCode = `#KD-${String(orderNumber).padStart(4, '0')}/200`;
   const subject = `[Kindr] Xác nhận đăng ký giữ chỗ thành công (${formattedCode})`;
 
+  const safeRoleName = escapeHtml(roleName);
+  const safeFormattedCode = escapeHtml(formattedCode);
+  const safeEmail = escapeHtml(toEmail);
+  const safePhone = escapeHtml(phone);
+  const safeInterest = escapeHtml(interest);
+
   const htmlContent = `
 <!DOCTYPE html>
 <html lang="vi">
@@ -367,7 +390,7 @@ export async function sendWaitlistWelcomeEmail(
               </h2>
               
               <p style="margin: 0 0 16px 0; font-size: 15px; line-height: 24px; color: #4A3E40;">
-                Xin chào <strong>${roleName}</strong>,
+                Xin chào <strong>${safeRoleName}</strong>,
               </p>
               
               <p style="margin: 0 0 24px 0; font-size: 15px; line-height: 24px; color: #4A3E40;">
@@ -407,7 +430,7 @@ export async function sendWaitlistWelcomeEmail(
                   <tr>
                     <td style="vertical-align: middle;">
                       <span style="font-family: monospace; font-size: 14px; font-weight: 800; color: #78350F; background: #FEF3C7; padding: 4px 10px; border-radius: 6px; letter-spacing: 0.5px;">
-                        ${formattedCode}
+                        ${safeFormattedCode}
                       </span>
                     </td>
                     <td align="right" style="vertical-align: middle;">
@@ -429,7 +452,7 @@ export async function sendWaitlistWelcomeEmail(
                     </svg>
                     Hòm thư nhận thông báo:
                   </td>
-                  <td style="font-size: 13px; font-weight: 700; color: #2D2325; text-align: right; padding: 6px 0;">${toEmail}</td>
+                  <td style="font-size: 13px; font-weight: 700; color: #2D2325; text-align: right; padding: 6px 0;">${safeEmail}</td>
                 </tr>
                 ${phone ? `
                 <tr>
@@ -439,7 +462,7 @@ export async function sendWaitlistWelcomeEmail(
                     </svg>
                     Số điện thoại liên hệ:
                   </td>
-                  <td style="font-size: 13px; font-weight: 700; color: #2D2325; text-align: right; padding: 6px 0;">${phone}</td>
+                  <td style="font-size: 13px; font-weight: 700; color: #2D2325; text-align: right; padding: 6px 0;">${safePhone}</td>
                 </tr>` : ''}
                 ${interest ? `
                 <tr>
@@ -449,7 +472,7 @@ export async function sendWaitlistWelcomeEmail(
                     </svg>
                     Món đồ mong muốn đổi:
                   </td>
-                  <td style="font-size: 13px; font-weight: 700; color: #E05A36; text-align: right; padding: 6px 0;">${interest}</td>
+                  <td style="font-size: 13px; font-weight: 700; color: #E05A36; text-align: right; padding: 6px 0;">${safeInterest}</td>
                 </tr>` : ''}
               </table>
 
@@ -601,7 +624,7 @@ export async function sendWaitlistWelcomeEmail(
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          sender: { name: 'Kindr Ecosystem', email: 'ht20041975@gmail.com' },
+          sender: { name: 'Kindr Ecosystem', email: (ENV.SMTP_USER || 'no-reply@kindr.vn').trim() },
           to: [{ email: toEmail }],
           subject,
           htmlContent,
@@ -622,7 +645,7 @@ export async function sendWaitlistWelcomeEmail(
     const sender = (process.env.SMTP_USER || ENV.SMTP_USER || '').trim();
     try {
       await transporter.sendMail({
-        from: sender ? `"Kindr Ecosystem" <${sender}>` : (ENV.EMAIL_FROM || 'Kindr Ecosystem <ht20041975@gmail.com>'),
+        from: sender ? `"Kindr Ecosystem" <${sender}>` : (ENV.EMAIL_FROM || '"Kindr Ecosystem" <no-reply@kindr.vn>'),
         to: toEmail,
         subject,
         text: `Xin chào ${roleName},\n\nCảm ơn bạn đã đăng ký nhận thông báo sớm của Kindr tại Đà Nẵng!\nSố thứ tự ưu đãi của bạn: ${formattedCode}.\nQuà tặng khởi động: 5 Xu Tiên Phong (tương đương 50.000 VNĐ) sẽ được kích hoạt vào ví tài khoản của bạn ngay khi ứng dụng chính thức ra mắt.\n\nTrân trọng,\nĐội ngũ Kindr Đà Nẵng`,

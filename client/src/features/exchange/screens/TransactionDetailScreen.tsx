@@ -20,7 +20,7 @@ import * as transactionService from '../../../services/transactionService';
 import * as chatService from '../../../services/chatService';
 import { upsertChatSession } from '../../chat/store/chatSlice';
 import { Transaction } from '../../../types/common';
-import { submitReport } from '../../trust-safety/store/reportSlice';
+import { submitReport, submitReportAsync } from '../../trust-safety/store/reportSlice';
 import { COLORS, SPACING, RADIUS, TYPOGRAPHY, SHADOWS } from '../../../theme';
 import ScreenContainer from '../../../components/layout/ScreenContainer';
 import Header from '../../../components/layout/Header';
@@ -43,6 +43,7 @@ import {
 } from 'lucide-react-native';
 import { ScalePressable } from '../../../components/common/ScalePressable';
 import { PulseBadge } from '../../../components/common/PulseBadge';
+import QRCode from 'react-native-qrcode-svg';
 
 type TransactionDetailRouteProp = RouteProp<AppStackParamList, 'TransactionDetail'>;
 type NavigationProp = NativeStackNavigationProp<AppStackParamList>;
@@ -191,10 +192,37 @@ export const TransactionDetailScreen = () => {
     );
   }
 
+  const [sellerPinInput, setSellerPinInput] = useState('');
+  const [isSubmittingHandover, setIsSubmittingHandover] = useState(false);
+
   const isBuyer = String(tx.buyerId) === String(currentUser?.id);
   const isSeller = String(tx.sellerId) === String(currentUser?.id);
 
-  // Handover confirmation ("Đã nhận hàng" -> triggers 6h Safeful Time)
+  // Seller confirms handover with Buyer's PIN
+  const handleSellerHandoverConfirm = async () => {
+    const code = sellerPinInput.trim().toUpperCase();
+    if (code.length !== 6) {
+      Alert.alert('Mã PIN không hợp lệ', 'Vui lòng hỏi người mua mã PIN 6 ký tự hiển thị trên màn hình của họ.');
+      return;
+    }
+    setIsSubmittingHandover(true);
+    try {
+      await dispatch(confirmHandoverAsync({ transactionId: tx.id, handoverCode: code })).unwrap();
+      const updated = await transactionService.getTransactionById(tx.id);
+      if (updated) {
+        setLocalTx(updated);
+        dispatch(upsertTransaction(updated));
+      }
+      setSellerPinInput('');
+      Alert.alert('Bàn giao thành công! 🎉', 'Đã kích hoạt khung giờ 6 tiếng kiểm định tại nhà cho người mua.');
+    } catch (err: any) {
+      Alert.alert('Xác nhận thất bại', typeof err === 'string' ? err : err?.message || 'Mã PIN không đúng hoặc đã hết lượt thử.');
+    } finally {
+      setIsSubmittingHandover(false);
+    }
+  };
+
+  // Buyer self-confirmation ("Đã nhận hàng" -> triggers 6h Safeful Time)
   const handleHandoverConfirm = () => {
     Alert.alert(
       'Xác nhận nhận đồ P2P',
@@ -206,10 +234,15 @@ export const TransactionDetailScreen = () => {
           onPress: async () => {
             try {
               await dispatch(confirmHandoverAsync(tx.id)).unwrap();
-            } catch (e) {
-              dispatch(confirmHandover({ transactionId: tx.id }));
+              const updated = await transactionService.getTransactionById(tx.id);
+              if (updated) {
+                setLocalTx(updated);
+                dispatch(upsertTransaction(updated));
+              }
+              Alert.alert('Đã kích hoạt 6h Bảo Chứng', 'Mẹ có 6 tiếng kiểm tra đồ dùng tại nhà.');
+            } catch (e: any) {
+              Alert.alert('Lỗi kích hoạt', typeof e === 'string' ? e : e?.message || 'Không thể xác nhận bàn giao.');
             }
-            Alert.alert('Đã kích hoạt 6h Bảo Chứng', 'Mẹ có 6 tiếng kiểm tra bánh xe, chi tiết đồ dùng tại nhà.');
           }
         }
       ]
@@ -229,16 +262,17 @@ export const TransactionDetailScreen = () => {
             try {
               await dispatch(completeTransactionAsync(tx.id)).unwrap();
               dispatch(refreshWalletBalance());
-            } catch (e) {
-              dispatch(finalizeSafefulTime({ transactionId: tx.id }));
-              dispatch(updateUserBalance({ userId: tx.sellerId, amount: tx.buyerEscrowFrozen + tx.sellerEscrowFrozen }));
-              dispatch(adjustCivilizationPoints({ userId: tx.buyerId, points: 5, reason: 'Giao dịch văn minh mượt mà' }));
-              dispatch(adjustCivilizationPoints({ userId: tx.sellerId, points: 5, reason: 'Đồ dùng đúng 100% mô tả' }));
+              const updated = await transactionService.getTransactionById(tx.id);
+              if (updated) {
+                setLocalTx(updated);
+                dispatch(upsertTransaction(updated));
+              }
+              Alert.alert('Giao dịch thành công', 'Xu đã vào ví người bán.', [
+                { text: 'Đánh giá 5 sao', onPress: () => navigation.navigate('RatingReview', { transactionId: tx.id }) }
+              ]);
+            } catch (e: any) {
+              Alert.alert('Lỗi hoàn tất', typeof e === 'string' ? e : e?.message || 'Không thể giải phóng Xu lúc này.');
             }
-
-            Alert.alert('Giao dịch thành công', 'Xu đã vào ví người bán.', [
-              { text: 'Đánh giá 5 sao', onPress: () => navigation.navigate('RatingReview', { transactionId: tx.id }) }
-            ]);
           }
         }
       ]
@@ -267,19 +301,22 @@ export const TransactionDetailScreen = () => {
   };
 
   // Report submission
-  const handleFileReport = () => {
-    if (!reportReasonText.trim() || !currentUser) return;
+  const handleFileReport = async () => {
+    if (!reportReasonText.trim() || !currentUser || !tx) return;
 
-    dispatch(submitReport({
-      targetType: 'user',
-      targetId: isBuyer ? tx.sellerId : tx.buyerId,
-      reporterId: currentUser.id,
-      reporterName: currentUser.name,
-      reason: reportReasonText,
-    }));
+    try {
+      await dispatch(submitReportAsync({
+        targetType: 'user',
+        targetId: isBuyer ? (typeof tx.sellerId === 'string' ? tx.sellerId : (tx.sellerId as any)?._id || (tx.sellerId as any)?.id) : (typeof tx.buyerId === 'string' ? tx.buyerId : (tx.buyerId as any)?._id || (tx.buyerId as any)?.id),
+        reason: reportReasonText,
+      })).unwrap();
 
-    setReportModalVisible(false);
-    Alert.alert('Đã gửi báo cáo', 'Kindr cảm ơn mẹ đã đóng góp xây dựng môi trường an toàn.');
+      setReportModalVisible(false);
+      setReportReasonText('');
+      Alert.alert('Đã gửi báo cáo', 'Kindr cảm ơn mẹ đã đóng góp xây dựng môi trường an toàn.');
+    } catch (err: any) {
+      Alert.alert('Lỗi gửi báo cáo', err?.message || 'Không thể gửi báo cáo lên hệ thống. Vui lòng thử lại.');
+    }
   };
 
   return (
@@ -296,13 +333,13 @@ export const TransactionDetailScreen = () => {
           tx.status === 'in_safeful_time' ? styles.statusSafeful : styles.statusFrozen
         ]}>
           {tx.status === 'completed' ? (
-            <ShieldCheck size={26} color="#FFF" />
+            <ShieldCheck size={26} color={COLORS.surface} />
           ) : tx.status === 'refunded' ? (
-            <CheckCircle2 size={26} color="#FFF" />
+            <CheckCircle2 size={26} color={COLORS.surface} />
           ) : tx.status === 'disputed' ? (
-            <ShieldAlert size={26} color="#FFF" />
+            <ShieldAlert size={26} color={COLORS.surface} />
           ) : (
-            <Lock size={26} color="#FFF" />
+            <Lock size={26} color={COLORS.surface} />
           )}
 
           <View style={styles.statusTextContainer}>
@@ -346,9 +383,9 @@ export const TransactionDetailScreen = () => {
                 tx.status === 'disputed' ? styles.disputeIconWarning : styles.disputeIconSuccess
               ]}>
                 {tx.status === 'disputed' ? (
-                  <ShieldAlert size={20} color="#DC2626" />
+                  <ShieldAlert size={20} color={COLORS.error} />
                 ) : (
-                  <ShieldCheck size={20} color="#10B981" />
+                  <ShieldCheck size={20} color={COLORS.success} />
                 )}
               </View>
               <View style={{ flex: 1 }}>
@@ -477,19 +514,65 @@ export const TransactionDetailScreen = () => {
 
         {/* Dynamic Action Buttons */}
         {tx.status === 'awaiting_handover' && isSeller && (
-          <Button
-            title="Mở mã QR Bàn Giao Đồ"
-            onPress={() => setQrModalVisible(true)}
-            style={styles.actionBtn}
-          />
+          <Card style={styles.sellerHandoverCard}>
+            <View style={styles.handoverCardHeader}>
+              <Lock size={18} color={COLORS.primary} />
+              <Text style={styles.handoverCardTitle}>Xác nhận bàn giao đồ cho người mua</Text>
+            </View>
+            <Text style={styles.handoverCardSubtitle}>
+              Khi gặp mặt giao đồ, hãy hỏi người mua mã PIN 6 ký tự hiển thị trên màn hình của họ và nhập vào đây:
+            </Text>
+            <TextInput
+              style={styles.sellerPinInput}
+              placeholder="VD: ABC123"
+              placeholderTextColor={COLORS.outline}
+              value={sellerPinInput}
+              onChangeText={(val) => setSellerPinInput(val.toUpperCase())}
+              maxLength={6}
+              autoCapitalize="characters"
+              autoCorrect={false}
+            />
+            <Button
+              title="Xác nhận đã giao đồ"
+              onPress={handleSellerHandoverConfirm}
+              loading={isSubmittingHandover}
+              disabled={sellerPinInput.trim().length !== 6 || isSubmittingHandover}
+              style={styles.actionBtn}
+            />
+          </Card>
         )}
 
         {tx.status === 'awaiting_handover' && isBuyer && (
-          <Button
-            title="Đã gặp mặt / Nhận đồ P2P (Bắt đầu 6h)"
-            onPress={handleHandoverConfirm}
-            style={styles.actionBtn}
-          />
+          <Card style={styles.buyerHandoverCard}>
+            <View style={styles.handoverCardHeader}>
+              <QrCode size={18} color={COLORS.primary} />
+              <Text style={styles.handoverCardTitle}>Mã bàn giao an toàn của mẹ</Text>
+            </View>
+            <Text style={styles.handoverCardSubtitle}>
+              Cung cấp mã PIN này hoặc mở mã QR cho người bán quét khi gặp mặt nhận đồ:
+            </Text>
+            {tx.handoverCode ? (
+              <View style={styles.buyerPinBox}>
+                <Text style={styles.buyerPinText}>{tx.handoverCode}</Text>
+              </View>
+            ) : null}
+            <View style={{ flexDirection: 'row', gap: SPACING.sm, marginTop: SPACING.xs }}>
+              <Button
+                title="Mở mã QR"
+                variant="outline"
+                onPress={() => setQrModalVisible(true)}
+                style={{ flex: 1, height: 48 }}
+              />
+              <Button
+                title="Đã nhận đồ P2P"
+                onPress={handleHandoverConfirm}
+                style={{ flex: 1.3, height: 48 }}
+              />
+            </View>
+            <Text style={styles.handoverHelperText}>
+              * Bấm "Đã nhận đồ P2P" để tự kích hoạt 6 giờ kiểm định nếu bạn tin tưởng không cần người bán nhập PIN.
+            </Text>
+          </Card>
         )}
 
         {tx.status === 'in_safeful_time' && isBuyer && (
@@ -505,7 +588,7 @@ export const TransactionDetailScreen = () => {
               onPress={() => navigation.navigate('DisputeForm', { transactionId: tx.id || (tx as any)._id })}
             >
               <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
-                <ShieldAlert size={15} color="#DC2626" />
+                <ShieldAlert size={15} color={COLORS.error} />
                 <Text style={styles.disputeBtnText}>Báo lỗi / Khiếu nại chất lượng</Text>
               </View>
             </ScalePressable>
@@ -520,7 +603,7 @@ export const TransactionDetailScreen = () => {
               onPress={() => navigation.navigate('DisputeForm', { transactionId: tx.id || (tx as any)._id })}
             >
               <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
-                <ShieldAlert size={15} color="#DC2626" />
+                <ShieldAlert size={15} color={COLORS.error} />
                 <Text style={styles.disputeBtnText}>Báo lỗi / Khiếu nại giao dịch</Text>
               </View>
             </ScalePressable>
@@ -543,7 +626,7 @@ export const TransactionDetailScreen = () => {
 
       </ScrollView>
 
-      {/* QR Code Handover Modal for Seller */}
+      {/* QR Code Handover Modal for Buyer */}
       <ModalConfirm
         visible={qrModalVisible}
         onClose={() => setQrModalVisible(false)}
@@ -551,24 +634,23 @@ export const TransactionDetailScreen = () => {
         title="Mã QR Bàn Giao Đồ An Toàn"
         confirmTitle="Đã xong"
         confirmVariant="primary"
-        description="Mẹ hãy đưa mã này cho người mua kiểm tra hoặc quét khi gặp mặt nhận đồ để kích hoạt bảo chứng."
+        description="Mẹ hãy đưa mã này cho người bán quét khi gặp mặt nhận đồ để kích hoạt bảo chứng."
       >
         <View style={styles.qrContainer}>
           <View style={styles.qrBox}>
-            <Image
-              source={{
-                uri: `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(
-                  tx.qrCodePayload || `KINDR|TX:${tx.id}|${tx.buyerId}|${tx.sellerId}`
-                )}`,
-              }}
-              style={{ width: 170, height: 170, borderRadius: 8 }}
-              resizeMode="contain"
+            <QRCode
+              value={tx.qrCodePayload || `KINDR|TX:${tx.id}|PIN:${tx.handoverCode || ''}`}
+              size={170}
+              color={COLORS.text}
+              backgroundColor={COLORS.surface}
             />
           </View>
-          <Text style={styles.qrCodeText}>
-            Mã PIN xác thực: <Text style={styles.qrCodeHighlight}>{tx.handoverCode || `KND-${tx.id.slice(-6).toUpperCase()}`}</Text>
-          </Text>
-          <Text style={styles.qrSubText}>Người mua nhận đồ trực tiếp có thể quét mã QR này hoặc nhập mã PIN để kích hoạt 6 giờ bảo chứng tại nhà.</Text>
+          {tx.handoverCode ? (
+            <Text style={styles.qrCodeText}>
+              Mã PIN xác thực: <Text style={styles.qrCodeHighlight}>{tx.handoverCode}</Text>
+            </Text>
+          ) : null}
+          <Text style={styles.qrSubText}>Người bán có thể quét mã QR này hoặc nhập trực tiếp mã PIN để xác nhận bàn giao.</Text>
         </View>
       </ModalConfirm>
 
@@ -623,7 +705,7 @@ const styles = StyleSheet.create({
   emptyCard: {
     alignItems: 'center',
     padding: SPACING.xl,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: COLORS.surface,
     borderRadius: RADIUS.lg,
     borderWidth: 1,
     borderColor: COLORS.outlineVariant,
@@ -649,12 +731,12 @@ const styles = StyleSheet.create({
   statusBanner: { flexDirection: 'row', alignItems: 'center', padding: SPACING.md, borderRadius: RADIUS.default, gap: SPACING.md, marginBottom: SPACING.md },
   statusFrozen: { backgroundColor: COLORS.tertiary },
   statusSafeful: { backgroundColor: COLORS.primary },
-  statusCompleted: { backgroundColor: '#10B981' },
-  statusRefunded: { backgroundColor: '#059669' },
+  statusCompleted: { backgroundColor: COLORS.success },
+  statusRefunded: { backgroundColor: COLORS.primary },
   statusDisputed: { backgroundColor: COLORS.error },
   statusTextContainer: { flex: 1 },
-  statusTitle: { fontSize: 13, fontWeight: '700', color: '#FFF' },
-  statusSub: { fontSize: 11, color: '#FFF', marginTop: 2 },
+  statusTitle: { fontSize: 13, fontWeight: '700', color: COLORS.surface },
+  statusSub: { fontSize: 12, color: COLORS.surface, marginTop: 2 },
   productCard: { flexDirection: 'row', gap: SPACING.md, marginBottom: SPACING.md, alignItems: 'center' },
   prodImg: { width: 56, height: 56, borderRadius: 10, backgroundColor: COLORS.surfaceContainer },
   prodDetails: { flex: 1 },
@@ -664,7 +746,7 @@ const styles = StyleSheet.create({
   mascotBox: { alignItems: 'center', marginVertical: SPACING.xs },
   contactCard: { marginBottom: SPACING.md, backgroundColor: COLORS.surfaceContainerLow },
   contactTitle: { fontSize: 13, fontWeight: '700', color: COLORS.onSurface, marginBottom: 2 },
-  contactSub: { fontSize: 11, color: COLORS.outline, marginBottom: SPACING.sm },
+  contactSub: { fontSize: 12, color: COLORS.outline, marginBottom: SPACING.sm },
   contactRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 },
   contactLabel: { fontSize: 12, color: COLORS.outline },
   contactName: { fontSize: 12, fontWeight: '700', color: COLORS.onSurface },
@@ -674,9 +756,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#FFF0F0',
+    backgroundColor: COLORS.errorContainer,
     borderWidth: 1,
-    borderColor: '#FECACA',
+    borderColor: COLORS.errorContainer,
     borderRadius: RADIUS.sm,
     paddingVertical: 8,
     marginTop: SPACING.sm,
@@ -689,7 +771,7 @@ const styles = StyleSheet.create({
   },
   escrowBox: { flexDirection: 'row', backgroundColor: COLORS.surfaceContainer, borderRadius: RADIUS.default, padding: SPACING.md, marginBottom: SPACING.lg, alignItems: 'center' },
   escrowColumn: { flex: 1, alignItems: 'center' },
-  escrowRole: { fontSize: 11, color: COLORS.outline },
+  escrowRole: { fontSize: 12, color: COLORS.outline },
   escrowXu: { fontSize: 16, fontWeight: '800', color: COLORS.tertiary, marginTop: 2 },
   escrowDivider: { width: 1, height: 30, backgroundColor: COLORS.surfaceVariant },
   buyerActionGroup: { gap: SPACING.xs },
@@ -697,13 +779,13 @@ const styles = StyleSheet.create({
   disputeBtn: { height: 42, justifyContent: 'center', alignItems: 'center' },
   disputeBtnText: { color: COLORS.error, fontWeight: '700', fontSize: 12 },
   reportRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 4, marginTop: SPACING.md },
-  reportText: { fontSize: 11, color: COLORS.outline },
+  reportText: { fontSize: 12, color: COLORS.outline },
   modalInput: { borderWidth: 1, borderColor: COLORS.outlineVariant, borderRadius: RADIUS.default, padding: SPACING.sm, height: 75, marginTop: SPACING.xs, color: COLORS.onSurface, textAlignVertical: 'top' },
   qrContainer: { alignItems: 'center', marginVertical: SPACING.sm },
-  qrBox: { padding: SPACING.md, backgroundColor: '#FFF', borderRadius: RADIUS.md, borderWidth: 1, borderColor: COLORS.outlineVariant, marginBottom: SPACING.sm },
+  qrBox: { padding: SPACING.md, backgroundColor: COLORS.surface, borderRadius: RADIUS.md, borderWidth: 1, borderColor: COLORS.outlineVariant, marginBottom: SPACING.sm },
   qrCodeText: { fontSize: 13, color: COLORS.onSurface, fontWeight: '600', marginBottom: 4 },
   qrCodeHighlight: { color: COLORS.primary, fontWeight: '800' },
-  qrSubText: { fontSize: 11, color: COLORS.outline, textAlign: 'center', paddingHorizontal: SPACING.sm },
+  qrSubText: { fontSize: 12, color: COLORS.outline, textAlign: 'center', paddingHorizontal: SPACING.sm },
   disputeCard: {
     padding: SPACING.md,
     borderRadius: RADIUS.md,
@@ -711,11 +793,11 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
   },
   disputeCardWarning: {
-    backgroundColor: '#FFF8F8',
+    backgroundColor: COLORS.errorContainer,
     borderColor: 'rgba(239, 68, 68, 0.3)',
   },
   disputeCardResolved: {
-    backgroundColor: '#F0FDF4',
+    backgroundColor: COLORS.primaryLight,
     borderColor: 'rgba(16, 185, 129, 0.3)',
   },
   disputeHeaderRow: {
@@ -731,10 +813,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   disputeIconWarning: {
-    backgroundColor: '#FEE2E2',
+    backgroundColor: COLORS.errorContainer,
   },
   disputeIconSuccess: {
-    backgroundColor: '#D1FAE5',
+    backgroundColor: COLORS.primaryLight,
   },
   disputeCardTitle: {
     fontSize: 14,
@@ -748,20 +830,20 @@ const styles = StyleSheet.create({
     borderRadius: RADIUS.full,
   },
   disputeBadgeWarning: {
-    backgroundColor: '#FEE2E2',
+    backgroundColor: COLORS.errorContainer,
   },
   disputeBadgeSuccess: {
-    backgroundColor: '#D1FAE5',
+    backgroundColor: COLORS.primaryLight,
   },
   disputeBadgeText: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '700',
   },
   disputeBadgeTextWarning: {
-    color: '#DC2626',
+    color: COLORS.error,
   },
   disputeBadgeTextSuccess: {
-    color: '#059669',
+    color: COLORS.success,
   },
   disputeVerdictSummary: {
     fontSize: 12,
@@ -778,7 +860,7 @@ const styles = StyleSheet.create({
     borderLeftColor: COLORS.primary,
   },
   disputeReasonLabel: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '700',
     color: COLORS.outline,
     marginBottom: 2,
@@ -799,6 +881,77 @@ const styles = StyleSheet.create({
     height: 50,
     borderRadius: 8,
     backgroundColor: COLORS.surfaceContainer,
+  },
+  sellerHandoverCard: {
+    padding: SPACING.md,
+    borderRadius: RADIUS.md,
+    marginBottom: SPACING.md,
+    borderWidth: 1,
+    borderColor: COLORS.outlineVariant,
+    backgroundColor: COLORS.surface,
+  },
+  buyerHandoverCard: {
+    padding: SPACING.md,
+    borderRadius: RADIUS.md,
+    marginBottom: SPACING.md,
+    borderWidth: 1,
+    borderColor: COLORS.primaryLight,
+    backgroundColor: COLORS.surface,
+  },
+  handoverCardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: SPACING.xs,
+  },
+  handoverCardTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: COLORS.onSurface,
+  },
+  handoverCardSubtitle: {
+    fontSize: 12,
+    color: COLORS.outline,
+    lineHeight: 18,
+    marginBottom: SPACING.sm,
+  },
+  sellerPinInput: {
+    borderWidth: 1.5,
+    borderColor: COLORS.primary,
+    borderRadius: RADIUS.default,
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.md,
+    fontSize: 20,
+    fontWeight: '800',
+    letterSpacing: 4,
+    color: COLORS.onSurface,
+    textAlign: 'center',
+    backgroundColor: COLORS.surfaceContainerLow,
+    marginBottom: SPACING.sm,
+  },
+  buyerPinBox: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: COLORS.surfaceContainer,
+    borderRadius: RADIUS.default,
+    paddingVertical: SPACING.md,
+    borderWidth: 1,
+    borderColor: COLORS.primary,
+    borderStyle: 'dashed',
+    marginBottom: SPACING.sm,
+  },
+  buyerPinText: {
+    fontSize: 26,
+    fontWeight: '900',
+    letterSpacing: 6,
+    color: COLORS.primary,
+  },
+  handoverHelperText: {
+    fontSize: 11,
+    color: COLORS.outline,
+    marginTop: SPACING.xs,
+    lineHeight: 15,
+    fontStyle: 'italic',
   },
 });
 

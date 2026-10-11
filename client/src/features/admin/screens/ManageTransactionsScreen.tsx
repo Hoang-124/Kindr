@@ -52,13 +52,13 @@ export const ManageTransactionsScreen = () => {
   const getStatusConfig = (status: string) => {
     switch (status) {
       case 'completed':
-        return { label: 'Hoàn tất', color: COLORS.primary, bg: COLORS.primaryContainer + '30', icon: CheckCircle2 };
+        return { label: 'Hoàn tất', color: COLORS.primary, bg: COLORS.primaryLight, icon: CheckCircle2 };
       case 'frozen':
         return { label: 'Đang khóa xu', color: COLORS.outline, bg: COLORS.surfaceContainer, icon: Lock };
       case 'shipped':
-        return { label: 'Chờ nhận hàng', color: '#d97706', bg: '#fef3c7', icon: Lock };
+        return { label: 'Chờ nhận hàng', color: COLORS.warning, bg: COLORS.tertiaryContainer, icon: Lock };
       case 'disputed':
-        return { label: 'Tranh chấp', color: COLORS.error, bg: COLORS.errorContainer + '40', icon: ShieldAlert };
+        return { label: 'Tranh chấp', color: COLORS.error, bg: COLORS.errorContainer, icon: ShieldAlert };
       default:
         return { label: 'Không rõ', color: COLORS.outline, bg: COLORS.surfaceContainer, icon: Lock };
     }
@@ -159,11 +159,11 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   statusText: {
-    fontSize: 9,
+    fontSize: 12,
     fontWeight: '700',
   },
   txId: {
-    fontSize: 10,
+    fontSize: 12,
     color: COLORS.outline,
     fontWeight: '500',
   },
@@ -188,13 +188,13 @@ const styles = StyleSheet.create({
     color: COLORS.onSurface,
   },
   parties: {
-    fontSize: 11,
+    fontSize: 12,
     color: COLORS.onSurfaceVariant,
     fontWeight: '600',
     marginTop: 2,
   },
   dateText: {
-    fontSize: 9,
+    fontSize: 12,
     color: COLORS.outline,
     marginTop: 2,
   },
@@ -216,14 +216,14 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   escrowTitle: {
-    fontSize: 10,
+    fontSize: 12,
     color: COLORS.outline,
     fontWeight: '600',
   },
   escrowVal: {
-    fontSize: 11,
+    fontSize: 13,
     fontWeight: '800',
-    color: COLORS.tertiary,
+    color: COLORS.coinOrange,
   },
 });
 

@@ -130,8 +130,10 @@ export const ManageReportsScreen = () => {
                 style={[styles.actionBtn, styles.ignoreBtn]}
                 onPress={() => handleIgnore(item.id)}
                 activeOpacity={0.8}
+                accessibilityRole="button"
+                accessibilityLabel="Bỏ qua báo cáo này"
               >
-                <CheckCircle2 size={14} color={COLORS.primary} />
+                <CheckCircle2 size={16} color={COLORS.primary} />
                 <Text style={styles.btnTextIgnore}>Bỏ qua</Text>
               </TouchableOpacity>
 
@@ -139,8 +141,10 @@ export const ManageReportsScreen = () => {
                 style={[styles.actionBtn, styles.deleteBtn]}
                 onPress={() => handleRemovePost(item.id, item.productId, item.productName)}
                 activeOpacity={0.8}
+                accessibilityRole="button"
+                accessibilityLabel="Gỡ bài đăng bị báo cáo"
               >
-                <Trash2 size={14} color="#ffffff" />
+                <Trash2 size={16} color={COLORS.onPrimary} />
                 <Text style={styles.btnTextDelete}>Gỡ bài đăng</Text>
               </TouchableOpacity>
             </View>
@@ -192,7 +196,7 @@ const styles = StyleSheet.create({
     color: COLORS.onSurface,
   },
   reporter: {
-    fontSize: 9,
+    fontSize: 12,
     color: COLORS.outline,
     fontWeight: '600',
     marginTop: 2,
@@ -207,15 +211,15 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
   },
   reasonTitle: {
-    fontSize: 10,
+    fontSize: 12,
     color: COLORS.outline,
     fontWeight: '700',
     marginBottom: 4,
   },
   reasonText: {
-    fontSize: 11,
+    fontSize: 12,
     color: COLORS.onSurface,
-    lineHeight: 15,
+    lineHeight: 16,
     fontWeight: '500',
   },
   divider: {
@@ -230,8 +234,8 @@ const styles = StyleSheet.create({
   },
   actionBtn: {
     flex: 1,
-    height: 36,
-    borderRadius: 10,
+    height: 44,
+    borderRadius: 12,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -241,10 +245,10 @@ const styles = StyleSheet.create({
   ignoreBtn: {
     borderWidth: 1.5,
     borderColor: COLORS.primary,
-    backgroundColor: '#ffffff',
+    backgroundColor: COLORS.surface,
   },
   btnTextIgnore: {
-    fontSize: 11,
+    fontSize: 13,
     fontWeight: '800',
     color: COLORS.primary,
   },
@@ -252,9 +256,9 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.error,
   },
   btnTextDelete: {
-    fontSize: 11,
+    fontSize: 13,
     fontWeight: '800',
-    color: '#ffffff',
+    color: COLORS.onPrimary,
   },
 });
 

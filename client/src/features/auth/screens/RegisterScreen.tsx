@@ -148,6 +148,8 @@ export const RegisterScreen = () => {
             style={styles.backBtn}
             onPress={() => navigation.goBack()}
             hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+            accessibilityRole="button"
+            accessibilityLabel="Quay lại"
           >
             <ArrowLeft size={20} color={COLORS.primary} />
           </TouchableOpacity>
@@ -286,7 +288,7 @@ export const RegisterScreen = () => {
           />
           {emailWarning ? (
             <View style={styles.warningContainer}>
-              <Info size={13} color="#D97706" />
+              <Info size={14} color={COLORS.warning} />
               <Text style={styles.warningText}>{emailWarning}</Text>
             </View>
           ) : (
@@ -352,11 +354,11 @@ const styles = StyleSheet.create({
   cardFrame: {
     width: '100%',
     maxWidth: 480,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: COLORS.surfaceContainerLowest,
     borderRadius: RADIUS.xl,
     padding: SPACING.md,
     borderWidth: 1,
-    borderColor: 'rgba(58, 103, 88, 0.1)',
+    borderColor: COLORS.border,
     ...SHADOWS.card,
   },
   cardFrameTablet: {
@@ -386,9 +388,9 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     ...TYPOGRAPHY.bodySm,
-    fontSize: 11.5,
+    fontSize: 12,
     color: COLORS.onSurfaceVariant,
-    lineHeight: 15,
+    lineHeight: 16,
   },
   gridRow: {
     flexDirection: 'row',
@@ -403,7 +405,7 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   helperText: {
-    fontSize: 10.5,
+    fontSize: 12,
     color: COLORS.outline,
     fontStyle: 'italic',
     marginTop: -4,
@@ -419,10 +421,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 2,
   },
   warningText: {
-    fontSize: 11,
-    color: '#D97706',
+    fontSize: 12,
+    color: COLORS.warning,
     fontWeight: '600',
-    lineHeight: 14,
+    lineHeight: 16,
     flex: 1,
   },
   actionsRow: {
@@ -431,7 +433,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   registerBtn: {
-    height: 40,
+    height: 44,
     borderRadius: RADIUS.full,
   },
   googleBtnWrap: {

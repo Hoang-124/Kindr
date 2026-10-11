@@ -440,7 +440,7 @@ const styles = StyleSheet.create({
     marginVertical: 4,
   },
   locationText: {
-    fontSize: 11,
+    fontSize: 12,
     color: COLORS.textMuted,
     fontWeight: '500',
   },
@@ -461,7 +461,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.surfaceDim,
   },
   sellerName: {
-    fontSize: 11,
+    fontSize: 12,
     color: COLORS.textMuted,
     fontWeight: '500',
   },
@@ -469,7 +469,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 3,
-    backgroundColor: '#FFF8E1',
+    backgroundColor: COLORS.tertiaryContainer,
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: RADIUS.full,
@@ -477,16 +477,16 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255, 209, 102, 0.4)',
   },
   priceSymbol: {
-    fontSize: 11,
+    fontSize: 12,
   },
   priceText: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '800',
-    color: '#8C6500',
+    color: COLORS.warning,
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(26, 29, 32, 0.5)',
+    backgroundColor: COLORS.scrim,
     justifyContent: 'flex-end',
   },
   modalContent: {

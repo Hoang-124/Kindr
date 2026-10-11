@@ -31,8 +31,10 @@ export async function getTransactionById(id: string): Promise<Transaction> {
   return normalizeTransaction(data.transaction);
 }
 
-export async function confirmHandover(transactionId: string): Promise<{ message: string }> {
-  const { data } = await api.post(`/transactions/${transactionId}/handover`);
+export async function confirmHandover(transactionId: string, handoverCode?: string): Promise<{ message: string }> {
+  const { data } = await api.post(`/transactions/${transactionId}/handover`, {
+    handoverCode: handoverCode ? handoverCode.trim().toUpperCase() : undefined,
+  });
   return data;
 }
 

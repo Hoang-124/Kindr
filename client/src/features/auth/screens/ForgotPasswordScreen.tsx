@@ -44,7 +44,7 @@ export const ForgotPasswordScreen = () => {
   const [showGoogleModal, setShowGoogleModal] = useState(false);
 
   // Countdown timer for resend OTP
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (resendCooldown > 0) {
@@ -351,12 +351,14 @@ export const ForgotPasswordScreen = () => {
                   </View>
                 </View>
                 <Text style={styles.googleAccountBody}>
-                  Email <Text style={{ fontWeight: '700', color: '#1F2937' }}>{isGoogleAccountWarning}</Text> được đăng ký và đăng nhập bảo mật qua Google. Mẹ không cần khôi phục mật khẩu Kindr.
+                  Email <Text style={{ fontWeight: '700', color: COLORS.onSurface }}>{isGoogleAccountWarning}</Text> được đăng ký và đăng nhập bảo mật qua Google. Mẹ không cần khôi phục mật khẩu Kindr.
                 </Text>
                 <TouchableOpacity 
                   style={styles.googleLoginBtn}
                   onPress={() => navigation.navigate('Login')}
                   activeOpacity={0.85}
+                  accessibilityRole="button"
+                  accessibilityLabel="Đăng nhập ngay với Google"
                 >
                   <GoogleGLogo size={18} />
                   <Text style={styles.googleLoginBtnText}>Đăng nhập ngay với Google</Text>
@@ -369,7 +371,7 @@ export const ForgotPasswordScreen = () => {
             {unregisteredWarning && step === 1 && (
               <View style={styles.unregisteredWarningCard}>
                 <View style={styles.unregisteredWarningHeader}>
-                  <AlertTriangle size={18} color="#D97706" />
+                  <AlertTriangle size={18} color={COLORS.warning} />
                   <Text style={styles.unregisteredWarningTitle}>Tài khoản chưa được đăng ký!</Text>
                 </View>
                 <Text style={styles.unregisteredWarningBody}>
@@ -527,7 +529,7 @@ export const ForgotPasswordScreen = () => {
             <Text style={styles.modalTitle}>Tài khoản liên kết Google</Text>
 
             <Text style={styles.modalBody}>
-              Địa chỉ email <Text style={{ fontWeight: '700', color: '#1F2937' }}>"{isGoogleAccountWarning}"</Text> được bảo vệ và đăng nhập bằng tài khoản Google.
+              Địa chỉ email <Text style={{ fontWeight: '700', color: COLORS.onSurface }}>"{isGoogleAccountWarning}"</Text> được bảo vệ và đăng nhập bằng tài khoản Google.
             </Text>
             <Text style={styles.modalSubBody}>
               Mẹ không cần đặt lại mật khẩu Kindr. Hãy đăng nhập ngay chỉ với 1 chạm nhanh chóng!
@@ -540,12 +542,14 @@ export const ForgotPasswordScreen = () => {
                 navigation.navigate('Login');
               }}
               activeOpacity={0.88}
+              accessibilityRole="button"
+              accessibilityLabel="Đăng nhập bằng Google"
             >
               <View style={styles.modalBtnIconWrap}>
                 <GoogleGLogo size={18} />
               </View>
               <Text style={styles.modalPrimaryBtnText}>Đăng nhập bằng Google</Text>
-              <ArrowRight size={16} color="#FFFFFF" strokeWidth={2.5} />
+              <ArrowRight size={16} color={COLORS.onPrimary} strokeWidth={2.5} />
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -586,7 +590,7 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
     ...SHADOWS.ambient,
     borderWidth: 1.5,
-    borderColor: '#C4EFEF',
+    borderColor: COLORS.secondaryContainer,
   },
   title: {
     ...TYPOGRAPHY.headlineMd,
@@ -614,7 +618,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: RADIUS.md,
     borderWidth: 1,
-    borderColor: '#C4EFEF',
+    borderColor: COLORS.secondaryContainer,
     marginBottom: SPACING.md,
   },
   emailTargetLeft: {
@@ -637,10 +641,10 @@ const styles = StyleSheet.create({
     paddingVertical: 3,
     paddingHorizontal: 7,
     borderRadius: RADIUS.sm,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: COLORS.surface,
   },
   changeEmailText: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '700',
     color: COLORS.primary,
   },
@@ -691,8 +695,8 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   unregisteredWarningCard: {
-    backgroundColor: '#FFFBEB',
-    borderColor: '#FDE68A',
+    backgroundColor: COLORS.tertiaryContainer,
+    borderColor: COLORS.coinBorder,
     borderWidth: 1.5,
     borderRadius: RADIUS.md,
     padding: SPACING.md,
@@ -708,11 +712,11 @@ const styles = StyleSheet.create({
   unregisteredWarningTitle: {
     fontSize: 14,
     fontWeight: '700',
-    color: '#B45309',
+    color: COLORS.onTertiaryContainer,
   },
   unregisteredWarningBody: {
     fontSize: 13,
-    color: '#92400E',
+    color: COLORS.onTertiaryContainer,
     lineHeight: 18,
     marginBottom: 10,
   },
@@ -725,13 +729,13 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
   },
   unregisteredRegisterBtnText: {
-    color: '#FFFFFF',
+    color: COLORS.onPrimary,
     fontWeight: '700',
     fontSize: 12,
   },
   googleAccountCard: {
-    backgroundColor: '#FFF8F6',
-    borderColor: 'rgba(255, 107, 107, 0.25)',
+    backgroundColor: COLORS.primaryLight,
+    borderColor: COLORS.border,
     borderWidth: 1.5,
     borderRadius: RADIUS.md,
     padding: SPACING.md,
@@ -748,25 +752,25 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: COLORS.surface,
     borderWidth: 1,
-    borderColor: '#FFD7D0',
+    borderColor: COLORS.border,
     justifyContent: 'center',
     alignItems: 'center',
   },
   googleAccountTitle: {
     fontSize: 14,
     fontWeight: '700',
-    color: '#1F2937',
+    color: COLORS.onSurface,
   },
   googleAccountSubtitle: {
-    fontSize: 11,
-    color: '#D97706',
+    fontSize: 12,
+    color: COLORS.warning,
     fontWeight: '600',
   },
   googleAccountBody: {
     fontSize: 13,
-    color: '#4B5563',
+    color: COLORS.onSurfaceVariant,
     lineHeight: 19,
     marginBottom: 12,
   },
@@ -774,23 +778,23 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    height: 42,
-    backgroundColor: '#FFFFFF',
+    height: 44,
+    backgroundColor: COLORS.surface,
     borderWidth: 1.5,
-    borderColor: 'rgba(255, 107, 107, 0.3)',
+    borderColor: COLORS.border,
     borderRadius: RADIUS.full,
     paddingHorizontal: 14,
     alignSelf: 'flex-start',
     ...SHADOWS.ambient,
   },
   googleLoginBtnText: {
-    color: '#1F2937',
+    color: COLORS.onSurface,
     fontWeight: '700',
     fontSize: 13,
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(15, 23, 42, 0.55)',
+    backgroundColor: COLORS.scrim,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
@@ -798,21 +802,21 @@ const styles = StyleSheet.create({
   modalCard: {
     width: '100%',
     maxWidth: 380,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: COLORS.surfaceContainerLowest,
     borderRadius: 24,
     padding: 24,
     alignItems: 'center',
     ...SHADOWS.card,
     borderWidth: 1,
-    borderColor: 'rgba(255, 107, 107, 0.18)',
+    borderColor: COLORS.border,
   },
   modalBadge: {
     width: 68,
     height: 68,
     borderRadius: 34,
-    backgroundColor: '#FFF5F3',
+    backgroundColor: COLORS.primaryLight,
     borderWidth: 1.5,
-    borderColor: '#FFE3DD',
+    borderColor: COLORS.border,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 16,
@@ -821,13 +825,13 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 18,
     fontWeight: '800',
-    color: '#1F2937',
+    color: COLORS.onSurface,
     textAlign: 'center',
     marginBottom: 8,
   },
   modalBody: {
     fontSize: 13.5,
-    color: '#4B5563',
+    color: COLORS.onSurfaceVariant,
     textAlign: 'center',
     lineHeight: 20,
     marginBottom: 4,
@@ -835,7 +839,7 @@ const styles = StyleSheet.create({
   },
   modalSubBody: {
     fontSize: 13,
-    color: '#6B7280',
+    color: COLORS.textMuted,
     textAlign: 'center',
     lineHeight: 18,
     marginBottom: 20,
@@ -858,12 +862,12 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: COLORS.surface,
     justifyContent: 'center',
     alignItems: 'center',
   },
   modalPrimaryBtnText: {
-    color: '#FFFFFF',
+    color: COLORS.onPrimary,
     fontSize: 15,
     fontWeight: '700',
     letterSpacing: 0.2,

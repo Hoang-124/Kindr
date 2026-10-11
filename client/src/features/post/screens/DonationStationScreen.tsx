@@ -177,10 +177,10 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   heroText: {
-    fontSize: 11,
+    fontSize: 12,
     color: 'rgba(255,255,255,0.85)',
     textAlign: 'center',
-    lineHeight: 16,
+    lineHeight: 18,
   },
   sectionTitle: {
     fontSize: 15,
@@ -218,7 +218,7 @@ const styles = StyleSheet.create({
     paddingVertical: 3,
   },
   infoText: {
-    fontSize: 11,
+    fontSize: 12,
     color: COLORS.onSurfaceVariant,
     fontWeight: '500',
     flex: 1,
@@ -238,7 +238,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   itemsBadgeText: {
-    fontSize: 10,
+    fontSize: 12,
     color: COLORS.primary,
     fontWeight: '700',
   },
@@ -248,7 +248,7 @@ const styles = StyleSheet.create({
   },
   btn: {
     flex: 1,
-    height: 38,
+    minHeight: 44, // Touch ergonomics >= 44pt
     borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
@@ -260,10 +260,10 @@ const styles = StyleSheet.create({
   primaryBtnText: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#ffffff',
+    color: COLORS.surface,
   },
   secondaryBtn: {
-    backgroundColor: '#ffffff',
+    backgroundColor: COLORS.surface,
     borderWidth: 1,
     borderColor: COLORS.outlineVariant,
   },

@@ -104,9 +104,53 @@ router.get('/', optionalAuth, async (req: AuthRequest, res: Response): Promise<v
     const limitNum = Math.min(50, Math.max(1, parseInt(limit as string, 10)));
     const skip = (pageNum - 1) * limitNum;
 
+    // Contact masking: Do NOT select phone for public feed listings
+    if (maxRadius && userLat && userLng) {
+      // Distance-filtered: fetch candidate set to calculate distance, filter, sort, and slice
+      const rawProducts = await Product.find(filter)
+        .populate('sellerId', 'name avatar')
+        .sort({ createdAt: -1 })
+        .limit(300)
+        .lean();
+
+      let matched = rawProducts.map((p: any) => {
+        const seller = p.sellerId && typeof p.sellerId === 'object' ? p.sellerId : null;
+        const formatted = {
+          ...p,
+          id: p._id?.toString() || p.id,
+          sellerId: seller?._id?.toString() || p.sellerId?.toString() || p.sellerId,
+          sellerName: seller?.name || p.sellerName || 'Thành viên Kindr',
+          sellerAvatar: seller?.avatar || p.sellerAvatar || '',
+        };
+        // Never leak raw phone on feed
+        delete formatted.sellerPhone;
+
+        const pLat = p.coordinates?.latitude || 16.0748;
+        const pLng = p.coordinates?.longitude || 108.2240;
+        const d = calculateHaversineKm(userLat, userLng, pLat, pLng);
+        return { ...formatted, distance: `${d} km`, distanceKm: d };
+      }).filter((p: any) => p.distanceKm <= maxRadius);
+
+      matched.sort((a: any, b: any) => (a.distanceKm || 0) - (b.distanceKm || 0));
+
+      const totalMatched = matched.length;
+      const paginatedProducts = matched.slice(skip, skip + limitNum);
+
+      res.json({
+        products: paginatedProducts,
+        pagination: {
+          page: pageNum,
+          limit: limitNum,
+          total: totalMatched,
+          totalPages: Math.ceil(totalMatched / limitNum),
+        },
+      });
+      return;
+    }
+
     const [rawProducts, total] = await Promise.all([
       Product.find(filter)
-        .populate('sellerId', 'name avatar phone')
+        .populate('sellerId', 'name avatar')
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limitNum)
@@ -123,6 +167,9 @@ router.get('/', optionalAuth, async (req: AuthRequest, res: Response): Promise<v
         sellerName: seller?.name || p.sellerName || 'Thành viên Kindr',
         sellerAvatar: seller?.avatar || p.sellerAvatar || '',
       };
+      // Contact masking: Remove sellerPhone from public listing
+      delete formatted.sellerPhone;
+
       if (userLat && userLng) {
         const pLat = p.coordinates?.latitude || 16.0748;
         const pLng = p.coordinates?.longitude || 108.2240;
@@ -131,10 +178,6 @@ router.get('/', optionalAuth, async (req: AuthRequest, res: Response): Promise<v
       }
       return formatted;
     });
-
-    if (maxRadius && userLat && userLng) {
-      products = products.filter((p: any) => p.distanceKm <= maxRadius);
-    }
 
     if (userLat && userLng) {
       products.sort((a: any, b: any) => (a.distanceKm || 0) - (b.distanceKm || 0));
@@ -145,8 +188,8 @@ router.get('/', optionalAuth, async (req: AuthRequest, res: Response): Promise<v
       pagination: {
         page: pageNum,
         limit: limitNum,
-        total: maxRadius ? products.length : total,
-        totalPages: Math.ceil((maxRadius ? products.length : total) / limitNum),
+        total,
+        totalPages: Math.ceil(total / limitNum),
       },
     });
   } catch (error) {
@@ -234,7 +277,20 @@ router.post('/', requireAuth, async (req: AuthRequest, res: Response): Promise<v
 
     const data = parsed.data;
 
-    // Chống ngáo giá: Kiểm tra biên độ giá tối đa cho phép theo danh mục
+    // Price Matrix & Price Anchoring System
+    const PRICING_MATRIX: Record<string, Record<'70' | '80' | '90', number>> = {
+      book: { '90': 2, '80': 1, '70': 1 },
+      sach_truyen: { '90': 2, '80': 1, '70': 1 },
+      toy_small: { '90': 2, '80': 2, '70': 2 },
+      do_choi: { '90': 2, '80': 2, '70': 2 },
+      toy_large: { '90': 10, '80': 8, '70': 5 },
+      xe_noi: { '90': 30, '80': 20, '70': 15 },
+      quan_ao: { '90': 5, '80': 3, '70': 2 },
+      do_hoc_tap: { '90': 4, '80': 3, '70': 2 },
+      charity: { '90': 0, '80': 0, '70': 0 },
+      tu_thien: { '90': 0, '80': 0, '70': 0 },
+    };
+
     const MAX_PRICE_BY_CATEGORY: Record<string, number> = {
       charity: 0,
       tu_thien: 0,
@@ -248,19 +304,27 @@ router.post('/', requireAuth, async (req: AuthRequest, res: Response): Promise<v
       xe_noi: 50,
     };
 
-    const maxAllowedPrice = MAX_PRICE_BY_CATEGORY[data.category] ?? 30;
+    const isCharity = data.category === 'charity' || data.category === 'tu_thien';
+    if (isCharity && data.price !== 0) {
+      res.status(400).json({ error: 'Món đồ thuộc danh mục từ thiện bắt buộc phải có giá là 0 Xu.' });
+      return;
+    }
+
+    const cond = data.condition as '70' | '80' | '90';
+    const matrixLimit = PRICING_MATRIX[data.category]?.[cond];
+    const maxAllowedPrice = matrixLimit !== undefined ? matrixLimit : (MAX_PRICE_BY_CATEGORY[data.category] ?? 30);
+
     if (data.price > maxAllowedPrice) {
       res.status(400).json({
-        error: `Mức giá ${data.price} Xu vượt quá khung định giá cho phép của danh mục này (tối đa ${maxAllowedPrice} Xu). Kindr áp dụng khung định giá cố định để chống ngáo giá.`,
+        error: `Mức giá ${data.price} Xu vượt quá khung định giá cho phép của danh mục này (tối đa ${maxAllowedPrice} Xu cho độ mới ${data.condition}%). Kindr áp dụng khung định giá chuẩn để chống ngáo giá.`,
       });
       return;
     }
 
     // Calculate SafeFee 10% (minimum 1 Xu, charity = 0)
-    const isCharity = data.category === 'charity' || data.category === 'tu_thien' || data.price === 0;
-    const safeFee = isCharity ? 0 : Math.max(1, Math.ceil(data.price * 0.1));
+    const safeFee = (isCharity || data.price === 0) ? 0 : Math.max(1, Math.ceil(data.price * 0.1));
 
-    // Check balance for SafeFee (standard Xu balance)
+    // Check balance for SafeFee
     if (safeFee > 0 && seller.xuBalance < safeFee) {
       res.status(400).json({
         error: `Số dư ví không đủ để ký quỹ ${safeFee} Xu Safe Fee (10%). Số dư hiện tại: ${seller.xuBalance} Xu. Hãy nạp thêm Xu để đăng đồ nhé!`,
@@ -268,7 +332,52 @@ router.post('/', requireAuth, async (req: AuthRequest, res: Response): Promise<v
       return;
     }
 
-    // Create product - Community-driven & asset-light: auto-available with 10% Safe Fee collateral
+    // Deduct SafeFee from balance with Welcome Credit tracking
+    let safeFeePromoUsed = 0;
+    if (safeFee > 0) {
+      const initialPromo = seller.welcomeCreditRemaining || 0;
+      const updatedSeller = await User.findOneAndUpdate(
+        { _id: seller._id, xuBalance: { $gte: safeFee }, isLocked: { $ne: true } },
+        [
+          {
+            $set: {
+              _promoUsed: {
+                $min: [
+                  { $ifNull: ['$welcomeCreditRemaining', 0] },
+                  safeFee,
+                ],
+              },
+            },
+          },
+          {
+            $set: {
+              xuBalance: { $subtract: ['$xuBalance', safeFee] },
+              xuFrozen: { $add: ['$xuFrozen', safeFee] },
+              welcomeCreditRemaining: {
+                $subtract: [
+                  { $ifNull: ['$welcomeCreditRemaining', 0] },
+                  '$_promoUsed',
+                ],
+              },
+            },
+          },
+          {
+            $unset: '_promoUsed',
+          },
+        ],
+        { new: true }
+      );
+
+      if (!updatedSeller) {
+        res.status(400).json({
+          error: `Số dư ví không đủ để ký quỹ ${safeFee} Xu Safe Fee (10%).`,
+        });
+        return;
+      }
+      safeFeePromoUsed = Math.max(0, initialPromo - (updatedSeller.welcomeCreditRemaining ?? 0));
+    }
+
+    // Create product
     const product = await Product.create({
       ...data,
       coordinates: data.coordinates || { latitude: 16.0748, longitude: 108.2240 },
@@ -278,24 +387,9 @@ router.post('/', requireAuth, async (req: AuthRequest, res: Response): Promise<v
       sellerPhone: seller.phone,
       sellerZalo: seller.phone,
       safeFeeLocked: safeFee,
+      safeFeePromoXu: safeFeePromoUsed,
       status: 'available',
     });
-
-    // Deduct SafeFee from balance, add to frozen
-    if (safeFee > 0) {
-      const updatedSeller = await User.findOneAndUpdate(
-        { _id: seller._id, xuBalance: { $gte: safeFee }, isLocked: { $ne: true } },
-        { $inc: { xuBalance: -safeFee, xuFrozen: safeFee } },
-        { new: true }
-      );
-      if (!updatedSeller) {
-        await Product.findByIdAndDelete(product._id);
-        res.status(400).json({
-          error: `Số dư ví không đủ để ký quỹ ${safeFee} Xu Safe Fee (10%).`,
-        });
-        return;
-      }
-    }
 
     // Trigger real-time notifications
     try {
@@ -365,34 +459,28 @@ router.put('/:id', validateObjectId('id'), requireAuth, async (req: AuthRequest,
  */
 router.delete('/:id', validateObjectId('id'), requireAuth, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const product = await Product.findById(req.params.id);
+    // Atomic CAS transition: only available products can be removed by their seller
+    const product = await Product.findOneAndUpdate(
+      { _id: req.params.id, sellerId: req.userId, status: 'available' },
+      { $set: { status: 'removed' } },
+      { new: true }
+    );
+
     if (!product) {
-      res.status(404).json({ error: 'Không tìm thấy sản phẩm.' });
+      res.status(400).json({ error: 'Không tìm thấy sản phẩm, bạn không có quyền xóa hoặc sản phẩm đang trong giao dịch.' });
       return;
     }
 
-    if (product.sellerId.toString() !== req.userId) {
-      res.status(403).json({ error: 'Bạn không có quyền xóa sản phẩm này.' });
-      return;
-    }
-
-    if (product.status !== 'available') {
-      res.status(400).json({ error: 'Không thể xóa sản phẩm đang trong giao dịch.' });
-      return;
-    }
-
-    // Refund SafeFee back to seller
+    // Refund SafeFee back to seller ONLY after atomic status transition
     if (product.safeFeeLocked > 0) {
       await User.findByIdAndUpdate(req.userId, {
         $inc: {
           xuBalance: product.safeFeeLocked,
           xuFrozen: -product.safeFeeLocked,
+          welcomeCreditRemaining: product.safeFeePromoXu || 0,
         },
       });
     }
-
-    product.status = 'removed';
-    await product.save();
 
     res.json({
       message: `Đã xóa sản phẩm. Hoàn trả ${product.safeFeeLocked} Xu Safe Fee vào ví.`,
@@ -400,6 +488,68 @@ router.delete('/:id', validateObjectId('id'), requireAuth, async (req: AuthReque
   } catch (error) {
     console.error('Delete product error:', error);
     res.status(500).json({ error: 'Lỗi hệ thống.' });
+  }
+});
+
+/**
+ * POST /api/products/ai-suggest
+ * Intelligent AI Assistant for listing baby items on Kindr.
+ * Evaluates fair market Xu price, category, age range, and generates mom-friendly descriptions.
+ */
+router.post('/ai-suggest', optionalAuth, async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { itemName, selectedCategory, selectedCondition } = req.body || {};
+    const name = (itemName || '').toString().trim().toLowerCase();
+
+    // Heuristic category detection
+    let detectedCategory = 'toy_small';
+    let detectedAge = '1-3y';
+    let suggestedXu = 2;
+
+    if (name.includes('xe') || name.includes('nôi') || name.includes('cũi') || name.includes('stroller')) {
+      detectedCategory = 'xe_noi';
+      detectedAge = '0-6m';
+      suggestedXu = 15;
+    } else if (name.includes('sách') || name.includes('truyện') || name.includes('ehon') || name.includes('flashcard')) {
+      detectedCategory = 'book';
+      detectedAge = '1-3y';
+      suggestedXu = 2;
+    } else if (name.includes('áo') || name.includes('quần') || name.includes('váy') || name.includes('body') || name.includes('yếm')) {
+      detectedCategory = 'quan_ao';
+      detectedAge = '6-12m';
+      suggestedXu = 3;
+    } else if (name.includes('học') || name.includes('bút') || name.includes('bảng') || name.includes('vở')) {
+      detectedCategory = 'do_hoc_tap';
+      detectedAge = '3+';
+      suggestedXu = 3;
+    } else if (name.includes('lớn') || name.includes('cầu trượt') || name.includes('nhà bóng') || name.includes('lego')) {
+      detectedCategory = 'toy_large';
+      detectedAge = '1-3y';
+      suggestedXu = 8;
+    }
+
+    const category = selectedCategory || detectedCategory;
+    const condition = selectedCondition || '90';
+
+    const descriptions: Record<string, string> = {
+      xe_noi: `Xe / nôi cho bé giữ gìn rất cẩn thận, khung kim loại chắc chắn, đệm lót sạch sẽ đã tiệt trùng bằng nước giặt hữu cơ. Khung gấp gọn tiện lợi khi cho bé đi dạo hoặc đi du lịch. Bé nhà mình đã lớn nên nhượng lại cho mẹ nào cần nhé.`,
+      book: `Bộ sách truyện tranh hình ảnh sinh động, màu sắc tươi sáng giúp bé phát triển ngôn ngữ và trí tưởng tượng. Giấy dày dặn, không quăn mép, bé xem rất thích. Mẹ pass lại cho bé khác cùng đọc nha.`,
+      quan_ao: `Chất liệu cotton 100% mềm mịn, thấm hút mồ hôi tốt, an toàn cho làn da nhạy cảm của bé. Form dáng xinh xắn, đường may tỉ mỉ, bé mặc chỉ vài lần dịp đi chơi nên còn rất mới.`,
+      do_hoc_tap: `Đồ dùng học tập và phát triển tư duy cho bé, các chi tiết bo tròn an toàn không góc nhọn. Giúp bé rèn luyện tính kiên nhẫn và khả năng sáng tạo.`,
+      toy_large: `Đồ chơi phát triển vận động cho bé, chất liệu nhựa nguyên sinh ABS an toàn không mùi. Kết cấu vững chãi, các khớp nối chắc chắn giúp bé chơi vui và an toàn tại nhà.`,
+      toy_small: `Món đồ chơi nhỏ xinh cho bé luyện cầm nắm và phản xạ linh hoạt. Âm thanh vui nhộn, màu sắc bắt mắt, các góc cạnh đều được bo tròn an toàn tuyệt đối.`,
+    };
+
+    res.json({
+      category,
+      condition,
+      ageRange: detectedAge,
+      suggestedXu,
+      description: descriptions[category] || descriptions.toy_small,
+    });
+  } catch (error) {
+    console.error('AI suggest error:', error);
+    res.status(500).json({ error: 'Không thể tạo gợi ý AI.' });
   }
 });
 

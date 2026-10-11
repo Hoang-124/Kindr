@@ -14,6 +14,8 @@
   /* Accents */
   --brand-primary: #E05A36;
   --brand-primary-hover: #C94A27;
+  --brand-primary-strong: #C2410C;
+  --brand-primary-strong-hover: #9A3412;
   --brand-primary-soft: #FDF0EB;
   --brand-primary-border: rgba(224, 90, 54, 0.22);
 
@@ -32,7 +34,7 @@
   --text-headline: #2D2325;
   --text-body: #4A3E40;
   --text-muted: #7A6C6F;
-  --text-subtle: #A39699;
+  --text-subtle: #6E5A5D;
 
   /* Borders & Shadows */
   --border-delicate: rgba(45, 35, 37, 0.08);
@@ -52,6 +54,17 @@
   /* Transitions */
   --trans-fast: 0.18s cubic-bezier(0.4, 0, 0.2, 1);
   --trans-smooth: 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  /* Extended Semantic Tokens */
+  --white: #FFFFFF;
+  --color-emerald: #10B981;
+  --color-emerald-soft: #ECFDF5;
+  --color-blue: #2563EB;
+  --color-blue-soft: #EFF6FF;
+  --color-amber-dark: #B45309;
+  --color-amber-deeper: #92400E;
+  --color-slate: #64748B;
+  --color-slate-dark: #1E293B;
+  --color-slate-border: #E2E8F0;
 }
 
 /* Reset */
@@ -64,6 +77,27 @@
 html {
   scroll-behavior: smooth;
   font-size: 16px;
+}
+
+:focus-visible {
+  outline: 2px solid var(--brand-primary-strong);
+  outline-offset: 2px;
+}
+
+.chip-option:has(input:focus-visible) {
+  outline: 2px solid var(--brand-primary-strong);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 body {
@@ -124,15 +158,15 @@ button {
 }
 
 .btn-primary {
-  background: var(--brand-primary);
-  color: #FFFFFF;
-  box-shadow: 0 4px 14px rgba(224, 90, 54, 0.25);
+  background: var(--brand-primary-strong);
+  color: var(--white);
+  box-shadow: 0 4px 14px rgba(194, 65, 12, 0.28);
 }
 
 .btn-primary:hover {
-  background: var(--brand-primary-hover);
+  background: var(--brand-primary-strong-hover);
   transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(224, 90, 54, 0.35);
+  box-shadow: 0 6px 20px rgba(194, 65, 12, 0.38);
 }
 
 .btn-primary:active {
@@ -232,7 +266,7 @@ button {
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: #FFFFFF;
+  background: var(--white);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -416,7 +450,7 @@ button {
   border-radius: 50%;
   object-fit: cover;
   object-position: center 26%;
-  border: 1.5px solid #FFFFFF;
+  border: 1.5px solid var(--white);
   box-shadow: 0 2px 6px rgba(43, 138, 126, 0.3);
   animation: floatMascot 3.2s ease-in-out infinite alternate;
   display: block;
@@ -527,7 +561,7 @@ button {
 }
 
 .mode-btn.active {
-  background: #FFFFFF;
+  background: var(--white);
   color: var(--brand-primary);
   box-shadow: var(--shadow-sm);
 }
@@ -612,7 +646,7 @@ button {
 }
 
 .micro-badge {
-  font-size: 0.62rem;
+  font-size: 0.75rem;
   font-weight: 700;
   padding: 2px 6px;
   border-radius: 4px;
@@ -621,16 +655,16 @@ button {
 .badge-coral { background: var(--brand-primary-soft); color: var(--brand-primary); }
 .badge-amber { background: var(--accent-amber-soft); color: var(--accent-amber); }
 .badge-teal { background: var(--accent-sage-soft); color: var(--accent-sage); }
-.badge-free { background: #E5F8ED; color: #2B8A7E; }
+.badge-free { background: #E5F8ED; color: var(--accent-sage); }
 
 .micro-condition {
-  font-size: 0.65rem;
+  font-size: 0.75rem;
   color: var(--text-muted);
 }
 
 .item-visual-slot {
   height: 56px;
-  background: #FFFFFF;
+  background: var(--white);
   border-radius: 8px;
   display: flex;
   align-items: center;
@@ -665,13 +699,13 @@ button {
 }
 
 .item-distance {
-  font-size: 0.65rem;
+  font-size: 0.75rem;
   color: var(--text-subtle);
 }
 
 .stage-action-drawer {
   display: none;
-  background: #FFFFFF;
+  background: var(--white);
   border: 1.5px solid var(--brand-primary-border);
   border-radius: var(--radius-md);
   padding: 10px 14px;
@@ -692,7 +726,7 @@ button {
 
 .drawer-tag {
   display: block;
-  font-size: 0.65rem;
+  font-size: 0.75rem;
   color: var(--text-muted);
   text-transform: uppercase;
 }
@@ -714,7 +748,7 @@ button {
   padding: 8px 6px;
   background: var(--surface-subtle);
   border-radius: 8px;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 700;
   color: var(--text-muted);
   text-align: center;
@@ -723,7 +757,7 @@ button {
 
 .sandbox-pill.active {
   background: var(--brand-primary);
-  color: #FFFFFF;
+  color: var(--white);
 }
 
 .sandbox-stage-view {
@@ -739,7 +773,7 @@ button {
 }
 
 .sandbox-actor {
-  background: #FFFFFF;
+  background: var(--white);
   border-radius: 12px;
   padding: 12px 8px;
   text-align: center;
@@ -754,14 +788,14 @@ button {
 }
 
 .actor-role {
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   color: var(--text-muted);
   display: block;
   margin-bottom: 6px;
 }
 
 .actor-coin-status {
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 800;
   padding: 2px 8px;
   border-radius: var(--radius-full);
@@ -770,7 +804,7 @@ button {
 }
 
 .sandbox-center-vault {
-  background: #FFFFFF;
+  background: var(--white);
   border-radius: var(--radius-md);
   padding: 1rem 0.5rem;
   text-align: center;
@@ -790,7 +824,7 @@ button {
 }
 
 .vault-balance-title {
-  font-size: 0.65rem;
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.5px;
   color: var(--text-muted);
@@ -808,7 +842,7 @@ button {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 700;
   color: var(--accent-sage);
 }
@@ -877,7 +911,7 @@ button {
   border-radius: 50%;
   background: var(--brand-primary);
   cursor: pointer;
-  border: 3px solid #FFFFFF;
+  border: 3px solid var(--white);
   box-shadow: 0 2px 6px rgba(224, 90, 54, 0.4);
 }
 
@@ -1044,7 +1078,7 @@ button {
 
 .flow-step-active .flow-num {
   background: var(--brand-primary);
-  color: #FFFFFF;
+  color: var(--white);
 }
 
 .flow-step strong {
@@ -1055,7 +1089,7 @@ button {
 }
 
 .flow-step span {
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   color: var(--text-muted);
 }
 
@@ -1098,7 +1132,7 @@ button {
 }
 
 .clock-center-content span {
-  font-size: 0.65rem;
+  font-size: 0.75rem;
   color: var(--text-muted);
   text-transform: uppercase;
 }
@@ -1170,10 +1204,10 @@ button {
 .radar-hub-dot {
   position: absolute;
   padding: 2px 6px;
-  background: #FFFFFF;
+  background: var(--white);
   border: 1px solid var(--border-delicate);
   border-radius: var(--radius-full);
-  font-size: 0.65rem;
+  font-size: 0.75rem;
   font-weight: 700;
   color: var(--brand-primary);
   box-shadow: var(--shadow-sm);
@@ -1184,11 +1218,15 @@ button {
 .dot-3 { top: 40px; right: 40px; }
 
 /* Tile 5: Stages */
+.bento-stages {
+  grid-column: span 3;
+}
+
 .stages-pill-strip {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin-top: 0.5rem;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-top: 0.75rem;
 }
 
 .stage-chip {
@@ -1207,7 +1245,7 @@ button {
 
 .stage-chip span {
   color: var(--text-muted);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
 }
 
 .stage-chip.active {
@@ -1222,11 +1260,11 @@ button {
 /* ================= ACT 3: STEP 4 MVP TRIAL BANNER ================= */
 .mvp-cta-section {
   padding: 4.5rem 0;
-  background: #FFFFFF;
+  background: var(--white);
 }
 
 .mvp-action-card {
-  background: linear-gradient(135deg, #FFF7F2 0%, #FAEDE4 100%);
+  background: linear-gradient(135deg, var(--brand-primary-soft) 0%, #FAEDE4 100%);
   border: 2px solid #F5C4B5;
   border-radius: var(--radius-xl);
   padding: 3.5rem 3rem;
@@ -1260,7 +1298,7 @@ button {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: #FFFFFF;
+  background: var(--white);
   padding: 6px 12px;
   border-radius: var(--radius-full);
   border: 1px solid rgba(224, 90, 54, 0.2);
@@ -1274,50 +1312,70 @@ button {
   height: 18px;
   border-radius: 50%;
   background: var(--brand-primary);
-  color: #FFFFFF;
+  color: var(--white);
   font-size: 0.7rem;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.testimonials-stack {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.t-quote-card {
-  background: #FFFFFF;
-  border-radius: var(--radius-md);
-  padding: 1.25rem;
+.mvp-transparency-card {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
   border: 1px solid var(--border-delicate);
   box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
 }
 
-.t-stars {
-  display: inline-flex;
+.transparency-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.transparency-header {
+  display: flex;
   align-items: center;
-  gap: 3px;
-  color: #D97706;
-  margin-bottom: 6px;
-}
-
-.t-quote-card p {
-  font-size: 0.86rem;
-  line-height: 1.5;
-  color: var(--text-body);
-  font-style: italic;
-  margin-bottom: 8px;
-}
-
-.t-author {
-  font-size: 0.75rem;
-  color: var(--text-muted);
-}
-
-.t-author strong {
+  gap: 8px;
+  font-size: 0.95rem;
+  font-weight: 700;
   color: var(--text-headline);
+}
+
+.transparency-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.transparency-list li {
+  font-size: 0.84rem;
+  line-height: 1.45;
+  color: var(--text-body);
+  position: relative;
+  padding-left: 1.1rem;
+}
+
+.transparency-list li::before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  color: var(--brand-primary-strong);
+  font-weight: bold;
+}
+
+.gold-card-disclaimer {
+  font-size: 0.76rem;
+  line-height: 1.4;
+  color: var(--text-subtle);
+  margin-top: 8px;
+  font-style: italic;
 }
 
 /* ================= ACT 4: MILESTONE 200 WAITLIST & FAQ ================= */
@@ -1400,7 +1458,7 @@ button {
 
 .meter-fill {
   height: 100%;
-  background: linear-gradient(90deg, #F4A261 0%, #E05A36 100%);
+  background: linear-gradient(90deg, #F4A261 0%, var(--brand-primary) 100%);
   border-radius: var(--radius-full);
   transition: width 1s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -1408,7 +1466,7 @@ button {
 .meter-markers {
   display: flex;
   justify-content: space-between;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   color: var(--text-subtle);
   margin-bottom: 0.75rem;
 }
@@ -1464,18 +1522,18 @@ button {
 .form-control:focus {
   outline: none;
   border-color: var(--brand-primary);
-  background: #FFFFFF;
+  background: var(--white);
   box-shadow: 0 0 0 3px rgba(224, 90, 54, 0.15);
 }
 
 .form-control.is-invalid {
-  border-color: #DC2626 !important;
-  background-color: #FEF2F2 !important;
+  border-color: var(--accent-danger) !important;
+  background-color: var(--accent-danger-soft) !important;
   box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15) !important;
 }
 
 .form-field-error {
-  color: #DC2626;
+  color: var(--accent-danger);
   font-size: 0.76rem;
   font-weight: 700;
   margin-top: 5px;
@@ -1562,7 +1620,7 @@ button {
 
 .faq-item.active {
   border-color: var(--brand-primary-border);
-  background: #FFFFFF;
+  background: var(--white);
   box-shadow: 0 4px 14px rgba(45, 35, 37, 0.05);
 }
 
@@ -1633,13 +1691,13 @@ button {
 }
 
 .footer-left .brand-symbol {
-  background: #FFFFFF;
+  background: var(--white);
   border-color: rgba(255, 255, 255, 0.3);
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
 }
 
 .footer-left .brand-text {
-  color: #FFFFFF;
+  color: var(--white);
 }
 
 .footer-tagline {
@@ -1679,7 +1737,7 @@ button {
 }
 
 .modal-box {
-  background: #FFFFFF;
+  background: var(--white);
   border-radius: var(--radius-xl);
   padding: 2.5rem 2rem;
   width: 90%;
@@ -1713,7 +1771,7 @@ button {
   width: 76px;
   height: 76px;
   border-radius: 50%;
-  background: #FFFFFF;
+  background: var(--white);
   border: 2.5px solid var(--accent-sage-border);
   display: flex;
   align-items: center;
@@ -1784,12 +1842,52 @@ button {
   .bento-escrow-core {
     grid-column: span 2;
   }
+  .bento-stages {
+    grid-column: span 2;
+  }
+  .bento-stages .stages-pill-strip {
+    grid-template-columns: repeat(2, 1fr);
+  }
   .mvp-action-card {
     grid-template-columns: 1fr;
   }
   .waitlist-two-col {
     grid-template-columns: 1fr;
   }
+}
+
+/* Consent Checkbox */
+.form-consent-field {
+  margin-bottom: 1.25rem;
+}
+
+.consent-checkbox-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: var(--text-body);
+  line-height: 1.45;
+}
+
+.consent-checkbox-label input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  accent-color: var(--brand-primary-strong);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.consent-checkbox-label a {
+  color: var(--brand-primary-strong);
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.consent-checkbox-label a:hover {
+  color: var(--brand-primary-strong-hover);
 }
 
 @media (max-width: 768px) {
@@ -1801,6 +1899,12 @@ button {
   }
   .bento-escrow-core {
     grid-column: span 1;
+  }
+  .bento-stages {
+    grid-column: span 1;
+  }
+  .bento-stages .stages-pill-strip {
+    grid-template-columns: 1fr;
   }
   .escrow-process-flow {
     flex-direction: column;
@@ -1846,7 +1950,7 @@ button {
 
 .mascot-speech-bubble {
   pointer-events: auto;
-  background: #FFFFFF;
+  background: var(--white);
   border: 1.5px solid var(--accent-sage-border);
   border-radius: 18px 18px 4px 18px;
   padding: 12px 14px;
@@ -1905,7 +2009,7 @@ button {
 }
 
 .bubble-action-hint {
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 600;
   color: var(--text-muted);
   font-style: italic;
@@ -1940,7 +2044,7 @@ button {
   width: 54px;
   height: 54px;
   border-radius: 50%;
-  background: #FFFFFF;
+  background: var(--white);
   border: 2px solid var(--accent-sage);
   box-shadow: 0 4px 16px rgba(43, 138, 126, 0.28);
   overflow: hidden;
@@ -1977,8 +2081,8 @@ button {
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: #10B981;
-  border: 2px solid #FFFFFF;
+  background: var(--color-emerald);
+  border: 2px solid var(--white);
   z-index: 3;
 }
 
@@ -2122,7 +2226,7 @@ button {
 
 /* Inner Screen Container (Edge-to-edge curved screen) */
 .phone-inner-screen {
-  background: #FAF7F2;
+  background: var(--canvas-bg);
   border-radius: 47px;
   overflow: hidden;
   display: flex;
@@ -2137,7 +2241,7 @@ button {
   justify-content: space-between;
   align-items: center;
   padding: 10px 18px 6px 18px;
-  background: #FAF7F2;
+  background: var(--canvas-bg);
   position: relative;
   z-index: 10;
 }
@@ -2146,14 +2250,14 @@ button {
   font-weight: 800;
   font-size: 0.8rem;
   letter-spacing: -0.02em;
-  color: #2D2325;
+  color: var(--text-headline);
 }
 
 .phone-status-bar .status-icons {
   display: flex;
   align-items: center;
   gap: 5px;
-  color: #2D2325;
+  color: var(--text-headline);
 }
 
 /* Centered Dynamic Island Pill */
@@ -2195,7 +2299,7 @@ button {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: #FAF7F2;
+  background: var(--canvas-bg);
   padding: 4px 14px 8px 14px;
   border-bottom: 1px solid var(--border-delicate);
 }
@@ -2225,21 +2329,34 @@ button {
 
 .app-banner-sub {
   display: block;
-  font-size: 0.66rem;
+  font-size: 0.75rem;
   color: var(--accent-sage);
   font-weight: 600;
+}
+
+/* Native App Bottom Navigation Wrap (Tab Bar + Safe Home Indicator) */
+.phone-bottom-nav-wrap {
+  background: var(--white);
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  position: relative;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 6px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* Native App Bottom Tab Bar */
 .phone-bottom-tabbar {
   display: grid;
   grid-template-columns: 1fr 1fr 50px 1fr 1fr;
-  background: #FFFFFF;
-  border-top: 1px solid rgba(0, 0, 0, 0.06);
-  padding: 6px 2px 4px 2px;
+  background: transparent;
+  padding: 6px 2px 2px 2px;
   position: relative;
-  z-index: 20;
   align-items: flex-end;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .phone-tab-item {
@@ -2247,7 +2364,7 @@ button {
   flex-direction: column;
   align-items: center;
   gap: 2px;
-  font-size: 0.62rem;
+  font-size: 0.75rem;
   font-weight: 700;
   color: #8E7C80;
   cursor: pointer;
@@ -2277,14 +2394,14 @@ button {
   top: -4px;
   right: -8px;
   background: var(--brand-primary);
-  color: #FFFFFF;
-  font-size: 0.52rem;
+  color: var(--white);
+  font-size: 0.75rem;
   font-weight: 800;
   padding: 1px 4px;
   border-radius: var(--radius-full);
   min-width: 14px;
   text-align: center;
-  border: 1.5px solid #FFFFFF;
+  border: 1.5px solid var(--white);
 }
 
 /* Floating Center FAB Button */
@@ -2301,12 +2418,12 @@ button {
   width: 42px;
   height: 42px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #FF6B6B 0%, #E05A36 100%);
+  background: linear-gradient(135deg, var(--brand-primary) 0%, var(--brand-primary) 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   box-shadow: 0 4px 12px rgba(224, 90, 54, 0.45);
-  border: 3px solid #FFFFFF;
+  border: 3px solid var(--white);
   cursor: pointer;
   transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -2320,9 +2437,9 @@ button {
   width: 100px;
   height: 4px;
   border-radius: 2px;
-  background: #2D2325;
+  background: var(--text-headline);
   opacity: 0.25;
-  margin: 4px auto 6px auto;
+  margin: 6px auto 2px auto;
 }
 
 /* ================= HERO GEN Z BADGE ================= */
@@ -2336,21 +2453,21 @@ button {
   border-radius: var(--radius-full);
   font-size: 0.76rem;
   font-weight: 700;
-  color: #B45309;
+  color: var(--color-amber-dark);
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   box-shadow: 0 2px 6px rgba(217, 119, 6, 0.08);
 }
 
 .hero-genz-badge:hover {
   background: rgba(217, 119, 6, 0.16);
-  border-color: #D97706;
+  border-color: var(--accent-amber);
   transform: translateY(-1px);
-  color: #92400E;
+  color: var(--color-amber-deeper);
 }
 
 /* ================= ĐÀ NẴNG RESIDENT NETWORK TICKER ================= */
 .danang-network-strip {
-  background: #FFFFFF;
+  background: var(--white);
   border-top: 1px solid var(--border-delicate);
   border-bottom: 1px solid var(--border-delicate);
   padding: 0.85rem 0;
@@ -2386,7 +2503,7 @@ button {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #10B981;
+  background: var(--color-emerald);
   box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25);
   animation: pulseDot 2s infinite;
 }
@@ -2412,7 +2529,7 @@ button {
 }
 
 .network-pill:hover {
-  background: #FFFFFF;
+  background: var(--white);
   border-color: var(--accent-sage);
   transform: translateY(-1px);
 }
@@ -2429,12 +2546,12 @@ button {
 
 .network-pill span {
   color: var(--text-muted);
-  font-size: 0.74rem;
+  font-size: 0.75rem;
 }
 
 /* ================= FOUNDING MEMBER GOLD CARD ================= */
 .founding-gold-card {
-  background: linear-gradient(135deg, #FFFDF8 0%, #FEF3C7 45%, #FDE68A 100%);
+  background: linear-gradient(135deg, #FFFDF8 0%, var(--accent-amber-soft) 45%, #FDE68A 100%);
   border: 1.5px solid rgba(217, 119, 6, 0.45);
   border-radius: var(--radius-lg);
   padding: 1.35rem 1.5rem;
@@ -2484,7 +2601,7 @@ button {
   border-radius: 50%;
   object-fit: cover;
   object-position: center 26%;
-  border: 2px solid #FFFFFF;
+  border: 2px solid var(--white);
   box-shadow: 0 2px 8px rgba(217, 119, 6, 0.3);
 }
 
@@ -2498,9 +2615,9 @@ button {
 
 .gold-pass-sub {
   display: block;
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   font-weight: 700;
-  color: #92400E;
+  color: var(--color-amber-deeper);
   opacity: 0.85;
 }
 
@@ -2526,7 +2643,7 @@ button {
 .gold-fiat-val {
   font-size: 0.86rem;
   font-weight: 700;
-  color: #92400E;
+  color: var(--color-amber-deeper);
   background: rgba(255, 255, 255, 0.6);
   padding: 3px 10px;
   border-radius: var(--radius-full);
@@ -2546,8 +2663,8 @@ button {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 0.72rem;
-  color: #92400E;
+  font-size: 0.75rem;
+  color: var(--color-amber-deeper);
   font-weight: 600;
 }
 
@@ -2561,7 +2678,7 @@ button {
 
 .card-scarcity {
   font-weight: 700;
-  color: #B45309;
+  color: var(--color-amber-dark);
 }
 
 /* ================= ROLE SELECTOR ================= */
@@ -2591,7 +2708,7 @@ button {
   border: 1px solid var(--accent-amber-border);
   padding: 3px 10px;
   border-radius: var(--radius-full);
-  font-size: 0.74rem;
+  font-size: 0.75rem;
   font-weight: 700;
 }
 
@@ -2600,7 +2717,7 @@ button {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #FFFFFF;
+  background: var(--white);
   border-bottom: 1px solid var(--border-delicate);
   padding: 8px 12px;
   gap: 4px;
@@ -2633,7 +2750,7 @@ button {
 }
 
 .flow-step-btn .step-txt {
-  font-size: 0.74rem;
+  font-size: 0.75rem;
   font-weight: 700;
   color: var(--text-muted);
   transition: all var(--trans-fast);
@@ -2645,7 +2762,7 @@ button {
 
 .flow-step-btn.active .step-num {
   background: var(--brand-primary);
-  color: #FFFFFF;
+  color: var(--white);
 }
 
 .flow-step-btn.active .step-txt {
@@ -2654,7 +2771,7 @@ button {
 
 .flow-step-btn.completed .step-num {
   background: var(--accent-sage);
-  color: #FFFFFF;
+  color: var(--white);
 }
 
 .step-divider-line {
@@ -2666,7 +2783,7 @@ button {
 
 /* ================= AUTHENTIC KINDR NATIVE APP STYLING ================= */
 .phone-screen-viewport {
-  background: #F8F9FA;
+  background: var(--canvas-bg);
   height: 520px;
   max-height: 520px;
   position: relative;
@@ -2715,7 +2832,7 @@ button {
   justify-content: space-between;
   align-items: center;
   padding: 6px 12px;
-  background: #FFFFFF;
+  background: var(--white);
   border-bottom: 1px solid rgba(0, 0, 0, 0.05);
   flex-shrink: 0;
 }
@@ -2748,15 +2865,15 @@ button {
 }
 
 .native-greeting-hint {
-  font-size: 0.62rem;
-  color: #64748B;
+  font-size: 0.75rem;
+  color: var(--color-slate);
   font-weight: 500;
 }
 
 .native-user-name {
   font-size: 0.84rem;
   font-weight: 800;
-  color: #0F172A;
+  color: var(--color-slate-dark);
 }
 
 .native-header-actions {
@@ -2769,13 +2886,13 @@ button {
   display: flex;
   align-items: center;
   gap: 4px;
-  background: #FFFBEB;
+  background: var(--accent-amber-soft);
   border: 1px solid #FDE68A;
   border-radius: var(--radius-full);
   padding: 3px 8px;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 800;
-  color: #D97706;
+  color: var(--accent-amber);
 }
 
 .native-bell-btn {
@@ -2785,7 +2902,7 @@ button {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #1E293B;
+  color: var(--color-slate-dark);
   cursor: pointer;
 }
 
@@ -2793,9 +2910,9 @@ button {
   position: absolute;
   top: 1px;
   right: 1px;
-  background: #EF4444;
-  color: #FFFFFF;
-  font-size: 0.52rem;
+  background: var(--accent-danger);
+  color: var(--white);
+  font-size: 0.75rem;
   font-weight: 800;
   border-radius: var(--radius-full);
   padding: 1px 4px;
@@ -2810,7 +2927,7 @@ button {
   align-items: center;
   height: 42px;
   padding: 0 10px;
-  background: #FFFFFF;
+  background: var(--white);
   border-bottom: 1px solid rgba(0, 0, 0, 0.06);
   flex-shrink: 0;
 }
@@ -2818,7 +2935,7 @@ button {
 .native-sub-header-title {
   font-size: 0.86rem;
   font-weight: 800;
-  color: #0F172A;
+  color: var(--color-slate-dark);
 }
 
 .native-header-back-btn,
@@ -2835,27 +2952,27 @@ button {
 /* ================= 2. HOMESCREEN COMPONENTS ================= */
 .native-search-bar {
   height: 36px;
-  background: #FFFFFF;
+  background: var(--white);
   border-radius: var(--radius-full);
   display: flex;
   align-items: center;
   padding: 0 12px;
   gap: 8px;
-  border: 1px solid #E2E8F0;
+  border: 1px solid var(--color-slate-border);
   margin-bottom: 8px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
   cursor: pointer;
 }
 
 .native-search-placeholder {
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   color: #94A3B8;
   font-weight: 500;
 }
 
 /* Declutter Banner with Mascot */
 .native-declutter-banner {
-  background: linear-gradient(135deg, #FFF5F2 0%, #FFEBE6 100%);
+  background: linear-gradient(135deg, var(--brand-primary-soft) 0%, var(--brand-primary-soft) 100%);
   border: 1px solid rgba(255, 107, 107, 0.22);
   border-radius: 12px;
   padding: 8px 10px;
@@ -2874,7 +2991,7 @@ button {
 
 .declutter-mini-tag {
   display: inline-block;
-  font-size: 0.55rem;
+  font-size: 0.75rem;
   font-weight: 800;
   color: var(--brand-primary);
   background: rgba(224, 90, 54, 0.12);
@@ -2884,25 +3001,25 @@ button {
 }
 
 .declutter-main-title {
-  font-size: 0.74rem;
+  font-size: 0.75rem;
   font-weight: 800;
-  color: #1E293B;
+  color: var(--color-slate-dark);
   line-height: 1.2;
   margin-bottom: 2px;
 }
 
 .declutter-sub-title {
   font-size: 0.6rem;
-  color: #64748B;
+  color: var(--color-slate);
   margin-bottom: 6px;
   line-height: 1.25;
 }
 
 .native-post-btn {
   background: var(--brand-primary);
-  color: #FFFFFF;
+  color: var(--white);
   border: none;
-  font-size: 0.62rem;
+  font-size: 0.75rem;
   font-weight: 700;
   padding: 3px 8px;
   border-radius: var(--radius-full);
@@ -2932,7 +3049,7 @@ button {
   flex-direction: column;
   align-items: center;
   gap: 2px;
-  font-size: 0.56rem;
+  font-size: 0.75rem;
   font-weight: 700;
   color: #475569;
   text-align: center;
@@ -2964,11 +3081,11 @@ button {
 .native-feed-title {
   font-size: 0.78rem;
   font-weight: 800;
-  color: #1E293B;
+  color: var(--color-slate-dark);
 }
 
 .native-feed-filter {
-  font-size: 0.62rem;
+  font-size: 0.75rem;
   font-weight: 700;
   color: #0284C7;
 }
@@ -2981,9 +3098,9 @@ button {
 }
 
 .native-prod-card {
-  background: #FFFFFF;
+  background: var(--white);
   border-radius: 10px;
-  border: 1px solid #E2E8F0;
+  border: 1px solid var(--color-slate-border);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -3006,7 +3123,7 @@ button {
   position: relative;
   width: 100%;
   height: 90px;
-  background: #F1F5F9;
+  background: var(--surface-subtle);
 }
 
 .native-card-img {
@@ -3020,7 +3137,7 @@ button {
   bottom: 3px;
   left: 3px;
   background: rgba(0, 0, 0, 0.68);
-  color: #FFFFFF;
+  color: var(--white);
   font-size: 0.5rem;
   font-weight: 600;
   padding: 1px 4px;
@@ -3032,8 +3149,8 @@ button {
   position: absolute;
   top: 3px;
   right: 3px;
-  background: #10B981;
-  color: #FFFFFF;
+  background: var(--color-emerald);
+  color: var(--white);
   font-size: 0.5rem;
   font-weight: 800;
   padding: 1px 4px;
@@ -3048,9 +3165,9 @@ button {
 }
 
 .native-card-name {
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   font-weight: 700;
-  color: #0F172A;
+  color: var(--color-slate-dark);
   line-height: 1.25;
   margin-bottom: 4px;
   display: -webkit-box;
@@ -3080,8 +3197,8 @@ button {
 }
 
 .native-seller-name {
-  font-size: 0.54rem;
-  color: #64748B;
+  font-size: 0.75rem;
+  color: var(--color-slate);
   font-weight: 600;
 }
 
@@ -3089,19 +3206,19 @@ button {
   display: inline-flex;
   align-items: center;
   gap: 2px;
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   font-weight: 800;
-  color: #D97706;
-  background: #FEF3C7;
+  color: var(--accent-amber);
+  background: var(--accent-amber-soft);
   padding: 1px 5px;
   border-radius: 3px;
 }
 
 .native-card-action-hint {
   margin-top: 5px;
-  background: #FFF5F2;
+  background: var(--brand-primary-soft);
   color: var(--brand-primary);
-  font-size: 0.58rem;
+  font-size: 0.75rem;
   font-weight: 800;
   padding: 3px;
   border-radius: 4px;
@@ -3114,8 +3231,8 @@ button {
 
 .native-card-status-hint {
   margin-top: 5px;
-  font-size: 0.52rem;
-  color: #64748B;
+  font-size: 0.75rem;
+  color: var(--color-slate);
   text-align: center;
 }
 
@@ -3144,15 +3261,15 @@ button {
   bottom: 14px;
   right: 8px;
   background: rgba(0, 0, 0, 0.65);
-  color: #FFFFFF;
-  font-size: 0.56rem;
+  color: var(--white);
+  font-size: 0.75rem;
   font-weight: 700;
   padding: 1px 6px;
   border-radius: var(--radius-full);
 }
 
 .native-sheet-content {
-  background: #FFFFFF;
+  background: var(--white);
   border-radius: 14px 14px 0 0;
   margin-top: -10px;
   position: relative;
@@ -3172,11 +3289,11 @@ button {
   align-items: center;
   gap: 4px;
   font-size: 0.6rem;
-  color: #64748B;
+  color: var(--color-slate);
 }
 
 .native-cat-label {
-  background: #F1F5F9;
+  background: var(--surface-subtle);
   padding: 1px 5px;
   border-radius: 3px;
   font-weight: 600;
@@ -3191,7 +3308,7 @@ button {
   display: flex;
   align-items: center;
   gap: 2px;
-  color: #D97706;
+  color: var(--accent-amber);
 }
 
 .native-price-main strong {
@@ -3200,12 +3317,12 @@ button {
 }
 
 .native-price-main span {
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   font-weight: 700;
 }
 
 .native-fiat-sub {
-  font-size: 0.55rem;
+  font-size: 0.75rem;
   color: #94A3B8;
   display: block;
 }
@@ -3213,7 +3330,7 @@ button {
 .native-detail-title {
   font-size: 0.88rem;
   font-weight: 800;
-  color: #0F172A;
+  color: var(--color-slate-dark);
   margin-bottom: 6px;
   line-height: 1.25;
 }
@@ -3226,20 +3343,20 @@ button {
 }
 
 .attr-pill {
-  font-size: 0.56rem;
+  font-size: 0.75rem;
   font-weight: 700;
   padding: 2px 6px;
   border-radius: 4px;
 }
 
 .pill-cond {
-  background: #ECFDF5;
-  color: #059669;
+  background: var(--color-emerald-soft);
+  color: var(--color-emerald);
 }
 
 .pill-age {
-  background: #EFF6FF;
-  color: #2563EB;
+  background: var(--color-blue-soft);
+  color: var(--color-blue);
 }
 
 .pill-loc {
@@ -3248,7 +3365,7 @@ button {
 }
 
 .native-desc-card {
-  background: #F8FAFC;
+  background: var(--surface-hover);
   border-radius: 6px;
   padding: 6px 8px;
   margin-bottom: 8px;
@@ -3256,7 +3373,7 @@ button {
 
 .desc-card-title {
   display: block;
-  font-size: 0.58rem;
+  font-size: 0.75rem;
   font-weight: 800;
   color: #475569;
   margin-bottom: 2px;
@@ -3264,7 +3381,7 @@ button {
 }
 
 .desc-card-text {
-  font-size: 0.64rem;
+  font-size: 0.75rem;
   color: #334155;
   line-height: 1.35;
 }
@@ -3275,10 +3392,10 @@ button {
   gap: 8px;
   align-items: center;
   padding: 6px 8px;
-  border: 1px solid #E2E8F0;
+  border: 1px solid var(--color-slate-border);
   border-radius: 8px;
   margin-bottom: 8px;
-  background: #FFFFFF;
+  background: var(--white);
 }
 
 .seller-card-avatar-wrap {
@@ -3302,8 +3419,8 @@ button {
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: #10B981;
-  border: 1.5px solid #FFFFFF;
+  background: var(--color-emerald);
+  border: 1.5px solid var(--white);
 }
 
 .seller-card-info {
@@ -3316,19 +3433,19 @@ button {
   display: flex;
   align-items: center;
   gap: 3px;
-  font-size: 0.72rem;
-  color: #0F172A;
+  font-size: 0.75rem;
+  color: var(--color-slate-dark);
 }
 
 .seller-card-meta {
   display: flex;
   align-items: center;
   gap: 4px;
-  font-size: 0.58rem;
+  font-size: 0.75rem;
 }
 
 .star-rating {
-  color: #D97706;
+  color: var(--accent-amber);
   font-weight: 700;
 }
 
@@ -3338,14 +3455,14 @@ button {
 }
 
 .phone-unlocked-hint {
-  font-size: 0.56rem;
-  color: #64748B;
+  font-size: 0.75rem;
+  color: var(--color-slate);
   font-style: italic;
 }
 
 /* Escrow Trust Card */
 .native-escrow-trust-card {
-  background: #FFFBEB;
+  background: var(--accent-amber-soft);
   border: 1px solid #FDE68A;
   border-radius: 8px;
   padding: 6px 8px;
@@ -3372,14 +3489,14 @@ button {
 
 .escrow-trust-header strong {
   display: block;
-  font-size: 0.68rem;
-  color: #92400E;
+  font-size: 0.75rem;
+  color: var(--color-amber-deeper);
 }
 
 .escrow-trust-header span {
   display: block;
-  font-size: 0.56rem;
-  color: #B45309;
+  font-size: 0.75rem;
+  color: var(--color-amber-dark);
 }
 
 .escrow-trust-body {
@@ -3401,7 +3518,7 @@ button {
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  background: #D97706;
+  background: var(--accent-amber);
   margin-top: 4px;
   flex-shrink: 0;
 }
@@ -3411,8 +3528,8 @@ button {
   display: flex;
   gap: 6px;
   padding: 6px 10px;
-  background: #FFFFFF;
-  border-top: 1px solid #E2E8F0;
+  background: var(--white);
+  border-top: 1px solid var(--color-slate-border);
   flex-shrink: 0;
 }
 
@@ -3420,11 +3537,11 @@ button {
   display: flex;
   align-items: center;
   gap: 4px;
-  background: #F1F5F9;
+  background: var(--surface-subtle);
   color: #334155;
   border: 1px solid #CBD5E1;
   border-radius: 6px;
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   font-weight: 700;
   padding: 0 10px;
   height: 36px;
@@ -3437,11 +3554,11 @@ button {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  background: linear-gradient(135deg, #FF6B6B 0%, #E05A36 100%);
-  color: #FFFFFF;
+  background: linear-gradient(135deg, var(--brand-primary) 0%, var(--brand-primary) 100%);
+  color: var(--white);
   border: none;
   border-radius: 6px;
-  font-size: 0.74rem;
+  font-size: 0.75rem;
   font-weight: 800;
   height: 36px;
   cursor: pointer;
@@ -3469,18 +3586,18 @@ button {
 }
 
 .banner-yellow {
-  background: #F59E0B;
-  color: #FFFFFF;
+  background: var(--accent-amber);
+  color: var(--white);
 }
 
 .banner-teal {
   background: #0D9488;
-  color: #FFFFFF;
+  color: var(--white);
 }
 
 .banner-green {
-  background: #10B981;
-  color: #FFFFFF;
+  background: var(--color-emerald);
+  color: var(--white);
 }
 
 .status-banner-icon {
@@ -3494,20 +3611,20 @@ button {
 .status-banner-title {
   font-size: 0.76rem;
   font-weight: 800;
-  color: #FFFFFF;
+  color: var(--white);
   margin-bottom: 1px;
 }
 
 .status-banner-sub {
-  font-size: 0.62rem;
+  font-size: 0.75rem;
   color: rgba(255, 255, 255, 0.95);
   line-height: 1.25;
 }
 
 /* Product Row in Transaction Screen */
 .native-tx-product-card {
-  background: #FFFFFF;
-  border: 1px solid #E2E8F0;
+  background: var(--white);
+  border: 1px solid var(--color-slate-border);
   border-radius: 8px;
   padding: 6px 8px;
   display: flex;
@@ -3531,18 +3648,18 @@ button {
 }
 
 .tx-product-name {
-  font-size: 0.74rem;
+  font-size: 0.75rem;
   font-weight: 800;
-  color: #0F172A;
+  color: var(--color-slate-dark);
 }
 
 .tx-product-price-row {
   display: flex;
   align-items: center;
   gap: 3px;
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   font-weight: 700;
-  color: #D97706;
+  color: var(--accent-amber);
 }
 
 /* Mascot Speech Box */
@@ -3561,7 +3678,7 @@ button {
   flex-shrink: 0;
   object-fit: cover;
   object-position: center 26%;
-  background: #FFFFFF;
+  background: var(--white);
 }
 
 .native-mascot-speech-bubble {
@@ -3570,7 +3687,7 @@ button {
   border-radius: 8px;
   border-top-left-radius: 2px;
   padding: 6px 8px;
-  font-size: 0.64rem;
+  font-size: 0.75rem;
   color: #166534;
   line-height: 1.35;
   font-weight: 600;
@@ -3578,8 +3695,8 @@ button {
 
 /* Unlocked Contact Card */
 .native-contact-unlocked-card {
-  background: #FFFFFF;
-  border: 1px solid #E2E8F0;
+  background: var(--white);
+  border: 1px solid var(--color-slate-border);
   border-radius: 8px;
   padding: 8px 10px;
   margin-bottom: 8px;
@@ -3599,14 +3716,14 @@ button {
 
 .contact-unlocked-header strong {
   display: block;
-  font-size: 0.68rem;
-  color: #0F172A;
+  font-size: 0.75rem;
+  color: var(--color-slate-dark);
 }
 
 .contact-unlocked-header span {
   display: block;
-  font-size: 0.58rem;
-  color: #64748B;
+  font-size: 0.75rem;
+  color: var(--color-slate);
   line-height: 1.25;
 }
 
@@ -3614,12 +3731,12 @@ button {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 0.66rem;
+  font-size: 0.75rem;
   margin-bottom: 3px;
 }
 
 .info-label {
-  color: #64748B;
+  color: var(--color-slate);
 }
 
 .info-value-name {
@@ -3628,18 +3745,18 @@ button {
 }
 
 .info-value {
-  color: #0F172A;
+  color: var(--color-slate-dark);
   font-weight: 700;
 }
 
 .native-contact-chat-btn {
   width: 100%;
   margin-top: 4px;
-  background: #FFF5F2;
+  background: var(--brand-primary-soft);
   color: var(--brand-primary);
   border: 1px solid var(--brand-primary-border);
   border-radius: 6px;
-  font-size: 0.66rem;
+  font-size: 0.75rem;
   font-weight: 700;
   padding: 5px;
   display: flex;
@@ -3651,8 +3768,8 @@ button {
 
 /* Escrow Split Box */
 .native-escrow-split-box {
-  background: #F8FAFC;
-  border: 1px solid #E2E8F0;
+  background: var(--surface-hover);
+  border: 1px solid var(--color-slate-border);
   border-radius: 6px;
   padding: 6px 8px;
   display: grid;
@@ -3668,15 +3785,15 @@ button {
 }
 
 .split-label {
-  font-size: 0.58rem;
-  color: #64748B;
+  font-size: 0.75rem;
+  color: var(--color-slate);
   font-weight: 600;
 }
 
 .split-value {
   font-size: 0.88rem;
   font-weight: 800;
-  color: #D97706;
+  color: var(--accent-amber);
 }
 
 .split-line-divider {
@@ -3688,10 +3805,10 @@ button {
 /* Buttons */
 .native-handover-confirm-btn,
 .native-release-confirm-btn {
-  background: linear-gradient(135deg, #FF6B6B 0%, #E05A36 100%);
-  color: #FFFFFF;
+  background: linear-gradient(135deg, var(--brand-primary) 0%, var(--brand-primary) 100%);
+  color: var(--white);
   border: none;
-  font-size: 0.74rem;
+  font-size: 0.75rem;
   font-weight: 800;
   padding: 9px 12px;
   border-radius: 6px;
@@ -3719,8 +3836,8 @@ button {
 .native-dispute-link-btn {
   background: transparent;
   border: 1px solid #FECACA;
-  color: #DC2626;
-  font-size: 0.64rem;
+  color: var(--accent-danger);
+  font-size: 0.75rem;
   font-weight: 700;
   padding: 6px;
   border-radius: 6px;
@@ -3734,7 +3851,7 @@ button {
 
 /* ================= FLOW NARRATOR PANEL (SIDE COMPANION) ================= */
 .flow-narrator-panel {
-  background: #FFFFFF;
+  background: var(--white);
   border: 1px solid var(--border-card);
   border-radius: var(--radius-lg);
   padding: 18px 18px 16px 18px;
@@ -3759,7 +3876,7 @@ button {
   height: 0;
   border-top: 8px solid transparent;
   border-bottom: 8px solid transparent;
-  border-left: 8px solid #FFFFFF;
+  border-left: 8px solid var(--white);
   filter: drop-shadow(2px 0 1px rgba(45, 35, 37, 0.05));
 }
 
@@ -3772,7 +3889,7 @@ button {
 }
 
 .narrator-step-pill {
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 800;
   color: var(--brand-primary);
   background: var(--brand-primary-soft);
@@ -3851,7 +3968,7 @@ button {
   white-space: nowrap;
   background: var(--surface-subtle);
   border: 1px solid var(--border-delicate);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 700;
   color: var(--text-headline);
   padding: 6px 11px;
@@ -3878,14 +3995,14 @@ button {
 
 .narrator-nav-next {
   background: var(--brand-primary);
-  color: #FFFFFF;
+  color: var(--white);
   border-color: var(--brand-primary);
   box-shadow: 0 2px 8px rgba(224, 90, 54, 0.25);
 }
 
 .narrator-nav-next:hover:not(:disabled) {
   background: var(--brand-primary-hover);
-  color: #FFFFFF;
+  color: var(--white);
   border-color: var(--brand-primary-hover);
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(224, 90, 54, 0.35);
@@ -3972,7 +4089,7 @@ button {
   .award-chip,
   .mascot-chip,
   .tiktok-collab-chip {
-    font-size: 0.74rem;
+    font-size: 0.75rem;
     padding: 4px 10px;
     max-width: 100%;
     justify-content: center;
@@ -4012,7 +4129,7 @@ button {
     font-size: 1.15rem;
   }
   .stat-bubble span {
-    font-size: 0.72rem;
+    font-size: 0.75rem;
   }
 
   /* Smartphone Simulator on mobile: centered, proportional, no cramped text */
@@ -4133,7 +4250,7 @@ button {
   }
   .live-status-pill {
     padding: 3px 8px;
-    font-size: 0.72rem;
+    font-size: 0.75rem;
   }
   .brand-text {
     font-size: 1.2rem;
@@ -4194,7 +4311,7 @@ button {
   width: 42px;
   height: 42px;
   border-radius: var(--radius-full);
-  background: #FFFFFF;
+  background: var(--white);
   border: 2px solid rgba(255, 255, 255, 0.2);
   display: flex;
   align-items: center;
@@ -4219,12 +4336,12 @@ button {
   font-family: 'Fraunces', serif;
   font-size: 1.6rem;
   font-weight: 800;
-  color: #FFFFFF;
+  color: var(--white);
   letter-spacing: -0.02em;
 }
 
 .brand-badge-pill {
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 700;
   color: #FBBF24;
   background: rgba(245, 158, 11, 0.15);
@@ -4244,7 +4361,7 @@ button {
 }
 
 .footer-mission-text strong {
-  color: #FFFFFF;
+  color: var(--white);
   font-weight: 700;
 }
 
@@ -4274,7 +4391,7 @@ button {
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: #FFFFFF;
+  color: var(--white);
   margin-bottom: 1.25rem;
   position: relative;
   display: inline-block;
@@ -4352,7 +4469,7 @@ button {
 }
 
 .footer-team-desc strong {
-  color: #FFFFFF;
+  color: var(--white);
 }
 
 .footer-contact-links {
@@ -4381,7 +4498,7 @@ button {
 .footer-social-link:hover {
   background: rgba(255, 255, 255, 0.16);
   border-color: rgba(255, 255, 255, 0.25);
-  color: #FFFFFF;
+  color: var(--white);
   transform: translateY(-1px);
 }
 
@@ -4419,7 +4536,7 @@ button {
 }
 
 .footer-copy-text em {
-  color: #F59E0B;
+  color: var(--accent-amber);
   font-style: normal;
 }
 
@@ -4433,7 +4550,7 @@ button {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  font-size: 0.74rem;
+  font-size: 0.75rem;
   font-weight: 600;
   color: #34D399;
   background: rgba(16, 185, 129, 0.1);
@@ -4462,7 +4579,7 @@ button {
 .footer-back-top-btn:hover {
   background: rgba(255, 255, 255, 0.16);
   border-color: rgba(255, 255, 255, 0.25);
-  color: #FFFFFF;
+  color: var(--white);
   transform: translateY(-2px);
 }
 

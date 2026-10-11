@@ -22,7 +22,8 @@ import {
   AlertOctagon,
   ChevronRight,
   TrendingUp,
-  ShieldCheck
+  ShieldCheck,
+  UserCheck
 } from 'lucide-react-native';
 import ScreenContainer from '../../../components/layout/ScreenContainer';
 import Header from '../../../components/layout/Header';
@@ -70,13 +71,14 @@ export const AdminDashboardScreen = () => {
   const stats = apiStats || localStats;
 
   const MENU_ITEMS = [
-    { name: 'Quản lý Thành viên', icon: Users, route: 'ManageUsers', count: stats.usersCount, color: '#3b82f6', bg: '#eff6ff' },
-    { name: 'Quản lý Tin đăng', icon: FileText, route: 'ManagePosts', count: stats.postsCount, color: '#10b981', bg: '#ecfdf5' },
-    { name: 'Quản lý Danh mục', icon: Layers, route: 'ManageCategories', count: null, color: '#8b5cf6', bg: '#f5f3ff' },
-    { name: 'Giám sát Giao dịch', icon: Activity, route: 'ManageTransactions', count: transactions.length, color: '#f59e0b', bg: '#fffbeb' },
-    { name: 'Xử lý Tranh chấp', icon: ShieldAlert, route: 'ManageDisputes', count: stats.disputesCount, color: '#ef4444', bg: '#fdf2f2', badge: true },
-    { name: 'Duyệt Rút tiền', icon: Wallet, route: 'ManageWithdraws', count: stats.withdrawsCount, color: '#06b6d4', bg: '#ecfeff', badge: true },
-    { name: 'Báo cáo Vi phạm', icon: AlertOctagon, route: 'ManageReports', count: 1, color: '#ec4899', bg: '#fdf2f8' },
+    { name: 'Quản lý Thành viên', icon: Users, route: 'ManageUsers', count: stats.usersCount, color: COLORS.secondary, bg: COLORS.secondaryLight },
+    { name: 'Quản lý Tin đăng', icon: FileText, route: 'ManagePosts', count: stats.postsCount, color: COLORS.success, bg: COLORS.primaryLight },
+    { name: 'Quản lý Danh mục', icon: Layers, route: 'ManageCategories', count: null, color: COLORS.adminBadgeText, bg: COLORS.adminBadge },
+    { name: 'Giám sát Giao dịch', icon: Activity, route: 'ManageTransactions', count: transactions.length, color: COLORS.warning, bg: COLORS.tertiaryContainer },
+    { name: 'Xử lý Tranh chấp', icon: ShieldAlert, route: 'ManageDisputes', count: stats.disputesCount, color: COLORS.error, bg: COLORS.errorContainer, badge: true },
+    { name: 'Duyệt Rút tiền', icon: Wallet, route: 'ManageWithdraws', count: stats.withdrawsCount, color: COLORS.secondary, bg: COLORS.secondaryLight, badge: true },
+    { name: 'Báo cáo Vi phạm', icon: AlertOctagon, route: 'ManageReports', count: 1, color: COLORS.primaryDark, bg: COLORS.primaryLight },
+    { name: 'Danh sách Chờ Landing Page', icon: UserCheck, route: 'ManageWaitlist', count: null, color: COLORS.primary, bg: COLORS.primaryLight },
   ];
 
   return (
@@ -91,7 +93,7 @@ export const AdminDashboardScreen = () => {
         {/* Banner */}
         <View style={styles.adminBanner}>
           <View style={styles.bannerTitleRow}>
-            <ShieldCheck size={20} color="#ffffff" />
+            <ShieldCheck size={20} color={COLORS.surface} />
             <Text style={styles.bannerTitle}>Hệ Thống Quản Trị Kindr</Text>
           </View>
           <Text style={styles.bannerText}>
@@ -176,12 +178,12 @@ const styles = StyleSheet.create({
   bannerTitle: {
     fontSize: 18,
     fontWeight: '800',
-    color: '#ffffff',
+    color: COLORS.surface,
   },
   bannerText: {
-    fontSize: 11,
+    fontSize: 12,
     color: 'rgba(255,255,255,0.85)',
-    lineHeight: 16,
+    lineHeight: 18,
   },
   statsRow: {
     marginBottom: SPACING.lg,
@@ -257,9 +259,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   alertDotText: {
-    fontSize: 9,
+    fontSize: 12,
     fontWeight: '800',
-    color: '#ffffff',
+    color: COLORS.surface,
   },
   rowRight: {
     flexDirection: 'row',

@@ -206,21 +206,47 @@ npm --prefix server install
 Tạo file `server/.env` dựa trên file mẫu:
 ```env
 PORT=5000
-MONGODB_URI=mongodb://localhost:27017/kindr
-JWT_SECRET=kindr_super_secret_jwt_key_2026
-JWT_REFRESH_SECRET=kindr_refresh_secret_key_2026
+MONGO_URI=mongodb://localhost:27017/kindr
+JWT_SECRET=your_jwt_secret_64_characters_minimum
+JWT_REFRESH_SECRET=your_jwt_refresh_secret_64_characters_minimum
+WEBHOOK_SECRET=your_webhook_secret_key
+CORS_ORIGIN=http://localhost:8081,http://localhost:19006
+
+# Tài khoản ngân hàng nhận tiền nạp Xu (VietQR)
+BANK_CODE=MB
+BANK_NAME=MBBank
+BANK_ACCOUNT_NUMBER=your_bank_account_number
+BANK_ACCOUNT_HOLDER=CONG TY CO PHAN KINDR
+
+# Cờ tính năng cho môi trường thử nghiệm / phát triển
+ENABLE_DEMO_TOPUP=false
+ENABLE_DEMO_LOGIN=false
+
+# Cloudinary lưu trữ ảnh
 CLOUDINARY_CLOUD_NAME=your_cloud_name
 CLOUDINARY_API_KEY=your_api_key
 CLOUDINARY_API_SECRET=your_api_secret
+
+# Gửi email mã OTP xác thực
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
 SMTP_USER=your_email@gmail.com
-SMTP_PASS=your_app_password
+SMTP_PASS=your_gmail_app_password
+EMAIL_FROM="Kindr Support" <your_email@gmail.com>
 ```
 
-### Bước 3: Nạp dữ liệu mẫu (Seeder)
+> ⚠️ **Lưu ý bảo mật về Token:** Hiện tại phiên bản Mobile đang lưu trữ Access/Refresh Token tại `AsyncStorage` (sẽ được nâng cấp lên `expo-secure-store` trong các bản cập nhật bảo mật tiếp theo theo đúng lộ trình).
+
+### Bước 3: Nạp dữ liệu mẫu (Seeder) & Kiểm tra chất lượng (CI/Test)
 ```bash
+# Nạp dữ liệu mẫu
 npm run server:seed
+
+# Kiểm tra TypeScript toàn bộ monorepo (Client + Server)
+npm run typecheck
+
+# Chạy toàn bộ 19 integration tests (Vitest + MongoDB Memory Server)
+npm test
 ```
 
 ### Bước 4: Khởi chạy toàn bộ hệ thống (Một lệnh duy nhất)

@@ -22,6 +22,7 @@ export interface IProduct extends Document {
   sellerPhone?: string;
   sellerZalo?: string;
   safeFeeLocked: number;
+  safeFeePromoXu: number;
   status: 'pending_approval' | 'available' | 'escrow' | 'completed' | 'disputed' | 'removed';
   createdAt: Date;
   updatedAt: Date;
@@ -51,6 +52,7 @@ const ProductSchema = new Schema<IProduct>({
   sellerPhone: { type: String },
   sellerZalo: { type: String },
   safeFeeLocked: { type: Number, default: 0 },
+  safeFeePromoXu: { type: Number, default: 0 },
   status: {
     type: String,
     enum: ['pending_approval', 'available', 'escrow', 'completed', 'disputed', 'removed'],

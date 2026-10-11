@@ -49,12 +49,12 @@ type TabNavigationProp = NativeStackNavigationProp<MainTabParamList>;
 
 // Categories metadata with harmonious Kindr palette
 const categoriesMetadata = [
-  { id: 'do_choi', name: 'Đồ chơi', icon: ToyBrick, bg: '#FFE8E8', text: '#FF6B6B' },
-  { id: 'sach_truyen', name: 'Sách truyện', icon: BookOpen, bg: '#E0F7F5', text: '#26A69A' },
-  { id: 'do_hoc_tap', name: 'Đồ học tập', icon: GraduationCap, bg: '#E8EDFB', text: '#4361EE' },
-  { id: 'quan_ao', name: 'Quần áo bé', icon: Shirt, bg: '#FFF3D6', text: '#D97706' },
-  { id: 'xe_noi', name: 'Xe & Nôi cũi', icon: Baby, bg: '#E5F8ED', text: '#2EC4B6' },
-  { id: 'tu_thien', name: 'Trạm Tặng Đồ', icon: Gift, bg: '#FFEBF0', text: '#E63946' },
+  { id: 'do_choi', name: 'Đồ chơi', icon: ToyBrick, bg: COLORS.primaryLight, text: COLORS.primary },
+  { id: 'sach_truyen', name: 'Sách truyện', icon: BookOpen, bg: COLORS.secondaryLight, text: COLORS.secondaryDark },
+  { id: 'do_hoc_tap', name: 'Đồ học tập', icon: GraduationCap, bg: COLORS.surfaceSubtle, text: COLORS.secondary },
+  { id: 'quan_ao', name: 'Quần áo bé', icon: Shirt, bg: COLORS.tertiaryContainer, text: COLORS.warning },
+  { id: 'xe_noi', name: 'Xe & Nôi cũi', icon: Baby, bg: COLORS.secondaryLight, text: COLORS.success },
+  { id: 'tu_thien', name: 'Trạm Tặng Đồ', icon: Gift, bg: COLORS.primaryLight, text: COLORS.error },
 ];
 
 export const HomeScreen = () => {
@@ -124,7 +124,7 @@ export const HomeScreen = () => {
         <View style={styles.demoGuideBanner}>
           <View style={styles.demoGuideHeader}>
             <View style={styles.demoGuideBadge}>
-              <Sparkles size={12} color="#FFFFFF" />
+              <Sparkles size={12} color={COLORS.surface} />
               <Text style={styles.demoGuideBadgeText}>TRẢI NGHIỆM MVP (DEMO)</Text>
             </View>
             <View style={styles.demoCoinPill}>
@@ -172,8 +172,10 @@ export const HomeScreen = () => {
             style={styles.bannerBtn}
             scaleTo={0.95}
             onPress={() => tabNavigation.navigate('Post')}
+            accessibilityRole="button"
+            accessibilityLabel="Đăng đồ chơi đổi Xu ngay"
           >
-            <Plus size={15} color="#FFFFFF" strokeWidth={2.6} />
+            <Plus size={15} color={COLORS.surface} strokeWidth={2.6} />
             <Text style={styles.bannerBtnText}>Đăng đồ ngay</Text>
           </ScalePressable>
         </View>
@@ -192,10 +194,14 @@ export const HomeScreen = () => {
         <View style={styles.activeExchangeContainer}>
           <View style={styles.activeExchangeHeader}>
             <View style={styles.activeExchangeBadge}>
-              <Package size={13} color="#D97706" />
+              <Package size={13} color={COLORS.warning} />
               <Text style={styles.activeExchangeBadgeText}>GIAO DỊCH CẦN XỬ LÝ ({pendingExchangeTx.length})</Text>
             </View>
-            <TouchableOpacity onPress={() => navigation.navigate('TransactionDetail', { id: pendingExchangeTx[0].id })}>
+            <TouchableOpacity 
+              onPress={() => navigation.navigate('TransactionDetail', { id: pendingExchangeTx[0].id })}
+              accessibilityRole="button"
+              accessibilityLabel="Xem chi tiết giao dịch"
+            >
               <Text style={styles.viewDetailLink}>Xem chi tiết</Text>
             </TouchableOpacity>
           </View>
@@ -207,6 +213,8 @@ export const HomeScreen = () => {
                 style={styles.activeExchangeCard}
                 scaleTo={0.97}
                 onPress={() => navigation.navigate('TransactionDetail', { id: tx.id })}
+                accessibilityRole="button"
+                accessibilityLabel={`Mở giao dịch ${tx.productName}`}
               >
                 <Image source={{ uri: tx.productImage || DEFAULT_IMAGES.PRODUCT_FALLBACK }} style={styles.activeExchangeImage} />
                 <View style={styles.activeExchangeBody}>
@@ -215,7 +223,7 @@ export const HomeScreen = () => {
                   </Text>
                   <Text style={styles.activeExchangeSub} numberOfLines={1}>
                     {tx.status === 'awaiting_handover' 
-                      ? (isSeller ? `Mã nhận: ${tx.handoverCode || 'Chờ mã'} • Hẹn gặp giao đồ` : `Mã của bạn: ${tx.handoverCode || 'Chờ mã'}`) 
+                      ? (isSeller ? 'Hẹn gặp & nhập mã từ người mua' : `Mã của mẹ: ${tx.handoverCode || 'Chờ mã'}`) 
                       : 'Đang trong 6 Giờ Kiểm Định Tại Nhà'}
                   </Text>
                 </View>
@@ -238,6 +246,8 @@ export const HomeScreen = () => {
                   style={styles.categoryCard}
                   scaleTo={0.92}
                   onPress={() => handleCategoryPress(cat.id)}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Danh mục ${cat.name}`}
                 >
                   <View style={[styles.categoryIconCircle, { backgroundColor: cat.bg }]}>
                     <Icon size={24} color={cat.text} />
@@ -360,7 +370,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   bannerCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: COLORS.surface,
     borderRadius: 22,
     borderWidth: 1,
     borderColor: 'rgba(255, 107, 107, 0.16)',
@@ -382,29 +392,29 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 4,
     alignSelf: 'flex-start',
-    backgroundColor: '#FFE8E8',
+    backgroundColor: COLORS.primaryLight,
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: RADIUS.full,
     marginBottom: 6,
   },
   bannerTagText: {
-    fontSize: 10,
+    fontSize: 12,
     fontWeight: '800',
     color: COLORS.primary,
     letterSpacing: 0.3,
   },
   bannerTitle: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: '800',
     color: COLORS.text,
-    lineHeight: 21,
+    lineHeight: 22,
     letterSpacing: -0.2,
   },
   bannerSubtitle: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: COLORS.textMuted,
-    lineHeight: 16,
+    lineHeight: 18,
     marginTop: 2,
     marginBottom: 12,
   },
@@ -415,13 +425,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 5,
     paddingHorizontal: 16,
-    height: 38,
+    minHeight: 44,
+    paddingVertical: 10,
     borderRadius: RADIUS.full,
     ...SHADOWS.btn,
   },
   bannerBtnText: {
-    color: '#FFFFFF',
-    fontSize: 12.5,
+    color: COLORS.surface,
+    fontSize: 13,
     fontWeight: '700',
   },
   bannerRight: {
@@ -437,10 +448,10 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: COLORS.surface,
     borderWidth: 2,
-    borderColor: '#78C2AD',
-    shadowColor: 'rgba(120, 194, 173, 0.35)',
+    borderColor: COLORS.secondary,
+    shadowColor: COLORS.secondary,
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.18,
     shadowRadius: 6,
@@ -522,10 +533,10 @@ const styles = StyleSheet.create({
     paddingVertical: 3,
     borderRadius: 8,
     borderWidth: 0.5,
-    borderColor: 'rgba(0, 0, 0, 0.08)',
+    borderColor: COLORS.border,
   },
   distanceText: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '600',
     color: COLORS.text,
   },
@@ -533,17 +544,17 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: SPACING.xs,
     left: SPACING.xs,
-    backgroundColor: '#ECFDF5',
+    backgroundColor: COLORS.secondaryLight,
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#A7F3D0',
+    borderColor: COLORS.secondary,
   },
   ownPostBadgeText: {
-    fontSize: 10,
+    fontSize: 12,
     fontWeight: '700',
-    color: '#059669',
+    color: COLORS.success,
   },
   itemDetails: {
     padding: SPACING.sm,
@@ -551,7 +562,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
   itemName: {
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '600',
     color: COLORS.onSurface,
     lineHeight: 18,
@@ -578,7 +589,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.surfaceDim,
   },
   sellerName: {
-    fontSize: 11,
+    fontSize: 12,
     color: COLORS.textMuted,
     fontWeight: '500',
     flex: 1,
@@ -587,25 +598,25 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 3,
-    backgroundColor: '#FFF8E1',
+    backgroundColor: COLORS.coinBackground,
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: RADIUS.full,
     borderWidth: 1,
-    borderColor: 'rgba(255, 209, 102, 0.4)',
+    borderColor: COLORS.coinBorder,
   },
   priceCoin: {
-    fontSize: 11,
+    fontSize: 12,
   },
   priceText: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '800',
-    color: '#8C6500',
+    color: COLORS.onTertiaryContainer,
   },
   activeExchangeContainer: {
-    backgroundColor: '#FFFBEB',
+    backgroundColor: COLORS.coinBackground,
     borderWidth: 1.5,
-    borderColor: '#FCD34D',
+    borderColor: COLORS.coinBorder,
     borderRadius: RADIUS.lg,
     padding: SPACING.md,
     marginTop: SPACING.md,
@@ -620,15 +631,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 5,
-    backgroundColor: '#FEF3C7',
+    backgroundColor: COLORS.tertiaryContainer,
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: RADIUS.full,
   },
   activeExchangeBadgeText: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '800',
-    color: '#B45309',
+    color: COLORS.onTertiaryContainer,
     letterSpacing: 0.5,
   },
   viewDetailLink: {
@@ -639,12 +650,12 @@ const styles = StyleSheet.create({
   activeExchangeCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: COLORS.surface,
     borderRadius: RADIUS.md,
     padding: SPACING.sm,
     marginTop: SPACING.xs,
     borderWidth: 1,
-    borderColor: '#FDE68A',
+    borderColor: COLORS.coinBorder,
   },
   activeExchangeImage: {
     width: 44,
@@ -662,20 +673,20 @@ const styles = StyleSheet.create({
     color: COLORS.text,
   },
   activeExchangeSub: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '500',
-    color: '#D97706',
+    color: COLORS.warning,
     marginTop: 2,
   },
   demoGuideBanner: {
-    backgroundColor: '#FFF7ED',
+    backgroundColor: COLORS.coinBackground,
     borderWidth: 1.5,
-    borderColor: '#FDBA74',
+    borderColor: COLORS.coinBorder,
     borderRadius: RADIUS.lg,
     padding: SPACING.md,
     marginTop: SPACING.sm,
     marginBottom: SPACING.xs,
-    shadowColor: '#EA580C',
+    shadowColor: COLORS.warning,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
     shadowRadius: 6,
@@ -691,40 +702,40 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 5,
-    backgroundColor: '#EA580C',
+    backgroundColor: COLORS.warning,
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: RADIUS.full,
   },
   demoGuideBadgeText: {
-    fontSize: 10,
+    fontSize: 12,
     fontWeight: '800',
-    color: '#FFFFFF',
+    color: COLORS.surface,
     letterSpacing: 0.5,
   },
   demoCoinPill: {
-    backgroundColor: '#FEF3C7',
+    backgroundColor: COLORS.tertiaryContainer,
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: RADIUS.full,
     borderWidth: 1,
-    borderColor: '#FDE68A',
+    borderColor: COLORS.coinBorder,
   },
   demoCoinPillText: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '800',
-    color: '#B45309',
+    color: COLORS.onTertiaryContainer,
   },
   demoGuideTitle: {
     fontSize: 15,
     fontWeight: '800',
-    color: '#9A3412',
+    color: COLORS.onTertiaryContainer,
     marginBottom: 4,
   },
   demoGuideDesc: {
     fontSize: 12,
     lineHeight: 18,
-    color: '#7C2D12',
+    color: COLORS.onTertiaryContainer,
     marginBottom: 10,
   },
   demoStepsRow: {
@@ -735,29 +746,29 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: COLORS.surface,
     paddingVertical: 6,
     paddingHorizontal: 6,
     borderRadius: RADIUS.sm,
     borderWidth: 1,
-    borderColor: '#FFEDD5',
+    borderColor: COLORS.coinBorder,
     gap: 4,
   },
   demoStepNum: {
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    backgroundColor: '#EA580C',
-    color: '#FFFFFF',
-    fontSize: 10,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: COLORS.warning,
+    color: COLORS.surface,
+    fontSize: 12,
     fontWeight: '800',
     textAlign: 'center',
-    lineHeight: 16,
+    lineHeight: 20,
   },
   demoStepText: {
-    fontSize: 10,
+    fontSize: 12,
     fontWeight: '700',
-    color: '#431407',
+    color: COLORS.text,
     flexShrink: 1,
   },
 });

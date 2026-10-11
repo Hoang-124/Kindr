@@ -26,4 +26,4 @@ services:
       - key: SMTP_PASS
         sync: false # Set your Google App Password in Render Dashboard
       - key: EMAIL_FROM
-        value: Kindr Ecosystem <ht20041975@gmail.com>
+        value: Kindr Ecosystem <noreply@kindr.vn>

@@ -38,7 +38,7 @@ export const ActivateAccountScreen = () => {
   const [resendCooldown, setResendCooldown] = useState(60);
   const [resending, setResending] = useState(false);
 
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (resendCooldown > 0) {
@@ -253,7 +253,7 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
     ...SHADOWS.ambient,
     borderWidth: 1.5,
-    borderColor: '#C4EFEF',
+    borderColor: COLORS.secondaryContainer,
   },
   title: {
     ...TYPOGRAPHY.headlineMd,
@@ -281,7 +281,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: RADIUS.md,
     borderWidth: 1,
-    borderColor: '#C4EFEF',
+    borderColor: COLORS.secondaryContainer,
     marginBottom: SPACING.md,
   },
   emailTargetLeft: {

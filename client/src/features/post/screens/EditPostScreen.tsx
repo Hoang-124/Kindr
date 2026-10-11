@@ -158,15 +158,15 @@ export const EditPostScreen = () => {
             <View style={styles.statusRow}>
               <View style={[
                 styles.statusBadge, 
-                { backgroundColor: product.status === 'available' ? '#ECFDF5' : '#FFFBEB' }
+                { backgroundColor: product.status === 'available' ? COLORS.primaryLight : COLORS.tertiaryContainer }
               ]}>
                 <View style={[
                   styles.statusDot, 
-                  { backgroundColor: product.status === 'available' ? '#10B981' : '#F59E0B' }
+                  { backgroundColor: product.status === 'available' ? COLORS.success : COLORS.warning }
                 ]} />
                 <Text style={[
                   styles.statusText, 
-                  { color: product.status === 'available' ? '#047857' : '#B45309' }
+                  { color: product.status === 'available' ? COLORS.success : COLORS.warning }
                 ]}>
                   {product.status === 'available' ? 'Đang hiển thị' : 'Chờ trao đổi'}
                 </Text>
@@ -319,11 +319,11 @@ const styles = StyleSheet.create({
     borderRadius: 3,
   },
   statusText: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '700',
   },
   productIdText: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '600',
     color: COLORS.outline,
   },
@@ -386,7 +386,7 @@ const styles = StyleSheet.create({
     ...SHADOWS.soft,
   },
   badgeSelected: {
-    backgroundColor: '#FFF1F1',
+    backgroundColor: COLORS.primaryLight,
     borderColor: COLORS.primary,
     borderWidth: 1.5,
   },

@@ -215,7 +215,7 @@ export const EditProfileScreen = () => {
 
               {isUploadingAvatar && (
                 <View style={styles.avatarLoadingOverlay}>
-                  <ActivityIndicator color="#FFFFFF" size="small" />
+                  <ActivityIndicator color={COLORS.surface} size="small" />
                   <Text style={styles.uploadingText}>Đang tải...</Text>
                 </View>
               )}
@@ -226,7 +226,7 @@ export const EditProfileScreen = () => {
                 onPress={showAvatarPickerOptions}
                 disabled={isUploadingAvatar}
               >
-                <Camera size={16} color="#FFFFFF" />
+                <Camera size={16} color={COLORS.surface} />
               </TouchableOpacity>
             </View>
 
@@ -475,17 +475,17 @@ const styles = StyleSheet.create({
     height: 96,
     borderRadius: 48,
     borderWidth: 3,
-    borderColor: '#FFFFFF',
+    borderColor: COLORS.surface,
   },
   avatarFallback: {
     width: 96,
     height: 96,
     borderRadius: 48,
-    backgroundColor: '#FFE8E8',
+    backgroundColor: COLORS.errorContainer,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 3,
-    borderColor: '#FFFFFF',
+    borderColor: COLORS.surface,
   },
   avatarFallbackText: {
     fontSize: 36,
@@ -499,13 +499,13 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     borderRadius: 48,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: COLORS.scrim,
     justifyContent: 'center',
     alignItems: 'center',
   },
   uploadingText: {
-    color: '#FFFFFF',
-    fontSize: 10,
+    color: COLORS.surface,
+    fontSize: 12,
     marginTop: 4,
     fontWeight: '600',
   },
@@ -520,7 +520,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 2,
-    borderColor: '#FFFFFF',
+    borderColor: COLORS.surface,
     ...SHADOWS.soft,
   },
   changeAvatarText: {
@@ -529,7 +529,7 @@ const styles = StyleSheet.create({
     color: COLORS.primary,
   },
   card: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: COLORS.surface,
     borderRadius: RADIUS.lg,
     padding: SPACING.md,
     borderWidth: 1,
@@ -547,13 +547,13 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   helperText: {
-    fontSize: 11,
+    fontSize: 12,
     color: COLORS.textMuted,
     marginTop: 4,
     lineHeight: 16,
   },
   charCounter: {
-    fontSize: 11,
+    fontSize: 12,
     color: COLORS.textMuted,
   },
   bioInput: {
@@ -564,7 +564,7 @@ const styles = StyleSheet.create({
   readOnlyInput: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F1F3F5',
+    backgroundColor: COLORS.surfaceContainer,
     borderRadius: RADIUS.default,
     paddingHorizontal: 14,
     paddingVertical: 12,
@@ -577,20 +577,20 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   verifiedTag: {
-    backgroundColor: '#E6F9F4',
+    backgroundColor: COLORS.primaryLight,
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: RADIUS.full,
   },
   verifiedTagText: {
-    fontSize: 10,
+    fontSize: 12,
     fontWeight: '700',
-    color: '#0D9488',
+    color: COLORS.success,
   },
   pickerSelector: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: COLORS.surface,
     borderRadius: RADIUS.default,
     paddingHorizontal: 14,
     paddingVertical: 13,
@@ -605,16 +605,16 @@ const styles = StyleSheet.create({
   },
   infoBanner: {
     flexDirection: 'row',
-    backgroundColor: '#FFF4E6',
+    backgroundColor: COLORS.tertiaryContainer,
     borderRadius: RADIUS.default,
     padding: SPACING.md,
     borderWidth: 1,
-    borderColor: '#FFE0B2',
+    borderColor: COLORS.tertiaryContainer,
     marginBottom: SPACING.lg,
   },
   infoBannerText: {
     fontSize: 12,
-    color: '#8C4A00',
+    color: COLORS.warning,
     lineHeight: 18,
     flex: 1,
   },
@@ -623,11 +623,11 @@ const styles = StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
+    backgroundColor: COLORS.scrim,
     justifyContent: 'flex-end',
   },
   modalSheet: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: COLORS.surface,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     paddingHorizontal: SPACING.md,
@@ -641,7 +641,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingBottom: SPACING.sm,
     borderBottomWidth: 1,
-    borderBottomColor: '#F0F0F0',
+    borderBottomColor: COLORS.surfaceContainer,
     marginBottom: 8,
   },
   modalTitle: {
@@ -659,10 +659,10 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     paddingHorizontal: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#F8F9FA',
+    borderBottomColor: COLORS.surfaceContainer,
   },
   modalOptionActive: {
-    backgroundColor: '#FFF5F5',
+    backgroundColor: COLORS.errorContainer,
     borderRadius: RADIUS.sm,
   },
   modalOptionText: {

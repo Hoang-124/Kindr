@@ -177,30 +177,30 @@ export const NotificationScreen = () => {
   const getIcon = (type: string) => {
     switch (type) {
       case 'post_pending_admin':
-        return <ShieldAlert size={18} color="#D97706" />;
+        return <ShieldAlert size={18} color={COLORS.warning} />;
       case 'post_approved':
-        return <CheckCircle size={18} color="#10B981" />;
+        return <CheckCircle size={18} color={COLORS.success} />;
       case 'post_rejected':
         return <XCircle size={18} color={COLORS.error} />;
       case 'post_submitted':
-        return <Clock size={18} color="#2563EB" />;
+        return <Clock size={18} color={COLORS.secondary} />;
       case 'topup_success':
       case 'xu_released':
       case 'welcome_credit':
-        return <Coins size={18} color="#10B981" />;
+        return <Coins size={18} color={COLORS.success} />;
       case 'match_request':
       case 'safeful_time_started':
       case 'trade':
-        return <Package size={18} color="#D97706" />;
+        return <Package size={18} color={COLORS.warning} />;
       case 'dispute_opened':
-        return <ShieldAlert size={18} color="#EF4444" />;
+        return <ShieldAlert size={18} color={COLORS.error} />;
       case 'dispute_resolved':
-        return <ShieldCheck size={18} color="#10B981" />;
+        return <ShieldCheck size={18} color={COLORS.success} />;
       case 'rating_received':
-        return <Award size={18} color="#F59E0B" />;
+        return <Award size={18} color={COLORS.warning} />;
       case 'message':
       case 'new_message':
-        return <MessageSquare size={18} color="#2563eb" />;
+        return <MessageSquare size={18} color={COLORS.secondary} />;
       default:
         return <Bell size={18} color={COLORS.primary} />;
     }
@@ -209,26 +209,26 @@ export const NotificationScreen = () => {
   const getIconBg = (type: string) => {
     switch (type) {
       case 'post_pending_admin':
-        return '#FEF3C7';
+        return COLORS.tertiaryContainer;
       case 'post_approved':
-        return '#D1FAE5';
+        return COLORS.primaryLight;
       case 'post_rejected':
-        return '#FEE2E2';
+        return COLORS.errorContainer;
       case 'post_submitted':
-        return '#DBEAFE';
+        return COLORS.secondaryLight;
       case 'topup_success':
       case 'xu_released':
       case 'welcome_credit':
-        return '#D1FAE5';
+        return COLORS.primaryLight;
       case 'dispute_opened':
-        return '#FEE2E2';
+        return COLORS.errorContainer;
       case 'dispute_resolved':
-        return '#D1FAE5';
+        return COLORS.primaryLight;
       case 'rating_received':
-        return '#FEF3C7';
+        return COLORS.tertiaryContainer;
       case 'message':
       case 'new_message':
-        return '#DBEAFE';
+        return COLORS.secondaryLight;
       default:
         return COLORS.primaryContainer + '30';
     }
@@ -397,7 +397,7 @@ const styles = StyleSheet.create({
   },
   notiCardUnread: {
     borderColor: 'rgba(255, 107, 107, 0.3)',
-    backgroundColor: '#FFFBFB',
+    backgroundColor: COLORS.errorContainer,
   },
   iconWrapper: {
     width: 40,
@@ -430,7 +430,7 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#FF5252',
+    backgroundColor: COLORS.error,
     marginLeft: 6,
   },
   notiBody: {
@@ -440,7 +440,7 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   notiTime: {
-    fontSize: 11,
+    fontSize: 12,
     color: COLORS.outline,
     fontWeight: '500',
   },

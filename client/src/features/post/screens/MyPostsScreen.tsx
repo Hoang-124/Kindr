@@ -97,13 +97,13 @@ export const MyPostsScreen = () => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'pending_approval':
-        return { label: 'Chờ admin duyệt', bg: '#FFF8E1', text: '#D97706' };
+        return { label: 'Chờ admin duyệt', bg: COLORS.tertiaryContainer, text: COLORS.warning };
       case 'available':
         return { label: 'Đang hiển thị', bg: COLORS.primaryContainer + '40', text: COLORS.primary };
       case 'escrow':
-        return { label: 'Tạm khóa (Đang đổi đồ)', bg: '#FEF3C7', text: '#D97706' };
+        return { label: 'Tạm khóa (Đang đổi đồ)', bg: COLORS.tertiaryContainer, text: COLORS.warning };
       case 'completed':
-        return { label: 'Đã hoàn tất đổi', bg: '#DCFCE7', text: '#15803D' };
+        return { label: 'Đã hoàn tất đổi', bg: COLORS.primaryLight, text: COLORS.success };
       case 'disputed':
         return { label: 'Tranh chấp', bg: COLORS.errorContainer, text: COLORS.error };
       default:
@@ -146,7 +146,7 @@ export const MyPostsScreen = () => {
                   navigation.navigate('Main');
                 }}
               >
-                <Plus size={16} color="#ffffff" />
+                <Plus size={16} color={COLORS.surface} />
                 <Text style={styles.emptyBtnText}>Đăng đồ ngay</Text>
               </TouchableOpacity>
             </View>
@@ -206,13 +206,14 @@ export const MyPostsScreen = () => {
                     </>
                   ) : relatedTx ? (
                     <TouchableOpacity
-                      style={[styles.actionBtn, styles.viewTxBtn, { backgroundColor: '#FEF3C7', borderColor: '#F59E0B' }]}
+                      style={[styles.actionBtn, styles.viewTxBtn, { backgroundColor: COLORS.tertiaryContainer, borderColor: COLORS.warning }]}
                       onPress={() => {
                         navigation.navigate('TransactionDetail', { id: relatedTx.id });
                       }}
                       activeOpacity={0.8}
+                      hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                     >
-                      <Eye size={18} color="#D97706" />
+                      <Eye size={18} color={COLORS.warning} />
                     </TouchableOpacity>
                   ) : (
                     <View style={[styles.actionBtn, styles.viewTxBtn]}>
@@ -258,7 +259,7 @@ const styles = StyleSheet.create({
   },
   emptyBtnText: {
     fontSize: 13,
-    color: '#ffffff',
+    color: COLORS.surface,
     fontWeight: '700',
   },
   itemCard: {
@@ -296,12 +297,12 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   priceLabel: {
-    fontSize: 10,
+    fontSize: 12,
     color: COLORS.outline,
     fontWeight: '500',
   },
   priceValue: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '800',
     color: COLORS.tertiary,
   },
@@ -312,7 +313,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   statusText: {
-    fontSize: 9,
+    fontSize: 12,
     fontWeight: '700',
   },
   itemActions: {
@@ -321,8 +322,8 @@ const styles = StyleSheet.create({
     marginLeft: SPACING.sm,
   },
   actionBtn: {
-    width: 32,
-    height: 32,
+    width: 36,
+    height: 36,
     borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',

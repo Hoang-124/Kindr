@@ -85,6 +85,9 @@ export const demoLoginAsync = createAsyncThunk(
         id: (user as any)._id?.toString() || user.id,
       };
     } catch (err: any) {
+      if (err.response?.status === 404) {
+        return rejectWithValue(err.response?.data?.error || 'Chức năng trải nghiệm demo hiện không khả dụng.');
+      }
       return rejectWithValue(err.response?.data?.error || 'Đăng nhập demo không thành công');
     }
   }

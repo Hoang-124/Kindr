@@ -146,7 +146,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setTimeout(() => processedIds.delete(notifId), 60000);
       }
 
-      console.log('🔔 [Client] Received notification event:', notif);
+      if (__DEV__) {
+        console.log('🔔 [Client] Received notification event:', notif);
+      }
       const normalized: Notification = {
         id: notif.id || notif._id?.toString() || 'n_' + Date.now(),
         userId: notif.userId?.toString() || currentUser.id,
@@ -204,12 +206,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     // 4. Real-time wallet & transaction sync listeners
     const handleWalletUpdated = (payload: any) => {
-      console.log('💰 [Client] Wallet updated event received:', payload);
+      if (__DEV__) {
+        console.log('💰 [Client] Wallet updated event received:', payload);
+      }
       dispatch(fetchCurrentUser());
     };
 
     const handleTransactionUpdated = (payload: any) => {
-      console.log('🔄 [Client] Transaction updated event received:', payload);
+      if (__DEV__) {
+        console.log('🔄 [Client] Transaction updated event received:', payload);
+      }
       dispatch(fetchMyTransactionsAsync());
     };
 

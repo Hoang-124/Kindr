@@ -38,6 +38,7 @@ import ManageTransactionsScreen from '../../features/admin/screens/ManageTransac
 import ManageDisputesScreen from '../../features/admin/screens/ManageDisputesScreen';
 import ManageWithdrawsScreen from '../../features/admin/screens/ManageWithdrawsScreen';
 import ManageReportsScreen from '../../features/admin/screens/ManageReportsScreen';
+import ManageWaitlistScreen from '../../features/admin/screens/ManageWaitlistScreen';
 
 const Stack = createNativeStackNavigator<AppStackParamList>();
 
@@ -94,6 +95,7 @@ export const AppNavigator = () => {
             <Stack.Screen name="ManageDisputes" component={ManageDisputesScreen} />
             <Stack.Screen name="ManageWithdraws" component={ManageWithdrawsScreen} />
             <Stack.Screen name="ManageReports" component={ManageReportsScreen} />
+            <Stack.Screen name="ManageWaitlist" component={ManageWaitlistScreen} />
           </>
         )}
       </Stack.Navigator>

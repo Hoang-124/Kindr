@@ -205,7 +205,7 @@ export const DisputeFormScreen = () => {
                 </Text>
                 {isSelected && (
                   <View style={styles.checkCircle}>
-                    <Check size={10} color="#ffffff" />
+                    <Check size={10} color={COLORS.surface} />
                   </View>
                 )}
               </TouchableOpacity>
@@ -239,7 +239,7 @@ export const DisputeFormScreen = () => {
                 }}
                 activeOpacity={0.7}
               >
-                <X size={12} color="#ffffff" />
+                <X size={12} color={COLORS.surface} />
               </TouchableOpacity>
             </View>
           ))}
@@ -392,7 +392,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   photoBoxText: {
-    fontSize: 10,
+    fontSize: 12,
     color: COLORS.primary,
     fontWeight: '700',
     marginTop: 4,
@@ -410,13 +410,13 @@ const styles = StyleSheet.create({
     ...SHADOWS.soft,
   },
   uploadBtnText: {
-    fontSize: 10,
+    fontSize: 12,
     color: COLORS.outline,
     fontWeight: '600',
     marginTop: 4,
   },
   uploadHelper: {
-    fontSize: 10,
+    fontSize: 12,
     color: COLORS.outline,
     fontWeight: '500',
     marginTop: 6,

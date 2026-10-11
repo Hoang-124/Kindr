@@ -1,19 +1,22 @@
 // src/features/admin/screens/ManageCategoriesScreen.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   View, 
   Text, 
   StyleSheet, 
   FlatList, 
   TouchableOpacity, 
-  Alert 
+  Alert,
+  ActivityIndicator,
+  RefreshControl
 } from 'react-native';
 import { COLORS, SPACING, RADIUS, TYPOGRAPHY, SHADOWS } from '../../../theme';
-import { Plus, Trash2, FolderPlus } from 'lucide-react-native';
+import { Plus, Trash2, FolderPlus, RefreshCw } from 'lucide-react-native';
 import ScreenContainer from '../../../components/layout/ScreenContainer';
 import Header from '../../../components/layout/Header';
 import Input from '../../../components/common/Input';
 import Button from '../../../components/common/Button';
+import { api } from '../../../services/api';
 
 interface CategoryItem {
   id: string;
@@ -33,26 +36,57 @@ const INITIAL_CATEGORIES: CategoryItem[] = [
 
 export const ManageCategoriesScreen = () => {
   const [categories, setCategories] = useState<CategoryItem[]>(INITIAL_CATEGORIES);
+  const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [newCatName, setNewCatName] = useState('');
   const [newCatCode, setNewCatCode] = useState('');
 
-  const handleAddCategory = () => {
+  const fetchCategories = async () => {
+    try {
+      const res = await api.get('/categories');
+      if (Array.isArray(res.data) && res.data.length > 0) {
+        setCategories(res.data);
+      }
+    } catch (err) {
+      console.warn('Cannot fetch categories from server, using local fallback:', err);
+    }
+  };
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchCategories();
+    setRefreshing(false);
+  };
+
+  const handleAddCategory = async () => {
     if (!newCatName.trim() || !newCatCode.trim()) {
       Alert.alert('Lưu ý', 'Mẹ vui lòng nhập tên và mã danh mục.');
       return;
     }
 
-    const newCat: CategoryItem = {
-      id: 'cat_' + Math.random().toString(36).substr(2, 9),
-      name: newCatName.trim(),
-      code: newCatCode.trim().toLowerCase(),
-      itemsCount: 0
-    };
+    setSubmitting(true);
+    try {
+      const res = await api.post('/categories', {
+        name: newCatName.trim(),
+        code: newCatCode.trim().toLowerCase(),
+      });
 
-    setCategories(prev => [...prev, newCat]);
-    setNewCatName('');
-    setNewCatCode('');
-    Alert.alert('Thành công', `Đã thêm danh mục mới: ${newCat.name}`);
+      const createdCat: CategoryItem = res.data;
+      setCategories(prev => [...prev, createdCat]);
+      setNewCatName('');
+      setNewCatCode('');
+      Alert.alert('Thành công', `Đã thêm danh mục mới: ${createdCat.name}`);
+    } catch (err: any) {
+      const errMsg = err?.response?.data?.error || err?.message || 'Không thể tạo danh mục.';
+      Alert.alert('Lỗi tạo danh mục', errMsg);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleDelete = (id: string, name: string) => {
@@ -64,7 +98,16 @@ export const ManageCategoriesScreen = () => {
         { 
           text: 'Xóa', 
           style: 'destructive',
-          onPress: () => setCategories(prev => prev.filter(c => c.id !== id)) 
+          onPress: async () => {
+            try {
+              await api.delete(`/categories/${id}`);
+              setCategories(prev => prev.filter(c => c.id !== id));
+              Alert.alert('Thành công', `Đã xóa danh mục "${name}".`);
+            } catch (err: any) {
+              const errMsg = err?.response?.data?.error || err?.message || 'Không thể xóa danh mục.';
+              Alert.alert('Không thể xóa', errMsg);
+            }
+          }
         }
       ]
     );
@@ -100,6 +143,7 @@ export const ManageCategoriesScreen = () => {
             title="Thêm danh mục"
             onPress={handleAddCategory}
             style={styles.addBtn}
+            loading={submitting}
           />
         </View>
 
@@ -109,6 +153,14 @@ export const ManageCategoriesScreen = () => {
           data={categories}
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.listContent}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              colors={[COLORS.primary]}
+              tintColor={COLORS.primary}
+            />
+          }
           renderItem={({ item }) => (
             <View style={styles.row}>
               <View style={styles.rowInfo}>
@@ -120,6 +172,9 @@ export const ManageCategoriesScreen = () => {
                 style={styles.deleteBtn}
                 onPress={() => handleDelete(item.id, item.name)}
                 activeOpacity={0.8}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                accessibilityRole="button"
+                accessibilityLabel={`Xóa danh mục ${item.name}`}
               >
                 <Trash2 size={16} color={COLORS.error} />
               </TouchableOpacity>
@@ -187,7 +242,7 @@ const styles = StyleSheet.create({
     color: COLORS.onSurface,
   },
   catCode: {
-    fontSize: 10,
+    fontSize: 12,
     color: COLORS.outline,
     fontWeight: '600',
     marginTop: 2,
@@ -197,8 +252,8 @@ const styles = StyleSheet.create({
     height: 32,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: COLORS.error + '40',
-    backgroundColor: COLORS.errorContainer + '10',
+    borderColor: COLORS.error,
+    backgroundColor: COLORS.errorContainer,
     justifyContent: 'center',
     alignItems: 'center',
   },

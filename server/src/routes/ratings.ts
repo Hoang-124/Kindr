@@ -58,13 +58,21 @@ router.post('/', requireAuth, async (req: AuthRequest, res: Response): Promise<v
       return;
     }
 
-    // Check if already rated
-    if (isBuyer && tx.buyerRated) {
-      res.status(400).json({ error: 'Bạn đã đánh giá giao dịch này rồi.' });
-      return;
-    }
-    if (isSeller && tx.sellerRated) {
-      res.status(400).json({ error: 'Bạn đã đánh giá giao dịch này rồi.' });
+    const fieldToUpdate = isBuyer ? 'buyerRated' : 'sellerRated';
+    const updatedTx = await Transaction.findOneAndUpdate(
+      {
+        _id: tx._id,
+        status: 'completed',
+        [fieldToUpdate]: { $ne: true },
+      },
+      {
+        $set: { [fieldToUpdate]: true },
+      },
+      { new: true }
+    );
+
+    if (!updatedTx) {
+      res.status(400).json({ error: 'Bạn đã đánh giá giao dịch này rồi hoặc trạng thái không hợp lệ.' });
       return;
     }
 
@@ -86,15 +94,7 @@ router.post('/', requireAuth, async (req: AuthRequest, res: Response): Promise<v
       tags,
     });
 
-    // 3. Mark transaction rated
-    if (isBuyer) {
-      tx.buyerRated = true;
-    } else {
-      tx.sellerRated = true;
-    }
-    await tx.save();
-
-    // 4. Calculate Civilization Points and Reputation Score for Partner
+    // 3. Calculate Civilization Points and Reputation Score for Partner
     let pointsChanged = 0;
     if (stars === 5) pointsChanged = 5;
     else if (stars === 4) pointsChanged = 2;
@@ -103,12 +103,13 @@ router.post('/', requireAuth, async (req: AuthRequest, res: Response): Promise<v
 
     const partnerUser = await User.findById(toUserId);
     if (partnerUser) {
-      // Update civilization points
+      // Update civilization points (clamped 0 - 100)
       partnerUser.civilizationPoints = Math.min(
         100,
         Math.max(0, partnerUser.civilizationPoints + pointsChanged)
       );
 
+      partnerUser.historyPoints = partnerUser.historyPoints || [];
       partnerUser.historyPoints.unshift({
         pointsChanged,
         reason: `Được ${fromUserName} đánh giá ${stars} sao: "${comment || 'Giao dịch tốt'}"`,
@@ -123,11 +124,14 @@ router.post('/', requireAuth, async (req: AuthRequest, res: Response): Promise<v
 
       partnerUser.ratingCount = newCount;
       partnerUser.reputationScore = newScore;
-      partnerUser.tradesCount = (partnerUser.tradesCount || 0) + 1;
+      if (partnerUser.xuFrozen < 0) {
+        partnerUser.xuFrozen = 0;
+      }
+      // Note: tradesCount is already incremented in escrowService.finalizeTransaction
 
       await partnerUser.save();
 
-      // 5. Send Notification to Partner
+      // 4. Send Notification to Partner
       const notif = await Notification.create({
         userId: partnerUser._id,
         type: 'rating_received',
@@ -143,7 +147,11 @@ router.post('/', requireAuth, async (req: AuthRequest, res: Response): Promise<v
       message: 'Đã gửi đánh giá thành công. Cảm ơn mẹ đã lan tỏa văn minh cộng đồng Kindr!',
       rating,
     });
-  } catch (error) {
+  } catch (error: any) {
+    if (error?.code === 11000) {
+      res.status(400).json({ error: 'Bạn đã đánh giá giao dịch này rồi.' });
+      return;
+    }
     console.error('Submit rating error:', error);
     res.status(500).json({ error: 'Lỗi hệ thống khi gửi đánh giá.' });
   }

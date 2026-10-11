@@ -295,7 +295,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   historySubtitle: {
-    fontSize: 11,
+    fontSize: 12,
     color: COLORS.outline,
     fontWeight: '500',
     marginTop: 2,
@@ -351,7 +351,7 @@ const styles = StyleSheet.create({
     color: COLORS.onSurface,
   },
   txStatus: {
-    fontSize: 10,
+    fontSize: 12,
     color: COLORS.outline,
     fontWeight: '600',
     marginTop: 2,

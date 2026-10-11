@@ -188,10 +188,11 @@ export const TopUpScreen = () => {
       dispatch(refreshWalletBalance());
       setReceivedCoins(selectedPack.coins);
       setPaymentSuccess(true);
-    } catch {
-      dispatch(updateUserBalance({ userId: currentUser.id, amount: selectedPack.coins }));
-      setReceivedCoins(selectedPack.coins);
-      setPaymentSuccess(true);
+    } catch (err: any) {
+      Alert.alert(
+        'Không thể nạp demo',
+        err?.response?.data?.error || 'Chức năng nạp Xu giả lập chỉ khả dụng khi bật ENABLE_DEMO_TOPUP trên server.'
+      );
     } finally {
       setSimulating(false);
     }
@@ -238,7 +239,7 @@ export const TopUpScreen = () => {
               >
                 {pack.popular && (
                   <View style={styles.popularBadge}>
-                    <Flame size={10} color="#ffffff" />
+                    <Flame size={10} color={COLORS.surface} />
                     <Text style={styles.popularBadgeText}>HOT</Text>
                   </View>
                 )}
@@ -258,7 +259,7 @@ export const TopUpScreen = () => {
 
                 {isSelected && (
                   <View style={styles.checkedCircle}>
-                    <Check size={12} color="#ffffff" strokeWidth={3} />
+                    <Check size={12} color={COLORS.surface} strokeWidth={3} />
                   </View>
                 )}
               </TouchableOpacity>
@@ -270,8 +271,8 @@ export const TopUpScreen = () => {
         <View style={styles.sectionHeaderRow}>
           <Text style={styles.sectionTitle}>2. Quét mã VietQR chuyển khoản tự động:</Text>
           <View style={styles.timerBadge}>
-            <Clock size={12} color={timeLeft < 180 ? '#DC2626' : COLORS.onSurfaceVariant} />
-            <Text style={[styles.timerText, timeLeft < 180 && { color: '#DC2626' }]}>
+            <Clock size={12} color={timeLeft < 180 ? COLORS.error : COLORS.onSurfaceVariant} />
+            <Text style={[styles.timerText, timeLeft < 180 && { color: COLORS.error }]}>
               {formatCountdown(timeLeft)}
             </Text>
           </View>
@@ -336,7 +337,7 @@ export const TopUpScreen = () => {
                 <Text style={[styles.bankValue, styles.highlightValue]}>
                   {activeOrder?.accountNumber || '0905123456'}
                 </Text>
-                <Copy size={16} color={copiedField === 'account' ? '#16A34A' : COLORS.primary} />
+                <Copy size={16} color={copiedField === 'account' ? COLORS.success : COLORS.primary} />
               </TouchableOpacity>
             </View>
 
@@ -357,7 +358,7 @@ export const TopUpScreen = () => {
                 <Text style={[styles.bankValue, styles.amountHighlight]}>
                   {formatNumber(activeOrder?.vndAmount || selectedPack.price)} VNĐ
                 </Text>
-                <Copy size={16} color={copiedField === 'amount' ? '#16A34A' : '#D97706'} />
+                <Copy size={16} color={copiedField === 'amount' ? COLORS.success : COLORS.warning} />
               </TouchableOpacity>
             </View>
 
@@ -375,7 +376,7 @@ export const TopUpScreen = () => {
                 <Text style={styles.memoText} numberOfLines={1}>
                   {activeOrder?.memo || 'KINDR NAP...'}
                 </Text>
-                <Copy size={16} color={copiedField === 'memo' ? '#16A34A' : COLORS.primary} />
+                <Copy size={16} color={copiedField === 'memo' ? COLORS.success : COLORS.primary} />
               </TouchableOpacity>
             </View>
           </View>
@@ -410,7 +411,7 @@ export const TopUpScreen = () => {
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
             <View style={styles.successIconWrapper}>
-              <CheckCircle2 size={56} color="#16A34A" />
+              <CheckCircle2 size={56} color={COLORS.success} />
             </View>
 
             <Text style={styles.modalTitle}>NẠP XU THÀNH CÔNG!</Text>
@@ -419,7 +420,7 @@ export const TopUpScreen = () => {
             </Text>
 
             <View style={styles.rewardCard}>
-              <Coins size={28} color="#D97706" />
+              <Coins size={28} color={COLORS.warning} />
               <View style={styles.rewardInfo}>
                 <Text style={styles.rewardAmount}>+{receivedCoins} Xu</Text>
                 <Text style={styles.rewardNote}>Đã cộng ngay vào ví của mẹ</Text>
@@ -517,13 +518,13 @@ const styles = StyleSheet.create({
   },
   packCardSelected: {
     borderColor: COLORS.primary,
-    backgroundColor: '#F0F9F5',
+    backgroundColor: COLORS.primaryLight,
   },
   popularBadge: {
     position: 'absolute',
     top: -10,
     right: -6,
-    backgroundColor: '#EF4444',
+    backgroundColor: COLORS.error,
     borderRadius: RADIUS.full,
     paddingHorizontal: 8,
     paddingVertical: 2,
@@ -532,12 +533,12 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   popularBadgeText: {
-    fontSize: 9,
+    fontSize: 12,
     fontWeight: '800',
-    color: '#ffffff',
+    color: COLORS.surface,
   },
   packLabel: {
-    fontSize: 11,
+    fontSize: 12,
     color: COLORS.outline,
     fontWeight: '600',
     marginBottom: 4,
@@ -566,7 +567,7 @@ const styles = StyleSheet.create({
     color: COLORS.outline,
   },
   priceTextSelected: {
-    color: '#D97706',
+    color: COLORS.warning,
   },
   checkedCircle: {
     position: 'absolute',
@@ -605,7 +606,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 5,
-    backgroundColor: '#DCFCE7',
+    backgroundColor: COLORS.primaryLight,
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: RADIUS.full,
@@ -614,12 +615,12 @@ const styles = StyleSheet.create({
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: '#16A34A',
+    backgroundColor: COLORS.success,
   },
   liveText: {
-    fontSize: 10,
+    fontSize: 12,
     fontWeight: '700',
-    color: '#166534',
+    color: COLORS.success,
   },
   qrImageContainer: {
     alignItems: 'center',
@@ -628,7 +629,7 @@ const styles = StyleSheet.create({
   qrImage: {
     width: 230,
     height: 230,
-    backgroundColor: '#ffffff',
+    backgroundColor: COLORS.surface,
     borderRadius: RADIUS.md,
   },
   qrLoadingBox: {
@@ -646,7 +647,7 @@ const styles = StyleSheet.create({
     color: COLORS.outline,
   },
   qrSubText: {
-    fontSize: 11,
+    fontSize: 12,
     color: COLORS.outline,
     marginTop: 8,
     textAlign: 'center',
@@ -677,7 +678,7 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
   amountHighlight: {
-    color: '#D97706',
+    color: COLORS.warning,
     fontWeight: '800',
     fontSize: 14,
   },
@@ -692,7 +693,7 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     alignItems: 'stretch',
     gap: 6,
-    backgroundColor: '#FEF3C7',
+    backgroundColor: COLORS.tertiaryContainer,
     padding: 8,
     borderRadius: RADIUS.sm,
   },
@@ -700,19 +701,19 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
   },
   memoSubLabel: {
-    fontSize: 10,
-    color: '#92400E',
+    fontSize: 12,
+    color: COLORS.warning,
     fontWeight: '500',
   },
   memoPill: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#ffffff',
+    backgroundColor: COLORS.surface,
     paddingHorizontal: 10,
     borderRadius: RADIUS.sm,
     borderWidth: 1,
-    borderColor: '#FDE68A',
+    borderColor: COLORS.tertiaryContainer,
   },
   memoText: {
     fontSize: 13,
@@ -734,7 +735,7 @@ const styles = StyleSheet.create({
   // Modal styles
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.65)',
+    backgroundColor: COLORS.scrim,
     justifyContent: 'center',
     alignItems: 'center',
     padding: SPACING.xl,
@@ -742,7 +743,7 @@ const styles = StyleSheet.create({
   modalCard: {
     width: '100%',
     maxWidth: 360,
-    backgroundColor: '#ffffff',
+    backgroundColor: COLORS.surface,
     borderRadius: RADIUS.xl,
     padding: SPACING.xl,
     alignItems: 'center',
@@ -752,7 +753,7 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: '#DCFCE7',
+    backgroundColor: COLORS.primaryLight,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: SPACING.md,
@@ -775,9 +776,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    backgroundColor: '#FFFBEB',
+    backgroundColor: COLORS.tertiaryContainer,
     borderWidth: 1.5,
-    borderColor: '#FDE68A',
+    borderColor: COLORS.tertiaryContainer,
     paddingHorizontal: SPACING.lg,
     paddingVertical: SPACING.md,
     borderRadius: RADIUS.lg,
@@ -790,11 +791,11 @@ const styles = StyleSheet.create({
   rewardAmount: {
     fontSize: 22,
     fontWeight: '900',
-    color: '#D97706',
+    color: COLORS.warning,
   },
   rewardNote: {
-    fontSize: 11,
-    color: '#92400E',
+    fontSize: 12,
+    color: COLORS.warning,
     fontWeight: '600',
   },
   modalActionCol: {

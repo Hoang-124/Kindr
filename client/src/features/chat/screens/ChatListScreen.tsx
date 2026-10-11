@@ -138,7 +138,7 @@ const styles = StyleSheet.create({
     height: 20,
     borderRadius: 6,
     borderWidth: 1.5,
-    borderColor: '#FFFFFF',
+    borderColor: COLORS.surface,
     backgroundColor: COLORS.surfaceContainer,
   },
   lastMessageUnread: {
@@ -160,12 +160,12 @@ const styles = StyleSheet.create({
     color: COLORS.onSurface,
   },
   timestamp: {
-    fontSize: 10,
+    fontSize: 12,
     color: COLORS.outline,
     fontWeight: '500',
   },
   prodName: {
-    fontSize: 11,
+    fontSize: 12,
     color: COLORS.primary,
     fontWeight: '600',
     marginTop: 2,
@@ -185,15 +185,15 @@ const styles = StyleSheet.create({
   unreadBadge: {
     backgroundColor: COLORS.tertiary,
     borderRadius: 10,
-    minWidth: 18,
-    height: 18,
+    minWidth: 20,
+    height: 20,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 4,
+    paddingHorizontal: 5,
   },
   unreadText: {
     color: COLORS.onTertiary,
-    fontSize: 9,
+    fontSize: 11,
     fontWeight: '700',
   },
 });

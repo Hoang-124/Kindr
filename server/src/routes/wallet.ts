@@ -71,13 +71,19 @@ router.post('/create-order', requireAuth, async (req: AuthRequest, res: Response
       return;
     }
 
+    if (!ENV.BANK_ACCOUNT_NUMBER || !ENV.BANK_ACCOUNT_NUMBER.trim()) {
+      res.status(503).json({ error: 'Chưa cấu hình tài khoản nhận tiền của sàn.' });
+      return;
+    }
+
     const vndAmount = xuAmount * 10000;
     const orderCode = `TOPUP_${Date.now()}_${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
     const memo = `KINDR NAP ${xuAmount}XU ${orderCode}`;
-    const bankName = 'MBBank';
-    const accountNumber = '0905123456';
-    const accountHolder = 'CONG DONG KINDR';
-    const vietqrUrl = `https://img.vietqr.io/image/MB-${accountNumber}-compact.png?amount=${vndAmount}&addInfo=${encodeURIComponent(memo)}&accountName=${encodeURIComponent(accountHolder)}`;
+    const bankCode = ENV.BANK_CODE || 'MB';
+    const bankName = ENV.BANK_NAME || 'MBBank';
+    const accountNumber = ENV.BANK_ACCOUNT_NUMBER;
+    const accountHolder = ENV.BANK_ACCOUNT_HOLDER || 'CONG DONG KINDR';
+    const vietqrUrl = `https://img.vietqr.io/image/${bankCode}-${accountNumber}-compact.png?amount=${vndAmount}&addInfo=${encodeURIComponent(memo)}&accountName=${encodeURIComponent(accountHolder)}`;
 
     const order = await TopupOrder.create({
       orderCode,
@@ -143,6 +149,10 @@ router.get('/orders/:orderCode/status', requireAuth, async (req: AuthRequest, re
  * Immediate simulated topup (useful for test/demo mode)
  */
 router.post('/topup', requireAuth, async (req: AuthRequest, res: Response): Promise<void> => {
+  if (!ENV.ENABLE_DEMO_TOPUP || ENV.NODE_ENV === 'production') {
+    res.status(403).json({ error: 'Chức năng nạp Xu trực tiếp chỉ được phép trong chế độ demo (ENABLE_DEMO_TOPUP).' });
+    return;
+  }
   try {
     const parsed = TopupSchema.safeParse(req.body);
     if (!parsed.success) {
@@ -160,7 +170,9 @@ router.post('/topup', requireAuth, async (req: AuthRequest, res: Response): Prom
     const vndAmount = xuAmount * 10000;
     const orderCode = `TOPUP_${Date.now()}_${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
     const memo = `KINDR NAP ${xuAmount}XU ${orderCode}`;
-    const vietqrUrl = `https://img.vietqr.io/image/MB-0905123456-compact.png?amount=${vndAmount}&addInfo=${encodeURIComponent(memo)}`;
+    const bankCode = ENV.BANK_CODE || 'MB';
+    const bankNum = ENV.BANK_ACCOUNT_NUMBER || '000000000';
+    const vietqrUrl = `https://img.vietqr.io/image/${bankCode}-${bankNum}-compact.png?amount=${vndAmount}&addInfo=${encodeURIComponent(memo)}`;
 
     // Create cloud TopupOrder in MongoDB
     const order = await TopupOrder.create({
@@ -199,14 +211,19 @@ router.post('/topup', requireAuth, async (req: AuthRequest, res: Response): Prom
  */
 router.post('/webhook', async (req: Request, res: Response): Promise<void> => {
   try {
-    const webhookSecret = req.headers['x-webhook-secret'] ||
-      req.headers['authorization'] ||
-      req.query.secret ||
-      req.body?.secret ||
-      req.body?.apiKey;
+    const authHeader = req.headers['authorization'];
+    const xWebhookSecret = req.headers['x-webhook-secret'];
+
+    let providedSecret = '';
+    if (typeof xWebhookSecret === 'string') {
+      providedSecret = xWebhookSecret.trim();
+    } else if (typeof authHeader === 'string') {
+      const match = authHeader.match(/^(?:Bearer|Apikey)\s+(.+)$/i);
+      providedSecret = match ? match[1].trim() : authHeader.trim();
+    }
 
     // Check against configured ENV.WEBHOOK_SECRET
-    if (webhookSecret !== ENV.WEBHOOK_SECRET && webhookSecret !== `Bearer ${ENV.WEBHOOK_SECRET}`) {
+    if (!providedSecret || providedSecret !== ENV.WEBHOOK_SECRET) {
       res.status(401).json({ error: 'Webhook secret không hợp lệ.' });
       return;
     }
@@ -277,17 +294,21 @@ router.post('/webhook', async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    // 4. Verify amount (if amount provided in webhook, ensure >= order.vndAmount)
-    if (rawAmount > 0 && rawAmount < order.vndAmount) {
+    // 4. Verify amount: rawAmount MUST be > 0 and >= order.vndAmount
+    if (!rawAmount || rawAmount <= 0) {
+      res.status(400).json({ error: 'Số tiền chuyển khoản trong webhook không hợp lệ (phải > 0).' });
+      return;
+    }
+    if (rawAmount < order.vndAmount) {
       res.status(400).json({
         error: `Số tiền chuyển khoản (${rawAmount}đ) không đủ so với giá trị đơn hàng (${order.vndAmount}đ).`,
       });
       return;
     }
 
-    // 5. Atomic CAS: transition from 'pending' to 'completed'
+    // 5. Atomic CAS: transition from 'pending' or 'expired' to 'completed'
     const completedOrder = await TopupOrder.findOneAndUpdate(
-      { _id: order._id, status: 'pending' },
+      { _id: order._id, status: { $in: ['pending', 'expired'] } },
       {
         $set: {
           status: 'completed',
@@ -377,18 +398,37 @@ router.post('/withdraw', requireAuth, async (req: AuthRequest, res: Response): P
     }
 
     const { xuAmount, bankName, accountNumber, accountHolder } = parsed.data;
-    const user = await User.findById(req.userId);
-    if (!user) {
-      res.status(404).json({ error: 'Tài khoản không tồn tại.' });
-      return;
-    }
 
-    const withdrawableXu = Math.max(0, user.xuBalance - (user.welcomeCreditRemaining || 0));
+    // Atomic compare-and-swap deduction
+    const updatedUser = await User.findOneAndUpdate(
+      {
+        _id: req.userId,
+        isLocked: { $ne: true },
+        $expr: {
+          $gte: [
+            { $subtract: ['$xuBalance', { $ifNull: ['$welcomeCreditRemaining', 0] }] },
+            xuAmount,
+          ],
+        },
+      },
+      { $inc: { xuBalance: -xuAmount } },
+      { new: true }
+    );
 
-    if (xuAmount > withdrawableXu) {
-      if (user.welcomeCreditRemaining > 0 && user.xuBalance >= xuAmount) {
+    if (!updatedUser) {
+      const currentUser = await User.findById(req.userId);
+      if (!currentUser) {
+        res.status(404).json({ error: 'Tài khoản không tồn tại.' });
+        return;
+      }
+      if (currentUser.isLocked) {
+        res.status(403).json({ error: 'Tài khoản của bạn đã bị khóa, không thể rút tiền.' });
+        return;
+      }
+      const withdrawableXu = Math.max(0, currentUser.xuBalance - (currentUser.welcomeCreditRemaining || 0));
+      if (currentUser.welcomeCreditRemaining > 0 && currentUser.xuBalance >= xuAmount) {
         res.status(400).json({
-          error: `Số dư có thể rút là ${withdrawableXu} Xu. ${user.welcomeCreditRemaining} Xu quà tặng chào mừng chỉ dùng để đổi đồ trên sàn, không thể rút thành tiền mặt.`,
+          error: `Số dư có thể rút là ${withdrawableXu} Xu. ${currentUser.welcomeCreditRemaining} Xu quà tặng chào mừng chỉ dùng để đổi đồ trên sàn, không thể rút thành tiền mặt.`,
         });
         return;
       }
@@ -402,13 +442,9 @@ router.post('/withdraw', requireAuth, async (req: AuthRequest, res: Response): P
     const feeVnd = Math.round(vndAmount * 0.1); // 10% cash-out fee
     const payoutVnd = vndAmount - feeVnd;
 
-    // Deduct Xu balance immediately
-    user.xuBalance -= xuAmount;
-    await user.save();
-
     const withdrawRequest = await WithdrawRequest.create({
-      userId: user._id,
-      userName: user.name,
+      userId: updatedUser._id,
+      userName: updatedUser.name,
       xuAmount,
       vndAmount,
       feeVnd,

@@ -171,7 +171,7 @@ export const ChatTabBadgeIcon: React.FC<ChatTabBadgeIconProps> = ({
               name={latestSender.senderName} 
               size={24} 
               showBorder 
-              borderColor="#FFFFFF" 
+              borderColor={COLORS.surface} 
             />
             <View style={styles.tooltipContent}>
               <Text style={styles.tooltipSender} numberOfLines={1}>
@@ -217,7 +217,7 @@ export const ChatTabBadgeIcon: React.FC<ChatTabBadgeIconProps> = ({
                   name={latestSender.senderName} 
                   size={15} 
                   showBorder 
-                  borderColor="#FFFFFF" 
+                  borderColor={COLORS.surface} 
                 />
               </View>
             ) : null}
@@ -255,12 +255,12 @@ const styles = StyleSheet.create({
     right: -14,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FF4D4F',
+    backgroundColor: COLORS.error,
     borderRadius: RADIUS.full,
     paddingHorizontal: 4,
     paddingVertical: 1,
     borderWidth: 1.5,
-    borderColor: '#FFFFFF',
+    borderColor: COLORS.surface,
     ...SHADOWS.soft,
     zIndex: 10,
   },
@@ -274,7 +274,7 @@ const styles = StyleSheet.create({
     minWidth: 12,
   },
   badgeText: {
-    color: '#FFFFFF',
+    color: COLORS.surface,
     fontSize: 9,
     fontWeight: '800',
     textAlign: 'center',
@@ -291,13 +291,13 @@ const styles = StyleSheet.create({
   tooltipPill: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#1E293B', // Rich dark glassmorphic slate
+    backgroundColor: COLORS.text, // Rich dark glassmorphic slate
     paddingVertical: 5,
     paddingHorizontal: 8,
     borderRadius: RADIUS.full,
     gap: 6,
     maxWidth: 168,
-    shadowColor: '#0F172A',
+    shadowColor: COLORS.scrim,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.28,
     shadowRadius: 8,
@@ -309,13 +309,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   tooltipSender: {
-    color: '#F8FAFC',
-    fontSize: 10,
+    color: COLORS.surface,
+    fontSize: 12,
     fontWeight: '700',
   },
   tooltipMessage: {
-    color: '#94A3B8',
-    fontSize: 9,
+    color: COLORS.textMuted,
+    fontSize: 12,
     fontWeight: '500',
   },
   tooltipArrow: {
@@ -328,7 +328,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 5,
     borderLeftColor: 'transparent',
     borderRightColor: 'transparent',
-    borderTopColor: '#1E293B',
+    borderTopColor: COLORS.text,
     alignSelf: 'center',
     marginTop: -0.5,
   },

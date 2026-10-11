@@ -1,15 +1,14 @@
-// src/components/layout/ScreenContainer.tsx
 import React, { ReactNode } from 'react';
 import { 
   StyleSheet, 
   View, 
-  SafeAreaView, 
   KeyboardAvoidingView, 
   Platform, 
   ScrollView,
   ViewStyle, 
   StatusBar
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { COLORS } from '../../theme';
 import Loading from '../common/Loading';
 

@@ -129,7 +129,11 @@ router.get('/users', async (req: AuthRequest, res: Response): Promise<void> => {
  */
 router.put('/users/:id/lock', async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const user = await User.findByIdAndUpdate(req.params.id, { isLocked: true }, { new: true });
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      { isLocked: true, refreshTokens: [] },
+      { new: true }
+    );
     if (!user) {
       res.status(404).json({ error: 'Người dùng không tồn tại.' });
       return;
@@ -449,19 +453,15 @@ router.get('/withdraws', async (req: AuthRequest, res: Response): Promise<void> 
  */
 router.put('/withdraws/:id/approve', async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const request = await WithdrawRequest.findById(req.params.id);
+    const request = await WithdrawRequest.findOneAndUpdate(
+      { _id: req.params.id, status: 'pending' },
+      { $set: { status: 'approved' } },
+      { new: true }
+    );
     if (!request) {
-      res.status(404).json({ error: 'Yêu cầu rút tiền không tồn tại.' });
+      res.status(400).json({ error: 'Yêu cầu không tồn tại hoặc đã được xử lý trước đó.' });
       return;
     }
-
-    if (request.status !== 'pending') {
-      res.status(400).json({ error: 'Yêu cầu này đã được xử lý trước đó.' });
-      return;
-    }
-
-    request.status = 'approved';
-    await request.save();
 
     // Notify user
     const notif = await Notification.create({
@@ -489,25 +489,25 @@ router.put('/withdraws/:id/approve', async (req: AuthRequest, res: Response): Pr
  */
 router.put('/withdraws/:id/reject', async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const request = await WithdrawRequest.findById(req.params.id);
+    const request = await WithdrawRequest.findOneAndUpdate(
+      { _id: req.params.id, status: 'pending' },
+      {
+        $set: {
+          status: 'rejected',
+          adminNote: req.body.adminNote || 'Yêu cầu bị từ chối',
+        },
+      },
+      { new: true }
+    );
     if (!request) {
-      res.status(404).json({ error: 'Yêu cầu rút tiền không tồn tại.' });
+      res.status(400).json({ error: 'Yêu cầu không tồn tại hoặc đã được xử lý trước đó.' });
       return;
     }
 
-    if (request.status !== 'pending') {
-      res.status(400).json({ error: 'Yêu cầu này đã được xử lý trước đó.' });
-      return;
-    }
-
-    // Refund Xu to user balance
+    // Refund Xu to user balance ONLY after atomic status transition
     await User.findByIdAndUpdate(request.userId, {
       $inc: { xuBalance: request.xuAmount },
     });
-
-    request.status = 'rejected';
-    request.adminNote = req.body.adminNote || 'Yêu cầu bị từ chối';
-    await request.save();
 
     // Notify user
     const notif = await Notification.create({

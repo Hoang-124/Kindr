@@ -60,6 +60,25 @@ export const COLORS = {
   textMuted: '#6C757D',
   textDim: '#ADB5BD',
   border: 'rgba(0, 0, 0, 0.08)',
+  divider: 'rgba(0, 0, 0, 0.06)',
+
+  // Overlay, Backdrop & Modal Scrim
+  overlay: 'rgba(0, 0, 0, 0.45)',
+  overlayWarm: 'rgba(34, 26, 17, 0.4)',
+  scrim: 'rgba(26, 29, 32, 0.6)',
+  glassBorder: 'rgba(255, 255, 255, 0.2)',
+
+  // Coin & Reward System Tokens
+  coinGold: '#FFD166',
+  coinOrange: '#FF9F1C',
+  coinBackground: '#FFF8E1',
+  coinBorder: 'rgba(255, 209, 102, 0.4)',
+
+  // Admin & Moderation Specific Tokens
+  adminBadge: '#FFE8E8',
+  adminBadgeText: '#B73232',
+  adminSurface: '#F8F9FA',
+  adminBorder: '#E2E8F0',
 
   // Shadows
   shadowColor: 'rgba(255, 107, 107, 0.12)',

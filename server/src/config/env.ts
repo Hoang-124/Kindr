@@ -24,7 +24,26 @@ export const ENV = {
     .filter(Boolean),
   SMTP_HOST: process.env.SMTP_HOST || 'smtp.gmail.com',
   SMTP_PORT: parseInt(process.env.SMTP_PORT || '465', 10),
-  SMTP_USER: process.env.SMTP_USER || process.env.EMAIL_USER || 'ht20041975@gmail.com',
-  SMTP_PASS: process.env.SMTP_PASS || process.env.EMAIL_PASS || 'rdgsrjdfadbfugqx',
-  EMAIL_FROM: process.env.EMAIL_FROM || 'Kindr Ecosystem <ht20041975@gmail.com>',
+  SMTP_USER: process.env.SMTP_USER || process.env.EMAIL_USER || '',
+  SMTP_PASS: process.env.SMTP_PASS || process.env.EMAIL_PASS || '',
+  EMAIL_FROM: process.env.EMAIL_FROM || '',
+  BANK_CODE: process.env.BANK_CODE || 'MB',
+  BANK_NAME: process.env.BANK_NAME || 'MBBank',
+  BANK_ACCOUNT_NUMBER: process.env.BANK_ACCOUNT_NUMBER || (process.env.NODE_ENV === 'test' ? '0901234567' : ''),
+  BANK_ACCOUNT_HOLDER: process.env.BANK_ACCOUNT_HOLDER || '',
+  ENABLE_DEMO_TOPUP: process.env.ENABLE_DEMO_TOPUP === 'true',
+  ENABLE_DEMO_LOGIN: process.env.ENABLE_DEMO_LOGIN === 'true',
 } as const;
+
+if (ENV.NODE_ENV === 'production') {
+  if (
+    ENV.JWT_SECRET === 'kindr_dev_secret' ||
+    ENV.JWT_REFRESH_SECRET === 'kindr_refresh_dev_secret' ||
+    ENV.WEBHOOK_SECRET === 'kindr_secure_webhook_secret_2026'
+  ) {
+    throw new Error(
+      'CRITICAL SECURITY ERROR: Running in production with default secrets (JWT_SECRET, JWT_REFRESH_SECRET, or WEBHOOK_SECRET). Server startup aborted.'
+    );
+  }
+}
+

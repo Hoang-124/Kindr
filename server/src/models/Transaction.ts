@@ -33,6 +33,8 @@ export interface ITransaction extends Document {
   handoverCode?: string;
   buyerRated: boolean;
   sellerRated: boolean;
+  buyerPromoXu: number;
+  handoverFailedAttempts: number;
   finalizedAt?: Date;
   createdAt: Date;
   updatedAt: Date;
@@ -68,6 +70,8 @@ const TransactionSchema = new Schema<ITransaction>({
   handoverCode: { type: String, index: true },
   buyerRated: { type: Boolean, default: false },
   sellerRated: { type: Boolean, default: false },
+  buyerPromoXu: { type: Number, default: 0 },
+  handoverFailedAttempts: { type: Number, default: 0 },
   finalizedAt: { type: Date },
 }, {
   timestamps: true,

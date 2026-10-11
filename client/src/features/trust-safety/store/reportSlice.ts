@@ -1,13 +1,33 @@
 // src/features/trust-safety/store/reportSlice.ts
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { Report } from '../../../types/report';
+import { api } from '../../../services/api';
+
+export const submitReportAsync = createAsyncThunk(
+  'report/submitReportAsync',
+  async (
+    payload: { targetType: 'user' | 'product' | 'transaction'; targetId: string; reason: string },
+    { rejectWithValue }
+  ) => {
+    try {
+      const res = await api.post('/reports', payload);
+      return res.data.report as Report;
+    } catch (err: any) {
+      return rejectWithValue(err?.response?.data?.error || 'Không thể gửi báo cáo vi phạm');
+    }
+  }
+);
 
 interface ReportState {
   reports: Report[];
+  loading: boolean;
+  error: string | null;
 }
 
 const initialState: ReportState = {
   reports: [],
+  loading: false,
+  error: null,
 };
 
 const reportSlice = createSlice({
@@ -29,6 +49,23 @@ const reportSlice = createSlice({
         report.status = action.payload.status;
       }
     },
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(submitReportAsync.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(submitReportAsync.fulfilled, (state, action) => {
+        state.loading = false;
+        if (action.payload) {
+          state.reports.unshift(action.payload);
+        }
+      })
+      .addCase(submitReportAsync.rejected, (state, action) => {
+        state.loading = false;
+        state.error = (action.payload as string) || 'Lỗi gửi báo cáo';
+      });
   },
 });
 

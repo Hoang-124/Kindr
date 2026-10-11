@@ -7,19 +7,48 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.kindr.app",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Kindr cần quyền truy cập máy ảnh để mẹ chụp trực tiếp đồ dùng đăng tải hoặc gửi ảnh chứng cứ đối soát.",
+        "NSPhotoLibraryUsageDescription": "Kindr cần quyền truy cập thư viện ảnh để mẹ đăng tải hình ảnh sản phẩm đồ chơi, sách truyện hoặc gửi chứng cứ đối soát."
+      }
     },
     "android": {
+      "package": "com.kindr.app",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "NOTIFICATIONS"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      "expo-font",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Kindr cần quyền truy cập ảnh để bạn đăng tải hình ảnh sản phẩm đồ chơi, sách truyện hoặc gửi chứng cứ đối soát.",
+          "cameraPermission": "Kindr cần quyền mở máy ảnh để chụp trực tiếp đồ chơi, sách truyện hoặc hình ảnh thực tế khi bàn giao."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#1B3B36"
+        }
+      ]
+    ]
   }
 }

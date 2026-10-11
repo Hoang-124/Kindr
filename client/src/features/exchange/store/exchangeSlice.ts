@@ -57,12 +57,18 @@ export const initiateExchangeAsync = createAsyncThunk(
 
 export const confirmHandoverAsync = createAsyncThunk(
   'exchange/confirmHandoverAsync',
-  async (transactionId: string, { rejectWithValue }) => {
+  async (
+    payload: string | { transactionId: string; handoverCode?: string },
+    { rejectWithValue }
+  ) => {
     try {
-      await transactionService.confirmHandover(transactionId);
+      const transactionId = typeof payload === 'string' ? payload : payload.transactionId;
+      const handoverCode = typeof payload === 'string' ? undefined : payload.handoverCode;
+      await transactionService.confirmHandover(transactionId, handoverCode);
       return { transactionId };
     } catch (err: any) {
-      return rejectWithValue(err.response?.data?.error || 'Không thể xác nhận bàn giao');
+      const msg = err.response?.data?.error || err.message || 'Không thể xác nhận bàn giao';
+      return rejectWithValue(msg);
     }
   }
 );

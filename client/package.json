@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "main": "index.ts",
   "dependencies": {
+    "@expo-google-fonts/plus-jakarta-sans": "^0.4.2",
     "@expo/metro-runtime": "^56.0.20",
     "@google/genai": "^2.7.0",
     "@react-native-async-storage/async-storage": "2.2.0",
@@ -13,6 +14,7 @@
     "axios": "^1.19.0",
     "expo": "~56.0.8",
     "expo-device": "~56.0.4",
+    "expo-font": "~56.0.7",
     "expo-image-picker": "^57.0.12",
     "expo-notifications": "~56.0.25",
     "expo-status-bar": "~56.0.4",
@@ -20,6 +22,7 @@
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-native": "0.85.3",
+    "react-native-qrcode-svg": "^6.3.26",
     "react-native-safe-area-context": "~5.7.0",
     "react-native-screens": "4.25.2",
     "react-native-svg": "15.15.5",
@@ -38,6 +41,7 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
+    "typecheck": "tsc --noEmit",
     "pitch": "npx serve pitch-page -p 3000"
   },
   "private": true

@@ -33,23 +33,16 @@ Kindr connects families to exchange gently used toys, educational games, and boo
 | `success` | `#2EC4B6` | Mint green for completed exchanges and verified badges |
 | `warning` | `#FF9F1C` | Amber for pending requests and dispute notices |
 | `error` | `#E63946` | Crimson red for destructive actions and validation errors |
+| `coinGold` | `#FFD166` | Amber gold for Kindr Xu balance and reward counters |
+| `coinOrange` | `#FF9F1C` | Deep amber for active Xu transactions |
+| `coinBackground` | `#FFF8E1` | Soft tint background for Xu badges and reward chips |
+| `adminBadge` | `#FFE8E8` | Coral tint background for admin role badges |
+| `adminBadgeText` | `#B73232` | High-contrast deep coral for admin badge labels |
+| `overlay` | `rgba(0, 0, 0, 0.45)` | Backdrop tint for bottom sheets and action menus |
+| `scrim` | `rgba(26, 29, 32, 0.6)` | Dimmed backdrop for critical dialogs and full modals |
 
-### Dark Mode (`[data-theme="dark"]`)
-| Token Name | Hex / Value | Description & Usage |
-| :--- | :--- | :--- |
-| `primary` | `#FF7B7B` | Slightly brighter coral for dark background contrast |
-| `secondary` | `#5FE0D7` | Luminous teal for secondary accents |
-| `accent` | `#FFE082` | Soft warm gold for star ratings and badges |
-| `background` | `#0F141C` | Deep navy-slate main background |
-| `card` | `#18202C` | Elevated slate surface with subtle translucent tint |
-| `surfaceSubtle` | `#222C3C` | Input backgrounds and pill chips |
-| `text` | `#F8F9FA` | Crisp light text for readability |
-| `textMuted` | `#94A3B8` | Slate grey for secondary captions |
-| `textDim` | `#64748B` | Muted slate for placeholders |
-| `border` | `rgba(255, 255, 255, 0.08)` | 1px luminous outline for dark glassmorphic cards |
-| `success` | `#34D399` | Emerald green status badge |
-| `warning` | `#FBBF24` | Warm amber status badge |
-| `error` | `#F87171` | Soft coral-red for errors |
+### Theme Implementation Note
+Kindr standardizes on the unified Warm Light Theme (`COLORS`). All screen components are strictly tokenized using `COLORS` without hardcoded hex literals. Sub-12pt fonts are forbidden across the UI, with exceptions strictly limited to single/double-digit counter bubbles and compact map pin chips.
 
 ---
 
@@ -73,10 +66,11 @@ Kindr connects families to exchange gently used toys, educational games, and boo
 
 - **Spacing Base**: 4pt / 8pt grid (`4`, `8`, `12`, `16`, `20`, `24`, `32`, `40`, `48`pt).
 - **Border Radius**:
-  - `radius-sm`: `6pt` (small badges, tags)
-  - `radius-md`: `12pt` (input fields, action chips)
-  - `radius-lg`: `18pt` (product cards, modals)
-  - `radius-xl`: `24pt` (bottom sheet dialogs)
+  - `radius-sm`: `8pt` (small badges, tags)
+  - `radius-default`: `16pt` (standard components, input fields)
+  - `radius-md`: `20pt` (action chips, elevated sheets)
+  - `radius-lg`: `28pt` (product cards, modals)
+  - `radius-xl`: `40pt` (bottom sheet dialogs, banner corners)
   - `radius-full`: `9999pt` (pill buttons, circular avatars)
 
 ---

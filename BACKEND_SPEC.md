@@ -13,11 +13,11 @@ d:\Kindr\
 ├── server/                       # Node.js Backend
 │   ├── src/
 │   │   ├── config/               # ✅ DONE: db.ts, env.ts
-│   │   ├── models/               # ✅ DONE: All 8 Mongoose models
+│   │   ├── models/               # ✅ DONE: All 10 Mongoose models (User, Product, Transaction, Chat, Notification, Wallet, Rating, Report, Waitlist, Category)
 │   │   ├── middleware/            # ✅ DONE: auth.ts (JWT + admin guard)
 │   │   ├── routes/               # ✅ COMPLETE: All routes implemented & mounted
-│   │   │   ├── auth.ts           # ✅ COMPLETE (register, login, refresh, me, logout)
-│   │   │   ├── products.ts       # ✅ COMPLETE (GET list/my/:id, POST, PUT, DELETE)
+│   │   │   ├── auth.ts           # ✅ COMPLETE (register, login, refresh, me, logout, delete account)
+│   │   │   ├── products.ts       # ✅ COMPLETE (GET list/my/:id, POST, PUT, DELETE, ai-suggest)
 │   │   │   ├── transactions.ts   # ✅ COMPLETE (Escrow, Handover 6h, Complete, Dispute)
 │   │   │   ├── chat.ts           # ✅ COMPLETE (List chats, Paginated messages, Create chat)
 │   │   │   ├── notifications.ts  # ✅ COMPLETE (List, Mark read, Mark all, Unread count)
@@ -25,6 +25,8 @@ d:\Kindr\
 │   │   │   ├── ratings.ts        # ✅ COMPLETE (Rate 5-star, Civilization Points, User ratings)
 │   │   │   ├── reports.ts        # ✅ COMPLETE (File report, My reports)
 │   │   │   ├── admin.ts          # ✅ COMPLETE (Dashboard, Users lock/unlock, Dispute resolve, Withdraw approve)
+│   │   │   ├── categories.ts     # ✅ COMPLETE (Dynamic categories CRUD + seed)
+│   │   │   ├── waitlist.ts       # ✅ COMPLETE (Public registration, admin entries listing)
 │   │   │   └── care-handbook.ts  # ✅ COMPLETE (CRUD vaccine, growth, reviews)
 │   │   ├── services/             # 🟡 PARTIAL: escrowService.ts ✅ (full logic)
 │   │   ├── socket/               # ✅ DONE: index.ts, chatHandler.ts, notificationHandler.ts
@@ -57,7 +59,8 @@ d:\Kindr\
 ### 3. Business Rules Quan Trọng
 - **1 Xu = 10.000 VNĐ** (không bao giờ thay đổi)
 - **SafeFee = 10%** giá sản phẩm (tối thiểu 1 Xu, charity = 0)
-- **Welcome Credit = 10 Xu** (Non-withdrawable — chưa implement logic phân biệt)
+- **Welcome Credit = 10 Xu** (Non-withdrawable — Xu tặng chào mừng)
+- **5 Xu Tiên Phong (Founding Member):** 200 suất đầu tiên trong waitlist (`orderNumber <= 200`, `foundingMember: true`). Khi đăng ký tài khoản (thường, kích hoạt email hoặc Google), hệ thống tự động claim atomic (`xuClaimed: true`, `claimedByUserId: user._id`). Người dùng được cộng `+5` vào `xuBalance` và `+5` vào `welcomeCreditRemaining` (Xu tặng không rút được). Mỗi entry waitlist chỉ được claim 1 lần duy nhất.
 - **Phí rút tiền = 10%** trên tổng Xu rút
 - **6h Safeful Time** sau khi xác nhận nhận hàng
 - **3 strikes → auto lock** tài khoản
@@ -67,118 +70,156 @@ d:\Kindr\
 
 ## 📡 API ENDPOINTS — Chi Tiết Cần Tạo
 
-### `routes/transactions.ts` ❌ TODO
+### `routes/transactions.ts` ✅ COMPLETE (Escrow, Handover PIN/QR, Complete, Dispute)
 
-> **Business logic đã có sẵn trong [`server/src/services/escrowService.ts`](file:///d:/Kindr/server/src/services/escrowService.ts)**. Route chỉ cần gọi service functions.
+> **Business logic đã hoàn tất và tối ưu trong [`server/src/services/escrowService.ts`](file:///d:/Kindr/server/src/services/escrowService.ts)**.
+- Tạo giao dịch Escrow trừ tiền nguyên tử CAS (Atomic CAS).
+- Phân biệt Xu thật và Welcome Credit (`buyerPromoXu`).
+- Mã PIN 6 ký tự ngẫu nhiên bảo mật (loại trừ ký tự dễ nhầm O/0/I/1).
+- Người mua giữ mã PIN/QR. Người bán nhập mã PIN khi giao đồ (tối đa 5 lần thử sai).
+- Người mua có thể tự xác nhận đã nhận đồ P2P không cần PIN.
 
 | Method | Endpoint | Auth | Handler |
 |:---|:---|:---|:---|
-| POST | `/api/transactions` | Required | Gọi `escrowService.createEscrow(req.userId, req.body.productId)` |
-| GET | `/api/transactions/my` | Required | Tìm transactions có `buyerId` hoặc `sellerId` = userId |
-| GET | `/api/transactions/:id` | Required | Tìm transaction, verify buyer/seller, unmask contact info |
-| POST | `/api/transactions/:id/handover` | Required | Gọi `escrowService.confirmHandover(id, req.userId)` |
-| POST | `/api/transactions/:id/complete` | Required | Gọi `escrowService.finalizeTransaction(id)` — chỉ buyer |
-| POST | `/api/transactions/:id/dispute` | Required | Gọi `escrowService.fileDispute(id, req.userId, reason, images)` |
+| POST | `/api/transactions` | Required | Tạo Escrow, khóa Xu người mua + 10% Safe Fee người bán |
+| GET | `/api/transactions/my` | Required | Danh sách giao dịch người dùng tham gia |
+| GET | `/api/transactions/:id` | Required | Chi tiết giao dịch, unmask SĐT/Zalo; chỉ trả handoverCode/QR cho người mua |
+| POST | `/api/transactions/:id/handover` | Required | Xác nhận bàn giao: Người bán cần `handoverCode`, người mua tự xác nhận |
+| POST | `/api/transactions/:id/complete` | Required | Người mua xác nhận sớm hài lòng 100%, giải phóng Xu ngay |
+| POST | `/api/transactions/:id/dispute` | Required | Mở khiếu nại chất lượng trong 6h Safeful Time |
 
 ---
 
-### `routes/wallet.ts` ❌ TODO
+### `routes/wallet.ts` ✅ COMPLETE (Balance, Topup VietQR, Webhook, Withdraw CAS, History)
+
+- Gated demo topup bằng `ENABLE_DEMO_TOPUP` (403 trong production).
+- Webhook VietQR bảo vệ bằng header secret `x-webhook-secret`, kiểm tra số tiền thực thu `>= order.vndAmount`.
+- Rút Xu bảo vệ bằng Atomic CAS chống double-spending (`User.findOneAndUpdate({ _id, xuBalance: { $gte: amount } })`).
 
 | Method | Endpoint | Auth | Mô tả |
 |:---|:---|:---|:---|
 | GET | `/api/wallet/balance` | Required | Trả `{ xuBalance, xuFrozen, welcomeCreditRemaining }` |
-| POST | `/api/wallet/topup` | Required | Body: `{ xuAmount: number }`. Cộng Xu vào user balance. Tạo VietQR URL. |
-| POST | `/api/wallet/withdraw` | Required | Body: `{ xuAmount, bankName, accountNumber, accountHolder }`. Validate balance >= amount. Trừ Xu. Tính phí 10%. Tạo WithdrawRequest. |
-| GET | `/api/wallet/history` | Required | Lấy lịch sử: transactions + withdraw requests |
-
-**Công thức phí rút:**
-```
-vndAmount = xuAmount × 10000
-feeVnd = vndAmount × 0.1
-payoutVnd = vndAmount - feeVnd
-```
+| POST | `/api/wallet/create-order` | Required | Tạo đơn nạp tiền VietQR kèm mã chuyển khoản duy nhất |
+| POST | `/api/wallet/webhook` | Webhook Secret | Đối soát tự động ngân hàng cộng Xu vào ví |
+| POST | `/api/wallet/topup` | Demo Only | Giả lập nạp tiền (chỉ bật khi ENABLE_DEMO_TOPUP=true) |
+| POST | `/api/wallet/withdraw` | Required | Đặt lệnh rút tiền Atomic CAS, thu phí 10% |
+| GET | `/api/wallet/history` | Required | Lịch sử giao dịch ví và lệnh rút |
 
 ---
 
-### `routes/chat.ts` ❌ TODO
+### `routes/chat.ts` ✅ COMPLETE
 
-> **Real-time đã được xử lý bởi Socket.IO** trong [`server/src/socket/chatHandler.ts`](file:///d:/Kindr/server/src/socket/chatHandler.ts). REST route chỉ dùng cho lịch sử.
+> **Real-time đã được xử lý bởi Socket.IO** trong [`server/src/socket/chatHandler.ts`](file:///d:/Kindr/server/src/socket/chatHandler.ts). REST route dùng cho lịch sử tin nhắn.
 
 | Method | Endpoint | Auth | Mô tả |
 |:---|:---|:---|:---|
-| GET | `/api/chats` | Required | Lấy danh sách chats có `buyerId` hoặc `sellerId` = userId. Sort by `lastMessageTime` desc |
-| GET | `/api/chats/:id/messages` | Required | Lấy messages theo chatId. Pagination: `?page=1&limit=50`. Sort by `createdAt` asc |
-| POST | `/api/chats` | Required | Tạo chat session mới. Body: `{ productId, sellerId }`. Kiểm tra duplicate |
+| GET | `/api/chats` | Required | Lấy danh sách chats của người dùng |
+| GET | `/api/chats/:id/messages` | Required | Lấy tin nhắn theo chatId phân trang |
+| POST | `/api/chats` | Required | Tạo hoặc lấy hội thoại chat giữa người mua và người bán |
 
 ---
 
-### `routes/notifications.ts` ❌ TODO
+### `routes/notifications.ts` ✅ COMPLETE
 
 | Method | Endpoint | Auth | Mô tả |
 |:---|:---|:---|:---|
-| GET | `/api/notifications` | Required | Lấy notifications của user. `?page=1&limit=20`. Sort by `createdAt` desc |
-| PUT | `/api/notifications/:id/read` | Required | Đánh dấu đã đọc |
-| PUT | `/api/notifications/read-all` | Required | Đánh dấu tất cả đã đọc |
-| GET | `/api/notifications/unread-count` | Required | Trả `{ count: number }` |
+| GET | `/api/notifications` | Required | Lấy thông báo cá nhân phân trang |
+| PUT | `/api/notifications/:id/read` | Required | Đánh dấu thông báo đã đọc |
+| PUT | `/api/notifications/read-all` | Required | Đánh dấu tất cả thông báo đã đọc |
+| GET | `/api/notifications/unread-count` | Required | Đếm số thông báo chưa đọc |
 
 ---
 
-### `routes/ratings.ts` ❌ TODO
+### `routes/ratings.ts` ✅ COMPLETE (Atomic CAS, Civilization Points, No Duplicate)
+
+- Đánh giá giao dịch Atomic CAS trên `buyerRated` / `sellerRated`.
+- Điểm văn minh cộng/trừ được clamp an toàn trong biên độ 0 - 100.
+- Compound unique index `{ transactionId: 1, fromUserId: 1 }`.
 
 | Method | Endpoint | Auth | Mô tả |
 |:---|:---|:---|:---|
-| POST | `/api/ratings` | Required | Body: `{ transactionId, stars, comment, tags }`. Validate: chỉ buyer/seller trong transaction, chưa rate. Cập nhật `buyerRated`/`sellerRated` trong Transaction. Tính Civilization Points cho partner. |
-| GET | `/api/ratings/user/:userId` | Optional | Lấy tất cả đánh giá cho 1 user |
-
-**Quy tắc Civilization Points khi nhận rating:**
-- 5 sao: +5 điểm
-- 4 sao: +2 điểm
-- 3 sao: +0 điểm
-- 1-2 sao: -5 điểm
+| POST | `/api/ratings` | Required | Gửi đánh giá sao, comment, tags cho đối tác giao dịch |
+| GET | `/api/ratings/user/:userId` | Optional | Lấy danh sách đánh giá công khai của người dùng |
 
 ---
 
-### `routes/reports.ts` ❌ TODO
+### `routes/reports.ts` ✅ COMPLETE
 
 | Method | Endpoint | Auth | Mô tả |
 |:---|:---|:---|:---|
-| POST | `/api/reports` | Required | Body: `{ targetType, targetId, reason }` |
-| GET | `/api/reports/my` | Required | Lấy reports tôi đã gửi |
+| POST | `/api/reports` | Required | Báo cáo tài khoản hoặc giao dịch vi phạm |
+| GET | `/api/reports/my` | Required | Xem danh sách báo cáo đã gửi |
 
 ---
 
-### `routes/admin.ts` ❌ TODO
+### `routes/admin.ts` ✅ COMPLETE
 
-> Tất cả endpoints cần `requireAuth` + `requireAdmin`.
+> Yêu cầu `requireAuth` + `requireAdmin`.
 
 | Method | Endpoint | Mô tả |
 |:---|:---|:---|
-| GET | `/api/admin/dashboard` | Stats: tổng users, products, transactions, revenue |
-| GET | `/api/admin/users` | Danh sách users + filter/search |
-| PUT | `/api/admin/users/:id/lock` | Khóa tài khoản |
-| PUT | `/api/admin/users/:id/unlock` | Mở khóa |
-| GET | `/api/admin/products` | Tất cả products kể cả removed |
+| GET | `/api/admin/dashboard` | Thống kê tổng quan hệ thống Kindr |
+| GET | `/api/admin/users` | Quản lý danh sách người dùng |
+| PUT | `/api/admin/users/:id/lock` | Khóa tài khoản và hủy toàn bộ refresh tokens |
+| PUT | `/api/admin/users/:id/unlock` | Mở khóa tài khoản |
+| GET | `/api/admin/products` | Danh sách sản phẩm |
 | DELETE | `/api/admin/products/:id` | Xóa sản phẩm vi phạm |
-| GET | `/api/admin/transactions` | Tất cả transactions |
-| GET | `/api/admin/disputes` | Transactions có status='disputed' |
-| PUT | `/api/admin/disputes/:id/resolve` | Body: `{ outcome: 'resolved_buyer' \| 'resolved_seller' }`. Gọi `escrowService.resolveDispute()` |
-| GET | `/api/admin/withdraws` | WithdrawRequests pending |
-| PUT | `/api/admin/withdraws/:id/approve` | Duyệt rút Xu |
-| PUT | `/api/admin/withdraws/:id/reject` | Từ chối rút Xu (hoàn Xu lại) |
-| GET | `/api/admin/reports` | Tất cả reports |
-| PUT | `/api/admin/reports/:id` | Update status report |
+| GET | `/api/admin/transactions` | Danh sách toàn bộ giao dịch Escrow |
+| GET | `/api/admin/disputes` | Danh sách khiếu nại đang chờ xử lý |
+| PUT | `/api/admin/disputes/:id/resolve` | Phán quyết khiếu nại (hoàn Xu người mua hoặc giải ngân người bán) |
+| GET | `/api/admin/withdraws` | Danh sách yêu cầu rút tiền |
+| PUT | `/api/admin/withdraws/:id/approve` | Duyệt chi trả rút tiền |
+| PUT | `/api/admin/withdraws/:id/reject` | Từ chối rút tiền và hoàn Xu lại vào ví người dùng (Atomic CAS) |
+| GET | `/api/admin/reports` | Quản lý báo cáo người dùng |
+| PUT | `/api/admin/reports/:id` | Cập nhật trạng thái xử lý báo cáo |
 
 ---
 
-### `routes/care-handbook.ts` ❌ TODO (Thấp ưu tiên)
+### `routes/care-handbook.ts` ⏳ CHƯA IMPLEMENT (Planned for Phase 2)
 
-> Sổ Tay Mẹ Bỉm — hiện tại FE dùng data local. Backend chỉ cần khi muốn persist.
+> ⚠️ **Lưu ý:** Module Sổ tay Chăm sóc bé (`care-handbook.ts`) **chưa được implement** trên backend trong giai đoạn MVP hiện tại. Các tính năng tiêm chủng, tăng trưởng và đánh giá địa điểm sẽ được bổ sung ở Phase tiếp theo.
 
-| Method | Endpoint | Auth | Mô tả |
-|:---|:---|:---|:---|
-| GET/POST | `/api/care/vaccines` | Required | CRUD vaccine doses cho user |
-| GET/POST | `/api/care/growth` | Required | CRUD growth records |
-| GET/POST | `/api/care/reviews` | Required | CRUD community reviews |
+| Method | Endpoint | Auth | Mô tả | Trạng thái |
+|:---|:---|:---|:---|:---|
+| GET/POST | `/api/care/vaccines` | Required | CRUD lịch tiêm chủng của bé | ⏳ Chưa có backend route |
+| GET/POST | `/api/care/growth` | Required | CRUD theo dõi chiều cao, cân nặng | ⏳ Chưa có backend route |
+| GET/POST | `/api/care/reviews` | Required | CRUD đánh giá địa điểm mẹ & bé | ⏳ Chưa có backend route |
+
+---
+
+## 📜 CÁC QUY TẮC NGHIỆP VỤ & BẢO MẬT MỚI (PHASE 1 - 7)
+
+### 1. Luật Bàn Giao PIN & QR
+- **Người mua nắm giữ bí mật:** Khi giao dịch chuyển sang `awaiting_handover`, hệ thống tự sinh mã PIN 6 ký tự ngẫu nhiên bằng `crypto.randomInt` từ tập ký tự không gây nhầm lẫn: `ABCDEFGHJKMNPQRSTUVWXYZ23456789`.
+- **Ẩn mã khỏi Người bán:** Trường `handoverCode` và `qrCodePayload` chỉ được trả về cho Người mua (hoặc Admin). Người bán hoàn toàn không thể xem mã này từ API hay notification.
+- **Xác thực lúc gặp mặt:**
+  - **Người bán:** Phải nhập chính xác mã PIN 6 ký tự do Người mua cung cấp trên app. Cho phép tối đa **5 lần nhập sai**. Quá 5 lần, phương thức nhập mã bị khóa cứng (`handoverFailedAttempts >= 5`).
+  - **Người mua:** Có toàn quyền tự bấm *"Tôi đã nhận hàng"* trên thiết bị của mình mà **không cần nhập mã** (vì đây là số tiền của chính họ đang được bảo chứng).
+- Sau khi bàn giao thành công, đồng hồ **6 Giờ Kiểm Định Tại Nhà (Safeful Time)** bắt đầu đếm ngược.
+
+### 2. Luật Xu Tặng (Welcome Credit) & Phòng Chống Rửa Tiền
+- **Bản chất Welcome Credit (`welcomeCreditRemaining`):** Là phần số dư "Non-withdrawable" (không thể rút thành tiền mặt). Khi đăng ký mới, người dùng nhận 10 Xu khuyến mãi.
+- **Luật tiêu dùng:** Xu tặng luôn được ưu tiên khấu trừ trước khi người mua thanh toán tiền hàng hoặc người bán ký quỹ SafeFee 10%:
+  $$\text{promoUsed} = \min(\text{welcomeCreditRemaining}, \text{price})$$
+- **Truy vết giao dịch:** `buyerPromoXu` được lưu vào bản ghi `Transaction`.
+- **Bảo lưu tính chất không rút được qua vòng trao đổi:** Khi giải ngân tiền hàng cho người bán (`finalizeTransaction` hoặc giải quyết tranh chấp người bán thắng), số lượng `buyerPromoXu` được cộng vào `welcomeCreditRemaining` của người bán. Nhờ đó, người bán nhận được Xu để tiếp tục đổi đồ trên nền tảng nhưng **không thể rút ra tiền mặt**, triệt tiêu hoàn toàn lỗ hổng rửa tiền tạo nick mới để rút Xu khuyến mại.
+- **Rút tiền an toàn (Atomic CAS):**
+  Lệnh rút tiền chỉ cho phép rút tối đa số Xu nạp thực tế:
+  $$\text{xuWithdrawable} = \text{xuBalance} - \text{welcomeCreditRemaining} \ge \text{xuAmount}$$
+
+### 3. Biến Môi Trường Hệ Thống (ENV Specs)
+| Biến | Mặc định | Bắt buộc trong Prod | Mô tả |
+|:---|:---|:---:|:---|
+| `MONGO_URI` | `mongodb://localhost:27017/kindr` | Có | Chuỗi kết nối MongoDB standalone / replica set |
+| `JWT_SECRET` | - | Có (>= 32 ký tự) | Khóa ký Access Token (ném lỗi nếu dùng mặc định) |
+| `JWT_REFRESH_SECRET` | - | Có (>= 32 ký tự) | Khóa ký Refresh Token |
+| `WEBHOOK_SECRET` | - | Có | Khóa đối soát bảo vệ endpoint `/api/wallet/webhook` |
+| `BANK_CODE` | `MB` | Có | Mã ngân hàng nhận tiền nạp VietQR |
+| `BANK_NAME` | `MBBank` | Có | Tên ngân hàng nhận chuyển khoản |
+| `BANK_ACCOUNT_NUMBER`| - | Có | Số tài khoản nhận tiền (bắt buộc để tạo đơn) |
+| `BANK_ACCOUNT_HOLDER`| - | Có | Tên chủ tài khoản nhận tiền nạp |
+| `ENABLE_DEMO_TOPUP` | `false` | Tắt (`false`) | Cho phép endpoint nạp xu trực tiếp không qua ngân hàng |
+| `ENABLE_DEMO_LOGIN` | `false` | Tắt (`false`) | Cho phép đăng nhập nhanh qua tài khoản demo (trả 404 nếu tắt) |
 
 ---
 

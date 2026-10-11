@@ -3,12 +3,17 @@
 // COMPLETE AUTH ROUTES — This is the PATTERN
 // for all other route files to follow.
 // ========================================
+import crypto from 'crypto';
 import { Router, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { z } from 'zod';
 import { User } from '../models/User';
+import { Product } from '../models/Product';
+import { Transaction } from '../models/Transaction';
+import { WithdrawRequest } from '../models/WithdrawRequest';
 import { Notification } from '../models/Notification';
+import { Waitlist } from '../models/Waitlist';
 import { requireAuth, AuthRequest } from '../middleware/auth';
 import { ENV } from '../config/env';
 import { registerPushToken, unregisterPushToken } from '../services/pushNotificationService';
@@ -45,6 +50,57 @@ function generateRefreshToken(userId: string, role: string): string {
   return jwt.sign({ userId, role }, ENV.JWT_REFRESH_SECRET, {
     expiresIn: 604800, // 7 days in seconds
   });
+}
+
+/**
+ * Claim 5 Xu Founding Member Waitlist Reward if user matches an unclaimed founding waitlist entry.
+ * Increments xuBalance (+5) and welcomeCreditRemaining (+5). Non-withdrawable.
+ */
+export async function claimWaitlistReward(
+  userId: any,
+  email?: string | null,
+  phone?: string | null
+): Promise<boolean> {
+  const orConditions: any[] = [];
+  if (email && email.trim()) {
+    orConditions.push({ email: email.trim().toLowerCase() });
+  }
+  if (phone && phone.trim()) {
+    orConditions.push({ phone: phone.trim() });
+  }
+  if (orConditions.length === 0) return false;
+
+  const entry = await Waitlist.findOneAndUpdate(
+    {
+      foundingMember: true,
+      xuClaimed: false,
+      $or: orConditions,
+    },
+    {
+      $set: {
+        xuClaimed: true,
+        xuClaimedAt: new Date(),
+        claimedByUserId: userId,
+      },
+    },
+    { new: true }
+  );
+
+  if (!entry) return false;
+
+  await User.updateOne(
+    { _id: userId },
+    { $inc: { xuBalance: 5, welcomeCreditRemaining: 5 } }
+  );
+
+  await Notification.create({
+    userId,
+    type: 'welcome_credit',
+    title: 'Mẹ nhận 5 Xu Tiên Phong!',
+    body: 'Cảm ơn Mẹ đã đồng hành cùng Kindr từ những ngày đầu. 5 Xu Tiên Phong đã được cộng vào ví của Mẹ!',
+  });
+
+  return true;
 }
 
 // ---- Routes ----
@@ -95,7 +151,7 @@ router.post('/register', async (req: AuthRequest, res: Response): Promise<void> 
     let activationOtpExpires: Date | undefined;
 
     if (hasEmail) {
-      activationOtp = Math.floor(100000 + Math.random() * 900000).toString();
+      activationOtp = crypto.randomInt(100000, 1000000).toString();
       activationOtpExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
     }
 
@@ -123,6 +179,8 @@ router.post('/register', async (req: AuthRequest, res: Response): Promise<void> 
       }],
     });
 
+    const claimedWaitlist = await claimWaitlistReward(user._id, user.email, user.phone);
+
     // 7. Create welcome notification
     await Notification.create({
       userId: user._id,
@@ -139,6 +197,7 @@ router.post('/register', async (req: AuthRequest, res: Response): Promise<void> 
         message: 'Đăng ký thành công! Vui lòng kiểm tra email để nhập mã kích hoạt tài khoản.',
         needsActivation: true,
         email: user.email,
+        foundingMemberClaimed: claimedWaitlist,
       });
       return;
     }
@@ -155,6 +214,7 @@ router.post('/register', async (req: AuthRequest, res: Response): Promise<void> 
       user: user.toJSON(),
       accessToken,
       refreshToken,
+      foundingMemberClaimed: claimedWaitlist,
     });
   } catch (error) {
     console.error('Register error:', error);
@@ -210,7 +270,7 @@ router.post('/login', async (req: AuthRequest, res: Response): Promise<void> => 
     // Check if account needs email activation
     if (user.email && !user.isActivated) {
       // Always generate a fresh 6-digit activation OTP
-      const activationOtp = Math.floor(100000 + Math.random() * 900000).toString();
+      const activationOtp = crypto.randomInt(100000, 1000000).toString();
       user.activationOtp = activationOtp;
       user.activationOtpExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
       await user.save();
@@ -259,6 +319,10 @@ router.post('/login', async (req: AuthRequest, res: Response): Promise<void> => 
  * Instant 1-click login for Step 4 MVP visitors. Zero-friction onboarding.
  */
 router.post('/demo-login', async (_req: AuthRequest, res: Response): Promise<void> => {
+  if (!ENV.ENABLE_DEMO_LOGIN) {
+    res.status(404).json({ error: 'Chức năng đăng nhập demo hiện không khả dụng.' });
+    return;
+  }
   try {
     let demoUser = await User.findOne({ phone: '0905888888' });
     if (!demoUser) {
@@ -332,6 +396,13 @@ router.post('/refresh', async (req: AuthRequest, res: Response): Promise<void> =
     const user = await User.findById(decoded.userId);
     if (!user || !user.refreshTokens.includes(refreshToken)) {
       res.status(401).json({ error: 'Refresh token đã bị thu hồi.' });
+      return;
+    }
+
+    if (user.isLocked) {
+      user.refreshTokens = [];
+      await user.save();
+      res.status(403).json({ error: 'Tài khoản của bạn đã bị khóa.' });
       return;
     }
 
@@ -516,6 +587,13 @@ router.post('/google', async (req: AuthRequest, res: Response): Promise<void> =>
         title: `Chào mừng ${googleProfile.name}!`,
         body: 'Kindr đã gửi tặng Mẹ 10 Xu chào mừng vào ví. Hãy bắt đầu đổi quà cho bé ngay nào!',
       });
+
+      const claimedWaitlist = await claimWaitlistReward(user._id, user.email, user.phone);
+      if (claimedWaitlist) {
+        user.xuBalance += 5;
+        user.welcomeCreditRemaining += 5;
+        await user.save();
+      }
     } else {
       // Link googleId / avatar / admin role if needed
       let modified = false;
@@ -764,7 +842,7 @@ router.post('/forgot-password', async (req: AuthRequest, res: Response): Promise
     }
 
     // Generate random 6-digit OTP
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otp = crypto.randomInt(100000, 1000000).toString();
     const otpExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
     user.resetPasswordOtp = otp;
@@ -989,6 +1067,12 @@ router.post('/activate-account', async (req: AuthRequest, res: Response): Promis
     user.activationOtp = undefined;
     user.activationOtpExpires = undefined;
 
+    const claimedWaitlist = await claimWaitlistReward(user._id, user.email, user.phone);
+    if (claimedWaitlist) {
+      user.xuBalance += 5;
+      user.welcomeCreditRemaining += 5;
+    }
+
     // Generate tokens for immediate login
     const accessToken = generateAccessToken(user._id.toString(), user.role);
     const refreshToken = generateRefreshToken(user._id.toString(), user.role);
@@ -1036,7 +1120,7 @@ router.post('/resend-activation', async (req: AuthRequest, res: Response): Promi
       return;
     }
 
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otp = crypto.randomInt(100000, 1000000).toString();
     user.activationOtp = otp;
     user.activationOtpExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
     await user.save();
@@ -1051,6 +1135,78 @@ router.post('/resend-activation', async (req: AuthRequest, res: Response): Promi
   } catch (error: any) {
     console.error('Resend activation error:', error);
     res.status(500).json({ error: 'Lỗi hệ thống khi gửi lại mã kích hoạt.' });
+  }
+});
+
+/**
+ * DELETE /api/auth/me
+ * Self account deletion (Apple App Store / Google Play Guideline compliant).
+ * Validates that there are no active Escrow transactions or pending withdrawals.
+ */
+router.delete('/me', requireAuth, async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const userId = req.userId;
+    if (!userId) {
+      res.status(401).json({ error: 'Chưa xác thực người dùng.' });
+      return;
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      res.status(404).json({ error: 'Không tìm thấy thông tin tài khoản.' });
+      return;
+    }
+
+    // 1. Check for active escrow transactions
+    const activeTransactions = await Transaction.find({
+      $or: [{ buyerId: userId }, { sellerId: userId }],
+      status: { $in: ['awaiting_handover', 'in_safeful_time', 'disputed'] },
+    });
+
+    if (activeTransactions.length > 0) {
+      res.status(400).json({
+        error: 'Không thể xóa tài khoản khi đang có giao dịch ký quỹ (Escrow) chưa hoàn tất. Vui lòng hoàn tất hoặc giải quyết giao dịch trước.',
+      });
+      return;
+    }
+
+    // 2. Check for pending withdrawals
+    const pendingWithdrawal = await WithdrawRequest.findOne({
+      userId,
+      status: 'pending',
+    });
+
+    if (pendingWithdrawal) {
+      res.status(400).json({
+        error: 'Mẹ đang có yêu cầu rút tiền đang chờ xử lý. Vui lòng chờ giải quyết xong trước khi xóa tài khoản.',
+      });
+      return;
+    }
+
+    // 3. Mark user's active products as removed
+    await Product.updateMany(
+      { sellerId: userId, status: { $in: ['available', 'pending_approval'] } },
+      { $set: { status: 'removed' } }
+    );
+
+    // 4. Soft-delete and anonymize user data
+    user.name = `Người dùng đã xóa (${userId.slice(-4)})`;
+    user.phone = `deleted_${userId}_${Date.now()}`;
+    if (user.email) {
+      user.email = `deleted_${userId}_${Date.now()}@kindr.vn`;
+    }
+    user.avatar = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80';
+    user.isLocked = true;
+    user.refreshTokens = [];
+    await user.save();
+
+    res.json({
+      success: true,
+      message: 'Tài khoản và thông tin cá nhân của bạn đã được xóa thành công.',
+    });
+  } catch (error: any) {
+    console.error('Delete account error:', error);
+    res.status(500).json({ error: 'Lỗi hệ thống khi xóa tài khoản.' });
   }
 });
 

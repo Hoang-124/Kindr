@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Kindr OG Image</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,700;1,9..144,600&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      width: 1200px;
+      height: 630px;
+      overflow: hidden;
+      background: #FAF7F2;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 44px 56px;
+      color: #2D2325;
+    }
+    .bg-circle-1 {
+      position: absolute;
+      width: 450px;
+      height: 450px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(224, 90, 54, 0.12) 0%, rgba(250, 247, 242, 0) 70%);
+      top: -100px;
+      right: -60px;
+      z-index: 1;
+    }
+    .bg-circle-2 {
+      position: absolute;
+      width: 380px;
+      height: 380px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(43, 138, 126, 0.10) 0%, rgba(250, 247, 242, 0) 70%);
+      bottom: -80px;
+      left: 80px;
+      z-index: 1;
+    }
+    .content-wrap {
+      position: relative;
+      z-index: 2;
+    }
+    .header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .brand-logo {
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      background: #FFFFFF;
+      box-shadow: 0 4px 16px rgba(45, 35, 37, 0.08);
+      border: 2px solid rgba(224, 90, 54, 0.2);
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .brand-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .brand-name {
+      font-size: 34px;
+      font-weight: 800;
+      color: #C2410C;
+      letter-spacing: -1px;
+    }
+    .brand-tag {
+      background: #FEE7DE;
+      color: #C2410C;
+      font-size: 14px;
+      font-weight: 700;
+      padding: 5px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(194, 65, 12, 0.2);
+    }
+    .main-title {
+      font-size: 52px;
+      line-height: 1.15;
+      font-weight: 800;
+      letter-spacing: -1.5px;
+      color: #1F1615;
+      margin-bottom: 16px;
+    }
+    .main-title .highlight {
+      font-family: 'Fraunces', serif;
+      font-style: italic;
+      color: #C2410C;
+    }
+    .main-desc {
+      font-size: 20px;
+      line-height: 1.5;
+      color: #6E5A5D;
+      max-width: 860px;
+    }
+    .footer-row {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1.5px solid rgba(45, 35, 37, 0.08);
+      padding-top: 18px;
+    }
+    .feature-chips {
+      display: flex;
+      gap: 12px;
+    }
+    .chip {
+      background: #FFFFFF;
+      border: 1px solid rgba(45, 35, 37, 0.1);
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: 700;
+      color: #2D2325;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 2px 6px rgba(45, 35, 37, 0.04);
+    }
+    .chip.highlight {
+      background: #FFF7ED;
+      border-color: #FDBA74;
+      color: #C2410C;
+    }
+    .author-tag {
+      font-size: 15px;
+      color: #7A6C6F;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-circle-1"></div>
+  <div class="bg-circle-2"></div>
+
+  <div class="content-wrap">
+    <div class="header-row">
+      <div class="brand">
+        <div class="brand-logo">
+          <img src="kindr-mascot.png" alt="Kindr Logo">
+        </div>
+        <span class="brand-name">Kindr</span>
+      </div>
+      <span class="brand-tag">Thí Điểm Đà Nẵng 2026</span>
+    </div>
+
+    <h1 class="main-title">
+      Đổi đồ cho con. Nhẹ ví cho mẹ.<br>
+      <span class="highlight">Gặp nhau trong 1km.</span>
+    </h1>
+
+    <p class="main-desc">
+      Nền tảng hoán đổi đồ mẹ &amp; bé siêu cục bộ qua Ví Xu nội bộ, Ký Quỹ Double Escrow và 6 giờ kiểm định tại nhà.
+    </p>
+  </div>
+
+  <div class="footer-row">
+    <div class="feature-chips">
+      <div class="chip highlight">🎁 200 Suất Tặng 5 Xu Tiên Phong</div>
+      <div class="chip">🛡️ Ký Quỹ Double Escrow</div>
+      <div class="chip">⏱️ 6H Kiểm Định Tại Nhà</div>
+    </div>
+    <div class="author-tag">Khởi Nghiệp FPT University Đà Nẵng</div>
+  </div>
+</body>
+</html>

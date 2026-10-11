@@ -94,7 +94,7 @@ const styles = StyleSheet.create({
     height: '90%',
     borderRadius: RADIUS.full,
     borderWidth: 4,
-    borderColor: '#ffffff',
+    borderColor: COLORS.onPrimary,
     backgroundColor: COLORS.surfaceContainerLowest,
     padding: SPACING.sm,
   },

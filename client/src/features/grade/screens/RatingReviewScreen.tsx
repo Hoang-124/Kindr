@@ -10,8 +10,7 @@ import {
 } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { useAppSelector, useAppDispatch } from '../../../app/store/hooks';
-import { adjustCivilizationPoints } from '../../auth/store/authSlice';
-import { updateTransactionStatus } from '../../exchange/store/exchangeSlice';
+import { markRated } from '../../exchange/store/exchangeSlice';
 import { COLORS, TYPOGRAPHY, SPACING, RADIUS, SHADOWS } from '../../../theme';
 import { Star, MessageSquare, Award } from 'lucide-react-native';
 import ScreenContainer from '../../../components/layout/ScreenContainer';
@@ -66,53 +65,30 @@ export const RatingReviewScreen = () => {
   const handleSubmit = async () => {
     setLoading(true);
 
-    let pointsChanged = 0;
-    let reason = '';
-
-    if (rating === 5) {
-      pointsChanged = 5;
-      reason = `Được ${currentUser.name} đánh giá 5 sao: "${comment || 'Giao dịch tuyệt vời'}"`;
-    } else if (rating === 4) {
-      pointsChanged = 2;
-      reason = `Được ${currentUser.name} đánh giá 4 sao: "${comment || 'Khá tốt'}"`;
-    } else if (rating <= 2) {
-      pointsChanged = -5;
-      reason = `Bị ${currentUser.name} đánh giá thấp (${rating} sao): "${comment || 'Có lỗi xảy ra'}"`;
-    }
-
     try {
       await ratingService.submitRating({
         transactionId: tx.id,
         stars: rating,
         comment: comment.trim(),
       });
-    } catch (e) {
-      // Fallback
-    }
 
-    setLoading(false);
-    
-    // Update partner civilization points in state
-    if (pointsChanged !== 0) {
-      dispatch(adjustCivilizationPoints({
-        userId: partnerId,
-        points: pointsChanged,
-        reason,
+      // Mark transaction as rated locally
+      dispatch(markRated({
+        transactionId: tx.id,
+        isBuyer,
       }));
+
+      Alert.alert(
+        'Đã gửi đánh giá thành công',
+        `Cảm ơn mẹ đã đóng góp ý kiến xây dựng cộng đồng Kindr văn minh!`,
+        [{ text: 'Đồng ý', onPress: () => navigation.navigate('Main' as never) }]
+      );
+    } catch (e: any) {
+      const msg = e.response?.data?.error || e.message || 'Không thể gửi đánh giá lúc này';
+      Alert.alert('Lỗi đánh giá', msg);
+    } finally {
+      setLoading(false);
     }
-
-    // Mark transaction as complete
-    dispatch(updateTransactionStatus({
-      transactionId: tx.id,
-      status: 'completed',
-      finalizedAt: new Date().toISOString()
-    }));
-
-    Alert.alert(
-      'Đã gửi đánh giá thành công',
-      `Cảm ơn mẹ đã đóng góp ý kiến. Điểm văn minh của ${partnerName} đã được cập nhật tương ứng.`,
-      [{ text: 'Đồng ý', onPress: () => navigation.navigate('Main') }]
-    );
   };
 
   return (
@@ -235,7 +211,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   partnerTitle: {
-    fontSize: 11,
+    fontSize: 12,
     color: COLORS.outline,
     fontWeight: '600',
   },
@@ -289,7 +265,7 @@ const styles = StyleSheet.create({
     ...SHADOWS.soft,
   },
   tagText: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '600',
     color: COLORS.onSurface,
   },

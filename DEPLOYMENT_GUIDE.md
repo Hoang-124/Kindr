@@ -40,13 +40,20 @@
    | `NODE_ENV` | `production` | Chế độ production |
    | `PORT` | `5000` | Cổng dịch vụ |
    | `MONGO_URI` | *[Chuỗi kết nối Atlas ở Bước 1]* | URL database |
-   | `JWT_SECRET` | `kindr_prod_jwt_secret_2026_super_secure` | Khóa bí mật JWT |
-   | `JWT_REFRESH_SECRET` | `kindr_prod_refresh_secret_2026` | Khóa refresh |
+   | `JWT_SECRET` | `<random-64-chars-jwt-secret>` | Khóa bí mật JWT |
+   | `JWT_REFRESH_SECRET` | `<random-64-chars-refresh-secret>` | Khóa refresh |
+   | `WEBHOOK_SECRET` | `<random-64-chars-webhook-secret>` | Khóa xác thực Webhook |
    | `SMTP_HOST` | `smtp.gmail.com` | Máy chủ mail Google |
    | `SMTP_PORT` | `465` | Cổng SSL |
-   | `SMTP_USER` | `ht20041975@gmail.com` | Email gửi thư |
-   | `SMTP_PASS` | `rdgsrjdfadbfugqx` | Google App Password |
-   | `EMAIL_FROM` | `Kindr Ecosystem <ht20041975@gmail.com>` | Tên người gửi |
+   | `SMTP_USER` | `<your-gmail>@gmail.com` | Email gửi thư |
+   | `SMTP_PASS` | `<gmail-app-password>` | Google App Password |
+   | `EMAIL_FROM` | `Kindr Ecosystem <<your-gmail>@gmail.com>` | Tên người gửi |
+   | `BANK_CODE` | `MB` | Mã ngân hàng nhận tiền (VietQR) |
+   | `BANK_NAME` | `MBBank` | Tên ngân hàng |
+   | `BANK_ACCOUNT_NUMBER` | `<so-tai-khoan-nhan-tien>` | STK nhận tiền ký quỹ/nạp Xu |
+   | `BANK_ACCOUNT_HOLDER` | `<ten-chu-tai-khoan>` | Tên chủ tài khoản |
+   | `ENABLE_DEMO_TOPUP` | `false` | Bật/tắt nạp xu demo (mặc định tắt) |
+   | `ENABLE_DEMO_LOGIN` | `false` | Bật/tắt đăng nhập demo 1-click (mặc định tắt) |
 
 5. Bấm **Create Web Service**.
    - Render sẽ tự động build TypeScript và chạy server.

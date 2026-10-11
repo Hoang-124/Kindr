@@ -16,11 +16,18 @@ import reportRoutes from './routes/reports';
 import adminRoutes from './routes/admin';
 import uploadRoutes from './routes/upload';
 import waitlistRoutes from './routes/waitlist';
+import categoryRoutes from './routes/categories';
+import { isOriginAllowed } from './utils/cors';
+import { ENV } from './config/env';
 
 export function createApp(): Express {
   const app = express();
 
   // 1. Security & Body parsing
+  if (ENV.NODE_ENV === 'production') {
+    app.set('trust proxy', 1);
+  }
+
   app.use(helmet({
     crossOriginResourcePolicy: false,
     contentSecurityPolicy: false,
@@ -28,7 +35,10 @@ export function createApp(): Express {
 
   app.use(cors({
     origin: (origin, callback) => {
-      callback(null, true);
+      if (isOriginAllowed(origin)) {
+        return callback(null, true);
+      }
+      return callback(new Error('Blocked by CORS policy'));
     },
     credentials: true,
   }));
@@ -70,6 +80,7 @@ export function createApp(): Express {
   app.use('/api/admin', adminRoutes);
   app.use('/api/upload', uploadRoutes);
   app.use('/api/waitlist', waitlistRoutes);
+  app.use('/api/categories', categoryRoutes);
 
   // 5. Global error handler
   app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {

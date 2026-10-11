@@ -58,11 +58,13 @@ const STREET_COORDINATES: Array<{ pattern: RegExp; lat: number; lng: number }> =
 
 const DEFAULT_COORDS = { lat: 16.0286, lng: 108.2520, name: 'Quận Ngũ Hành Sơn' };
 
-// High-resolution Satellite Hybrid with full street names & labels
+// OpenStreetMap standard tiles with attribution
 const TILE_LAYERS = {
-  satellite: 'https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', // Google Satellite Hybrid (Ảnh chụp thực tế + Tên đường tiếng Việt)
-  street: 'https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', // Google Maps Standard Vector
+  street: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+  satellite: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
 };
+
+const OSM_ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
 
 interface AddressMapPreviewProps {
   districtId?: string;
@@ -100,6 +102,11 @@ export const AddressMapPreview: React.FC<AddressMapPreviewProps> = ({
   const modalTileLayerRef = useRef<any>(null);
   const markerRef = useRef<any>(null);
   const modalMarkerRef = useRef<any>(null);
+
+  const verifiedAddressRef = useRef(verifiedAddress);
+  verifiedAddressRef.current = verifiedAddress;
+  const onLocationSelectRef = useRef(onLocationSelect);
+  onLocationSelectRef.current = onLocationSelect;
 
   // Update coordinates whenever district or detail changes
   useEffect(() => {
@@ -206,9 +213,10 @@ export const AddressMapPreview: React.FC<AddressMapPreviewProps> = ({
           attributionControl: false,
         });
 
-        // Satellite Hybrid Tile Layer (Google Satellite + Street Labels)
+        // Standard OpenStreetMap Tile Layer with Attribution
         const tileLayer = L.tileLayer(TILE_LAYERS[mapMode], {
-          maxZoom: 20,
+          maxZoom: 19,
+          attribution: OSM_ATTRIBUTION,
         }).addTo(map);
 
         tileLayerRef.current = tileLayer;
@@ -221,9 +229,9 @@ export const AddressMapPreview: React.FC<AddressMapPreviewProps> = ({
           const newPos = { lat: e.latlng.lat, lng: e.latlng.lng };
           setCoords(newPos);
           marker.setLatLng(e.latlng);
-          onLocationSelect?.({
+          onLocationSelectRef.current?.({
             ...newPos,
-            address: verifiedAddress,
+            address: verifiedAddressRef.current,
           });
         });
 
@@ -277,7 +285,8 @@ export const AddressMapPreview: React.FC<AddressMapPreviewProps> = ({
         });
 
         const layer = L.tileLayer(TILE_LAYERS[mapMode], {
-          maxZoom: 20,
+          maxZoom: 19,
+          attribution: OSM_ATTRIBUTION,
         }).addTo(modalMap);
 
         modalTileLayerRef.current = layer;
@@ -287,16 +296,21 @@ export const AddressMapPreview: React.FC<AddressMapPreviewProps> = ({
 
         marker.on('dragend', (e: any) => {
           const pos = e.target.getLatLng();
-          setCoords({ lat: pos.lat, lng: pos.lng });
+          const newPos = { lat: pos.lat, lng: pos.lng };
+          setCoords(newPos);
+          onLocationSelectRef.current?.({
+            ...newPos,
+            address: verifiedAddressRef.current,
+          });
         });
 
         modalMap.on('click', (e: any) => {
           const newPos = { lat: e.latlng.lat, lng: e.latlng.lng };
           setCoords(newPos);
           marker.setLatLng(e.latlng);
-          onLocationSelect?.({
+          onLocationSelectRef.current?.({
             ...newPos,
-            address: verifiedAddress,
+            address: verifiedAddressRef.current,
           });
         });
 
@@ -322,7 +336,8 @@ export const AddressMapPreview: React.FC<AddressMapPreviewProps> = ({
     if (leafletMapRef.current && tileLayerRef.current) {
       leafletMapRef.current.removeLayer(tileLayerRef.current);
       const newLayer = L.tileLayer(TILE_LAYERS[mapMode], {
-        maxZoom: 20,
+        maxZoom: 19,
+        attribution: OSM_ATTRIBUTION,
       }).addTo(leafletMapRef.current);
       tileLayerRef.current = newLayer;
     }
@@ -330,7 +345,8 @@ export const AddressMapPreview: React.FC<AddressMapPreviewProps> = ({
     if (modalLeafletMapRef.current && modalTileLayerRef.current) {
       modalLeafletMapRef.current.removeLayer(modalTileLayerRef.current);
       const newModalLayer = L.tileLayer(TILE_LAYERS[mapMode], {
-        maxZoom: 20,
+        maxZoom: 19,
+        attribution: OSM_ATTRIBUTION,
       }).addTo(modalLeafletMapRef.current);
       modalTileLayerRef.current = newModalLayer;
     }
@@ -348,9 +364,9 @@ export const AddressMapPreview: React.FC<AddressMapPreviewProps> = ({
           };
           setCoords(gpsCoords);
           setLoading(false);
-          onLocationSelect?.({
+          onLocationSelectRef.current?.({
             ...gpsCoords,
-            address: verifiedAddress,
+            address: verifiedAddressRef.current,
           });
         },
         () => setLoading(false),
@@ -416,6 +432,7 @@ export const AddressMapPreview: React.FC<AddressMapPreviewProps> = ({
             style={styles.expandBtn}
             onPress={() => setFullMapVisible(true)}
             activeOpacity={0.7}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
             <Maximize2 size={13} color={COLORS.onSurfaceVariant} />
           </TouchableOpacity>
@@ -504,6 +521,7 @@ export const AddressMapPreview: React.FC<AddressMapPreviewProps> = ({
                 <TouchableOpacity 
                   style={styles.closeBtn}
                   onPress={() => setFullMapVisible(false)}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                 >
                   <X size={18} color={COLORS.onSurface} />
                 </TouchableOpacity>
@@ -560,16 +578,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 4,
+    marginBottom: SPACING.xs,
     paddingHorizontal: 2,
   },
   headerTitleWrap: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: 6,
   },
   headerTitle: {
-    fontSize: 11.5,
+    fontSize: 13,
     fontWeight: '700',
     color: COLORS.primary,
   },
@@ -582,16 +600,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: COLORS.surfaceContainer,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
     borderRadius: RADIUS.sm,
-    gap: 3,
+    gap: 4,
+    minHeight: 32,
   },
   gpsBtnActive: {
     backgroundColor: COLORS.primary,
   },
   gpsBtnText: {
-    fontSize: 10.5,
+    fontSize: 12,
     fontWeight: '600',
     color: COLORS.primary,
   },
@@ -599,13 +618,16 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
   },
   expandBtn: {
-    padding: 3,
+    width: 34,
+    height: 34,
+    alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: COLORS.surfaceContainer,
     borderRadius: RADIUS.sm,
   },
   mapCard: {
     width: '100%',
-    height: 140,
+    height: 150,
     backgroundColor: '#1E293B',
     borderRadius: RADIUS.md,
     overflow: 'hidden',
@@ -615,7 +637,7 @@ const styles = StyleSheet.create({
     ...SHADOWS.soft,
   },
   mapCardCompact: {
-    height: 110,
+    height: 120,
   },
   zoomControls: {
     position: 'absolute',
@@ -630,7 +652,8 @@ const styles = StyleSheet.create({
     ...SHADOWS.soft,
   },
   zoomBtn: {
-    padding: 5,
+    width: 36,
+    height: 36,
     alignItems: 'center',
     justifyContent: 'center',
     borderBottomWidth: 0.5,
@@ -644,18 +667,18 @@ const styles = StyleSheet.create({
     zIndex: 1000,
     backgroundColor: 'rgba(255, 255, 255, 0.95)',
     paddingHorizontal: 8,
-    paddingVertical: 3,
+    paddingVertical: 4,
     borderRadius: RADIUS.sm,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 5,
+    gap: 6,
     borderWidth: 0.5,
     borderColor: 'rgba(58, 103, 88, 0.15)',
     ...SHADOWS.ambient,
   },
   addressPillText: {
     flex: 1,
-    fontSize: 10.5,
+    fontSize: 12,
     color: COLORS.onSurface,
     fontWeight: '600',
   },
@@ -666,7 +689,7 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   mobileFallbackText: {
-    fontSize: 11,
+    fontSize: 12,
     color: COLORS.outline,
   },
   loadingOverlay: {
@@ -713,7 +736,10 @@ const styles = StyleSheet.create({
     color: COLORS.primary,
   },
   closeBtn: {
-    padding: 6,
+    width: 36,
+    height: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
     borderRadius: RADIUS.full,
     backgroundColor: COLORS.surfaceContainer,
   },
@@ -724,7 +750,7 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.xs,
   },
   modalAddressLabel: {
-    fontSize: 11,
+    fontSize: 12,
     color: COLORS.outline,
   },
   modalAddressValue: {
@@ -733,7 +759,7 @@ const styles = StyleSheet.create({
     color: COLORS.onSurface,
   },
   modalCoords: {
-    fontSize: 10.5,
+    fontSize: 12,
     color: COLORS.primary,
     fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
     marginTop: 2,
@@ -747,7 +773,7 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.xs,
   },
   confirmBtn: {
-    height: 42,
+    height: 48,
     backgroundColor: COLORS.primary,
     borderRadius: RADIUS.full,
     alignItems: 'center',

@@ -25,9 +25,34 @@ if (typeof document !== 'undefined') {
     document.head.appendChild(meta);
   }
 
+  // Preconnect and inject Google Font Plus Jakarta Sans with full Vietnamese diacritics support
+  if (!document.querySelector('link[href*="fonts.googleapis.com"]')) {
+    const preconnect1 = document.createElement('link');
+    preconnect1.rel = 'preconnect';
+    preconnect1.href = 'https://fonts.googleapis.com';
+    document.head.appendChild(preconnect1);
+
+    const preconnect2 = document.createElement('link');
+    preconnect2.rel = 'preconnect';
+    preconnect2.href = 'https://fonts.gstatic.com';
+    preconnect2.crossOrigin = 'anonymous';
+    document.head.appendChild(preconnect2);
+
+    const fontLink = document.createElement('link');
+    fontLink.rel = 'stylesheet';
+    fontLink.href = 'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&display=swap';
+    document.head.appendChild(fontLink);
+  }
+
   const style = document.createElement('style');
   style.id = 'kindr-web-focus-reset';
   style.textContent = `
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&display=swap');
+
+    html, body, #root, div, span, p, a, input, textarea, select, button {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
+    }
+
     input, textarea, select, [contenteditable] {
       outline: none !important;
       outline-width: 0 !important;

@@ -129,8 +129,8 @@ export const AdminProfileView = () => {
       count: dashboardStats.pendingProducts,
       countLabel: 'chờ duyệt',
       isWarning: dashboardStats.pendingProducts > 0,
-      iconColor: '#D97706',
-      iconBg: '#FEF3C7',
+      iconColor: COLORS.warning,
+      iconBg: COLORS.tertiaryContainer,
     },
     {
       id: 'disputes',
@@ -141,8 +141,8 @@ export const AdminProfileView = () => {
       count: dashboardStats.pendingDisputes,
       countLabel: 'vụ việc',
       isWarning: dashboardStats.pendingDisputes > 0,
-      iconColor: '#EF4444',
-      iconBg: '#FEE2E2',
+      iconColor: COLORS.error,
+      iconBg: COLORS.errorContainer,
     },
     {
       id: 'users',
@@ -153,8 +153,8 @@ export const AdminProfileView = () => {
       count: dashboardStats.totalUsers,
       countLabel: 'thành viên',
       isWarning: false,
-      iconColor: '#3B82F6',
-      iconBg: '#EFF6FF',
+      iconColor: COLORS.secondary,
+      iconBg: COLORS.surfaceSubtle,
     },
     {
       id: 'withdraws',
@@ -165,8 +165,8 @@ export const AdminProfileView = () => {
       count: dashboardStats.pendingWithdraws,
       countLabel: 'yêu cầu',
       isWarning: dashboardStats.pendingWithdraws > 0,
-      iconColor: '#06B6D4',
-      iconBg: '#ECFEFF',
+      iconColor: COLORS.secondaryDark,
+      iconBg: COLORS.secondaryLight,
     },
     {
       id: 'reports',
@@ -177,8 +177,8 @@ export const AdminProfileView = () => {
       count: dashboardStats.openReports,
       countLabel: 'báo cáo',
       isWarning: dashboardStats.openReports > 0,
-      iconColor: '#EC4899',
-      iconBg: '#FDF2F8',
+      iconColor: COLORS.primary,
+      iconBg: COLORS.primaryLight,
     },
     {
       id: 'transactions',
@@ -189,8 +189,8 @@ export const AdminProfileView = () => {
       count: dashboardStats.totalTransactions,
       countLabel: 'giao dịch',
       isWarning: false,
-      iconColor: '#10B981',
-      iconBg: '#ECFDF5',
+      iconColor: COLORS.success,
+      iconBg: COLORS.secondaryLight,
     },
     {
       id: 'categories',
@@ -201,8 +201,8 @@ export const AdminProfileView = () => {
       count: null,
       countLabel: '',
       isWarning: false,
-      iconColor: '#8B5CF6',
-      iconBg: '#F5F3FF',
+      iconColor: COLORS.primaryDark,
+      iconBg: COLORS.primaryLight,
     },
   ];
 
@@ -213,7 +213,7 @@ export const AdminProfileView = () => {
         <View style={styles.headerInner}>
           <View style={styles.headerLeft}>
             <View style={styles.headerIconCircle}>
-              <Shield size={20} color="#FFFFFF" strokeWidth={2.4} />
+              <Shield size={20} color={COLORS.surface} strokeWidth={2.4} />
             </View>
             <View>
               <Text style={styles.headerTitle}>Bảng Quản Trị Hệ Thống</Text>
@@ -261,7 +261,7 @@ export const AdminProfileView = () => {
                   <Image source={KINDR_LOGO} style={styles.adminAvatar} resizeMode="contain" />
                 )}
                 <View style={styles.verifiedBadge}>
-                  <ShieldCheck size={11} color="#FFFFFF" strokeWidth={3} />
+                  <ShieldCheck size={11} color={COLORS.surface} strokeWidth={3} />
                 </View>
               </View>
 
@@ -274,7 +274,7 @@ export const AdminProfileView = () => {
 
                 <View style={styles.badgeRow}>
                   <View style={styles.roleBadge}>
-                    <Shield size={11} color="#6D28D9" />
+                    <Shield size={11} color={COLORS.adminBadgeText} />
                     <Text style={styles.roleBadgeText}>QUẢN TRỊ VIÊN CẤP CAO</Text>
                   </View>
                   <View style={styles.onlinePill}>
@@ -327,8 +327,8 @@ export const AdminProfileView = () => {
               scaleTo={0.97}
               onPress={() => navigation.navigate('ManagePosts')}
             >
-              <View style={[styles.kpiIconBox, { backgroundColor: '#FEF3C7' }]}>
-                <FileText size={20} color="#D97706" strokeWidth={2.2} />
+              <View style={[styles.kpiIconBox, { backgroundColor: COLORS.tertiaryContainer }]}>
+                <FileText size={20} color={COLORS.warning} strokeWidth={2.2} />
               </View>
               <View style={styles.kpiInfo}>
                 <Text style={styles.kpiLabel}>Tin chờ duyệt</Text>
@@ -363,8 +363,8 @@ export const AdminProfileView = () => {
               scaleTo={0.97}
               onPress={() => navigation.navigate('ManageWithdraws')}
             >
-              <View style={[styles.kpiIconBox, { backgroundColor: '#ECFEFF' }]}>
-                <Wallet size={20} color="#0891B2" strokeWidth={2.2} />
+              <View style={[styles.kpiIconBox, { backgroundColor: COLORS.secondaryLight }]}>
+                <Wallet size={20} color={COLORS.secondary} strokeWidth={2.2} />
               </View>
               <View style={styles.kpiInfo}>
                 <Text style={styles.kpiLabel}>Lệnh rút Xu</Text>
@@ -402,8 +402,8 @@ export const AdminProfileView = () => {
               scaleTo={0.97}
               onPress={() => navigation.navigate('ManageDisputes')}
             >
-              <View style={[styles.kpiIconBox, { backgroundColor: '#FEE2E2' }]}>
-                <ShieldAlert size={20} color="#DC2626" strokeWidth={2.2} />
+              <View style={[styles.kpiIconBox, { backgroundColor: COLORS.errorContainer }]}>
+                <ShieldAlert size={20} color={COLORS.error} strokeWidth={2.2} />
               </View>
               <View style={styles.kpiInfo}>
                 <Text style={styles.kpiLabel}>Tranh chấp</Text>
@@ -435,16 +435,16 @@ export const AdminProfileView = () => {
               scaleTo={0.97}
               onPress={() => navigation.navigate('ManageUsers')}
             >
-              <View style={[styles.kpiIconBox, { backgroundColor: '#ECFDF5' }]}>
-                <Users size={20} color="#059669" strokeWidth={2.2} />
+              <View style={[styles.kpiIconBox, { backgroundColor: COLORS.primaryLight }]}>
+                <Users size={20} color={COLORS.primary} strokeWidth={2.2} />
               </View>
               <View style={styles.kpiInfo}>
                 <Text style={styles.kpiLabel}>Thành viên</Text>
-                <Text style={[styles.kpiValue, { color: '#059669' }]}>
+                <Text style={[styles.kpiValue, { color: COLORS.primary }]}>
                   {dashboardStats.totalUsers}
                 </Text>
                 <View style={[styles.kpiStatusPill, styles.kpiStatusPillMuted]}>
-                  <Text style={[styles.kpiStatusText, { color: '#059669' }]}>
+                  <Text style={[styles.kpiStatusText, { color: COLORS.primary }]}>
                     Cộng đồng mẹ bỉm
                   </Text>
                 </View>
@@ -541,7 +541,7 @@ export const AdminProfileView = () => {
               activeOpacity={0.7}
             >
               <View style={styles.systemLeft}>
-                <View style={[styles.systemIconBox, { backgroundColor: '#F3F4F6' }]}>
+                <View style={[styles.systemIconBox, { backgroundColor: COLORS.surfaceContainer }]}>
                   <Settings size={18} color={COLORS.text} />
                 </View>
                 <View>
@@ -560,17 +560,17 @@ export const AdminProfileView = () => {
               activeOpacity={0.7}
             >
               <View style={styles.systemLeft}>
-                <View style={[styles.systemIconBox, { backgroundColor: '#FEE2E2' }]}>
-                  <LogOut size={18} color="#EF4444" />
+                <View style={[styles.systemIconBox, { backgroundColor: COLORS.errorContainer }]}>
+                  <LogOut size={18} color={COLORS.error} />
                 </View>
                 <View>
-                  <Text style={[styles.systemTitle, { color: '#EF4444', fontWeight: '700' }]}>
+                  <Text style={[styles.systemTitle, { color: COLORS.error, fontWeight: '700' }]}>
                     Đăng xuất tài khoản Quản trị
                   </Text>
                   <Text style={styles.systemSubtitle}>Kết thúc phiên làm việc Ban Quản Trị</Text>
                 </View>
               </View>
-              <ChevronRight size={18} color="#EF4444" />
+              <ChevronRight size={18} color={COLORS.error} />
             </TouchableOpacity>
           </View>
 
@@ -584,7 +584,7 @@ export const AdminProfileView = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8F9FA',
+    backgroundColor: COLORS.background,
   },
   topHeader: {
     backgroundColor: COLORS.surface,
@@ -612,7 +612,7 @@ const styles = StyleSheet.create({
     width: 38,
     height: 38,
     borderRadius: 19,
-    backgroundColor: '#7C3AED',
+    backgroundColor: COLORS.adminBadgeText,
     alignItems: 'center',
     justifyContent: 'center',
     ...SHADOWS.soft,
@@ -625,7 +625,7 @@ const styles = StyleSheet.create({
   },
   headerSubtitle: {
     ...TYPOGRAPHY.caption,
-    fontSize: 11,
+    fontSize: 12,
     color: COLORS.textMuted,
   },
   headerActions: {
@@ -662,7 +662,7 @@ const styles = StyleSheet.create({
     borderRadius: RADIUS.lg,
     padding: SPACING.md,
     borderWidth: 1,
-    borderColor: 'rgba(124, 58, 237, 0.16)',
+    borderColor: COLORS.adminBorder,
     ...SHADOWS.card,
     marginBottom: SPACING.md,
   },
@@ -678,9 +678,9 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: COLORS.surfaceContainer,
     borderWidth: 2.5,
-    borderColor: '#7C3AED',
+    borderColor: COLORS.adminBadgeText,
   },
   verifiedBadge: {
     position: 'absolute',
@@ -689,11 +689,11 @@ const styles = StyleSheet.create({
     width: 20,
     height: 20,
     borderRadius: 10,
-    backgroundColor: '#7C3AED',
+    backgroundColor: COLORS.adminBadgeText,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
-    borderColor: '#FFFFFF',
+    borderColor: COLORS.surface,
   },
   adminMeta: {
     flex: 1,
@@ -720,22 +720,22 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    backgroundColor: '#EDE9FE',
+    backgroundColor: COLORS.adminBadge,
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: RADIUS.sm,
   },
   roleBadgeText: {
-    fontSize: 10,
+    fontSize: 12,
     fontWeight: '800',
-    color: '#6D28D9',
+    color: COLORS.adminBadgeText,
     letterSpacing: 0.4,
   },
   onlinePill: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    backgroundColor: '#ECFDF5',
+    backgroundColor: COLORS.primaryLight,
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: RADIUS.sm,
@@ -744,12 +744,12 @@ const styles = StyleSheet.create({
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: '#10B981',
+    backgroundColor: COLORS.success,
   },
   onlineText: {
-    fontSize: 10,
+    fontSize: 12,
     fontWeight: '700',
-    color: '#059669',
+    color: COLORS.success,
   },
   contactDetails: {
     flexDirection: 'row',
@@ -763,7 +763,7 @@ const styles = StyleSheet.create({
   },
   contactText: {
     ...TYPOGRAPHY.caption,
-    fontSize: 11,
+    fontSize: 12,
     color: COLORS.textMuted,
   },
   adminCardFooter: {
@@ -774,7 +774,7 @@ const styles = StyleSheet.create({
   },
   footerScopeText: {
     ...TYPOGRAPHY.caption,
-    fontSize: 11,
+    fontSize: 12,
     color: COLORS.textMuted,
     fontWeight: '500',
   },
@@ -795,7 +795,7 @@ const styles = StyleSheet.create({
   },
   sectionHeadingSub: {
     ...TYPOGRAPHY.caption,
-    fontSize: 11,
+    fontSize: 12,
     color: COLORS.textMuted,
   },
   // 2x2 Balanced KPI Rows
@@ -819,16 +819,16 @@ const styles = StyleSheet.create({
     gap: SPACING.sm,
   },
   kpiCardWarning: {
-    backgroundColor: '#FFFDF5',
-    borderColor: 'rgba(217, 119, 6, 0.3)',
+    backgroundColor: COLORS.tertiaryContainer,
+    borderColor: COLORS.warning,
   },
   kpiCardCyan: {
-    backgroundColor: '#F8FEFF',
-    borderColor: 'rgba(8, 145, 178, 0.3)',
+    backgroundColor: COLORS.secondaryLight,
+    borderColor: COLORS.secondary,
   },
   kpiCardDanger: {
-    backgroundColor: '#FFF5F5',
-    borderColor: 'rgba(220, 38, 38, 0.3)',
+    backgroundColor: COLORS.errorContainer,
+    borderColor: COLORS.error,
   },
   kpiIconBox: {
     width: 44,
@@ -841,7 +841,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   kpiLabel: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '600',
     color: COLORS.textMuted,
     marginBottom: 2,
@@ -853,13 +853,13 @@ const styles = StyleSheet.create({
     lineHeight: 26,
   },
   kpiValueWarning: {
-    color: '#D97706',
+    color: COLORS.warning,
   },
   kpiValueCyan: {
-    color: '#0891B2',
+    color: COLORS.secondary,
   },
   kpiValueDanger: {
-    color: '#DC2626',
+    color: COLORS.error,
   },
   kpiStatusPill: {
     alignSelf: 'flex-start',
@@ -869,29 +869,29 @@ const styles = StyleSheet.create({
     marginTop: 3,
   },
   kpiStatusPillWarning: {
-    backgroundColor: '#FEF3C7',
+    backgroundColor: COLORS.tertiaryContainer,
   },
   kpiStatusPillCyan: {
-    backgroundColor: '#ECFEFF',
+    backgroundColor: COLORS.secondaryLight,
   },
   kpiStatusPillDanger: {
-    backgroundColor: '#FEE2E2',
+    backgroundColor: COLORS.errorContainer,
   },
   kpiStatusPillMuted: {
-    backgroundColor: '#F3F4F6',
+    backgroundColor: COLORS.surfaceContainer,
   },
   kpiStatusText: {
-    fontSize: 10,
+    fontSize: 12,
     fontWeight: '700',
   },
   kpiStatusTextWarning: {
-    color: '#B45309',
+    color: COLORS.warning,
   },
   kpiStatusTextCyan: {
-    color: '#0E7490',
+    color: COLORS.secondary,
   },
   kpiStatusTextDanger: {
-    color: '#B91C1C',
+    color: COLORS.error,
   },
   kpiStatusTextMuted: {
     color: COLORS.textMuted,
@@ -900,11 +900,11 @@ const styles = StyleSheet.create({
   escrowBanner: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#E6F4F1',
+    backgroundColor: COLORS.primaryLight,
     borderRadius: RADIUS.lg,
     padding: SPACING.md,
     borderWidth: 1,
-    borderColor: 'rgba(120, 194, 173, 0.45)',
+    borderColor: COLORS.primaryLight,
     gap: SPACING.sm,
     marginVertical: SPACING.sm,
     ...SHADOWS.soft,
@@ -913,7 +913,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: COLORS.surface,
     alignItems: 'center',
     justifyContent: 'center',
     ...SHADOWS.card,
@@ -928,7 +928,7 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
   },
   escrowTitle: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '800',
     color: COLORS.primaryDark,
     letterSpacing: 0.4,
@@ -937,13 +937,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 3,
-    backgroundColor: '#C2E5DC',
+    backgroundColor: COLORS.secondaryLight,
     paddingHorizontal: 6,
     paddingVertical: 1.5,
     borderRadius: RADIUS.sm,
   },
   escrowSafeTagText: {
-    fontSize: 9,
+    fontSize: 12,
     fontWeight: '700',
     color: COLORS.primaryDark,
   },
@@ -956,13 +956,13 @@ const styles = StyleSheet.create({
   escrowVnd: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#4B5563',
+    color: COLORS.textMuted,
   },
   escrowNote: {
     ...TYPOGRAPHY.caption,
-    fontSize: 11,
-    color: '#3A6758',
-    lineHeight: 15,
+    fontSize: 12,
+    color: COLORS.primaryDark,
+    lineHeight: 16,
   },
   // Suites Container
   suitesContainer: {
@@ -1007,21 +1007,21 @@ const styles = StyleSheet.create({
     color: COLORS.text,
   },
   urgentBadge: {
-    backgroundColor: '#FEF3C7',
+    backgroundColor: COLORS.tertiaryContainer,
     paddingHorizontal: 7,
     paddingVertical: 2,
     borderRadius: RADIUS.sm,
     borderWidth: 1,
-    borderColor: '#F59E0B',
+    borderColor: COLORS.warning,
   },
   urgentBadgeText: {
-    fontSize: 10,
+    fontSize: 12,
     fontWeight: '800',
-    color: '#B45309',
+    color: COLORS.warning,
   },
   suiteSubtitle: {
     ...TYPOGRAPHY.caption,
-    fontSize: 11,
+    fontSize: 12,
     color: COLORS.textMuted,
     marginTop: 2,
   },
@@ -1031,7 +1031,7 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   normalCountBadge: {
-    backgroundColor: '#F3F4F6',
+    backgroundColor: COLORS.surfaceContainer,
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: RADIUS.sm,
@@ -1078,7 +1078,7 @@ const styles = StyleSheet.create({
   },
   systemSubtitle: {
     ...TYPOGRAPHY.caption,
-    fontSize: 11,
+    fontSize: 12,
     color: COLORS.textMuted,
     marginTop: 1,
   },

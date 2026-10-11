@@ -30,6 +30,7 @@ import {
   Eye,
   EyeOff,
   UserCheck,
+  Trash2,
 } from 'lucide-react-native';
 import ScreenContainer from '../../../components/layout/ScreenContainer';
 import Header from '../../../components/layout/Header';
@@ -38,6 +39,7 @@ import Button from '../../../components/common/Button';
 import { ScalePressable } from '../../../components/common/ScalePressable';
 import { COLORS, TYPOGRAPHY, SPACING, RADIUS, SHADOWS } from '../../../theme';
 import { useAuth } from '../../../app/providers/AuthProvider';
+import { api } from '../../../services/api';
 
 type NavigationProp = NativeStackNavigationProp<AppStackParamList>;
 
@@ -103,6 +105,53 @@ export const SettingsScreen = () => {
     ]);
   };
 
+  const handleDeleteAccount = () => {
+    Alert.alert(
+      'Xóa vĩnh viễn tài khoản?',
+      'Hành động này sẽ hủy kích hoạt tài khoản, ẩn tất cả bài đăng và gỡ bỏ dữ liệu cá nhân của mẹ khỏi Kindr. Bạn không thể hoàn tác.',
+      [
+        { text: 'Hủy bỏ', style: 'cancel' },
+        {
+          text: 'Xác nhận xóa',
+          style: 'destructive',
+          onPress: () => {
+            Alert.alert(
+              'Cảnh báo lần cuối',
+              'Mẹ có chắc chắn 100% muốn xóa tài khoản này? Mọi quyền lợi và số dư còn lại (nếu có) sẽ không thể phục hồi.',
+              [
+                { text: 'Dừng lại', style: 'cancel' },
+                {
+                  text: 'Đồng ý xóa vĩnh viễn',
+                  style: 'destructive',
+                  onPress: async () => {
+                    try {
+                      const res = await api.delete('/auth/me');
+                      Alert.alert(
+                        'Đã xóa tài khoản',
+                        res.data?.message || 'Tài khoản của mẹ đã được xóa thành công. Tạm biệt mẹ và bé!',
+                        [
+                          {
+                            text: 'Đóng',
+                            onPress: async () => {
+                              await logout();
+                            },
+                          },
+                        ]
+                      );
+                    } catch (err: any) {
+                      const errMsg = err?.response?.data?.error || err?.message || 'Không thể xóa tài khoản lúc này.';
+                      Alert.alert('Không thể xóa tài khoản', errMsg);
+                    }
+                  },
+                },
+              ]
+            );
+          },
+        },
+      ]
+    );
+  };
+
   const showCharterModal = () => {
     setActivePolicy({
       title: 'Quy Chế Mẹ Bỉm Văn Minh',
@@ -151,8 +200,8 @@ export const SettingsScreen = () => {
 
             <View style={[styles.adminCard, styles.adminCardActive]}>
               <View style={styles.adminCardHeader}>
-                <View style={[styles.adminIconBox, { backgroundColor: '#FEF3C7' }]}>
-                  <ShieldAlert size={22} color="#D97706" />
+                <View style={[styles.adminIconBox, { backgroundColor: COLORS.tertiaryContainer }]}>
+                  <ShieldAlert size={22} color={COLORS.warning} />
                 </View>
                 <View style={{ flex: 1, marginLeft: 12 }}>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
@@ -173,7 +222,7 @@ export const SettingsScreen = () => {
                   scaleTo={0.96}
                   onPress={() => navigation.navigate('AdminDashboard')}
                 >
-                  <ShieldCheck size={16} color="#FFFFFF" style={{ marginRight: 6 }} />
+                  <ShieldCheck size={16} color={COLORS.surface} style={{ marginRight: 6 }} />
                   <Text style={styles.adminDashboardBtnText}>Mở Bảng Quản Trị Admin</Text>
                 </ScalePressable>
               </View>
@@ -188,8 +237,8 @@ export const SettingsScreen = () => {
 
         <View style={styles.menuCard}>
           <ScalePressable style={styles.menuRow} scaleTo={0.98} onPress={() => setShowPasswordModal(true)}>
-            <View style={[styles.menuIconBox, { backgroundColor: '#EFF6FF' }]}>
-              <Lock size={18} color="#2563EB" />
+            <View style={[styles.menuIconBox, { backgroundColor: COLORS.secondaryLight }]}>
+              <Lock size={18} color={COLORS.secondary} />
             </View>
             <View style={styles.menuTextContainer}>
               <Text style={styles.menuLabel}>Đổi mật khẩu tài khoản</Text>
@@ -199,9 +248,9 @@ export const SettingsScreen = () => {
           </ScalePressable>
 
           {currentUser?.email && (
-            <View style={[styles.menuRow, { borderTopWidth: 1, borderTopColor: '#F0F0F0' }]}>
-              <View style={[styles.menuIconBox, { backgroundColor: '#ECFDF5' }]}>
-                <CheckCircle2 size={18} color="#10B981" />
+            <View style={[styles.menuRow, { borderTopWidth: 1, borderTopColor: COLORS.surfaceContainer }]}>
+              <View style={[styles.menuIconBox, { backgroundColor: COLORS.primaryLight }]}>
+                <CheckCircle2 size={18} color={COLORS.success} />
               </View>
               <View style={styles.menuTextContainer}>
                 <Text style={styles.menuLabel}>Liên kết Google an toàn</Text>
@@ -221,8 +270,8 @@ export const SettingsScreen = () => {
 
         <View style={styles.menuCard}>
           <View style={styles.switchRow}>
-            <View style={[styles.menuIconBox, { backgroundColor: '#FEF3C7' }]}>
-              <Bell size={18} color="#D97706" />
+            <View style={[styles.menuIconBox, { backgroundColor: COLORS.tertiaryContainer }]}>
+              <Bell size={18} color={COLORS.warning} />
             </View>
             <View style={styles.menuTextContainer}>
               <Text style={styles.menuLabel}>Biến động ví Xu & Giao dịch</Text>
@@ -231,14 +280,14 @@ export const SettingsScreen = () => {
             <Switch
               value={notifyWallet}
               onValueChange={setNotifyWallet}
-              trackColor={{ false: '#E2E8F0', true: COLORS.primary }}
-              thumbColor="#FFFFFF"
+              trackColor={{ false: COLORS.outline, true: COLORS.primary }}
+              thumbColor={COLORS.surface}
             />
           </View>
 
-          <View style={[styles.switchRow, { borderTopWidth: 1, borderTopColor: '#F0F0F0' }]}>
-            <View style={[styles.menuIconBox, { backgroundColor: '#E0F7F5' }]}>
-              <ShieldCheck size={18} color="#0D9488" />
+          <View style={[styles.switchRow, { borderTopWidth: 1, borderTopColor: COLORS.surfaceContainer }]}>
+            <View style={[styles.menuIconBox, { backgroundColor: COLORS.secondaryLight }]}>
+              <ShieldCheck size={18} color={COLORS.secondary} />
             </View>
             <View style={styles.menuTextContainer}>
               <Text style={styles.menuLabel}>Bảo chứng 6 giờ Safeful Time</Text>
@@ -247,14 +296,14 @@ export const SettingsScreen = () => {
             <Switch
               value={notifyEscrow}
               onValueChange={setNotifyEscrow}
-              trackColor={{ false: '#E2E8F0', true: COLORS.secondary }}
-              thumbColor="#FFFFFF"
+              trackColor={{ false: COLORS.outline, true: COLORS.secondary }}
+              thumbColor={COLORS.surface}
             />
           </View>
 
-          <View style={[styles.switchRow, { borderTopWidth: 1, borderTopColor: '#F0F0F0' }]}>
-            <View style={[styles.menuIconBox, { backgroundColor: '#F3E8FF' }]}>
-              <Smartphone size={18} color="#9333EA" />
+          <View style={[styles.switchRow, { borderTopWidth: 1, borderTopColor: COLORS.surfaceContainer }]}>
+            <View style={[styles.menuIconBox, { backgroundColor: COLORS.adminBadge }]}>
+              <Smartphone size={18} color={COLORS.adminBadgeText} />
             </View>
             <View style={styles.menuTextContainer}>
               <Text style={styles.menuLabel}>Rung phản hồi xúc giác</Text>
@@ -263,8 +312,8 @@ export const SettingsScreen = () => {
             <Switch
               value={hapticsEnabled}
               onValueChange={setHapticsEnabled}
-              trackColor={{ false: '#E2E8F0', true: COLORS.primary }}
-              thumbColor="#FFFFFF"
+              trackColor={{ false: COLORS.outline, true: COLORS.primary }}
+              thumbColor={COLORS.surface}
             />
           </View>
         </View>
@@ -276,7 +325,7 @@ export const SettingsScreen = () => {
 
         <View style={styles.menuCard}>
           <ScalePressable style={styles.menuRow} scaleTo={0.98} onPress={showCharterModal}>
-            <View style={[styles.menuIconBox, { backgroundColor: '#FFE8E8' }]}>
+            <View style={[styles.menuIconBox, { backgroundColor: COLORS.errorContainer }]}>
               <Sparkles size={18} color={COLORS.primary} />
             </View>
             <View style={styles.menuTextContainer}>
@@ -287,12 +336,12 @@ export const SettingsScreen = () => {
           </ScalePressable>
 
           <ScalePressable
-            style={[styles.menuRow, { borderTopWidth: 1, borderTopColor: '#F0F0F0' }]}
+            style={[styles.menuRow, { borderTopWidth: 1, borderTopColor: COLORS.surfaceContainer }]}
             scaleTo={0.98}
             onPress={showEscrowModal}
           >
-            <View style={[styles.menuIconBox, { backgroundColor: '#E0F2FE' }]}>
-              <FileText size={18} color="#0284C7" />
+            <View style={[styles.menuIconBox, { backgroundColor: COLORS.secondaryLight }]}>
+              <FileText size={18} color={COLORS.secondary} />
             </View>
             <View style={styles.menuTextContainer}>
               <Text style={styles.menuLabel}>Quy trình bảo chứng ký quỹ kép</Text>
@@ -302,11 +351,11 @@ export const SettingsScreen = () => {
           </ScalePressable>
 
           <ScalePressable
-            style={[styles.menuRow, { borderTopWidth: 1, borderTopColor: '#F0F0F0' }]}
+            style={[styles.menuRow, { borderTopWidth: 1, borderTopColor: COLORS.surfaceContainer }]}
             scaleTo={0.98}
             onPress={showPrivacyModal}
           >
-            <View style={[styles.menuIconBox, { backgroundColor: '#F3F4F6' }]}>
+            <View style={[styles.menuIconBox, { backgroundColor: COLORS.surfaceContainer }]}>
               <HelpCircle size={18} color={COLORS.text} />
             </View>
             <View style={styles.menuTextContainer}>
@@ -329,6 +378,16 @@ export const SettingsScreen = () => {
           <LogOut size={18} color={COLORS.error} />
           <Text style={styles.logoutText}>Đăng xuất tài khoản</Text>
         </ScalePressable>
+
+        {/* Delete Account Button */}
+        <TouchableOpacity
+          style={styles.deleteAccountBtn}
+          onPress={handleDeleteAccount}
+          activeOpacity={0.7}
+        >
+          <Trash2 size={15} color={COLORS.outline} />
+          <Text style={styles.deleteAccountText}>Xóa tài khoản vĩnh viễn</Text>
+        </TouchableOpacity>
       </ScrollView>
 
       {/* Password Change Modal */}
@@ -440,12 +499,12 @@ const styles = StyleSheet.create({
     ...SHADOWS.card,
   },
   adminCardActive: {
-    backgroundColor: '#FFFDF5',
-    borderColor: '#FCD34D',
+    backgroundColor: COLORS.tertiaryContainer,
+    borderColor: COLORS.warning,
   },
   adminCardInactive: {
-    backgroundColor: '#FFFFFF',
-    borderColor: 'rgba(0,0,0,0.08)',
+    backgroundColor: COLORS.surface,
+    borderColor: COLORS.outline,
   },
   adminCardHeader: {
     flexDirection: 'row',
@@ -464,13 +523,14 @@ const styles = StyleSheet.create({
     color: COLORS.text,
   },
   roleBadge: {
+    backgroundColor: COLORS.adminBadgeText,
     paddingHorizontal: 7,
     paddingVertical: 2,
     borderRadius: RADIUS.full,
   },
   roleBadgeText: {
-    color: '#FFFFFF',
-    fontSize: 10,
+    color: COLORS.surface,
+    fontSize: 12,
     fontWeight: '800',
   },
   adminStatusSub: {
@@ -487,13 +547,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#D97706',
+    backgroundColor: COLORS.warning,
     borderRadius: RADIUS.default,
     paddingVertical: 12,
     ...SHADOWS.soft,
   },
   adminDashboardBtnText: {
-    color: '#FFFFFF',
+    color: COLORS.surface,
     fontSize: 14,
     fontWeight: '800',
   },
@@ -509,16 +569,16 @@ const styles = StyleSheet.create({
     ...SHADOWS.btn,
   },
   switchRoleBtnUser: {
-    backgroundColor: '#F1F5F9',
+    backgroundColor: COLORS.surfaceContainer,
     borderWidth: 1,
-    borderColor: '#CBD5E1',
+    borderColor: COLORS.outline,
   },
   switchRoleBtnText: {
     fontSize: 13,
     fontWeight: '700',
   },
   menuCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: COLORS.surface,
     borderRadius: RADIUS.lg,
     borderWidth: 1,
     borderColor: 'rgba(0,0,0,0.06)',
@@ -553,21 +613,21 @@ const styles = StyleSheet.create({
     color: COLORS.text,
   },
   menuSubLabel: {
-    fontSize: 11,
+    fontSize: 12,
     color: COLORS.textMuted,
     marginTop: 2,
     lineHeight: 16,
   },
   linkedBadge: {
-    backgroundColor: '#ECFDF5',
+    backgroundColor: COLORS.primaryLight,
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: RADIUS.full,
   },
   linkedBadgeText: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '700',
-    color: '#10B981',
+    color: COLORS.success,
   },
   appInfoSection: {
     alignItems: 'center',
@@ -579,12 +639,12 @@ const styles = StyleSheet.create({
     color: COLORS.text,
   },
   appInfoVersion: {
-    fontSize: 11,
+    fontSize: 12,
     color: COLORS.textMuted,
     marginTop: 3,
   },
   appInfoCopy: {
-    fontSize: 10,
+    fontSize: 12,
     color: COLORS.textMuted,
     marginTop: 2,
   },
@@ -592,9 +652,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#FFF5F5',
+    backgroundColor: COLORS.errorContainer,
     borderWidth: 1,
-    borderColor: '#FED7D7',
+    borderColor: COLORS.errorContainer,
     borderRadius: RADIUS.default,
     paddingVertical: 14,
     gap: 8,
@@ -605,15 +665,29 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: COLORS.error,
   },
+  deleteAccountBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    gap: 6,
+    marginBottom: 32,
+  },
+  deleteAccountText: {
+    fontSize: 13,
+    color: COLORS.outline,
+    fontWeight: '500',
+    textDecorationLine: 'underline',
+  },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: COLORS.scrim,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
   },
   modalCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: COLORS.surface,
     borderRadius: 20,
     padding: 20,
     width: '100%',
@@ -621,7 +695,7 @@ const styles = StyleSheet.create({
     ...SHADOWS.ambient,
   },
   policyCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: COLORS.surface,
     borderRadius: 20,
     padding: 20,
     width: '100%',
@@ -633,7 +707,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingBottom: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#F0F0F0',
+    borderBottomColor: COLORS.surfaceContainer,
     marginBottom: 12,
   },
   modalTitle: {

@@ -4,6 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 import { api } from './api';
+import { COLORS } from '../theme/colors';
 
 const PUSH_TOKEN_STORAGE_KEY = '@kindr_expo_push_token';
 
@@ -27,20 +28,26 @@ export async function registerPushNotifications(): Promise<string | null> {
   try {
     // 1. Web fallback
     if (Platform.OS === 'web') {
-      console.log('[Push] Push notifications via Expo Push Service are designed for mobile devices.');
+      if (__DEV__) {
+        console.log('[Push] Push notifications via Expo Push Service are designed for mobile devices.');
+      }
       return null;
     }
 
     // 2. Simulator handling
     if (!Device.isDevice) {
-      console.log('[Push] Running on simulator/emulator - using simulated device token for development.');
+      if (__DEV__) {
+        console.log('[Push] Running on simulator/emulator - using simulated device token for development.');
+      }
       const mockToken = `ExponentPushToken[SIMULATOR_${Platform.OS.toUpperCase()}_DEV]`;
       try {
         await api.post('/auth/push-token', { token: mockToken });
         cachedPushToken = mockToken;
         await AsyncStorage.setItem(PUSH_TOKEN_STORAGE_KEY, mockToken);
       } catch (err: any) {
-        console.warn('[Push] Simulator token registration fallback:', err.message);
+        if (__DEV__) {
+          console.warn('[Push] Simulator token registration fallback:', err.message);
+        }
       }
       return mockToken;
     }
@@ -54,7 +61,9 @@ export async function registerPushNotifications(): Promise<string | null> {
     }
 
     if (finalStatus !== 'granted') {
-      console.warn('[Push] Notification permissions not granted by user.');
+      if (__DEV__) {
+        console.warn('[Push] Notification permissions not granted by user.');
+      }
       return null;
     }
 
@@ -64,7 +73,7 @@ export async function registerPushNotifications(): Promise<string | null> {
         name: 'Thông báo Kindr',
         importance: Notifications.AndroidImportance.MAX,
         vibrationPattern: [0, 250, 250, 250],
-        lightColor: '#059669',
+        lightColor: COLORS.primary,
       });
     }
 
@@ -73,7 +82,9 @@ export async function registerPushNotifications(): Promise<string | null> {
     const token = pushTokenData.data;
 
     if (!token) {
-      console.warn('[Push] Failed to acquire Expo push token.');
+      if (__DEV__) {
+        console.warn('[Push] Failed to acquire Expo push token.');
+      }
       return null;
     }
 
@@ -82,10 +93,14 @@ export async function registerPushNotifications(): Promise<string | null> {
     cachedPushToken = token;
     await AsyncStorage.setItem(PUSH_TOKEN_STORAGE_KEY, token);
 
-    console.log('[Push] Registered Expo Push Token successfully:', token);
+    if (__DEV__) {
+      console.log('[Push] Registered Expo Push Token successfully:', token);
+    }
     return token;
   } catch (error: any) {
-    console.error('[Push] Failed to register push token:', error.message);
+    if (__DEV__) {
+      console.error('[Push] Failed to register push token:', error.message);
+    }
     return null;
   }
 }
@@ -100,10 +115,14 @@ export async function unregisterPushNotifications(): Promise<void> {
       await api.delete('/auth/push-token', { data: { token } });
       await AsyncStorage.removeItem(PUSH_TOKEN_STORAGE_KEY);
       cachedPushToken = null;
-      console.log('[Push] Unregistered push token from server.');
+      if (__DEV__) {
+        console.log('[Push] Unregistered push token from server.');
+      }
     }
   } catch (error: any) {
-    console.warn('[Push] Failed to unregister push token:', error.message);
+    if (__DEV__) {
+      console.warn('[Push] Failed to unregister push token:', error.message);
+    }
   }
 }
 
@@ -115,14 +134,18 @@ export function setupNotificationListeners(
   onNotificationResponse?: (response: Notifications.NotificationResponse) => void
 ) {
   const receivedSub = Notifications.addNotificationReceivedListener((notification) => {
-    console.log('[Push] Notification received in foreground:', notification);
+    if (__DEV__) {
+      console.log('[Push] Notification received in foreground:', notification);
+    }
     if (onNotificationReceived) {
       onNotificationReceived(notification);
     }
   });
 
   const responseSub = Notifications.addNotificationResponseReceivedListener((response) => {
-    console.log('[Push] User tapped notification:', response);
+    if (__DEV__) {
+      console.log('[Push] User tapped notification:', response);
+    }
     if (onNotificationResponse) {
       onNotificationResponse(response);
     }

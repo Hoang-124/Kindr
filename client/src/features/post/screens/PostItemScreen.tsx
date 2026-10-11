@@ -579,7 +579,7 @@ export const PostItemScreen = () => {
 
           {/* Smart Pricing Nudge Box */}
           <View style={styles.nudgeBox}>
-            <Lightbulb size={16} color="#D97706" style={{ marginTop: 2 }} />
+            <Lightbulb size={16} color={COLORS.warning} style={{ marginTop: 2 }} />
             <Text style={styles.nudgeText}>{pricingNudge}</Text>
           </View>
 
@@ -680,7 +680,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: COLORS.surface,
   },
-  addPhotoText: { fontSize: 10, fontWeight: '600', color: COLORS.primary, marginTop: 4 },
+  addPhotoText: { fontSize: 12, fontWeight: '600', color: COLORS.primary, marginTop: 4 },
   photoPreviewWrapper: { width: 85, height: 85, borderRadius: RADIUS.sm, overflow: 'hidden' },
   photoPreview: { width: '100%', height: '100%' },
   deletePhotoBtn: {
@@ -707,8 +707,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    backgroundColor: '#F0FDF4',
-    borderColor: '#BBF7D0',
+    backgroundColor: COLORS.primaryLight,
+    borderColor: COLORS.primaryLight,
     borderWidth: 1,
     borderRadius: RADIUS.default,
     paddingVertical: 10,
@@ -736,7 +736,7 @@ const styles = StyleSheet.create({
   priceInput: { flex: 1, height: '100%', color: COLORS.onSurface, fontSize: 15, fontWeight: '700' },
   nudgeBox: {
     flexDirection: 'row',
-    backgroundColor: '#FFFBEB',
+    backgroundColor: COLORS.tertiaryContainer,
     borderColor: 'rgba(245, 166, 35, 0.3)',
     borderWidth: 1,
     borderRadius: RADIUS.md,
@@ -747,7 +747,7 @@ const styles = StyleSheet.create({
   nudgeText: {
     flex: 1,
     fontSize: 12,
-    color: '#92400E',
+    color: COLORS.warning,
     lineHeight: 17,
   },
   safeFeeBox: {
@@ -763,7 +763,7 @@ const styles = StyleSheet.create({
   },
   safeFeeText: { fontSize: 12, color: COLORS.onSurfaceVariant, flex: 1, lineHeight: 16 },
   safeFeeHighlight: { fontWeight: '700', color: COLORS.tertiary },
-  photoCountText: { fontSize: 11, color: COLORS.outline, fontWeight: '500' },
+  photoCountText: { fontSize: 12, color: COLORS.outline, fontWeight: '500' },
   photoSlot: { marginRight: SPACING.sm },
   photoBadgePrimary: {
     position: 'absolute',
@@ -783,7 +783,7 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
     alignItems: 'center',
   },
-  photoBadgeText: { fontSize: 9, color: '#FFF', fontWeight: '700' },
+  photoBadgeText: { fontSize: 12, color: COLORS.surface, fontWeight: '700' },
   addMorePhotoBtn: {
     width: 85,
     height: 85,
@@ -793,10 +793,10 @@ const styles = StyleSheet.create({
     borderRadius: RADIUS.sm,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F0FDF4',
+    backgroundColor: COLORS.primaryLight,
   },
-  addMorePhotoText: { fontSize: 10, fontWeight: '600', color: COLORS.primary, marginTop: 4 },
-  boundsHelperText: { fontSize: 11, color: COLORS.primary, marginTop: 4, fontWeight: '600' },
+  addMorePhotoText: { fontSize: 12, fontWeight: '600', color: COLORS.primary, marginTop: 4 },
+  boundsHelperText: { fontSize: 12, color: COLORS.primary, marginTop: 4, fontWeight: '600' },
 
   locationSection: {
     marginBottom: SPACING.sm,

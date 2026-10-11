@@ -33,6 +33,7 @@ export const LoginScreen = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [unactivatedEmail, setUnactivatedEmail] = useState<string | null>(null);
+  const [isDemoDisabled, setIsDemoDisabled] = useState(false);
 
   const handleLogin = async () => {
     if (!username.trim() || !password.trim()) {
@@ -92,12 +93,17 @@ export const LoginScreen = () => {
   };
 
   const handleDemoLogin = async () => {
+    if (isDemoDisabled) return;
     setLoading(true);
     setError('');
     try {
       await loginDemo();
     } catch (apiErr: any) {
-      setError(typeof apiErr === 'string' ? apiErr : 'Không thể kết nối đến máy chủ demo.');
+      const msg = typeof apiErr === 'string' ? apiErr : (apiErr?.message || 'Không thể kết nối đến máy chủ demo.');
+      if (typeof msg === 'string' && (msg.includes('không khả dụng') || msg.includes('404'))) {
+        setIsDemoDisabled(true);
+      }
+      setError(msg);
     } finally {
       setLoading(false);
     }
@@ -125,25 +131,29 @@ export const LoginScreen = () => {
         </View>
 
         {/* Step 4 Funnel: Instant 1-Click Demo MVP Access */}
-        <TouchableOpacity
-          style={styles.demoCardBtn}
-          onPress={handleDemoLogin}
-          activeOpacity={0.88}
-        >
-          <View style={styles.demoIconBadge}>
-            <Sparkles size={20} color="#D97706" />
-          </View>
-          <View style={{ flex: 1 }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-              <Text style={styles.demoBtnTitle}>Trải Nghiệm Thử MVP (1-Click) ⭐</Text>
-              <View style={styles.demoPill}>
-                <Text style={styles.demoPillText}>Demo</Text>
-              </View>
+        {!isDemoDisabled && (
+          <TouchableOpacity
+            style={styles.demoCardBtn}
+            onPress={handleDemoLogin}
+            activeOpacity={0.88}
+            accessibilityRole="button"
+            accessibilityLabel="Trải nghiệm thử MVP một click"
+          >
+            <View style={styles.demoIconBadge}>
+              <Sparkles size={20} color={COLORS.warning} />
             </View>
-            <Text style={styles.demoBtnSub}>Có sẵn 100 Xu trong ví để thử đổi đồ ngay</Text>
-          </View>
-          <ChevronRight size={18} color="#D97706" />
-        </TouchableOpacity>
+            <View style={{ flex: 1 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                <Text style={styles.demoBtnTitle}>Trải Nghiệm Thử MVP (1-Click) ⭐</Text>
+                <View style={styles.demoPill}>
+                  <Text style={styles.demoPillText}>Demo</Text>
+                </View>
+              </View>
+              <Text style={styles.demoBtnSub}>Có sẵn 100 Xu trong ví để thử đổi đồ ngay</Text>
+            </View>
+            <ChevronRight size={18} color={COLORS.warning} />
+          </TouchableOpacity>
+        )}
 
         {/* Credentials Form */}
         <View style={styles.form}>
@@ -274,7 +284,7 @@ const styles = StyleSheet.create({
     width: 92,
     height: 92,
     borderRadius: 46,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: COLORS.surfaceContainerLowest,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: SPACING.xs,
@@ -332,7 +342,7 @@ const styles = StyleSheet.create({
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: 'rgba(58, 103, 88, 0.12)',
+    backgroundColor: COLORS.divider,
   },
   dividerText: {
     fontSize: 12,
@@ -358,9 +368,9 @@ const styles = StyleSheet.create({
   activationNoticeBanner: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#E6F8F7',
+    backgroundColor: COLORS.secondaryContainer,
     borderWidth: 1,
-    borderColor: '#0ABAB5',
+    borderColor: COLORS.secondary,
     borderRadius: RADIUS.md,
     paddingVertical: 10,
     paddingHorizontal: 12,
@@ -370,16 +380,16 @@ const styles = StyleSheet.create({
   activationNoticeText: {
     flex: 1,
     fontSize: 13,
-    color: '#007A78',
+    color: COLORS.onSecondaryContainer,
     fontWeight: '600',
     lineHeight: 18,
   },
   demoCardBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFBEB',
+    backgroundColor: COLORS.tertiaryContainer,
     borderWidth: 1.5,
-    borderColor: '#FCD34D',
+    borderColor: COLORS.coinBorder,
     borderRadius: RADIUS.lg,
     padding: SPACING.md,
     marginBottom: SPACING.md,
@@ -390,29 +400,29 @@ const styles = StyleSheet.create({
     width: 38,
     height: 38,
     borderRadius: 19,
-    backgroundColor: '#FEF3C7',
+    backgroundColor: COLORS.coinBackground,
     alignItems: 'center',
     justifyContent: 'center',
   },
   demoBtnTitle: {
     fontSize: 13,
     fontWeight: '800',
-    color: '#92400E',
+    color: COLORS.onTertiaryContainer,
   },
   demoPill: {
-    backgroundColor: '#FDE68A',
+    backgroundColor: COLORS.tertiary,
     paddingHorizontal: 6,
     paddingVertical: 1,
     borderRadius: RADIUS.full,
   },
   demoPillText: {
-    fontSize: 10,
+    fontSize: 11,
     fontWeight: '700',
-    color: '#92400E',
+    color: COLORS.onTertiary,
   },
   demoBtnSub: {
-    fontSize: 11,
-    color: '#B45309',
+    fontSize: 12,
+    color: COLORS.onTertiaryContainer,
     marginTop: 2,
     fontWeight: '500',
   },

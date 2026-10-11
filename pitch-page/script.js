@@ -1,6 +1,7 @@
 /**
  * KINDR — DENSE & HIGH SIGNAL INTERACTIVE SCRIPT
- * Manages Console Mode Switching, Escrow Sandbox, ROI Slider & Real-time Waitlist
+ * Manages 4-Step Interactive Simulator, Truthful Copy,
+ * Decree 13 Consent Validation, and Real-time Waitlist API Integration
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -13,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let currentFlowStep = 1;
   let autoPlayInterval = null;
   let isAutoPlaying = false;
+  let safefulTimerInterval = null;
 
   const flowScreens = {
     1: document.getElementById('flowScreen1'),
@@ -35,25 +37,61 @@ document.addEventListener('DOMContentLoaded', () => {
   const narratorContent = {
     1: {
       pill: 'Bước 1: Chọn Đồ',
-      title: 'Khám phá đồ mẹ bé chất lượng cao bán kính < 1km',
-      body: 'Giao diện chính xác của app Kindr: Mẹ Lan duyệt nguồn cấp đồ chơi gần nhà. Chạm vào món "Xe hơi cổ tích" để xem chi tiết.'
+      title: 'Khám phá đồ mẹ bé chất lượng gần nhà trong bán kính 1km',
+      body: 'Giao diện thực tế của app Kindr: Mẹ Lan duyệt nguồn cấp đồ chơi gần nhà. Chạm vào món "Bộ đường ray tàu gỗ" để xem chi tiết.'
     },
     2: {
       pill: 'Bước 2: Ký Quỹ Kép',
-      title: 'Cơ chế Double Escrow bảo chứng 100% an toàn',
-      body: 'Người bán đã cọc 1 Xu SafeFee (10%), người mua khóa 10 Xu. Xu được Rương Escrow giữ hộ, chưa chuyển cho người bán.'
+      title: 'Cơ chế Double Escrow bảo vệ giao dịch song phương',
+      body: 'Người bán cọc 1 Xu SafeFee (10%), người mua khóa 10 Xu. Hệ thống ký quỹ tạm giữ an toàn, chưa chuyển cho người bán.'
     },
     3: {
       pill: 'Bước 3: Nhận Đồ',
-      title: 'Đang tạm khóa Xu ký quỹ & Mở khóa số điện thoại liên hệ',
-      body: 'Hệ thống mở khóa số điện thoại của Mẹ Mai Thảo để hai mẹ tự hẹn gặp giao nhận tiện đường. Nhận xong bấm Bắt đầu 6H.'
+      title: 'Tạm khóa Xu ký quỹ & Mở liên hệ hẹn gặp',
+      body: 'Hệ thống mở số liên hệ của người bán để hai mẹ tự hẹn gặp giao nhận tiện đường. Nhận đồ và xác nhận mã 6 ký tự để bắt đầu 6H.'
     },
     4: {
       pill: 'Bước 4: 6H Kiểm Định',
-      title: 'Mang về phòng ngủ cho bé dùng thử 6 tiếng rồi mới giải ngân',
-      body: 'Nếu đồ êm đúng mô tả, mẹ bấm Giải phóng Xu ngay. Nếu có lỗi trầy bánh, bấm Khiếu nại để nhận lại 100% Xu tức thì.'
+      title: 'Mang về phòng cho bé kiểm tra 6 tiếng trước khi tất toán',
+      body: 'Nếu đồ đúng mô tả, mẹ bấm Giải phóng Xu. Nếu phát sinh sai lệch, bấm Khiếu nại để Ban quản trị tạm khóa giải ngân và đối soát.'
     }
   };
+
+  // Safeful 6H Live Countdown Timer
+  const liveSafefulDigits = document.getElementById('liveSafefulDigits');
+  function startSafefulTimer() {
+    stopSafefulTimer();
+    let remainingSecs = 6 * 3600; // 6 hours
+    const pad = (n) => String(n).padStart(2, '0');
+    
+    function renderDigits(secs) {
+      if (!liveSafefulDigits) return;
+      const hrs = Math.floor(secs / 3600);
+      const mins = Math.floor((secs % 3600) / 60);
+      const s = secs % 60;
+      liveSafefulDigits.textContent = `${pad(hrs)}h ${pad(mins)}m ${pad(s)}s`;
+    }
+
+    renderDigits(remainingSecs);
+    safefulTimerInterval = setInterval(() => {
+      if (remainingSecs > 0) {
+        remainingSecs--;
+        renderDigits(remainingSecs);
+      } else {
+        stopSafefulTimer();
+      }
+    }, 1000);
+  }
+
+  function stopSafefulTimer() {
+    if (safefulTimerInterval) {
+      clearInterval(safefulTimerInterval);
+      safefulTimerInterval = null;
+    }
+    if (liveSafefulDigits) {
+      liveSafefulDigits.textContent = '06h 00m 00s';
+    }
+  }
 
   function setFlowStep(stepNumber) {
     if (stepNumber < 1 || stepNumber > 4) return;
@@ -71,7 +109,22 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-    // Update Stepper Buttons (if any exist)
+    // Reset Step 4 sub-states when navigating
+    if (inspectionActiveBox) inspectionActiveBox.style.display = 'block';
+    if (disputeActiveBox) disputeActiveBox.style.display = 'none';
+    if (exchangeCelebrationBox) {
+      exchangeCelebrationBox.classList.add('hidden');
+      exchangeCelebrationBox.style.display = 'none';
+    }
+
+    // Manage 6H Timer
+    if (currentFlowStep === 4) {
+      startSafefulTimer();
+    } else {
+      stopSafefulTimer();
+    }
+
+    // Update Stepper Buttons
     stepBtns.forEach(btn => {
       const bStep = parseInt(btn.dataset.step, 10);
       btn.classList.remove('active');
@@ -163,12 +216,19 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // In-Screen Action Buttons
+  // In-Screen Action Buttons with keyboard a11y
   const btnActionStep1 = document.getElementById('btnActionStep1');
   if (btnActionStep1) {
-    btnActionStep1.addEventListener('click', () => {
+    const triggerStep1 = () => {
       setFlowStep(2);
       stopAutoPlay();
+    };
+    btnActionStep1.addEventListener('click', triggerStep1);
+    btnActionStep1.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        triggerStep1();
+      }
     });
   }
 
@@ -222,17 +282,20 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Step 4: Release Xu & Celebration
+  // Step 4: In-Screen Substates (Release Xu, Dispute Simulation, Cancel Dispute)
   const btnConfirmReleaseXu = document.getElementById('btnConfirmReleaseXu');
   const inspectionActiveBox = document.getElementById('inspectionActiveBox');
+  const disputeActiveBox = document.getElementById('disputeActiveBox');
   const exchangeCelebrationBox = document.getElementById('exchangeCelebrationBox');
   const btnRestartFlow = document.getElementById('btnRestartFlow');
   const btnSimulateDispute = document.getElementById('btnSimulateDispute');
+  const btnCancelDispute = document.getElementById('btnCancelDispute');
 
   if (btnConfirmReleaseXu) {
     btnConfirmReleaseXu.addEventListener('click', () => {
       if (inspectionActiveBox && exchangeCelebrationBox) {
         inspectionActiveBox.style.display = 'none';
+        if (disputeActiveBox) disputeActiveBox.style.display = 'none';
         exchangeCelebrationBox.classList.remove('hidden');
         exchangeCelebrationBox.style.display = 'block';
       }
@@ -242,19 +305,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (btnRestartFlow) {
     btnRestartFlow.addEventListener('click', () => {
-      if (inspectionActiveBox && exchangeCelebrationBox) {
-        inspectionActiveBox.style.display = 'block';
-        exchangeCelebrationBox.classList.add('hidden');
-        exchangeCelebrationBox.style.display = 'none';
-      }
       setFlowStep(1);
       stopAutoPlay();
     });
   }
 
+  // In-Screen Dispute Simulation (NO alert())
   if (btnSimulateDispute) {
     btnSimulateDispute.addEventListener('click', () => {
-      alert('[Khung Giờ Vàng 6H Safeful Time - Bảo Chứng Kindr]\n\nMẹ bấm khiếu nại chất lượng vì xe bị kẹt bánh hoặc không đúng cam kết.\n\nHệ thống lập tức đóng băng lệnh giải ngân, Ban Quản Trị đối soát và hoàn trả 100% (10 Xu) về ví của mẹ!');
+      if (inspectionActiveBox && disputeActiveBox) {
+        inspectionActiveBox.style.display = 'none';
+        disputeActiveBox.style.display = 'block';
+      }
+      stopAutoPlay();
+    });
+  }
+
+  if (btnCancelDispute) {
+    btnCancelDispute.addEventListener('click', () => {
+      if (inspectionActiveBox && disputeActiveBox) {
+        disputeActiveBox.style.display = 'none';
+        inspectionActiveBox.style.display = 'block';
+      }
     });
   }
 
@@ -268,12 +340,6 @@ document.addEventListener('DOMContentLoaded', () => {
       if (currentFlowStep < 4) {
         setFlowStep(currentFlowStep + 1);
       } else {
-        // Reset substate if was celebrated
-        if (inspectionActiveBox && exchangeCelebrationBox) {
-          inspectionActiveBox.style.display = 'block';
-          exchangeCelebrationBox.classList.add('hidden');
-          exchangeCelebrationBox.style.display = 'none';
-        }
         setFlowStep(1);
       }
     }, 4500);
@@ -299,23 +365,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Live countdown ticker in Step 4
-  const liveSafefulDigits = document.getElementById('liveSafefulDigits');
-  let countdownSecs = 5 * 3600 + 59 * 60 + 42;
-  setInterval(() => {
-    if (countdownSecs > 0) {
-      countdownSecs--;
-      const hrs = Math.floor(countdownSecs / 3600);
-      const mins = Math.floor((countdownSecs % 3600) / 60);
-      const secs = countdownSecs % 60;
-      const pad = (n) => String(n).padStart(2, '0');
-      if (liveSafefulDigits) {
-        liveSafefulDigits.textContent = `${pad(hrs)}:${pad(mins)}:${pad(secs)}`;
-      }
-    }
-  }, 1000);
-
-  // ================= 5. REAL-TIME WAITLIST API INTEGRATION =================
+  // ================= 2. REAL-TIME WAITLIST API INTEGRATION =================
   const waitlistForm = document.getElementById('waitlistForm');
   const waitlistCounter = document.getElementById('waitlistCounter');
   const waitlistPercent = document.getElementById('waitlistPercent');
@@ -323,11 +373,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const waitlistRemaining = document.getElementById('waitlistRemaining');
   const navWaitlistCount = document.getElementById('navWaitlistCount');
   const goldCardSerial = document.getElementById('goldCardSerial');
+  const goldCardScarcity = document.getElementById('goldCardScarcity');
 
   const waitlistEmail = document.getElementById('waitlistEmail');
   const waitlistPhone = document.getElementById('waitlistPhone');
+  const waitlistConsent = document.getElementById('waitlistConsent');
   const emailError = document.getElementById('emailError');
   const phoneError = document.getElementById('phoneError');
+  const consentError = document.getElementById('consentError');
 
   const successModalOverlay = document.getElementById('successModalOverlay');
   const successModalClose = document.getElementById('successModalClose');
@@ -365,6 +418,17 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  function setConsentError(msg) {
+    if (!consentError || !waitlistConsent) return;
+    if (msg) {
+      consentError.textContent = msg;
+      consentError.style.display = 'block';
+    } else {
+      consentError.textContent = '';
+      consentError.style.display = 'none';
+    }
+  }
+
   function validateEmail(val) {
     const trimmed = (val || '').trim();
     if (!trimmed) {
@@ -395,6 +459,16 @@ document.addEventListener('DOMContentLoaded', () => {
     return true;
   }
 
+  function validateConsent() {
+    if (!waitlistConsent) return true;
+    if (!waitlistConsent.checked) {
+      setConsentError('Vui lòng tích đồng ý với Chính sách bảo mật để tiếp tục');
+      return false;
+    }
+    setConsentError('');
+    return true;
+  }
+
   // Real-time Input Listeners
   if (waitlistEmail) {
     waitlistEmail.addEventListener('input', () => {
@@ -422,21 +496,21 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  if (waitlistConsent) {
+    waitlistConsent.addEventListener('change', () => {
+      if (waitlistConsent.checked) {
+        setConsentError('');
+      }
+    });
+  }
+
   // Role toggle
   roleInputs.forEach(r => {
     r.addEventListener('change', () => {
       if (r.value === 'genz') {
         if (labelEmail) labelEmail.innerHTML = 'Email của bạn (để nhận thông báo gửi Mẹ/Chị) <span class="text-coral">*</span>';
-        if (btnSubmitWaitlist) {
-          const span = btnSubmitWaitlist.querySelector('span');
-          if (span) span.textContent = 'Đăng Ký Giữ Chỗ & Nhận 5 Xu Tiên Phong';
-        }
       } else {
         if (labelEmail) labelEmail.innerHTML = 'Địa chỉ Email nhận thông báo <span class="text-coral">*</span>';
-        if (btnSubmitWaitlist) {
-          const span = btnSubmitWaitlist.querySelector('span');
-          if (span) span.textContent = 'Đăng Ký Giữ Chỗ & Nhận 5 Xu Tiên Phong';
-        }
       }
     });
   });
@@ -449,6 +523,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (navWaitlistCount) navWaitlistCount.textContent = total;
     const currentCardNum = total === 0 ? 1 : total;
     if (goldCardSerial) goldCardSerial.textContent = `MÃ THẺ: #KD-${String(currentCardNum).padStart(4, '0')}/${target}`;
+    if (goldCardScarcity) {
+      if (remaining > 0) {
+        goldCardScarcity.textContent = `Chỉ còn ${remaining} suất đầu tiên`;
+      } else {
+        goldCardScarcity.textContent = `Đã đủ 200 suất đầu tiên`;
+      }
+    }
   }
 
   async function fetchStats() {
@@ -463,9 +544,39 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Initial fetch and real-time live synchronization poller (every 4s)
+  // Initial fetch and synchronization poller (every 30s, paused when tab is hidden)
   fetchStats();
-  setInterval(fetchStats, 4000);
+  setInterval(() => {
+    if (!document.hidden) {
+      fetchStats();
+    }
+  }, 30000);
+
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) {
+      fetchStats();
+    }
+  });
+
+  // Modal Open & Close with Focus Trap and Esc Key
+  let previousActiveElement = null;
+
+  function openSuccessModal() {
+    if (!successModalOverlay) return;
+    previousActiveElement = document.activeElement;
+    successModalOverlay.classList.add('active');
+    if (successModalClose) {
+      successModalClose.focus();
+    }
+  }
+
+  function closeSuccessModal() {
+    if (!successModalOverlay) return;
+    successModalOverlay.classList.remove('active');
+    if (previousActiveElement && typeof previousActiveElement.focus === 'function') {
+      previousActiveElement.focus();
+    }
+  }
 
   if (waitlistForm) {
     waitlistForm.addEventListener('submit', async (e) => {
@@ -473,6 +584,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const isEmailValid = validateEmail(waitlistEmail ? waitlistEmail.value : '');
       const isPhoneValid = validatePhone(waitlistPhone ? waitlistPhone.value : '');
+      const isConsentValid = validateConsent();
 
       if (!isEmailValid) {
         if (waitlistEmail) waitlistEmail.focus();
@@ -480,6 +592,10 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       if (!isPhoneValid) {
         if (waitlistPhone) waitlistPhone.focus();
+        return;
+      }
+      if (!isConsentValid) {
+        if (waitlistConsent) waitlistConsent.focus();
         return;
       }
 
@@ -492,16 +608,18 @@ document.addEventListener('DOMContentLoaded', () => {
       submitBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="animation: spin 0.8s linear infinite; vertical-align: middle; margin-right: 6px;"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg><span>Đang đăng ký & gửi email...</span>';
 
       try {
+        const payloadRole = selectedRole && selectedRole.value === 'genz' ? 'genz' : 'mom';
         const response = await fetch(`${API_BASE_URL}/api/waitlist`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             email: waitlistEmail.value.trim(),
             phone: waitlistPhone ? waitlistPhone.value.trim() : '',
-            userRole: selectedRole ? selectedRole.value : 'mother',
+            userRole: payloadRole,
             interest: interestInput ? interestInput.value : 'Đồ chơi vận động',
+            consent: true,
             utmSource: 'landing_compact',
-            utmMedium: selectedRole ? selectedRole.value : 'web',
+            utmMedium: payloadRole,
             utmCampaign: 'pilot_danang'
           })
         });
@@ -512,37 +630,45 @@ document.addEventListener('DOMContentLoaded', () => {
           const orderNum = json.orderNumber || json.data?.orderNumber || 1;
           const newTotal = json.total || json.data?.total;
           const newTarget = json.target || json.data?.target || 200;
-          const newRemaining = json.remaining ?? json.data?.remaining ?? (newTarget - newTotal);
-          const newPct = json.percentage ?? json.data?.percentage ?? Math.round((newTotal / newTarget) * 100);
+          const newRemaining = json.remaining ?? json.data?.remaining ?? (newTarget - (newTotal || 0));
+          const newPct = json.percentage ?? json.data?.percentage ?? Math.round(((newTotal || 0) / newTarget) * 100);
 
           if (json.alreadyRegistered) {
-            if (successModalTitle) successModalTitle.textContent = 'Mẹ/Bạn Đã Đăng Ký Giữ Chỗ Trước Đó!';
-            if (successOrderBadge) successOrderBadge.textContent = `Số thứ tự ưu đãi của bạn: #${orderNum}`;
+            if (successModalTitle) successModalTitle.textContent = 'Email Đã Được Đăng Ký Giữ Chỗ';
+            if (successOrderBadge) successOrderBadge.textContent = 'Thông Tin Đã Được Bảo Lưu';
             if (successModalDesc) {
-              successModalDesc.innerHTML = `Bạn đã giữ chỗ thành công trước đó với vị trí thành viên <strong>#${orderNum}</strong> (gói quà 5 Xu Tiên Phong đã được lưu trữ an toàn). Hiện tại cộng đồng đã có <strong>${newTotal}/200 Mẹ</strong> tham gia!`;
+              successModalDesc.innerHTML = `Hòm thư của mẹ/bạn đã có trong danh sách giữ chỗ trước đó! Gói quà 5 Xu Tiên Phong đã được lưu trữ an toàn. Kindr sẽ gửi email thông báo ngay khi cụm thử nghiệm mở cửa.`;
             }
           } else {
-            if (successModalTitle) successModalTitle.textContent = 'Chào Mừng Mẹ Tiên Phong!';
-            if (successOrderBadge) successOrderBadge.textContent = `Mẹ/Bạn là thành viên thứ #${orderNum}`;
-            if (successModalDesc) {
-              successModalDesc.innerHTML = `Kindr đã ghi nhận thông tin và gửi email xác nhận đến hòm thư của bạn! Gói quà <strong>5 Xu Tiên Phong</strong> đã được khóa bảo lưu và sẽ gửi thẳng vào ví tài khoản của bạn khi hệ thống chính thức mở cửa!`;
+            const isFounding = json.foundingMember ?? true;
+            if (isFounding) {
+              if (successModalTitle) successModalTitle.textContent = 'Chào Mừng Mẹ Tiên Phong!';
+              if (successOrderBadge) successOrderBadge.textContent = `Mẹ/Bạn là thành viên thứ #${orderNum}`;
+              if (successModalDesc) {
+                successModalDesc.innerHTML = `Kindr đã ghi nhận thông tin và gửi email xác nhận đến hòm thư của bạn! Gói quà <strong>5 Xu Tiên Phong</strong> đã được khóa bảo lưu và sẽ gửi thẳng vào ví tài khoản của bạn khi hệ thống chính thức mở cửa!`;
+              }
+            } else {
+              if (successModalTitle) successModalTitle.textContent = 'Chào Mừng Đến Với Kindr!';
+              if (successOrderBadge) successOrderBadge.textContent = `Thành viên thứ #${orderNum}`;
+              if (successModalDesc) {
+                successModalDesc.innerHTML = `Kindr đã ghi nhận thông tin giữ chỗ của bạn vào danh sách chờ thử nghiệm Đà Nẵng!`;
+              }
             }
           }
 
-          // Immediate real-time UI progression!
+          // Immediate real-time UI progression
           if (newTotal) {
             updateTrackerUI(newTotal, newTarget, newRemaining, newPct);
           } else {
             fetchStats();
           }
 
-          if (successModalOverlay) {
-            successModalOverlay.classList.add('active');
-          }
+          openSuccessModal();
 
           waitlistForm.reset();
           setEmailError('');
           setPhoneError('');
+          setConsentError('');
         } else {
           const errText = json.error || json.message || 'Có lỗi xảy ra, mẹ vui lòng thử lại sau nhé!';
           setEmailError(errText);
@@ -559,23 +685,41 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   if (successModalClose) {
-    successModalClose.addEventListener('click', () => {
-      successModalOverlay.classList.remove('active');
-    });
+    successModalClose.addEventListener('click', closeSuccessModal);
   }
   const btnModalCloseSecondary = document.getElementById('btnModalCloseSecondary');
   if (btnModalCloseSecondary) {
-    btnModalCloseSecondary.addEventListener('click', () => {
-      successModalOverlay.classList.remove('active');
-    });
+    btnModalCloseSecondary.addEventListener('click', closeSuccessModal);
   }
   window.addEventListener('click', (e) => {
     if (e.target === successModalOverlay) {
-      successModalOverlay.classList.remove('active');
+      closeSuccessModal();
     }
   });
 
-  // ================= 6. COMPACT FAQ ACCORDION =================
+  // Modal Focus Trap & Esc Key
+  window.addEventListener('keydown', (e) => {
+    if (!successModalOverlay || !successModalOverlay.classList.contains('active')) return;
+    if (e.key === 'Escape') {
+      closeSuccessModal();
+      return;
+    }
+    if (e.key === 'Tab') {
+      const focusable = successModalOverlay.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+      if (focusable.length === 0) return;
+      const firstElem = focusable[0];
+      const lastElem = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === firstElem) {
+        e.preventDefault();
+        lastElem.focus();
+      } else if (!e.shiftKey && document.activeElement === lastElem) {
+        e.preventDefault();
+        firstElem.focus();
+      }
+    }
+  });
+
+  // ================= 3. COMPACT FAQ ACCORDION =================
   const faqItems = document.querySelectorAll('.faq-item');
   faqItems.forEach(item => {
     const q = item.querySelector('.faq-q');
@@ -590,18 +734,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // ================= 7. FLOATING MASCOT COMPANION (GẤU KINDY) =================
+  // ================= 4. FLOATING MASCOT COMPANION (GẤU KINDY) =================
   const mascotAvatarBtn = document.getElementById('mascotAvatarBtn');
   const mascotBubble = document.getElementById('mascotBubble');
   const bubbleCloseBtn = document.getElementById('bubbleCloseBtn');
   const mascotQuote = document.getElementById('mascotQuote');
 
   const mascotQuotes = [
-    'Chào mẹ! Em là Gấu Kindy — 100% Xu được bảo chứng an lành qua Ký Quỹ Double Escrow nhé!',
+    'Chào mẹ! Em là Gấu Kindy — Xu được bảo chứng minh bạch qua Ký Quỹ Double Escrow nhé!',
     'Khung giờ 6H Safeful Time: Mẹ mang đồ về phòng ngủ kiểm tra êm ái, ưng ý mới chuyển Xu cho người bán!',
-    'Người bán cọc 10% Xu cam kết mô tả trung thực — triệt tiêu 100% tình trạng hàng lỗi hay ảnh mạng!',
+    'Người bán cọc 10% Xu cam kết mô tả trung thực — hạn chế tối đa tình trạng đồ lỗi hay ảnh mạng!',
     'Mẹ để lại email bên dưới để nhận ngay 5 Xu Tiên Phong (tương đương 50.000 VNĐ) vào ví nhé!',
-    'Gặp nhau ngay sảnh chung cư hoặc công viên gần nhà — siêu cục bộ Đà Nẵng, an tâm tuyệt đối!'
+    'Gặp nhau ngay sảnh chung cư hoặc công viên gần nhà — siêu cục bộ Đà Nẵng, an tâm và tiện lợi!'
   ];
   let quoteIndex = 0;
 
@@ -628,13 +772,11 @@ document.addEventListener('DOMContentLoaded', () => {
       if (mascotBubble) {
         if (mascotBubble.classList.contains('hidden')) {
           mascotBubble.classList.remove('hidden');
-          // On mobile, auto-dismiss after 5s so it never permanently blocks content
-          if (window.innerWidth <= 768) {
-            clearTimeout(bubbleAutoDismissTimeout);
-            bubbleAutoDismissTimeout = setTimeout(() => {
-              mascotBubble.classList.add('hidden');
-            }, 5000);
-          }
+          // Auto-dismiss after 8s so it never permanently blocks content
+          clearTimeout(bubbleAutoDismissTimeout);
+          bubbleAutoDismissTimeout = setTimeout(() => {
+            mascotBubble.classList.add('hidden');
+          }, 8000);
         } else {
           cycleMascotQuote();
         }
@@ -650,25 +792,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // On desktop only: gently show speech bubble after 3.5s to welcome user
-  if (window.innerWidth > 768 && mascotBubble) {
-    setTimeout(() => {
-      mascotBubble.classList.remove('hidden');
-    }, 3500);
-  }
-
-  // Auto-cycle quote occasionally when visible
-  setInterval(() => {
-    if (mascotBubble && !mascotBubble.classList.contains('hidden')) {
-      cycleMascotQuote();
-    }
-  }, 14000);
-
-  // ================= 8. 3D PERSPECTIVE TILT ON HOVER (DESKTOP) =================
+  // ================= 5. 3D PERSPECTIVE TILT ON HOVER (DESKTOP) =================
   const tiltElements = document.querySelectorAll('.bento-card, .phone-outer-frame, .founding-gold-card');
   const isTouchDevice = window.matchMedia('(pointer: coarse)').matches;
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  if (!isTouchDevice) {
+  if (!isTouchDevice && !prefersReducedMotion) {
     tiltElements.forEach(card => {
       card.addEventListener('mousemove', (e) => {
         const rect = card.getBoundingClientRect();
@@ -688,34 +817,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // ================= 9. SMOOTH STATS COUNTER ROLLUP =================
-  function animateValue(elem, start, end, duration, formatFn) {
-    if (!elem) return;
-    const startTime = performance.now();
-
-    function step(currentTime) {
-      const elapsed = currentTime - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-      // Ease out cubic
-      const easeOut = 1 - Math.pow(1 - progress, 3);
-      const current = Math.floor(start + (end - start) * easeOut);
-
-      elem.textContent = formatFn ? formatFn(current) : current;
-
-      if (progress < 1) {
-        requestAnimationFrame(step);
-      } else {
-        elem.textContent = formatFn ? formatFn(end) : end;
-      }
-    }
-    requestAnimationFrame(step);
-  }
-
-  // ================= 10. CLOCK PULSE ON SAFEFUL TIME =================
+  // ================= 6. CLOCK PULSE ON SAFEFUL TIME =================
   const clockIcons = document.querySelectorAll('.bento-clock-badge, .bento-clock-icon');
   clockIcons.forEach(icon => icon.classList.add('clock-pulse-active'));
 
-  // ================= 11. FOOTER BACK TO TOP SMOOTH SCROLL =================
+  // ================= 7. FOOTER BACK TO TOP SMOOTH SCROLL =================
   const btnBackToTop = document.getElementById('btnBackToTop');
   if (btnBackToTop) {
     btnBackToTop.addEventListener('click', (e) => {

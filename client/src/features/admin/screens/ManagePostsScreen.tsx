@@ -241,12 +241,12 @@ export const ManagePostsScreen = () => {
                     onPress={() => handleApprove(item.id, item.name)}
                     activeOpacity={0.8}
                   >
-                    <Check size={15} color="#ffffff" />
+                    <Check size={15} color={COLORS.onPrimary} />
                     <Text style={styles.btnTextApprove}>Duyệt bài đăng</Text>
                   </TouchableOpacity>
                 ) : (
                   <View style={styles.approvedIndicator}>
-                    <Check size={14} color="#10b981" strokeWidth={2.5} />
+                    <Check size={14} color={COLORS.success} strokeWidth={2.5} />
                     <Text style={styles.approvedText}>Đã duyệt hoạt động</Text>
                   </View>
                 )}
@@ -275,7 +275,7 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.sm,
     backgroundColor: COLORS.surface,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(0,0,0,0.06)',
+    borderBottomColor: COLORS.divider,
     gap: 8,
   },
   tabItem: {
@@ -296,18 +296,18 @@ const styles = StyleSheet.create({
     color: COLORS.textMuted,
   },
   tabItemTextActive: {
-    color: '#FFFFFF',
+    color: COLORS.onPrimary,
     fontWeight: '700',
   },
   badgeCount: {
-    backgroundColor: '#EF4444',
+    backgroundColor: COLORS.error,
     paddingHorizontal: 6,
     paddingVertical: 1,
     borderRadius: RADIUS.full,
   },
   badgeCountText: {
-    color: '#FFFFFF',
-    fontSize: 10,
+    color: COLORS.onError,
+    fontSize: 11,
     fontWeight: '700',
   },
   listContent: {
@@ -328,7 +328,7 @@ const styles = StyleSheet.create({
   postCard: {
     backgroundColor: COLORS.surfaceContainerLowest,
     borderWidth: 1,
-    borderColor: 'rgba(0,0,0,0.07)',
+    borderColor: COLORS.border,
     borderRadius: 16,
     padding: SPACING.md,
     marginBottom: SPACING.md,
@@ -355,7 +355,7 @@ const styles = StyleSheet.create({
     color: COLORS.onSurface,
   },
   timeAgo: {
-    fontSize: 10,
+    fontSize: 12,
     color: COLORS.outline,
   },
   headerRight: {
@@ -363,15 +363,15 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   priceBadge: {
-    backgroundColor: '#FFF8E1',
+    backgroundColor: COLORS.tertiaryContainer,
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: RADIUS.full,
   },
   priceText: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '700',
-    color: '#B45309',
+    color: COLORS.onTertiaryContainer,
   },
   statusTag: {
     paddingHorizontal: 6,
@@ -379,20 +379,20 @@ const styles = StyleSheet.create({
     borderRadius: RADIUS.full,
   },
   statusTagPending: {
-    backgroundColor: '#FEF3C7',
+    backgroundColor: COLORS.tertiaryContainer,
   },
   statusTagAvailable: {
-    backgroundColor: '#ECFDF5',
+    backgroundColor: COLORS.secondaryContainer,
   },
   statusTagText: {
-    fontSize: 10,
+    fontSize: 12,
     fontWeight: '700',
   },
   statusTagTextPending: {
-    color: '#D97706',
+    color: COLORS.onTertiaryContainer,
   },
   statusTagTextAvailable: {
-    color: '#059669',
+    color: COLORS.onSecondaryContainer,
   },
   cardBody: {
     flexDirection: 'row',
@@ -421,12 +421,12 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   postLocation: {
-    fontSize: 11,
+    fontSize: 12,
     color: COLORS.outline,
   },
   divider: {
     height: 1,
-    backgroundColor: 'rgba(0,0,0,0.05)',
+    backgroundColor: COLORS.divider,
     marginVertical: SPACING.sm,
   },
   cardActions: {
@@ -444,15 +444,15 @@ const styles = StyleSheet.create({
     borderRadius: RADIUS.full,
   },
   approveBtn: {
-    backgroundColor: '#10B981',
+    backgroundColor: COLORS.success,
   },
   btnTextApprove: {
-    color: '#FFFFFF',
+    color: COLORS.onPrimary,
     fontSize: 12,
     fontWeight: '700',
   },
   rejectBtn: {
-    backgroundColor: '#FEE2E2',
+    backgroundColor: COLORS.errorContainer,
   },
   btnTextReject: {
     color: COLORS.error,
@@ -467,7 +467,7 @@ const styles = StyleSheet.create({
   approvedText: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#10B981',
+    color: COLORS.success,
   },
   viewDetailHintRow: {
     flexDirection: 'row',
@@ -477,7 +477,7 @@ const styles = StyleSheet.create({
     paddingTop: 4,
   },
   viewDetailHintText: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '700',
     color: COLORS.primary,
   },

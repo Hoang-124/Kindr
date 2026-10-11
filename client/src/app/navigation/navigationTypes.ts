@@ -42,6 +42,7 @@ export type AppStackParamList = {
   ManageDisputes: undefined;
   ManageWithdraws: undefined;
   ManageReports: undefined;
+  ManageWaitlist: undefined;
 };
 
 // Make the types globally available to navigation hooks

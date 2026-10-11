@@ -4,6 +4,7 @@
 // This service contains ALL the core Kindr transaction logic.
 // Used by routes/transactions.ts
 // ========================================
+import crypto from 'crypto';
 import { User } from '../models/User';
 import { Product } from '../models/Product';
 import { Transaction, TransactionStatus } from '../models/Transaction';
@@ -62,10 +63,37 @@ export async function createEscrow(buyerId: string, productId: string): Promise<
     return { success: false, error: 'Sản phẩm đã được đổi hoặc không khả dụng.' };
   }
 
-  // 4. Atomic deduction on Buyer
+  // 4. Atomic deduction on Buyer with Welcome Credit tracking
+  const initialPromo = buyer.welcomeCreditRemaining || 0;
   const updatedBuyer = await User.findOneAndUpdate(
     { _id: buyerId, xuBalance: { $gte: product.price }, isLocked: { $ne: true } },
-    { $inc: { xuBalance: -product.price, xuFrozen: product.price } },
+    [
+      {
+        $set: {
+          _promoUsed: {
+            $min: [
+              { $ifNull: ['$welcomeCreditRemaining', 0] },
+              product.price,
+            ],
+          },
+        },
+      },
+      {
+        $set: {
+          xuBalance: { $subtract: ['$xuBalance', product.price] },
+          xuFrozen: { $add: ['$xuFrozen', product.price] },
+          welcomeCreditRemaining: {
+            $subtract: [
+              { $ifNull: ['$welcomeCreditRemaining', 0] },
+              '$_promoUsed',
+            ],
+          },
+        },
+      },
+      {
+        $unset: '_promoUsed',
+      },
+    ],
     { new: true }
   );
 
@@ -75,17 +103,29 @@ export async function createEscrow(buyerId: string, productId: string): Promise<
     return { success: false, error: `Không đủ Xu. Cần ${product.price} Xu.` };
   }
 
+  const promoUsed = Math.max(0, initialPromo - (updatedBuyer.welcomeCreditRemaining ?? 0));
+
   // 5. Get seller
   const seller = await User.findById(product.sellerId);
   if (!seller) {
     // Rollback both
     await Product.findByIdAndUpdate(productId, { $set: { status: 'available' } });
-    await User.findByIdAndUpdate(buyerId, { $inc: { xuBalance: product.price, xuFrozen: -product.price } });
+    await User.findByIdAndUpdate(buyerId, {
+      $inc: {
+        xuBalance: product.price,
+        xuFrozen: -product.price,
+        welcomeCreditRemaining: promoUsed,
+      },
+    });
     return { success: false, error: 'Người bán không tồn tại.' };
   }
 
-  // 6. Generate unique 6-character Handover Code & QR Payload
-  const handoverCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+  // 6. Generate unambiguous 6-character Handover Code & QR Payload
+  const alphabet = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+  let handoverCode = '';
+  for (let i = 0; i < 6; i++) {
+    handoverCode += alphabet[crypto.randomInt(0, alphabet.length)];
+  }
   const qrCodePayload = `KINDR|TX:${Date.now()}|${product._id}|${buyer._id}|${seller._id}|CODE:${handoverCode}`;
 
   // 7. Create Transaction record
@@ -104,17 +144,18 @@ export async function createEscrow(buyerId: string, productId: string): Promise<
     sellerZalo: seller.phone,
     buyerEscrowFrozen: product.price,
     sellerEscrowFrozen: product.safeFeeLocked,
+    buyerPromoXu: promoUsed,
     status: 'awaiting_handover',
     qrCodePayload,
     handoverCode,
   });
 
-  // 8. Notify seller in real-time
+  // 8. Notify seller in real-time (NO HANDOVER CODE EXPOSED TO SELLER)
   const notif = await Notification.create({
     userId: seller._id,
     type: 'match_request',
     title: 'Có mẹ vừa chọn đổi đồ của bạn!',
-    body: `${buyer.name} vừa bấm đổi món: ${product.name}. Mã nhận đồ: ${handoverCode}. Kiểm tra liên hệ để hẹn gặp nhé!`,
+    body: `${buyer.name} vừa bấm đổi món: ${product.name}. Hãy liên hệ mẹ để hẹn địa điểm gặp mặt bàn giao nhé!`,
     relatedTransactionId: tx._id,
     relatedProductId: product._id,
   });
@@ -145,18 +186,40 @@ export async function confirmHandover(
   if (!existingTx) return { success: false, error: 'Giao dịch không tồn tại.' };
   if (existingTx.status !== 'awaiting_handover') return { success: false, error: 'Trạng thái giao dịch không hợp lệ.' };
 
-  // Either buyer or seller can confirm handover
-  if (existingTx.buyerId.toString() !== userId && existingTx.sellerId.toString() !== userId) {
+  const isBuyer = existingTx.buyerId.toString() === userId;
+  const isSeller = existingTx.sellerId.toString() === userId;
+
+  if (!isBuyer && !isSeller) {
     return { success: false, error: 'Không có quyền thao tác.' };
   }
 
-  // If a handover code is provided, verify it matches
-  if (handoverCodeInput && existingTx.handoverCode) {
-    if (handoverCodeInput.trim().toUpperCase() !== existingTx.handoverCode.toUpperCase()) {
-      return { success: false, error: 'Mã xác nhận bàn giao không chính xác.' };
+  // Seller MUST enter buyer's handover code (maximum 5 failed attempts allowed)
+  if (isSeller) {
+    if ((existingTx.handoverFailedAttempts || 0) >= 5) {
+      return {
+        success: false,
+        error: 'Đã nhập sai mã quá 5 lần. Xác nhận bằng mã đã bị khóa. Vui lòng nhờ Người mua tự bấm "Đã nhận hàng" trên app của họ.',
+      };
+    }
+
+    if (!handoverCodeInput || !handoverCodeInput.trim()) {
+      return { success: false, error: 'Người bán bắt buộc phải nhập mã nhận hàng (PIN 6 ký tự) từ người mua.' };
+    }
+
+    const cleanInput = handoverCodeInput.trim().toUpperCase();
+    if (cleanInput !== (existingTx.handoverCode || '').toUpperCase()) {
+      await Transaction.findByIdAndUpdate(transactionId, {
+        $inc: { handoverFailedAttempts: 1 },
+      });
+      const attemptsLeft = Math.max(0, 5 - ((existingTx.handoverFailedAttempts || 0) + 1));
+      return {
+        success: false,
+        error: `Mã xác nhận bàn giao không chính xác. Còn lại ${attemptsLeft} lần thử.`,
+      };
     }
   }
 
+  // Buyer self-confirm requires no code (it is their own frozen money)
   const sixHoursLater = new Date(Date.now() + 6 * 60 * 60 * 1000);
   const tx = await Transaction.findOneAndUpdate(
     { _id: transactionId, status: 'awaiting_handover' },
@@ -236,16 +299,22 @@ export async function finalizeTransaction(transactionId: string): Promise<{
 
   // Release Xu: buyer escrow → seller balance, seller SafeFee → seller balance
   const totalXuToSeller = tx.buyerEscrowFrozen + tx.sellerEscrowFrozen;
+  const buyerPromo = (tx as any).buyerPromoXu || 0;
 
   await User.findByIdAndUpdate(tx.sellerId, {
     $inc: {
       xuBalance: totalXuToSeller,
       xuFrozen: -tx.sellerEscrowFrozen,
+      welcomeCreditRemaining: buyerPromo,
+      tradesCount: 1,
     },
   });
 
   await User.findByIdAndUpdate(tx.buyerId, {
-    $inc: { xuFrozen: -tx.buyerEscrowFrozen },
+    $inc: {
+      xuFrozen: -tx.buyerEscrowFrozen,
+      tradesCount: 1,
+    },
   });
 
   // Update product status
@@ -459,27 +528,50 @@ export async function resolveDispute(
   const txIdStr = tx._id.toString();
 
   if (outcome === 'resolved_buyer') {
-    // 1. Refund buyer's escrow, confiscate seller's SafeFee
+    const buyerPromo = (tx as any).buyerPromoXu || 0;
+    // 1. Refund buyer's escrow, restore welcome credit
     const updatedBuyer = await User.findByIdAndUpdate(
       tx.buyerId,
       {
-        $inc: { xuBalance: tx.buyerEscrowFrozen, xuFrozen: -tx.buyerEscrowFrozen },
-      },
-      { new: true }
-    );
-
-    // Seller loses SafeFee + penalty -15 points + 1 dispute strike
-    const updatedSeller = await User.findByIdAndUpdate(
-      tx.sellerId,
-      {
         $inc: {
-          xuFrozen: -tx.sellerEscrowFrozen,
-          civilizationPoints: -15,
-          disputeStrikeCount: 1,
+          xuBalance: tx.buyerEscrowFrozen,
+          xuFrozen: -tx.buyerEscrowFrozen,
+          welcomeCreditRemaining: buyerPromo,
         },
       },
       { new: true }
     );
+
+    // Seller loses SafeFee + penalty -15 points (clamped to 0) + 1 dispute strike
+    const updatedSeller = await User.findByIdAndUpdate(
+      tx.sellerId,
+      [
+        {
+          $set: {
+            xuFrozen: { $subtract: ['$xuFrozen', tx.sellerEscrowFrozen] },
+            civilizationPoints: {
+              $max: [0, { $subtract: ['$civilizationPoints', 15] }],
+            },
+            disputeStrikeCount: {
+              $add: [{ $ifNull: ['$disputeStrikeCount', 0] }, 1],
+            },
+          },
+        },
+      ],
+      { new: true }
+    );
+
+    // Business rule: 3 strikes -> auto lock account enforced on backend
+    if (updatedSeller && (updatedSeller.disputeStrikeCount || 0) >= 3) {
+      await User.findByIdAndUpdate(tx.sellerId, { isLocked: true });
+      await Notification.create({
+        userId: tx.sellerId,
+        type: 'system',
+        title: 'Tài khoản đã bị tạm khóa ⚠️',
+        body: 'Tài khoản của mẹ đã bị khóa do tích lũy đủ 3 lần vi phạm tranh chấp theo Quy chuẩn văn minh Kindr.',
+        data: { transactionId: txIdStr, reason: 'dispute_3_strikes' },
+      });
+    }
 
     // Update Product status
     await Product.findByIdAndUpdate(tx.productId, { status: 'cancelled' });
@@ -564,17 +656,26 @@ export async function resolveDispute(
   } else {
     // Seller wins: complete transaction, release all frozen escrow to seller
     const totalXu = tx.buyerEscrowFrozen + tx.sellerEscrowFrozen;
+    const buyerPromo = (tx as any).buyerPromoXu || 0;
     const updatedSeller = await User.findByIdAndUpdate(
       tx.sellerId,
       {
-        $inc: { xuBalance: totalXu, xuFrozen: -tx.sellerEscrowFrozen },
+        $inc: {
+          xuBalance: totalXu,
+          xuFrozen: -tx.sellerEscrowFrozen,
+          welcomeCreditRemaining: buyerPromo,
+          tradesCount: 1,
+        },
       },
       { new: true }
     );
     const updatedBuyer = await User.findByIdAndUpdate(
       tx.buyerId,
       {
-        $inc: { xuFrozen: -tx.buyerEscrowFrozen },
+        $inc: {
+          xuFrozen: -tx.buyerEscrowFrozen,
+          tradesCount: 1,
+        },
       },
       { new: true }
     );

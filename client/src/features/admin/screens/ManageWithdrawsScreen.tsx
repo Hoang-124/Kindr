@@ -170,8 +170,10 @@ export const ManageWithdrawsScreen = () => {
                       style={[styles.actionBtn, styles.approveBtn]}
                       onPress={() => handleApprove(item.id, item.userName, item.xuAmount)}
                       activeOpacity={0.8}
+                      accessibilityRole="button"
+                      accessibilityLabel="Duyệt chi yêu cầu rút xu"
                     >
-                      <CheckCircle size={14} color="#ffffff" />
+                      <CheckCircle size={16} color={COLORS.onPrimary} />
                       <Text style={styles.btnTextApprove}>Duyệt chi</Text>
                     </TouchableOpacity>
 
@@ -179,8 +181,10 @@ export const ManageWithdrawsScreen = () => {
                       style={[styles.actionBtn, styles.rejectBtn]}
                       onPress={() => handleReject(item.id, item.userName, item.xuAmount)}
                       activeOpacity={0.8}
+                      accessibilityRole="button"
+                      accessibilityLabel="Từ chối yêu cầu rút xu"
                     >
-                      <XCircle size={14} color={COLORS.error} />
+                      <XCircle size={16} color={COLORS.error} />
                       <Text style={styles.btnTextReject}>Từ chối</Text>
                     </TouchableOpacity>
                   </View>
@@ -213,7 +217,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.background,
   },
   tabText: {
-    fontSize: 11,
+    fontSize: 13,
     fontWeight: '600',
     color: COLORS.outline,
   },
@@ -253,7 +257,7 @@ const styles = StyleSheet.create({
   requestAmount: {
     fontSize: 15,
     fontWeight: '800',
-    color: COLORS.tertiary,
+    color: COLORS.coinOrange,
     marginLeft: 4,
   },
   cashVal: {
@@ -269,7 +273,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   reqDate: {
-    fontSize: 9,
+    fontSize: 12,
     color: COLORS.outline,
     marginTop: 2,
   },
@@ -282,7 +286,7 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   bankDetails: {
-    fontSize: 11,
+    fontSize: 12,
     color: COLORS.onSurfaceVariant,
     lineHeight: 16,
     fontWeight: '600',
@@ -299,8 +303,8 @@ const styles = StyleSheet.create({
   },
   actionBtn: {
     flex: 1,
-    height: 34,
-    borderRadius: 10,
+    height: 44,
+    borderRadius: 12,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -310,17 +314,17 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.primary,
   },
   btnTextApprove: {
-    fontSize: 11,
+    fontSize: 13,
     fontWeight: '700',
-    color: '#ffffff',
+    color: COLORS.onPrimary,
   },
   rejectBtn: {
     borderWidth: 1.5,
     borderColor: COLORS.error,
-    backgroundColor: '#ffffff',
+    backgroundColor: COLORS.surface,
   },
   btnTextReject: {
-    fontSize: 11,
+    fontSize: 13,
     fontWeight: '700',
     color: COLORS.error,
   },

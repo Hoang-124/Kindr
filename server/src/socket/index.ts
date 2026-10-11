@@ -2,6 +2,7 @@
 import { Server as HttpServer } from 'http';
 import { Server, Socket } from 'socket.io';
 import jwt from 'jsonwebtoken';
+import { isOriginAllowed } from '../utils/cors';
 import { ENV } from '../config/env';
 import { setupChatHandler } from './chatHandler';
 import { setupNotificationHandler } from './notificationHandler';
@@ -16,7 +17,12 @@ export function getIO(): Server {
 export function setupSocketIO(httpServer: HttpServer): Server {
   io = new Server(httpServer, {
     cors: {
-      origin: '*',
+      origin: (origin, callback) => {
+        if (isOriginAllowed(origin)) {
+          return callback(null, true);
+        }
+        return callback(new Error('Blocked by CORS policy'));
+      },
       methods: ['GET', 'POST'],
       credentials: true,
     },
