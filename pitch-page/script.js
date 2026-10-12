@@ -10,17 +10,22 @@ document.addEventListener('DOMContentLoaded', () => {
       ? 'http://localhost:5000'
       : 'https://kindr-backend-rl2t.onrender.com');
 
-  // ================= 1. 4-STEP INTERACTIVE FLOW CONTROLLER =================
+  // ================= 1. MULTI-FLOW INTERACTIVE APP SIMULATOR CONTROLLER =================
   let currentFlowStep = 1;
   let autoPlayInterval = null;
   let isAutoPlaying = false;
   let safefulTimerInterval = null;
+  let toastTimer = null;
 
   const flowScreens = {
     1: document.getElementById('flowScreen1'),
     2: document.getElementById('flowScreen2'),
     3: document.getElementById('flowScreen3'),
-    4: document.getElementById('flowScreen4')
+    4: document.getElementById('flowScreenChat'),
+    5: document.getElementById('flowScreen4'),
+    post: document.getElementById('flowScreenPost'),
+    wallet: document.getElementById('flowScreenWallet'),
+    search: document.getElementById('flowScreenSearch')
   };
 
   const stepBtns = document.querySelectorAll('.flow-step-btn');
@@ -28,36 +33,94 @@ document.addEventListener('DOMContentLoaded', () => {
   const narratorStepPill = document.getElementById('narratorStepPill');
   const narratorHeaderTitle = document.getElementById('narratorHeaderTitle');
   const narratorBodyText = document.getElementById('narratorBodyText');
+  const narratorHighlight1 = document.getElementById('narratorHighlight1');
+  const narratorHighlight2 = document.getElementById('narratorHighlight2');
   const btnNarratorPrev = document.getElementById('btnNarratorPrev');
   const btnNarratorNext = document.getElementById('btnNarratorNext');
   const btnAutoPlayToggle = document.getElementById('btnAutoPlayToggle');
   const autoPlayLabel = document.getElementById('autoPlayLabel');
   const flowUserXu = document.getElementById('flowUserXu');
 
+  // Bottom Navigation Tabs
+  const tabHome = document.getElementById('tabHome');
+  const tabSearch = document.getElementById('tabSearch');
+  const tabFabPost = document.getElementById('tabFabPost');
+  const tabChat = document.getElementById('tabChat');
+  const tabProfile = document.getElementById('tabProfile');
+  const bottomTabs = [tabHome, tabSearch, tabChat, tabProfile];
+
+  // Flow Selector Pills on Narrator
+  const flowSelPills = document.querySelectorAll('.flow-sel-pill');
+
+  // Multi-Flow Content Matrix (5-step Core Exchange + 3 Standalone Showcases)
   const narratorContent = {
     1: {
-      pill: 'Bước 1: Chọn Đồ',
-      title: 'Khám phá đồ mẹ bé chất lượng gần nhà trong bán kính 1km',
-      body: 'Giao diện thực tế của app Kindr: Mẹ Lan duyệt nguồn cấp đồ chơi gần nhà. Chạm vào món "Bộ đường ray tàu gỗ" để xem chi tiết.'
+      pill: 'Bước 1/5: Chọn Đồ',
+      title: 'Khám phá đồ mẹ bé chất lượng cao trong bán kính 1km',
+      body: 'Giao diện thực tế app Kindr: Mẹ Lan duyệt nguồn cấp đồ chơi gần nhà tại cụm chung cư FPT Plaza. Người bán đã cọc trước 10% Safe Fee cam kết chuẩn mô tả.',
+      h1: 'Ký quỹ kép song phương: Cả 2 bên đều được bảo hộ an toàn',
+      h2: 'Vị trí siêu cục bộ: Cùng chung cư FPT Plaza 2 (cách 400m)',
+      flow: 'escrow'
     },
     2: {
-      pill: 'Bước 2: Ký Quỹ Kép',
+      pill: 'Bước 2/5: Ký Quỹ Kép',
       title: 'Cơ chế Double Escrow bảo vệ giao dịch song phương',
-      body: 'Người bán cọc 1 Xu SafeFee (10%), người mua khóa 10 Xu. Hệ thống ký quỹ tạm giữ an toàn, chưa chuyển cho người bán.'
+      body: 'Mẹ Lan bấm "Ký Quỹ Đổi Ngay (10 Xu)". Hệ thống tạm khóa 10 Xu vào Rương Escrow trung gian. Người bán cũng đã cọc sẵn 1 Xu Safe Fee (10%) từ trước.',
+      h1: 'Người bán cọc trước 10% Safe Fee - Chống hàng hỏng & tin ảo',
+      h2: 'Người mua khóa Xu vào Rương Escrow trung gian minh bạch',
+      flow: 'escrow'
     },
     3: {
-      pill: 'Bước 3: Nhận Đồ',
-      title: 'Tạm khóa Xu ký quỹ & Mở liên hệ hẹn gặp',
-      body: 'Hệ thống mở số liên hệ của người bán để hai mẹ tự hẹn gặp giao nhận tiện đường. Nhận đồ và xác nhận mã 6 ký tự để bắt đầu 6H.'
+      pill: 'Bước 3/5: Rương Escrow & PIN',
+      title: 'Tạm khóa Xu ký quỹ & Cấp mã nhận hàng KND-889',
+      body: 'Rương Escrow bảo hộ an toàn 10 Xu. Hệ thống mở khóa ngay SĐT của mẹ bán để tự hẹn gặp, đồng thời cấp mã PIN 6 ký tự độc quyền cho mẹ mua giữ.',
+      h1: 'Mã xác thực PIN KND-889: Chống gian lận khi nhận đồ',
+      h2: 'Mở khóa SĐT 0905 123 456 & Chat P2P trực tiếp',
+      flow: 'escrow'
     },
     4: {
-      pill: 'Bước 4: 6H Kiểm Định',
+      pill: 'Bước 4/5: Hẹn Sảnh & Giao Đồ',
+      title: 'Nhắn tin P2P thỏa thuận giờ gặp tại sảnh chung cư',
+      body: 'Hai mẹ nhắn tin hẹn gặp tại Sảnh B FPT Plaza 2 lúc 17h15 tiện đường đón con. Khi gặp mặt kiểm tra đồ, mẹ bấm xác nhận để bắt đầu 6 Giờ Kiểm Định.',
+      h1: 'Widget Escrow ghim cố định: Xem trạng thái cọc & mã nhận KND-889',
+      h2: 'Bấm xác nhận bàn giao tại sảnh để kích hoạt 6H kiểm định',
+      flow: 'escrow'
+    },
+    5: {
+      pill: 'Bước 5/5: 6H Kiểm Định & Tất Toán',
       title: 'Mang về phòng cho bé kiểm tra 6 tiếng trước khi tất toán',
-      body: 'Nếu đồ đúng mô tả, mẹ bấm Giải phóng Xu. Nếu phát sinh sai lệch, bấm Khiếu nại để Ban quản trị tạm khóa giải ngân và đối soát.'
+      body: 'Đồng hồ 6H Safeful Time chạy trực tiếp. Nếu đồ đúng mô tả, mẹ bấm Giải phóng Xu (Người bán nhận 10 Xu + hoàn 1 Xu cọc). Nếu sai lệch, bấm Khiếu nại để đóng băng bảo vệ 100% Xu.',
+      h1: 'Đồng hồ đếm ngược 6 giờ Safeful Time chạy trực tiếp tại nhà',
+      h2: 'Tất toán Escrow minh bạch: Hoàn 100% cọc cho người bán uy tín',
+      flow: 'escrow'
+    },
+    post: {
+      pill: 'Tính Năng: Mẹ Bán Đăng Đồ',
+      title: 'Kindr AI Vision định giá & Cam kết Safe Fee 10%',
+      body: 'Kindr AI Vision tự nhận diện đồ chơi & gợi ý phân loại. Người bán cọc trước 10% Safe Fee (1 Xu) để cam kết trung thực và loại bỏ 100% tin ảo rác.',
+      h1: 'AI Vision nhận diện ảnh: gợi ý tên, độ tuổi bé, tình trạng mới',
+      h2: 'Cọc Safe Fee 10%: Hoàn 100% khi mẹ mua ưng ý sau 6 giờ',
+      flow: 'post'
+    },
+    wallet: {
+      pill: 'Tính Năng: Ví Xu & Uy Tín',
+      title: 'Quản lý Ví Kindr Xu & Điểm Mẹ Bỉm Văn Minh 99/100',
+      body: 'Minh bạch số dư khả dụng (90 Xu) và Xu đang trong rương ký quỹ Escrow (10 Xu). Điểm uy tín cộng dồn qua mỗi giao dịch trung thực, mở khóa đặc quyền tiên phong.',
+      h1: '1 Xu = 10.000 VNĐ, quản lý nạp rút & tiền cọc ký quỹ',
+      h2: 'Điểm uy tín 99/100 chứng nhận "Mẹ Bỉm Tin Cậy"',
+      flow: 'wallet'
+    },
+    search: {
+      pill: 'Tính Năng: Lọc Bán Kính <1km',
+      title: 'Bộ lọc bán kính siêu cục bộ (<500m / <1km)',
+      body: 'Thuật toán tìm kiếm ưu tiên hàng xóm cùng tòa nhà và bán kính đi bộ 10 phút. Lọc theo độ tuổi bé và đồ chơi Trạm Tặng (0 Xu) lan tỏa yêu thương.',
+      h1: 'Lọc siêu cục bộ: <500m cùng sảnh chung cư FPT Plaza',
+      h2: 'Trạm Tặng 0 Xu: Lan tỏa đồ chơi cũ cho các bé lân cận',
+      flow: 'search'
     }
   };
 
-  // Safeful 6H Live Countdown Timer
+  // Live Safeful 6H Countdown Timer
   const liveSafefulDigits = document.getElementById('liveSafefulDigits');
   function startSafefulTimer() {
     stopSafefulTimer();
@@ -93,15 +156,51 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  function setFlowStep(stepNumber) {
-    if (stepNumber < 1 || stepNumber > 4) return;
-    currentFlowStep = stepNumber;
+  // In-Phone Dynamic Toast Function (Pure Crisp SVGs only, Zero Emojis)
+  const TOAST_SVGS = {
+    check: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>',
+    lock: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',
+    shield: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#2EC4B6" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
+    refresh: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4361EE" stroke-width="2.2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>',
+    camera: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#E05A36" stroke-width="2.2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>',
+    wallet: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2.2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><path d="M12 9v6"/></svg>',
+    search: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#8E7C80" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>',
+    chat: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#E05A36" stroke-width="2.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
+    clock: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#0D9488" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+    star: '<svg width="13" height="13" viewBox="0 0 24 24" fill="#D97706"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
+    phone: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>',
+    heart: '<svg width="13" height="13" viewBox="0 0 24 24" fill="#EF4444" stroke="#EF4444" stroke-width="1"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>',
+    warning: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>',
+    box: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#E05A36" stroke-width="2.2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>',
+    gift: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#E63946" stroke-width="2.2"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/></svg>'
+  };
 
-    // Update screens
+  const phoneDynamicToast = document.getElementById('phoneDynamicToast');
+  const phoneToastIcon = document.getElementById('phoneToastIcon');
+  const phoneToastMsg = document.getElementById('phoneToastMsg');
+
+  function showPhoneToast(msg, iconKey = 'check') {
+    if (!phoneDynamicToast || !phoneToastMsg) return;
+    phoneToastMsg.textContent = msg;
+    if (phoneToastIcon) {
+      phoneToastIcon.innerHTML = TOAST_SVGS[iconKey] || TOAST_SVGS.check;
+    }
+    phoneDynamicToast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => {
+      phoneDynamicToast.classList.remove('show');
+    }, 2800);
+  }
+
+  // Master Flow Switcher
+  function setFlowStep(stepTarget) {
+    currentFlowStep = stepTarget;
+
+    // 1. Toggle Screen Viewports
     Object.keys(flowScreens).forEach(key => {
       const screen = flowScreens[key];
       if (screen) {
-        if (parseInt(key, 10) === currentFlowStep) {
+        if (key == currentFlowStep) {
           screen.classList.add('active');
         } else {
           screen.classList.remove('active');
@@ -109,7 +208,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-    // Reset Step 4 sub-states when navigating
+    // 2. Reset Step 4 sub-states when navigating
     if (inspectionActiveBox) inspectionActiveBox.style.display = 'block';
     if (disputeActiveBox) disputeActiveBox.style.display = 'none';
     if (exchangeCelebrationBox) {
@@ -117,57 +216,95 @@ document.addEventListener('DOMContentLoaded', () => {
       exchangeCelebrationBox.style.display = 'none';
     }
 
-    // Manage 6H Timer
-    if (currentFlowStep === 4) {
+    // 3. Manage 6H Timer
+    // 3. Manage 6H Timer (Step 5 is 6H Safeful Time)
+    if (currentFlowStep === 5) {
       startSafefulTimer();
     } else {
       stopSafefulTimer();
     }
 
-    // Update Stepper Buttons
-    stepBtns.forEach(btn => {
-      const bStep = parseInt(btn.dataset.step, 10);
-      btn.classList.remove('active');
-      btn.setAttribute('aria-selected', 'false');
-      if (bStep === currentFlowStep) {
-        btn.classList.add('active');
-        btn.setAttribute('aria-selected', 'true');
-      } else if (bStep < currentFlowStep) {
-        btn.classList.add('completed');
-      } else {
-        btn.classList.remove('completed');
-      }
-    });
+    // 4. Update Bottom Tabs Active States
+    bottomTabs.forEach(t => t?.classList.remove('active'));
+    if (tabFabPost) {
+      const fabCircle = tabFabPost.querySelector('.fab-circle');
+      if (fabCircle) fabCircle.style.transform = (currentFlowStep === 'post') ? 'scale(1.12)' : '';
+    }
 
-    // Update Narrator Panel
+    if (currentFlowStep === 1 || currentFlowStep === 2 || currentFlowStep === 3 || currentFlowStep === 5) {
+      tabHome?.classList.add('active');
+    } else if (currentFlowStep === 4) {
+      tabChat?.classList.add('active');
+    } else if (currentFlowStep === 'search') {
+      tabSearch?.classList.add('active');
+    } else if (currentFlowStep === 'wallet') {
+      tabProfile?.classList.add('active');
+    }
+
+    // 5. Update Narrator Panel Info
     const info = narratorContent[currentFlowStep];
     if (info) {
       if (narratorStepPill) narratorStepPill.textContent = info.pill;
       if (narratorHeaderTitle) narratorHeaderTitle.textContent = info.title;
       if (narratorBodyText) narratorBodyText.textContent = info.body;
+      if (narratorHighlight1) narratorHighlight1.textContent = info.h1;
+      if (narratorHighlight2) narratorHighlight2.textContent = info.h2;
+
+      // Sync Flow Selector Pills
+      flowSelPills.forEach(pill => {
+        const pFlow = pill.dataset.flow;
+        if (pFlow === info.flow) {
+          pill.classList.add('active');
+          pill.setAttribute('aria-selected', 'true');
+        } else {
+          pill.classList.remove('active');
+          pill.setAttribute('aria-selected', 'false');
+        }
+      });
     }
 
-    // Update Narrator Dots
+    // 6. Update Narrator Dots & Controls (for 5-step escrow exchange)
+    const isEscrowStep = (typeof currentFlowStep === 'number');
     narratorDots.forEach(dot => {
       const dStep = parseInt(dot.dataset.step, 10);
-      if (dStep === currentFlowStep) {
+      if (isEscrowStep && dStep === currentFlowStep) {
         dot.classList.add('active');
       } else {
         dot.classList.remove('active');
       }
     });
 
-    // Update Prev / Next Controls
     if (btnNarratorPrev) {
       btnNarratorPrev.disabled = (currentFlowStep === 1);
     }
     if (btnNarratorNext) {
-      btnNarratorNext.textContent = (currentFlowStep === 4) ? '↺ Về Bước 1' : 'Tiếp theo →';
+      if (currentFlowStep === 5) {
+        btnNarratorNext.textContent = 'Khám phá Đăng Đồ →';
+      } else if (currentFlowStep === 'search') {
+        btnNarratorNext.textContent = '↺ Về Bước 1';
+      } else {
+        btnNarratorNext.textContent = 'Tiếp theo →';
+      }
     }
 
-    // Update Xu balance simulation
+    // 7. Update Stepper Buttons if present
+    stepBtns.forEach(btn => {
+      const bStep = parseInt(btn.dataset.step, 10);
+      btn.classList.remove('active');
+      btn.setAttribute('aria-selected', 'false');
+      if (isEscrowStep && bStep === currentFlowStep) {
+        btn.classList.add('active');
+        btn.setAttribute('aria-selected', 'true');
+      } else if (isEscrowStep && bStep < currentFlowStep) {
+        btn.classList.add('completed');
+      } else {
+        btn.classList.remove('completed');
+      }
+    });
+
+    // 8. Update Xu balance simulation
     if (flowUserXu) {
-      if (currentFlowStep >= 2) {
+      if (currentFlowStep === 3 || currentFlowStep === 4 || currentFlowStep === 5) {
         flowUserXu.textContent = '90 Xu';
       } else {
         flowUserXu.textContent = '100 Xu';
@@ -184,7 +321,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Narrator Dot clicks
+  // Narrator Dot clicks (1..5)
   narratorDots.forEach(dot => {
     dot.addEventListener('click', () => {
       const targetStep = parseInt(dot.dataset.step, 10);
@@ -195,11 +332,35 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Narrator Prev / Next clicks
+  // Flow Selector Strip Clicks on Narrator Top
+  flowSelPills.forEach(pill => {
+    pill.addEventListener('click', () => {
+      const flow = pill.dataset.flow;
+      stopAutoPlay();
+      if (flow === 'escrow') {
+        setFlowStep(1);
+        showPhoneToast('Mở Luồng: Ký Quỹ Đổi Đồ', 'refresh');
+      } else if (flow === 'post') {
+        setFlowStep('post');
+        showPhoneToast('Mở Luồng: Mẹ Bán Đăng Đồ', 'camera');
+      } else if (flow === 'wallet') {
+        setFlowStep('wallet');
+        showPhoneToast('Mở Luồng: Ví Xu & Uy Tín', 'wallet');
+      } else if (flow === 'search') {
+        setFlowStep('search');
+        showPhoneToast('Mở Luồng: Lọc Bán Kính <1km', 'search');
+      }
+    });
+  });
+
+  // Narrator Prev / Next navigation sequence (5-step core + 3 showcases)
+  const flowSequence = [1, 2, 3, 4, 5, 'post', 'wallet', 'search'];
+
   if (btnNarratorPrev) {
     btnNarratorPrev.addEventListener('click', () => {
-      if (currentFlowStep > 1) {
-        setFlowStep(currentFlowStep - 1);
+      const idx = flowSequence.indexOf(currentFlowStep);
+      if (idx > 0) {
+        setFlowStep(flowSequence[idx - 1]);
         stopAutoPlay();
       }
     });
@@ -207,21 +368,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (btnNarratorNext) {
     btnNarratorNext.addEventListener('click', () => {
-      if (currentFlowStep < 4) {
-        setFlowStep(currentFlowStep + 1);
+      const idx = flowSequence.indexOf(currentFlowStep);
+      if (idx < flowSequence.length - 1) {
+        setFlowStep(flowSequence[idx + 1]);
       } else {
-        setFlowStep(1);
+        setFlowStep(flowSequence[0]);
       }
       stopAutoPlay();
     });
   }
 
-  // In-Screen Action Buttons with keyboard a11y
+  // ================= PHONE IN-APP TRIGGERS & ACTIONS =================
+
+  // 1. Screen 1 -> Screen 2: Tap item 1
   const btnActionStep1 = document.getElementById('btnActionStep1');
   if (btnActionStep1) {
     const triggerStep1 = () => {
       setFlowStep(2);
       stopAutoPlay();
+      showPhoneToast('Đã chọn Bộ đường ray tàu gỗ (10 Xu)', 'box');
     };
     btnActionStep1.addEventListener('click', triggerStep1);
     btnActionStep1.addEventListener('keydown', (e) => {
@@ -232,23 +397,37 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // 2. Screen 2 -> Screen 3: Escrow Exchange (Lock 10 Xu)
   const btnActionStep2 = document.getElementById('btnActionStep2');
   if (btnActionStep2) {
     btnActionStep2.addEventListener('click', () => {
       setFlowStep(3);
       stopAutoPlay();
+      showPhoneToast('Đã khóa 10 Xu vào Rương Escrow', 'lock');
     });
   }
 
-  const btnActionStep3 = document.getElementById('btnActionStep3');
-  if (btnActionStep3) {
-    btnActionStep3.addEventListener('click', () => {
+  // 3. Screen 3 -> Screen 4: Move to Chat to arrange meetup
+  const btnStep3ToChat = document.getElementById('btnStep3ToChat');
+  if (btnStep3ToChat) {
+    btnStep3ToChat.addEventListener('click', () => {
       setFlowStep(4);
       stopAutoPlay();
+      showPhoneToast('Mở chat hẹn gặp sảnh chung cư', 'chat');
     });
   }
 
-  // Back Navigation Handlers
+  // 4. Screen 4 (Chat) -> Screen 5: Confirm Meetup & Handover to start 6H Inspection
+  const btnChatToInspection = document.getElementById('btnChatToInspection');
+  if (btnChatToInspection) {
+    btnChatToInspection.addEventListener('click', () => {
+      setFlowStep(5);
+      stopAutoPlay();
+      showPhoneToast('Bắt đầu 6H kiểm định tại nhà', 'clock');
+    });
+  }
+
+  // Back Buttons
   const btnBackToHome = document.getElementById('btnBackToHome');
   if (btnBackToHome) {
     btnBackToHome.addEventListener('click', () => {
@@ -265,24 +444,128 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  const btnBackTo3 = document.getElementById('btnBackTo3');
-  if (btnBackTo3) {
-    btnBackTo3.addEventListener('click', () => {
+  const btnBackFromChat = document.getElementById('btnBackFromChat');
+  if (btnBackFromChat) {
+    btnBackFromChat.addEventListener('click', () => {
       setFlowStep(3);
       stopAutoPlay();
     });
   }
 
-  // Native Bottom Tabs Navigation
-  const tabHome = document.getElementById('tabHome');
+  const btnBackTo3 = document.getElementById('btnBackTo3');
+  if (btnBackTo3) {
+    btnBackTo3.addEventListener('click', () => {
+      setFlowStep(4);
+      stopAutoPlay();
+    });
+  }
+
+  const btnBackFromPost = document.getElementById('btnBackFromPost');
+  if (btnBackFromPost) {
+    btnBackFromPost.addEventListener('click', () => {
+      setFlowStep(1);
+      stopAutoPlay();
+    });
+  }
+
+  const btnBackFromWallet = document.getElementById('btnBackFromWallet');
+  if (btnBackFromWallet) {
+    btnBackFromWallet.addEventListener('click', () => {
+      setFlowStep(1);
+      stopAutoPlay();
+    });
+  }
+
+  const btnBackFromSearch = document.getElementById('btnBackFromSearch');
+  if (btnBackFromSearch) {
+    btnBackFromSearch.addEventListener('click', () => {
+      setFlowStep(1);
+      stopAutoPlay();
+    });
+  }
+
+  // Cross-Screen Jump Triggers
+  const nativeSearchTrigger = document.getElementById('nativeSearchTrigger');
+  if (nativeSearchTrigger) {
+    nativeSearchTrigger.addEventListener('click', () => {
+      setFlowStep('search');
+      stopAutoPlay();
+    });
+  }
+
+  const btnHomePostTrigger = document.getElementById('btnHomePostTrigger');
+  if (btnHomePostTrigger) {
+    btnHomePostTrigger.addEventListener('click', () => {
+      setFlowStep('post');
+      stopAutoPlay();
+    });
+  }
+
+  const btnNativeProfileTrigger = document.getElementById('btnNativeProfileTrigger');
+  if (btnNativeProfileTrigger) {
+    btnNativeProfileTrigger.addEventListener('click', () => {
+      setFlowStep('wallet');
+      stopAutoPlay();
+    });
+  }
+
+  const btnNativeWalletTrigger = document.getElementById('btnNativeWalletTrigger');
+  if (btnNativeWalletTrigger) {
+    btnNativeWalletTrigger.addEventListener('click', () => {
+      setFlowStep('wallet');
+      stopAutoPlay();
+    });
+  }
+
+  const btnDetailChatTrigger = document.getElementById('btnDetailChatTrigger');
+  if (btnDetailChatTrigger) {
+    btnDetailChatTrigger.addEventListener('click', () => {
+      setFlowStep(4);
+      stopAutoPlay();
+    });
+  }
+
+  const btnContactChatTrigger = document.getElementById('btnContactChatTrigger');
+  if (btnContactChatTrigger) {
+    btnContactChatTrigger.addEventListener('click', () => {
+      setFlowStep(4);
+      stopAutoPlay();
+    });
+  }
+
+  // Bottom Navigation Tabs Handling
   if (tabHome) {
     tabHome.addEventListener('click', () => {
       setFlowStep(1);
       stopAutoPlay();
     });
   }
+  if (tabSearch) {
+    tabSearch.addEventListener('click', () => {
+      setFlowStep('search');
+      stopAutoPlay();
+    });
+  }
+  if (tabFabPost) {
+    tabFabPost.addEventListener('click', () => {
+      setFlowStep('post');
+      stopAutoPlay();
+    });
+  }
+  if (tabChat) {
+    tabChat.addEventListener('click', () => {
+      setFlowStep(4);
+      stopAutoPlay();
+    });
+  }
+  if (tabProfile) {
+    tabProfile.addEventListener('click', () => {
+      setFlowStep('wallet');
+      stopAutoPlay();
+    });
+  }
 
-  // Step 4: In-Screen Substates (Release Xu, Dispute Simulation, Cancel Dispute)
+  // 7. Step 4 Actions: Release Xu & Dispute
   const btnConfirmReleaseXu = document.getElementById('btnConfirmReleaseXu');
   const inspectionActiveBox = document.getElementById('inspectionActiveBox');
   const disputeActiveBox = document.getElementById('disputeActiveBox');
@@ -298,6 +581,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (disputeActiveBox) disputeActiveBox.style.display = 'none';
         exchangeCelebrationBox.classList.remove('hidden');
         exchangeCelebrationBox.style.display = 'block';
+        showPhoneToast('Giao dịch thành công! Đã giải ngân Xu', 'check');
       }
       stopAutoPlay();
     });
@@ -307,15 +591,16 @@ document.addEventListener('DOMContentLoaded', () => {
     btnRestartFlow.addEventListener('click', () => {
       setFlowStep(1);
       stopAutoPlay();
+      showPhoneToast('Đã đánh giá 5 sao cho Mẹ Mai Thảo', 'star');
     });
   }
 
-  // In-Screen Dispute Simulation (NO alert())
   if (btnSimulateDispute) {
     btnSimulateDispute.addEventListener('click', () => {
       if (inspectionActiveBox && disputeActiveBox) {
         inspectionActiveBox.style.display = 'none';
         disputeActiveBox.style.display = 'block';
+        showPhoneToast('Đã tiếp nhận khiếu nại! Tạm khóa giải ngân', 'warning');
       }
       stopAutoPlay();
     });
@@ -330,17 +615,158 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Auto-play Toggle
+  // 8. Screen Post Interactions (Mode Chips & Submit)
+  const chipModeXu = document.getElementById('chipModeXu');
+  const chipModeDonate = document.getElementById('chipModeDonate');
+  const postXuVal = document.getElementById('postXuVal');
+  const postSafeFeeVal = document.getElementById('postSafeFeeVal');
+  const postNetRefund = document.getElementById('postNetRefund');
+  const btnSubmitPostLabel = document.getElementById('btnSubmitPostLabel');
+  const btnSubmitPostDemo = document.getElementById('btnSubmitPostDemo');
+
+  if (chipModeXu && chipModeDonate) {
+    chipModeXu.addEventListener('click', () => {
+      chipModeXu.classList.add('active');
+      chipModeDonate.classList.remove('active');
+      if (postXuVal) postXuVal.textContent = '10 Xu';
+      if (postSafeFeeVal) postSafeFeeVal.textContent = '1 Xu';
+      if (postNetRefund) postNetRefund.textContent = '10 Xu + hoàn 1 Xu cọc';
+      if (btnSubmitPostLabel) btnSubmitPostLabel.textContent = 'Đăng Tin & Ký Quỹ 1 Xu Safe Fee';
+    });
+
+    chipModeDonate.addEventListener('click', () => {
+      chipModeDonate.classList.add('active');
+      chipModeXu.classList.remove('active');
+      if (postXuVal) postXuVal.textContent = '0 Xu (Trạm Tặng)';
+      if (postSafeFeeVal) postSafeFeeVal.textContent = '0 Xu (Miễn phí cọc)';
+      if (postNetRefund) postNetRefund.textContent = 'Niềm vui chia sẻ cộng đồng';
+      if (btnSubmitPostLabel) btnSubmitPostLabel.textContent = 'Đăng Tin Trạm Tặng (0 Xu)';
+    });
+  }
+
+  if (btnSubmitPostDemo) {
+    btnSubmitPostDemo.addEventListener('click', () => {
+      showPhoneToast('Đăng đồ thành công! Tin đã xuất hiện trên Feed', 'check');
+      setTimeout(() => {
+        setFlowStep(1);
+      }, 1500);
+      stopAutoPlay();
+    });
+  }
+
+  // 9. Screen Chat Interactions
+  const btnChatCall = document.getElementById('btnChatCall');
+  if (btnChatCall) {
+    btnChatCall.addEventListener('click', () => {
+      showPhoneToast('Đang kết nối gọi thoại an toàn đến Mẹ Mai Thảo', 'phone');
+    });
+  }
+
+  const btnChatViewEscrow = document.getElementById('btnChatViewEscrow');
+  if (btnChatViewEscrow) {
+    btnChatViewEscrow.addEventListener('click', () => {
+      setFlowStep(3);
+      stopAutoPlay();
+    });
+  }
+
+  const btnDemoSendMsg = document.getElementById('btnDemoSendMsg');
+  const chatInputTrigger = document.getElementById('chatInputTrigger');
+  const chatMessagesStream = document.getElementById('chatMessagesStream');
+
+  function sendChatSample() {
+    if (!chatMessagesStream) return;
+    const newBubble = document.createElement('div');
+    newBubble.className = 'chat-bubble chat-bubble-outgoing';
+    newBubble.innerHTML = `
+      <div class="bubble-text">Dạ mẹ ơi mình vừa xuống sảnh rồi nha!</div>
+      <div class="bubble-time">Vừa xong</div>
+    `;
+    chatMessagesStream.appendChild(newBubble);
+    chatMessagesStream.scrollTop = chatMessagesStream.scrollHeight;
+    showPhoneToast('Đã gửi tin nhắn đến Mẹ Mai Thảo', 'chat');
+  }
+
+  if (btnDemoSendMsg) btnDemoSendMsg.addEventListener('click', sendChatSample);
+  if (chatInputTrigger) chatInputTrigger.addEventListener('click', sendChatSample);
+
+  // 10. Screen Wallet Actions
+  const btnWalletTopUp = document.getElementById('btnWalletTopUp');
+  if (btnWalletTopUp) {
+    btnWalletTopUp.addEventListener('click', () => {
+      showPhoneToast('Nạp Xu VietQR tự động 24/7 (1 Xu = 10.000đ)', 'wallet');
+    });
+  }
+
+  const btnWalletWithdraw = document.getElementById('btnWalletWithdraw');
+  if (btnWalletWithdraw) {
+    btnWalletWithdraw.addEventListener('click', () => {
+      showPhoneToast('Rút Xu về tài khoản ngân hàng chính chủ', 'wallet');
+    });
+  }
+
+  const btnWalletEscrowHistory = document.getElementById('btnWalletEscrowHistory');
+  if (btnWalletEscrowHistory) {
+    btnWalletEscrowHistory.addEventListener('click', () => {
+      setFlowStep(3);
+      stopAutoPlay();
+    });
+  }
+
+  const btnWalletDonate = document.getElementById('btnWalletDonate');
+  if (btnWalletDonate) {
+    btnWalletDonate.addEventListener('click', () => {
+      setFlowStep('search');
+      stopAutoPlay();
+    });
+  }
+
+  // 11. Screen Search Actions
+  const searchFilterPills = document.querySelectorAll('.search-filter-pill');
+  searchFilterPills.forEach(pill => {
+    pill.addEventListener('click', () => {
+      // sibling pill toggle
+      const siblings = pill.parentElement.querySelectorAll('.search-filter-pill');
+      siblings.forEach(s => s.classList.remove('active'));
+      pill.classList.add('active');
+      showPhoneToast(`Đã lọc: ${pill.textContent}`, 'search');
+    });
+  });
+
+  const searchItemResult1 = document.getElementById('searchItemResult1');
+  if (searchItemResult1) {
+    searchItemResult1.addEventListener('click', () => {
+      setFlowStep(2);
+      stopAutoPlay();
+    });
+  }
+
+  const searchItemResult2 = document.getElementById('searchItemResult2');
+  if (searchItemResult2) {
+    searchItemResult2.addEventListener('click', () => {
+      showPhoneToast('Đã chọn Ô tô mô hình cổ điển (4 Xu)', 'box');
+    });
+  }
+
+  const searchItemResult3 = document.getElementById('searchItemResult3');
+  if (searchItemResult3) {
+    searchItemResult3.addEventListener('click', () => {
+      showPhoneToast('Trạm Tặng: Bạn có thể nhận món này 0 Xu', 'gift');
+    });
+  }
+
+  // 12. Full-Cycle Autoplay Engine
   function startAutoPlay() {
     isAutoPlaying = true;
     if (btnAutoPlayToggle) btnAutoPlayToggle.classList.add('playing');
     if (autoPlayLabel) autoPlayLabel.textContent = 'Đang chạy';
 
     autoPlayInterval = setInterval(() => {
-      if (currentFlowStep < 4) {
-        setFlowStep(currentFlowStep + 1);
+      const idx = flowSequence.indexOf(currentFlowStep);
+      if (idx < flowSequence.length - 1) {
+        setFlowStep(flowSequence[idx + 1]);
       } else {
-        setFlowStep(1);
+        setFlowStep(flowSequence[0]);
       }
     }, 4500);
   }
