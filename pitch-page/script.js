@@ -1140,7 +1140,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const answered = Math.min(n - 1, steps.length);
       progressFill.style.width = `${(answered / steps.length) * 100}%`;
       progress.setAttribute('aria-valuenow', String(answered));
-      stepLabel.textContent = n <= TOTAL_QUESTIONS ? `Câu ${n} / ${TOTAL_QUESTIONS}` : 'Bước cuối: nhận thưởng';
+      stepLabel.textContent = n <= TOTAL_QUESTIONS ? `Câu hỏi ${n} / ${TOTAL_QUESTIONS}` : 'Bước cuối: Nhận 5 Xu vào ví';
       backBtn.disabled = n === 1;
       const active = steps[n - 1];
       const focusTarget = n <= TOTAL_QUESTIONS
@@ -1181,12 +1181,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const phone = phoneInput.value.replace(/[\s.-]/g, '');
       if (!/^(0[35789])[0-9]{8}$/.test(phone)) {
-        errorEl.textContent = 'Số điện thoại phải là 10 chữ số Việt Nam hợp lệ (ví dụ: 0905123456).';
+        errorEl.textContent = 'Mẹ kiểm tra lại số điện thoại nhé (gồm 10 chữ số, ví dụ: 0905 123 456).';
         phoneInput.focus();
         return;
       }
       if (!consentInput.checked) {
-        errorEl.textContent = 'Vui lòng đồng ý Chính sách bảo mật để nhận ưu đãi.';
+        errorEl.textContent = 'Mẹ tích chọn đồng ý để Kindr gửi quà tặng vào ví nhé!';
         consentInput.focus();
         return;
       }
@@ -1199,7 +1199,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const origHtml = submitBtn.innerHTML;
       submitBtn.disabled = true;
-      submitBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="animation: spin 0.8s linear infinite;" aria-hidden="true"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg><span>Đang gửi...</span>';
+      submitBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="animation: spin 0.8s linear infinite;" aria-hidden="true"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg><span>Đang gửi quà...</span>';
 
       try {
         const res = await fetch(`${API_BASE_URL}/api/survey`, {
@@ -1209,21 +1209,21 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         const json = await res.json();
         if (!res.ok || !json.success) {
-          errorEl.textContent = json.error || 'Có lỗi xảy ra, mẹ vui lòng thử lại nhé!';
+          errorEl.textContent = json.error || 'Có chút trục trặc, mẹ thử bấm gửi lại giúp Kindr nhé!';
           return;
         }
 
         const d = json.data;
         setSlots(d.waiverRemaining);
         document.getElementById('surveyResultTitle').textContent = json.alreadySubmitted
-          ? 'Mẹ đã nhận ưu đãi rồi!'
-          : 'Cảm ơn mẹ đã chia sẻ!';
+          ? 'Mẹ đã nhận quà rồi nè!'
+          : 'Tuyệt vời quá mẹ ơi!';
         document.getElementById('surveyRewardCode').textContent = d.rewardCode;
 
-        const perks = [`<strong>${d.starterXu} Xu Tân Thủ</strong> vào ví khi kích hoạt ứng dụng`];
-        if (d.safeFeeWaiver) perks.push('<strong>Miễn 100% Phí Bảo Đảm</strong> cho 3 bài đăng đầu tiên');
-        perks.push('Đăng bài tại Bàn trải nghiệm: <strong>ghim vị trí Đầu Trang Chủ FPT Plaza 3 ngày</strong>');
-        perks.push('Mời bạn chung cư: <strong>+2 Xu cho cả hai</strong>');
+        const perks = [`<strong>${d.starterXu} Xu Tân Thủ (50.000đ)</strong> vào ví khi kích hoạt ứng dụng`];
+        if (d.safeFeeWaiver) perks.push('<strong>Miễn 100% Cọc Bảo Đảm</strong> cho 3 bài đăng đầu tiên');
+        perks.push('Đăng bài tại Bàn trải nghiệm: <strong>Ghim vị trí đầu Trang Chủ FPT Plaza 3 ngày</strong>');
+        perks.push('Rủ thêm mẹ cùng tầng: <strong>Tặng +2 Xu cho cả hai</strong>');
         document.getElementById('surveyPerks').innerHTML = perks.map((p) => `<li>${CHECK_SVG}<span>${p}</span></li>`).join('');
 
         form.hidden = true;
@@ -1236,7 +1236,7 @@ document.addEventListener('DOMContentLoaded', () => {
         resultEl.focus({ preventScroll: true });
       } catch (err) {
         console.error('Survey submit error:', err);
-        errorEl.textContent = 'Không thể kết nối máy chủ. Mẹ vui lòng kiểm tra mạng nhé!';
+        errorEl.textContent = 'Không thể kết nối máy chủ. Mẹ kiểm tra lại mạng giúp Kindr nhé!';
       } finally {
         submitBtn.disabled = false;
         submitBtn.innerHTML = origHtml;
