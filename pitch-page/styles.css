@@ -6006,8 +6006,12 @@ button {
   font-weight: 700;
   color: var(--accent-sage);
   background: var(--accent-sage-soft);
-  padding: 1px 8px;
+  padding: 3px 10px;
   border-radius: var(--radius-full);
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid rgba(46, 125, 50, 0.18);
+  letter-spacing: 0.02em;
 }
 
 .offer-list {
