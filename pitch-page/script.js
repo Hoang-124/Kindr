@@ -1110,140 +1110,229 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // ================= POP-UP FPT PLAZA SURVEY (POST /api/survey) =================
+  // ================= FAST CLAIM & OPTIONAL MODAL SURVEY (PHƯƠNG ÁN 1) =================
   (() => {
-    const form = document.getElementById('surveyForm');
-    if (!form) return;
+    const claimForm = document.getElementById('fastClaimForm');
+    const claimModal = document.getElementById('claimModalOverlay');
+    const claimClose = document.getElementById('claimModalClose');
+    const btnSkipSurvey = document.getElementById('btnSkipMiniSurvey');
+    const miniSurveyForm = document.getElementById('claimMiniSurveyForm');
+    const btnCopyCode = document.getElementById('btnCopyRewardCode');
+    const slotsEl = document.getElementById('surveySlotsLeft');
 
     const CAMPAIGN = 'fpt_plaza_popup';
-    const TOTAL_QUESTIONS = 5;
-    const steps = Array.from(form.querySelectorAll('.survey-step'));
-    const progress = document.getElementById('surveyProgress');
-    const progressFill = document.getElementById('surveyProgressFill');
-    const stepLabel = document.getElementById('surveyStepLabel');
-    const backBtn = document.getElementById('btn-survey-back');
-    const slotsEl = document.getElementById('surveySlotsLeft');
-    const phoneInput = document.getElementById('surveyPhone');
-    const consentInput = document.getElementById('surveyConsent');
-    const errorEl = document.getElementById('surveyError');
-    const submitBtn = document.getElementById('btn-submit-survey');
-    const resultEl = document.getElementById('surveyResult');
-    const navEl = backBtn ? backBtn.parentElement : null;
-    const CHECK_SVG = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>';
-
-    const answers = {};
-    let current = 1;
-
-    const showStep = (n, moveFocus = true) => {
-      current = n;
-      steps.forEach((s) => s.classList.toggle('active', Number(s.dataset.step) === n));
-      const answered = Math.min(n - 1, steps.length);
-      progressFill.style.width = `${(answered / steps.length) * 100}%`;
-      progress.setAttribute('aria-valuenow', String(answered));
-      stepLabel.textContent = n <= TOTAL_QUESTIONS ? `Câu ${n} / ${TOTAL_QUESTIONS}` : 'Bước cuối: nhận thưởng';
-      backBtn.disabled = n === 1;
-      const active = steps[n - 1];
-      const focusTarget = n <= TOTAL_QUESTIONS
-        ? active.querySelector('.survey-choice.selected') || active.querySelector('.survey-choice')
-        : phoneInput;
-      if (moveFocus && focusTarget) focusTarget.focus({ preventScroll: true });
-    };
+    let currentClaimedPhone = '';
+    let currentRewardCode = '';
 
     const setSlots = (remaining) => {
       if (slotsEl && Number.isFinite(remaining)) slotsEl.textContent = String(remaining);
     };
 
+    // Load initial stats
     fetch(`${API_BASE_URL}/api/survey/stats?campaign=${CAMPAIGN}`)
       .then((r) => (r.ok ? r.json() : null))
       .then((json) => json && json.data && setSlots(json.data.waiverRemaining))
-      .catch(() => { /* offline: keep default */ });
+      .catch(() => {});
 
-    form.addEventListener('click', (e) => {
-      const btn = e.target.closest('.survey-choice');
-      if (!btn) return;
-      const { key, value } = btn.dataset;
-      answers[key] = value === 'true' ? true : value === 'false' ? false : value;
-      btn.parentElement.querySelectorAll('.survey-choice').forEach((b) => {
-        const isSel = b === btn;
-        b.classList.toggle('selected', isSel);
-        b.setAttribute('aria-pressed', String(isSel));
+    function openClaimModal() {
+      if (!claimModal) return;
+      claimModal.classList.add('active');
+      document.body.style.overflow = 'hidden';
+      const closeBtn = document.getElementById('claimModalClose');
+      if (closeBtn) closeBtn.focus();
+    }
+
+    function closeClaimModal() {
+      if (!claimModal) return;
+      claimModal.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+
+    if (claimClose) claimClose.addEventListener('click', closeClaimModal);
+    if (btnSkipSurvey) btnSkipSurvey.addEventListener('click', closeClaimModal);
+    if (claimModal) {
+      claimModal.addEventListener('click', (e) => {
+        if (e.target === claimModal) closeClaimModal();
       });
-      setTimeout(() => showStep(Math.min(current + 1, steps.length)), 220);
+    }
+
+    // Modal Focus Trap & Esc Key for Claim Modal
+    window.addEventListener('keydown', (e) => {
+      if (!claimModal || !claimModal.classList.contains('active')) return;
+      if (e.key === 'Escape') {
+        closeClaimModal();
+        return;
+      }
+      if (e.key === 'Tab') {
+        const focusable = claimModal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+        if (focusable.length === 0) return;
+        const firstElem = focusable[0];
+        const lastElem = focusable[focusable.length - 1];
+        if (e.shiftKey && document.activeElement === firstElem) {
+          e.preventDefault();
+          lastElem.focus();
+        } else if (!e.shiftKey && document.activeElement === lastElem) {
+          e.preventDefault();
+          firstElem.focus();
+        }
+      }
     });
 
-    backBtn.addEventListener('click', () => {
-      if (current > 1) showStep(current - 1);
-    });
+    // Modal Copy Code button
+    if (btnCopyCode) {
+      btnCopyCode.addEventListener('click', async () => {
+        if (!currentRewardCode) return;
+        try {
+          await navigator.clipboard.writeText(currentRewardCode);
+          btnCopyCode.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg><span>Đã chép!</span>';
+          setTimeout(() => {
+            btnCopyCode.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span>Sao chép</span>';
+          }, 2000);
+        } catch (_) {}
+      });
+    }
 
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      errorEl.textContent = '';
+    // 1. Fast Claim Form Submit (Phone only)
+    if (claimForm) {
+      claimForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const phoneInput = document.getElementById('claimPhone');
+        const consentInput = document.getElementById('claimConsent');
+        const errorEl = document.getElementById('claimError');
+        const submitBtn = document.getElementById('btnFastClaim');
 
-      const phone = phoneInput.value.replace(/[\s.-]/g, '');
-      if (!/^(0[35789])[0-9]{8}$/.test(phone)) {
-        errorEl.textContent = 'Số điện thoại phải là 10 chữ số Việt Nam hợp lệ (ví dụ: 0905123456).';
-        phoneInput.focus();
-        return;
-      }
-      if (!consentInput.checked) {
-        errorEl.textContent = 'Vui lòng đồng ý Chính sách bảo mật để nhận ưu đãi.';
-        consentInput.focus();
-        return;
-      }
-      const missing = ['hasItemsToDeclutter', 'motivation', 'fearsFacebookScams', 'findsAppUseful', 'referralIntent']
-        .findIndex((k) => answers[k] === undefined);
-      if (missing !== -1) {
-        showStep(missing + 1);
-        return;
-      }
+        if (errorEl) errorEl.textContent = '';
+        const phone = (phoneInput?.value || '').replace(/[\s.-]/g, '');
 
-      const origHtml = submitBtn.innerHTML;
-      submitBtn.disabled = true;
-      submitBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="animation: spin 0.8s linear infinite;" aria-hidden="true"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg><span>Đang gửi...</span>';
-
-      try {
-        const res = await fetch(`${API_BASE_URL}/api/survey`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ...answers, phone, campaign: CAMPAIGN, consent: true }),
-        });
-        const json = await res.json();
-        if (!res.ok || !json.success) {
-          errorEl.textContent = json.error || 'Có lỗi xảy ra, mẹ vui lòng thử lại nhé!';
+        if (!/^(0[35789])[0-9]{8}$/.test(phone)) {
+          if (errorEl) errorEl.textContent = 'Số điện thoại phải là 10 chữ số Việt Nam hợp lệ (ví dụ: 0905123456).';
+          if (phoneInput) phoneInput.focus();
           return;
         }
 
-        const d = json.data;
-        setSlots(d.waiverRemaining);
-        document.getElementById('surveyResultTitle').textContent = json.alreadySubmitted
-          ? 'Mẹ đã nhận ưu đãi rồi!'
-          : 'Cảm ơn mẹ đã chia sẻ!';
-        document.getElementById('surveyRewardCode').textContent = d.rewardCode;
+        if (consentInput && !consentInput.checked) {
+          if (errorEl) errorEl.textContent = 'Vui lòng đồng ý Chính sách bảo mật để nhận ưu đãi.';
+          consentInput.focus();
+          return;
+        }
 
-        const perks = [`<strong>${d.starterXu} Xu Tân Thủ</strong> vào ví khi kích hoạt ứng dụng`];
-        if (d.safeFeeWaiver) perks.push('<strong>Miễn 100% Phí Bảo Đảm</strong> cho 3 bài đăng đầu tiên');
-        perks.push('Đăng bài tại Bàn trải nghiệm: <strong>ghim vị trí Đầu Trang Chủ FPT Plaza 3 ngày</strong>');
-        perks.push('Mời bạn chung cư: <strong>+2 Xu cho cả hai</strong>');
-        document.getElementById('surveyPerks').innerHTML = perks.map((p) => `<li>${CHECK_SVG}<span>${p}</span></li>`).join('');
+        const origHtml = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="animation: spin 0.8s linear infinite;" aria-hidden="true"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg><span>Đang đăng ký...</span>';
 
-        form.hidden = true;
-        if (navEl) navEl.hidden = true;
-        stepLabel.hidden = true;
-        progressFill.style.width = '100%';
-        progress.setAttribute('aria-valuenow', String(steps.length));
-        resultEl.hidden = false;
-        resultEl.setAttribute('tabindex', '-1');
-        resultEl.focus({ preventScroll: true });
-      } catch (err) {
-        console.error('Survey submit error:', err);
-        errorEl.textContent = 'Không thể kết nối máy chủ. Mẹ vui lòng kiểm tra mạng nhé!';
-      } finally {
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = origHtml;
-      }
-    });
+        try {
+          const res = await fetch(`${API_BASE_URL}/api/survey/claim`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ phone, campaign: CAMPAIGN, consent: true }),
+          });
+          const json = await res.json();
+          if (!res.ok || !json.success) {
+            if (errorEl) errorEl.textContent = json.error || 'Có lỗi xảy ra, mẹ vui lòng thử lại nhé!';
+            return;
+          }
 
-    showStep(1, false);
+          const d = json.data;
+          currentClaimedPhone = phone;
+          currentRewardCode = d.rewardCode;
+          setSlots(d.waiverRemaining);
+
+          const codeDisplay = document.getElementById('claimRewardCodeDisplay');
+          if (codeDisplay) codeDisplay.textContent = d.rewardCode;
+
+          const titleEl = document.getElementById('claimModalTitle');
+          if (titleEl) {
+            titleEl.textContent = json.alreadySubmitted
+              ? 'Mẹ Đã Nhận Mã Ưu Đãi Trước Đó!'
+              : 'Chào Mừng Mẹ Nhận 5 Xu Tân Thủ!';
+          }
+
+          // Reset survey section in modal
+          const surveySection = document.getElementById('claimSurveySection');
+          const unlockedBox = document.getElementById('claimSurveyUnlocked');
+          if (surveySection) surveySection.hidden = false;
+          if (unlockedBox) unlockedBox.hidden = true;
+          if (miniSurveyForm) miniSurveyForm.hidden = false;
+
+          openClaimModal();
+        } catch (err) {
+          console.error('Fast claim error:', err);
+          if (errorEl) errorEl.textContent = 'Không thể kết nối máy chủ. Mẹ vui lòng kiểm tra mạng nhé!';
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = origHtml;
+        }
+      });
+    }
+
+    // 2. Mini-Survey Choice Chips in Modal
+    if (miniSurveyForm) {
+      miniSurveyForm.addEventListener('click', (e) => {
+        const chip = e.target.closest('.survey-pill');
+        if (!chip) return;
+        const parent = chip.closest('.survey-pill-group');
+        if (!parent) return;
+        parent.querySelectorAll('.survey-pill').forEach((p) => p.classList.remove('active'));
+        chip.classList.add('active');
+      });
+
+      miniSurveyForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const errorEl = document.getElementById('miniSurveyError');
+        const submitBtn = document.getElementById('btnSubmitMiniSurvey');
+        if (errorEl) errorEl.textContent = '';
+
+        if (!currentClaimedPhone) {
+          if (errorEl) errorEl.textContent = 'Không tìm thấy số điện thoại. Vui lòng thử lại!';
+          return;
+        }
+
+        const getVal = (qName) => {
+          const group = miniSurveyForm.querySelector(`[data-q="${qName}"]`);
+          const active = group?.querySelector('.survey-pill.active');
+          const val = active?.dataset.val;
+          return val === 'true' ? true : val === 'false' ? false : val;
+        };
+
+        const answers = {
+          hasItemsToDeclutter: getVal('hasItemsToDeclutter'),
+          motivation: getVal('motivation'),
+          fearsFacebookScams: getVal('fearsFacebookScams'),
+        };
+
+        const origHtml = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="animation: spin 0.8s linear infinite;" aria-hidden="true"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg><span>Đang mở khóa...</span>';
+
+        try {
+          const res = await fetch(`${API_BASE_URL}/api/survey/answers`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              phone: currentClaimedPhone,
+              campaign: CAMPAIGN,
+              ...answers,
+            }),
+          });
+          const json = await res.json();
+          if (!res.ok || !json.success) {
+            if (errorEl) errorEl.textContent = json.error || 'Có lỗi xảy ra, mẹ vui lòng thử lại nhé!';
+            return;
+          }
+
+          miniSurveyForm.hidden = true;
+          const unlockedBox = document.getElementById('claimSurveyUnlocked');
+          if (unlockedBox) unlockedBox.hidden = false;
+          showPhoneToast('Đã mở khóa Miễn 100% Phí Bảo Đảm!', 'check');
+        } catch (err) {
+          console.error('Survey answers submit error:', err);
+          if (errorEl) errorEl.textContent = 'Không thể kết nối máy chủ. Mẹ vui lòng kiểm tra mạng nhé!';
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = origHtml;
+        }
+      });
+    }
   })();
 
   if (successModalClose) {

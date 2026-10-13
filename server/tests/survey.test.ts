@@ -55,4 +55,31 @@ describe('Pop-up FPT Plaza Survey API', () => {
     expect(res.body.data.waiverSlots).toBe(50);
     expect(res.body.data.total + res.body.data.waiverRemaining).toBe(50);
   });
+
+  it('supports two-phase flow: fast claim phone first, then answers unlock safe fee waiver', async () => {
+    // 1. Fast Claim phone only
+    const claimRes = await request(app)
+      .post('/api/survey/claim')
+      .send({ phone: '0905 999 888', consent: true });
+    expect(claimRes.status).toBe(201);
+    expect(claimRes.body.data.starterXu).toBe(5);
+    expect(claimRes.body.data.safeFeeWaiver).toBe(false);
+    expect(claimRes.body.data.rewardCode).toMatch(/^POP-[A-Z2-9]{6}$/);
+
+    // 2. Submit answers to unlock Safe Fee waiver
+    const answersRes = await request(app)
+      .post('/api/survey/answers')
+      .send({
+        phone: '0905 999 888',
+        hasItemsToDeclutter: true,
+        motivation: 'save_money',
+        fearsFacebookScams: true,
+      });
+    expect(answersRes.status).toBe(200);
+    expect(answersRes.body.data.safeFeeWaiver).toBe(true);
+
+    const doc = await PopupSurvey.findOne({ phone: '0905999888' });
+    expect(doc?.safeFeeWaiver).toBe(true);
+    expect(doc?.motivation).toBe('save_money');
+  });
 });

@@ -14,15 +14,15 @@ export interface IPopupSurvey extends Document {
   campaign: SurveyCampaign;
   phone: string;
   /** Q1 — Has used kids' toys/clothes to declutter */
-  hasItemsToDeclutter: boolean;
+  hasItemsToDeclutter?: boolean;
   /** Q2 — Main expectation when swapping */
-  motivation: SurveyMotivation;
+  motivation?: SurveyMotivation;
   /** Q3 — Worried about haggling/scams on Facebook */
-  fearsFacebookScams: boolean;
+  fearsFacebookScams?: boolean;
   /** Q4 — Finds a nearby 0đ Xu swap app useful */
-  findsAppUseful: boolean;
+  findsAppUseful?: boolean;
   /** Q5 — Willing to refer other moms in the building */
-  referralIntent: SurveyReferralIntent;
+  referralIntent?: SurveyReferralIntent;
   rewardCode: string;
   starterXu: number;
   /** First N respondents get Safe Fee waived on their first 3 posts */
@@ -39,11 +39,11 @@ const PopupSurveySchema = new Schema<IPopupSurvey>(
   {
     campaign: { type: String, enum: SURVEY_CAMPAIGNS, required: true, index: true },
     phone: { type: String, required: true, trim: true },
-    hasItemsToDeclutter: { type: Boolean, required: true },
-    motivation: { type: String, enum: SURVEY_MOTIVATIONS, required: true },
-    fearsFacebookScams: { type: Boolean, required: true },
-    findsAppUseful: { type: Boolean, required: true },
-    referralIntent: { type: String, enum: SURVEY_REFERRAL_INTENTS, required: true },
+    hasItemsToDeclutter: { type: Boolean, required: false },
+    motivation: { type: String, enum: SURVEY_MOTIVATIONS, required: false },
+    fearsFacebookScams: { type: Boolean, required: false },
+    findsAppUseful: { type: Boolean, required: false },
+    referralIntent: { type: String, enum: SURVEY_REFERRAL_INTENTS, required: false },
     rewardCode: { type: String, required: true, unique: true },
     starterXu: { type: Number, required: true, default: 5 },
     safeFeeWaiver: { type: Boolean, default: false },

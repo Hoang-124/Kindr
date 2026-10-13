@@ -48,6 +48,32 @@ const SurveySchema = z.object({
   }),
 });
 
+export const ClaimSchema = z.object({
+  campaign: z.enum(SURVEY_CAMPAIGNS).default('fpt_plaza_popup'),
+  phone: z
+    .string({ required_error: 'Vui lòng nhập số điện thoại để nhận 5 Xu' })
+    .trim()
+    .transform((v) => v.replace(/[\s.-]/g, ''))
+    .refine((v) => /^(0[35789])[0-9]{8}$/.test(v), 'Số điện thoại phải là 10 chữ số Việt Nam hợp lệ (ví dụ: 0905123456)'),
+  consent: z.literal(true, {
+    errorMap: () => ({ message: 'Vui lòng đồng ý Chính sách bảo mật để nhận ưu đãi.' }),
+  }),
+});
+
+export const AnswersSchema = z.object({
+  campaign: z.enum(SURVEY_CAMPAIGNS).default('fpt_plaza_popup'),
+  phone: z
+    .string({ required_error: 'Thiếu số điện thoại' })
+    .trim()
+    .transform((v) => v.replace(/[\s.-]/g, ''))
+    .refine((v) => /^(0[35789])[0-9]{8}$/.test(v), 'Số điện thoại không hợp lệ'),
+  hasItemsToDeclutter: z.boolean().optional(),
+  motivation: z.enum(SURVEY_MOTIVATIONS).optional(),
+  fearsFacebookScams: z.boolean().optional(),
+  findsAppUseful: z.boolean().optional(),
+  referralIntent: z.enum(SURVEY_REFERRAL_INTENTS).optional(),
+});
+
 function generateRewardCode(): string {
   // Unambiguous alphabet (no 0/O/1/I)
   const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -191,6 +217,124 @@ router.post('/', surveyLimiter, async (req: Request, res: Response): Promise<voi
     }
     console.error('Survey submit error:', error);
     res.status(500).json({ success: false, error: 'Lỗi hệ thống khi gửi khảo sát.' });
+  }
+});
+
+/**
+ * POST /api/survey/claim
+ * Phase 1 (Fast Claim): Register phone, instantly get 5 Xu rewardCode + reserve spot.
+ */
+router.post('/claim', surveyLimiter, async (req: Request, res: Response): Promise<void> => {
+  try {
+    const parsed = ClaimSchema.safeParse(req.body);
+    if (!parsed.success) {
+      const msg = parsed.error.errors[0]?.message || 'Số điện thoại không hợp lệ';
+      res.status(400).json({ success: false, error: msg });
+      return;
+    }
+    const { campaign, phone } = parsed.data;
+
+    const existing = await PopupSurvey.findOne({ campaign, phone }).lean<{ rewardCode: string; safeFeeWaiver: boolean; starterXu: number }>();
+    if (existing) {
+      res.json({
+        success: true,
+        alreadySubmitted: true,
+        message: 'Số điện thoại này đã nhận ưu đãi 5 Xu trước đó.',
+        data: {
+          rewardCode: existing.rewardCode,
+          starterXu: existing.starterXu || POPUP_STARTER_XU,
+          safeFeeWaiver: existing.safeFeeWaiver,
+          ...(await buildStats(campaign)),
+        },
+      });
+      return;
+    }
+
+    const counter = await Counter.findOneAndUpdate(
+      { _id: `survey_${campaign}` },
+      { $inc: { seq: 1 } },
+      { upsert: true, new: true }
+    );
+    const orderNumber = counter ? counter.seq : 1;
+    const clientIp = (req.headers['x-forwarded-for'] as string)?.split(',')[0] || req.socket.remoteAddress || '';
+
+    const doc = await PopupSurvey.create({
+      campaign,
+      phone,
+      rewardCode: generateRewardCode(),
+      starterXu: POPUP_STARTER_XU,
+      safeFeeWaiver: false,
+      orderNumber,
+      ip: clientIp,
+      consentAt: new Date(),
+    });
+
+    res.status(201).json({
+      success: true,
+      alreadySubmitted: false,
+      message: `Chào mừng mẹ! Đã bảo lưu ${POPUP_STARTER_XU} Xu Tân Thủ vào ví tài khoản.`,
+      data: {
+        rewardCode: doc.rewardCode,
+        starterXu: doc.starterXu,
+        safeFeeWaiver: doc.safeFeeWaiver,
+        orderNumber: doc.orderNumber,
+        ...(await buildStats(campaign)),
+      },
+    });
+  } catch (error: any) {
+    if (error?.code === 11000) {
+      res.status(409).json({ success: false, error: 'Yêu cầu đang xử lý, vui lòng thử lại.' });
+      return;
+    }
+    console.error('Survey claim error:', error);
+    res.status(500).json({ success: false, error: 'Lỗi hệ thống khi nhận ưu đãi.' });
+  }
+});
+
+/**
+ * POST /api/survey/answers
+ * Phase 2 (Optional survey): Answer questions to unlock 100% Safe Fee waiver perk.
+ */
+router.post('/answers', surveyLimiter, async (req: Request, res: Response): Promise<void> => {
+  try {
+    const parsed = AnswersSchema.safeParse(req.body);
+    if (!parsed.success) {
+      const msg = parsed.error.errors[0]?.message || 'Dữ liệu không hợp lệ';
+      res.status(400).json({ success: false, error: msg });
+      return;
+    }
+    const { campaign, phone, ...answers } = parsed.data;
+
+    const doc = await PopupSurvey.findOne({ campaign, phone });
+    if (!doc) {
+      res.status(404).json({ success: false, error: 'Chưa tìm thấy đăng ký của số điện thoại này. Mẹ vui lòng nhận 5 Xu trước nhé!' });
+      return;
+    }
+
+    if (answers.hasItemsToDeclutter !== undefined) doc.hasItemsToDeclutter = answers.hasItemsToDeclutter;
+    if (answers.motivation !== undefined) doc.motivation = answers.motivation;
+    if (answers.fearsFacebookScams !== undefined) doc.fearsFacebookScams = answers.fearsFacebookScams;
+    if (answers.findsAppUseful !== undefined) doc.findsAppUseful = answers.findsAppUseful;
+    if (answers.referralIntent !== undefined) doc.referralIntent = answers.referralIntent;
+
+    // Grant Safe Fee Waiver for answering the survey!
+    doc.safeFeeWaiver = true;
+    await doc.save();
+
+    res.json({
+      success: true,
+      message: 'Đã mở khóa thành công Suất Miễn 100% Phí Bảo Đảm!',
+      data: {
+        rewardCode: doc.rewardCode,
+        starterXu: doc.starterXu,
+        safeFeeWaiver: doc.safeFeeWaiver,
+        orderNumber: doc.orderNumber,
+        ...(await buildStats(campaign)),
+      },
+    });
+  } catch (error: any) {
+    console.error('Survey answers error:', error);
+    res.status(500).json({ success: false, error: 'Lỗi hệ thống khi lưu câu trả lời khảo sát.' });
   }
 });
 

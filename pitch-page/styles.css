@@ -6387,3 +6387,346 @@ button {
     transition: none;
   }
 }
+
+/* ================= FAST CLAIM CARD & MINI-SURVEY MODAL (PHƯƠNG ÁN 1) ================= */
+.fast-claim-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.fast-claim-desc {
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--text-body);
+  margin: 0;
+}
+
+.fast-claim-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.fast-claim-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.fast-claim-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-headline);
+}
+
+.fast-claim-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  border: 1.5px solid var(--border-subtle);
+  border-radius: var(--radius-md, 12px);
+  background: var(--surface-card);
+  transition: all 0.2s ease;
+  min-height: 48px;
+}
+
+.fast-claim-input-wrap:focus-within {
+  border-color: var(--brand-primary);
+  box-shadow: 0 0 0 3px rgba(235, 94, 40, 0.15);
+}
+
+.claim-phone-ic {
+  position: absolute;
+  left: 14px;
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.fast-claim-input-wrap input {
+  width: 100%;
+  height: 48px;
+  border: none;
+  background: transparent;
+  padding: 0 14px 0 42px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-headline);
+  outline: none;
+  font-family: inherit;
+}
+
+.fast-claim-input-wrap input::placeholder {
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.btn-claim-submit {
+  min-height: 48px;
+  font-size: 0.98rem;
+  font-weight: 700;
+  border-radius: var(--radius-md, 12px);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(235, 94, 40, 0.25);
+  transition: all 0.2s ease;
+}
+
+.btn-claim-submit:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(235, 94, 40, 0.35);
+}
+
+.fast-claim-footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 6px;
+  font-size: 0.74rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.fast-claim-footer span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Modal Box Claim Styling */
+.modal-box-claim {
+  max-width: 520px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 28px 24px;
+  border-radius: 20px;
+  background: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-xl);
+}
+
+.claim-modal-head {
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.claim-modal-subtitle {
+  font-size: 0.88rem;
+  color: var(--text-body);
+  margin: 6px 0 12px;
+}
+
+.claim-code-box {
+  background: rgba(217, 119, 6, 0.08);
+  border: 2px dashed rgba(217, 119, 6, 0.45);
+  border-radius: 14px;
+  padding: 12px 16px;
+  margin: 12px 0;
+  text-align: center;
+}
+
+.claim-code-label {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #B45309;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.claim-code-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.claim-code-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #B45309;
+  letter-spacing: 0.06em;
+}
+
+.btn-copy-code {
+  background: var(--surface-card);
+  border: 1.5px solid var(--border-subtle);
+  border-radius: 8px;
+  padding: 4px 10px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--text-headline);
+  transition: all 0.2s ease;
+  min-height: 32px;
+}
+
+.btn-copy-code:hover {
+  border-color: var(--brand-primary);
+  color: var(--brand-primary);
+  background: var(--brand-primary-soft);
+}
+
+.claim-code-hint {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  display: block;
+  margin-top: 4px;
+}
+
+.claim-initial-perks {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-align: left;
+  font-size: 0.84rem;
+  color: var(--text-body);
+  background: var(--bg-card);
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border-subtle);
+  margin-top: 10px;
+}
+
+.claim-initial-perks li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Survey section in modal */
+.claim-survey-section {
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 16px;
+  margin-top: 14px;
+  text-align: left;
+}
+
+.claim-survey-banner {
+  background: rgba(235, 94, 40, 0.06);
+  border: 1px solid rgba(235, 94, 40, 0.18);
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 14px;
+}
+
+.survey-gift-pill {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--brand-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  display: inline-block;
+  margin-bottom: 4px;
+}
+
+.claim-survey-heading {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--text-headline);
+  margin: 0 0 4px;
+}
+
+.claim-survey-bonus {
+  font-size: 0.82rem;
+  color: var(--text-body);
+  margin: 0;
+}
+
+.survey-q-group {
+  margin-bottom: 12px;
+}
+
+.survey-q-title {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-headline);
+  display: block;
+  margin-bottom: 6px;
+}
+
+.survey-pill-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.survey-pill {
+  min-height: 42px;
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  border: 1.5px solid var(--border-subtle);
+  background: var(--surface-card);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-body);
+  cursor: pointer;
+  transition: all 0.18s ease;
+  font-family: inherit;
+}
+
+.survey-pill:hover {
+  border-color: var(--brand-primary);
+  color: var(--brand-primary);
+}
+
+.survey-pill.active {
+  border-color: var(--brand-primary);
+  background: var(--brand-primary-soft);
+  color: var(--brand-primary);
+  font-weight: 700;
+}
+
+.claim-survey-unlocked {
+  background: var(--accent-sage-soft);
+  border: 1.5px solid var(--accent-sage);
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin: 12px 0;
+  animation: fadeIn 0.3s ease;
+}
+
+.unlocked-badge-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.unlocked-badge-box strong {
+  color: var(--text-headline);
+  font-size: 0.88rem;
+  display: block;
+}
+
+.unlocked-badge-box p {
+  color: var(--text-body);
+  font-size: 0.82rem;
+  margin: 2px 0 0;
+}
+
+.btn-skip-modal {
+  background: transparent;
+  border: none;
+  width: 100%;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  margin-top: 10px;
+  cursor: pointer;
+  padding: 8px;
+  text-decoration: underline;
+  transition: color 0.2s ease;
+}
+
+.btn-skip-modal:hover {
+  color: var(--text-headline);
+}

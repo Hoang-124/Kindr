@@ -1568,103 +1568,52 @@
           </article>
         </div>
 
-        <!-- Interactive survey -->
-        <aside class="survey-card" id="popupSurvey" aria-labelledby="survey-title">
+        <!-- Fast Claim Card (Phase 1: 1 Touch Phone Claim) -->
+        <aside class="survey-card fast-claim-card" id="popupSurvey" aria-labelledby="claim-card-title">
           <div class="survey-top">
             <div>
               <span class="survey-kicker">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
-                Khảo sát 30 giây
+                Ưu Đãi Tân Thủ • 0đ Chi Phí
               </span>
-              <h3 id="survey-title">Trả lời 5 câu — nhận 5 Xu Tân Thủ</h3>
+              <h3 id="claim-card-title">Nhận 5 Xu Tân Thủ &amp; Giữ Chỗ</h3>
             </div>
             <div class="survey-slots" aria-live="polite">
               <strong id="surveySlotsLeft">50</strong>
-              <span>/ 50 suất Miễn Cọc Bảo Đảm</span>
+              <span>/ 50 suất ưu tiên</span>
             </div>
           </div>
 
-          <div class="survey-progress" role="progressbar" aria-valuemin="0" aria-valuemax="6" aria-valuenow="0" id="surveyProgress">
-            <div class="survey-progress-fill" id="surveyProgressFill"></div>
-          </div>
-          <p class="survey-step-label" id="surveyStepLabel">Câu 1 / 5</p>
+          <p class="fast-claim-desc">
+            Chỉ mất đúng 5 giây — nhập số điện thoại để giữ ngay <strong>5 Xu (50.000 VNĐ)</strong> vào ví Kindr khi kích hoạt tại FPT Plaza!
+          </p>
 
-          <form id="surveyForm" novalidate>
-            <fieldset class="survey-step active" data-step="1">
-              <legend>Chị có đang có đồ chơi / quần áo cũ của bé muốn dọn dẹp cho gọn nhà không?</legend>
-              <div class="survey-choices">
-                <button type="button" class="survey-choice" data-key="hasItemsToDeclutter" data-value="true" id="sq1-yes">Có</button>
-                <button type="button" class="survey-choice" data-key="hasItemsToDeclutter" data-value="false" id="sq1-no">Không</button>
+          <form id="fastClaimForm" novalidate class="fast-claim-form">
+            <div class="fast-claim-field">
+              <label for="claimPhone" class="fast-claim-label">Số điện thoại của mẹ:</label>
+              <div class="fast-claim-input-wrap">
+                <svg class="claim-phone-ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                <input type="tel" id="claimPhone" name="phone" inputmode="tel" autocomplete="tel" placeholder="0905 123 456" maxlength="13" required>
               </div>
-            </fieldset>
+            </div>
 
-            <fieldset class="survey-step" data-step="2">
-              <legend>Chị mong chờ điều gì nhất khi đổi đồ?</legend>
-              <div class="survey-choices survey-choices-col">
-                <button type="button" class="survey-choice" data-key="motivation" data-value="save_money" id="sq2-save">Tiết kiệm chi phí</button>
-                <button type="button" class="survey-choice" data-key="motivation" data-value="declutter" id="sq2-declutter">Gọn nhà</button>
-                <button type="button" class="survey-choice" data-key="motivation" data-value="new_items" id="sq2-new">Tìm đồ mới cho con</button>
-              </div>
-            </fieldset>
+            <label class="survey-consent" for="claimConsent">
+              <input type="checkbox" id="claimConsent" checked required>
+              <span>Tôi đồng ý để Kindr lưu số điện thoại để nhận 5 Xu và thông báo mở ứng dụng theo <a href="privacy.html" target="_blank" rel="noopener">Chính sách bảo mật</a>.</span>
+            </label>
 
-            <fieldset class="survey-step" data-step="3">
-              <legend>Chị có ngại thanh lý đồ cũ trên Facebook vì bị kỳ kèo ép giá hoặc sợ lừa đảo không?</legend>
-              <div class="survey-choices">
-                <button type="button" class="survey-choice" data-key="fearsFacebookScams" data-value="true" id="sq3-yes">Có</button>
-                <button type="button" class="survey-choice" data-key="fearsFacebookScams" data-value="false" id="sq3-no">Không</button>
-              </div>
-            </fieldset>
+            <p class="survey-error" id="claimError" role="alert"></p>
 
-            <fieldset class="survey-step" data-step="4">
-              <legend>Chị thấy ứng dụng trao đổi đồ 0 đồng bằng Xu Kindr gần nhà có giúp ích cho chị không?</legend>
-              <div class="survey-choices">
-                <button type="button" class="survey-choice" data-key="findsAppUseful" data-value="true" id="sq4-yes">Có</button>
-                <button type="button" class="survey-choice" data-key="findsAppUseful" data-value="false" id="sq4-no">Không</button>
-              </div>
-            </fieldset>
-
-            <fieldset class="survey-step" data-step="5">
-              <legend>Chị có sẵn lòng giới thiệu ứng dụng này cho các mẹ khác trong chung cư mình không?</legend>
-              <div class="survey-choices">
-                <button type="button" class="survey-choice" data-key="referralIntent" data-value="willing" id="sq5-willing">Sẵn lòng</button>
-                <button type="button" class="survey-choice" data-key="referralIntent" data-value="try_first" id="sq5-try">Cần dùng thử đã</button>
-              </div>
-            </fieldset>
-
-            <fieldset class="survey-step" data-step="6">
-              <legend>Nhập số điện thoại để giữ 5 Xu Tân Thủ</legend>
-              <label class="survey-field" for="surveyPhone">
-                <span class="sr-only">Số điện thoại</span>
-                <input type="tel" id="surveyPhone" name="phone" inputmode="tel" autocomplete="tel" placeholder="0905 123 456" maxlength="13" required>
-              </label>
-              <label class="survey-consent" for="surveyConsent">
-                <input type="checkbox" id="surveyConsent" required>
-                <span>Tôi đồng ý để Kindr lưu câu trả lời và số điện thoại theo <a href="privacy.html" target="_blank" rel="noopener">Chính sách bảo mật</a>.</span>
-              </label>
-              <p class="survey-error" id="surveyError" role="alert"></p>
-              <button type="submit" class="btn btn-primary survey-submit" id="btn-submit-survey">
-                <span>Nhận 5 Xu Tân Thủ</span>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-              </button>
-            </fieldset>
+            <button type="submit" class="btn btn-primary btn-claim-submit" id="btnFastClaim">
+              <span>Nhận Ngay 5 Xu Vào Ví</span>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </button>
           </form>
 
-          <div class="survey-nav">
-            <button type="button" class="survey-back" id="btn-survey-back" disabled>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
-              Quay lại
-            </button>
-          </div>
-
-          <div class="survey-result" id="surveyResult" hidden>
-            <div class="survey-result-icon" aria-hidden="true">
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
-            </div>
-            <h4 id="surveyResultTitle">Cảm ơn mẹ!</h4>
-            <p id="surveyResultDesc">Mã nhận thưởng của mẹ:</p>
-            <div class="survey-code" id="surveyRewardCode">POP-XXXXXX</div>
-            <ul class="survey-perks" id="surveyPerks"></ul>
-            <p class="survey-note">Đưa mã này cho nhân viên tại bàn trải nghiệm để kích hoạt ưu đãi trên ứng dụng.</p>
+          <div class="fast-claim-footer">
+            <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> 1 chạm trong 5 giây</span>
+            <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> 0đ phụ phí</span>
+            <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Bảo mật tuyệt đối</span>
           </div>
         </aside>
       </div>
@@ -1998,6 +1947,106 @@
       <div class="modal-actions">
         <button type="button" class="btn btn-primary btn-full" id="btnModalCloseSecondary">
           <span>Hoàn Tất &amp; Khám Phá Thêm Giải Pháp</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= FAST CLAIM CELEBRATION & MINI-SURVEY MODAL ================= -->
+  <div class="modal-overlay" id="claimModalOverlay" role="dialog" aria-modal="true" aria-labelledby="claimModalTitle">
+    <div class="modal-box modal-box-claim">
+      <button class="modal-close" id="claimModalClose" aria-label="Đóng cửa sổ">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+
+      <div class="claim-modal-head">
+        <div class="modal-celebrate-badge">
+          <img src="kindr-mascot.png" alt="Biểu tượng Gấu Kindy" class="modal-mascot-img" width="56" height="56" loading="lazy" decoding="async">
+        </div>
+        <h3 class="modal-title" id="claimModalTitle">Chào Mừng Mẹ Nhận 5 Xu Tân Thủ!</h3>
+        <p class="claim-modal-subtitle">Số điện thoại của mẹ đã được bảo lưu <strong>5 Xu Tân Thủ (50.000 VNĐ)</strong> vào ví tài khoản.</p>
+        
+        <div class="claim-code-box">
+          <span class="claim-code-label">MÃ ƯU ĐÃI CỦA MẸ</span>
+          <div class="claim-code-row">
+            <strong class="claim-code-val" id="claimRewardCodeDisplay">POP-XXXXXX</strong>
+            <button type="button" class="btn-copy-code" id="btnCopyRewardCode" title="Sao chép mã">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              <span>Sao chép</span>
+            </button>
+          </div>
+          <span class="claim-code-hint">Đưa mã này cho nhân viên tại bàn hoặc nhập vào ứng dụng khi ra mắt</span>
+        </div>
+
+        <ul class="claim-initial-perks">
+          <li>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            <span><strong>5 Xu Tân Thủ</strong> bảo lưu an toàn vào ví ứng dụng</span>
+          </li>
+          <li>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            <span>Suất trải nghiệm sớm tại cụm chung cư FPT Plaza</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Optional Unlockable Bonus Survey -->
+      <div class="claim-survey-section" id="claimSurveySection">
+        <div class="claim-survey-banner">
+          <span class="survey-gift-pill">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" style="vertical-align: middle; margin-right: 4px;" aria-hidden="true"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
+            ĐẶC QUYỀN MỞ KHÓA THÊM
+          </span>
+          <h4 class="claim-survey-heading">Mẹ chạm nhanh 3 câu (20 giây) để nhận thêm:</h4>
+          <p class="claim-survey-bonus"><strong>Miễn 100% Phí Bảo Đảm</strong> cho 3 bài đăng đầu + <strong>Ghim Đầu Trang Chủ 3 ngày</strong>!</p>
+        </div>
+
+        <form id="claimMiniSurveyForm" class="claim-mini-survey" novalidate>
+          <div class="survey-q-group">
+            <span class="survey-q-title">1. Nhà mẹ có đồ chơi / đồ dùng bé muốn thanh lý cho gọn nhà?</span>
+            <div class="survey-pill-group" data-q="hasItemsToDeclutter">
+              <button type="button" class="survey-pill active" data-val="true">Có, nhiều lắm</button>
+              <button type="button" class="survey-pill" data-val="false">Chưa có</button>
+            </div>
+          </div>
+
+          <div class="survey-q-group">
+            <span class="survey-q-title">2. Điều mẹ mong muốn nhất khi trao đổi đồ cũ?</span>
+            <div class="survey-pill-group" data-q="motivation">
+              <button type="button" class="survey-pill active" data-val="save_money">Tiết kiệm tiền</button>
+              <button type="button" class="survey-pill" data-val="declutter">Gọn nhà đỡ chật</button>
+              <button type="button" class="survey-pill" data-val="new_items">Đổi đồ mới cho bé</button>
+            </div>
+          </div>
+
+          <div class="survey-q-group">
+            <span class="survey-q-title">3. Mẹ có ngại thanh lý trên mạng vì sợ hàng lỗi hoặc lừa đảo?</span>
+            <div class="survey-pill-group" data-q="fearsFacebookScams">
+              <button type="button" class="survey-pill active" data-val="true">Rất ngại &amp; sợ rủi ro</button>
+              <button type="button" class="survey-pill" data-val="false">Bình thường</button>
+            </div>
+          </div>
+
+          <p class="survey-error" id="miniSurveyError" role="alert"></p>
+
+          <button type="submit" class="btn btn-primary btn-full" id="btnSubmitMiniSurvey">
+            <span>Mở Khóa Miễn Phí Cọc Ngay</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+          </button>
+        </form>
+
+        <div class="claim-survey-unlocked" id="claimSurveyUnlocked" hidden>
+          <div class="unlocked-badge-box">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            <div>
+              <strong>Đã Mở Khóa Thành Công 100% Đặc Quyền!</strong>
+              <p>Mẹ đã nhận thêm suất <strong>Miễn 100% Phí Bảo Đảm 3 bài đăng đầu</strong> + <strong>Ghim Đầu Trang Chủ</strong>.</p>
+            </div>
+          </div>
+        </div>
+
+        <button type="button" class="btn-skip-modal" id="btnSkipMiniSurvey">
+          <span>Để sau, tôi đã lưu mã rồi</span>
         </button>
       </div>
     </div>
