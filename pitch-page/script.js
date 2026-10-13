@@ -1164,6 +1164,15 @@ document.addEventListener('DOMContentLoaded', () => {
       if (moveFocus && focusTarget) focusTarget.focus({ preventScroll: true });
     };
 
+    const setSlots = (remaining) => {
+      if (slotsEl && Number.isFinite(remaining)) slotsEl.textContent = String(remaining);
+    };
+
+    fetch(`${API_BASE_URL}/api/survey/stats?campaign=fpt_plaza_popup`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((json) => json && json.data && setSlots(json.data.waiverRemaining))
+      .catch(() => { /* offline: keep default */ });
+
     const scrollToWaitlist = () => {
       const waitlistSec = document.getElementById('waitlist');
       if (waitlistSec) {
