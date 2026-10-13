@@ -1110,12 +1110,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // ================= POP-UP FPT PLAZA SURVEY (POST /api/survey) =================
+  // ================= POP-UP FPT PLAZA SURVEY (5 CÂU HỎI -> ĐIỀN KHUNG BÊN DƯỚI) =================
   (() => {
     const form = document.getElementById('surveyForm');
     if (!form) return;
 
-    const CAMPAIGN = 'fpt_plaza_popup';
     const TOTAL_QUESTIONS = 5;
     const steps = Array.from(form.querySelectorAll('.survey-step'));
     const progress = document.getElementById('surveyProgress');
@@ -1123,13 +1122,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const stepLabel = document.getElementById('surveyStepLabel');
     const backBtn = document.getElementById('btn-survey-back');
     const slotsEl = document.getElementById('surveySlotsLeft');
-    const phoneInput = document.getElementById('surveyPhone');
-    const consentInput = document.getElementById('surveyConsent');
-    const errorEl = document.getElementById('surveyError');
-    const submitBtn = document.getElementById('btn-submit-survey');
     const resultEl = document.getElementById('surveyResult');
     const navEl = backBtn ? backBtn.parentElement : null;
-    const CHECK_SVG = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>';
+    const scrollBtn = document.getElementById('btn-survey-scroll-waitlist');
 
     const answers = {};
     let current = 1;
@@ -1137,26 +1132,46 @@ document.addEventListener('DOMContentLoaded', () => {
     const showStep = (n, moveFocus = true) => {
       current = n;
       steps.forEach((s) => s.classList.toggle('active', Number(s.dataset.step) === n));
-      const answered = Math.min(n - 1, steps.length);
-      progressFill.style.width = `${(answered / steps.length) * 100}%`;
-      progress.setAttribute('aria-valuenow', String(answered));
-      stepLabel.textContent = n <= TOTAL_QUESTIONS ? `Câu hỏi ${n} / ${TOTAL_QUESTIONS}` : 'Bước cuối: Nhận 5 Xu vào ví';
-      backBtn.disabled = n === 1;
+      const answered = Math.min(n - 1, TOTAL_QUESTIONS);
+      if (progressFill) progressFill.style.width = `${(answered / TOTAL_QUESTIONS) * 100}%`;
+      if (progress) progress.setAttribute('aria-valuenow', String(answered));
+      if (stepLabel) stepLabel.textContent = `Câu hỏi ${n} / ${TOTAL_QUESTIONS}`;
+      if (backBtn) backBtn.disabled = n === 1;
       const active = steps[n - 1];
-      const focusTarget = n <= TOTAL_QUESTIONS
-        ? active.querySelector('.survey-choice.selected') || active.querySelector('.survey-choice')
-        : phoneInput;
+      const focusTarget = active ? (active.querySelector('.survey-choice.selected') || active.querySelector('.survey-choice')) : null;
       if (moveFocus && focusTarget) focusTarget.focus({ preventScroll: true });
     };
 
-    const setSlots = (remaining) => {
-      if (slotsEl && Number.isFinite(remaining)) slotsEl.textContent = String(remaining);
+    const scrollToWaitlist = () => {
+      const waitlistSec = document.getElementById('waitlist');
+      if (waitlistSec) {
+        waitlistSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        const emailInput = document.getElementById('waitlistEmail');
+        if (emailInput) setTimeout(() => emailInput.focus(), 650);
+      }
     };
 
-    fetch(`${API_BASE_URL}/api/survey/stats?campaign=${CAMPAIGN}`)
-      .then((r) => (r.ok ? r.json() : null))
-      .then((json) => json && json.data && setSlots(json.data.waiverRemaining))
-      .catch(() => { /* offline: keep default */ });
+    const completeSurvey = () => {
+      if (progressFill) progressFill.style.width = '100%';
+      if (progress) progress.setAttribute('aria-valuenow', String(TOTAL_QUESTIONS));
+      if (stepLabel) stepLabel.textContent = 'Hoàn thành 5/5 câu hỏi';
+      form.hidden = true;
+      if (navEl) navEl.hidden = true;
+      if (resultEl) {
+        resultEl.hidden = false;
+        resultEl.setAttribute('tabindex', '-1');
+        resultEl.focus({ preventScroll: true });
+      }
+
+      // Lưu câu trả lời khảo sát để đồng bộ cùng form đăng ký
+      window.kindrSurveyAnswers = { ...answers };
+      try {
+        localStorage.setItem('kindr_survey_answers', JSON.stringify(answers));
+      } catch (e) {}
+
+      // Tự động cuộn mượt xuống khung Cán mốc 200 Mẹ Tiên Phong bên dưới sau 650ms
+      setTimeout(scrollToWaitlist, 650);
+    };
 
     form.addEventListener('click', (e) => {
       const btn = e.target.closest('.survey-choice');
@@ -1168,80 +1183,26 @@ document.addEventListener('DOMContentLoaded', () => {
         b.classList.toggle('selected', isSel);
         b.setAttribute('aria-pressed', String(isSel));
       });
-      setTimeout(() => showStep(Math.min(current + 1, steps.length)), 220);
-    });
 
-    backBtn.addEventListener('click', () => {
-      if (current > 1) showStep(current - 1);
-    });
-
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      errorEl.textContent = '';
-
-      const phone = phoneInput.value.replace(/[\s.-]/g, '');
-      if (!/^(0[35789])[0-9]{8}$/.test(phone)) {
-        errorEl.textContent = 'Vui lòng nhập số điện thoại hợp lệ gồm 10 chữ số (ví dụ: 0905 123 456).';
-        phoneInput.focus();
-        return;
-      }
-      if (!consentInput.checked) {
-        errorEl.textContent = 'Vui lòng đồng ý Chính sách bảo mật để nhận ưu đãi.';
-        consentInput.focus();
-        return;
-      }
-      const missing = ['hasItemsToDeclutter', 'motivation', 'fearsFacebookScams', 'findsAppUseful', 'referralIntent']
-        .findIndex((k) => answers[k] === undefined);
-      if (missing !== -1) {
-        showStep(missing + 1);
-        return;
-      }
-
-      const origHtml = submitBtn.innerHTML;
-      submitBtn.disabled = true;
-      submitBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="animation: spin 0.8s linear infinite;" aria-hidden="true"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg><span>Đang gửi thông tin...</span>';
-
-      try {
-        const res = await fetch(`${API_BASE_URL}/api/survey`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ...answers, phone, campaign: CAMPAIGN, consent: true }),
-        });
-        const json = await res.json();
-        if (!res.ok || !json.success) {
-          errorEl.textContent = json.error || 'Có lỗi xảy ra, vui lòng thử lại.';
-          return;
-        }
-
-        const d = json.data;
-        setSlots(d.waiverRemaining);
-        document.getElementById('surveyResultTitle').textContent = json.alreadySubmitted
-          ? 'Chị đã nhận ưu đãi này rồi!'
-          : 'Hoàn thành khảo sát!';
-        document.getElementById('surveyRewardCode').textContent = d.rewardCode;
-
-        const perks = [`<strong>${d.starterXu} Xu Tân Thủ (50.000đ)</strong> vào ví khi kích hoạt ứng dụng`];
-        if (d.safeFeeWaiver) perks.push('<strong>Miễn 100% Phí Bảo Đảm</strong> cho 3 bài đăng đầu tiên');
-        perks.push('Đăng bài tại bàn trải nghiệm: <strong>Ghim vị trí đầu Trang Chủ FPT Plaza 3 ngày</strong>');
-        perks.push('Giới thiệu cư dân cùng chung cư: <strong>Tặng +2 Xu cho cả hai</strong>');
-        document.getElementById('surveyPerks').innerHTML = perks.map((p) => `<li>${CHECK_SVG}<span>${p}</span></li>`).join('');
-
-        form.hidden = true;
-        if (navEl) navEl.hidden = true;
-        stepLabel.hidden = true;
-        progressFill.style.width = '100%';
-        progress.setAttribute('aria-valuenow', String(steps.length));
-        resultEl.hidden = false;
-        resultEl.setAttribute('tabindex', '-1');
-        resultEl.focus({ preventScroll: true });
-      } catch (err) {
-        console.error('Survey submit error:', err);
-        errorEl.textContent = 'Không thể kết nối máy chủ. Vui lòng kiểm tra lại kết nối mạng.';
-      } finally {
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = origHtml;
+      if (current < TOTAL_QUESTIONS) {
+        setTimeout(() => showStep(current + 1), 220);
+      } else {
+        setTimeout(completeSurvey, 260);
       }
     });
+
+    if (backBtn) {
+      backBtn.addEventListener('click', () => {
+        if (current > 1) showStep(current - 1);
+      });
+    }
+
+    if (scrollBtn) {
+      scrollBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        scrollToWaitlist();
+      });
+    }
 
     showStep(1, false);
   })();

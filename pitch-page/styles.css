@@ -6357,6 +6357,26 @@ button {
   color: var(--text-muted);
 }
 
+.survey-cta-scroll {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  margin-top: 16px;
+  padding: 12px 18px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: 0 8px 20px -4px rgba(194, 65, 12, 0.35);
+  transition: transform var(--trans-fast), box-shadow var(--trans-fast);
+}
+
+.survey-cta-scroll:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px -4px rgba(194, 65, 12, 0.45);
+}
+
 @media (max-width: 960px) {
   .popup-grid {
     grid-template-columns: 1fr;
