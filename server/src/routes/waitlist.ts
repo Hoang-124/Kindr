@@ -43,6 +43,7 @@ const WaitlistSchema = z.object({
   interest: z
     .enum(['Đồ chơi vận động', 'Xe đẩy, nôi cũi', 'Quần áo Nous/cotton', 'Sách Ehon'])
     .default('Đồ chơi vận động'),
+  surveyAnswers: z.record(z.any()).optional(),
   utmSource: z.string().trim().max(50).optional().default('direct'),
   utmMedium: z.string().trim().max(50).optional().default('web'),
   utmCampaign: z.string().trim().max(50).optional().default('mvp_launch'),
@@ -170,7 +171,7 @@ router.post('/', waitlistSubmitLimiter, async (req: Request, res: Response): Pro
       return;
     }
 
-    const { email, phone, userRole, interest, utmSource, utmMedium, utmCampaign } = parseResult.data;
+    const { email, phone, userRole, interest, surveyAnswers, utmSource, utmMedium, utmCampaign } = parseResult.data;
     const cleanPhone = phone ? phone.replace(/[\s.-]/g, '') : '';
     const clientIp = (req.headers['x-forwarded-for'] as string)?.split(',')[0] || req.socket.remoteAddress || '';
 
@@ -220,6 +221,7 @@ router.post('/', waitlistSubmitLimiter, async (req: Request, res: Response): Pro
       phone: cleanPhone,
       userRole,
       interest,
+      surveyAnswers: surveyAnswers || undefined,
       ip: clientIp,
       utmSource,
       utmMedium,

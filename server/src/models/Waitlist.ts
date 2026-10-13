@@ -6,6 +6,7 @@ export interface IWaitlist extends Document {
   phone?: string;
   userRole?: string;
   interest?: string;
+  surveyAnswers?: Record<string, any>;
   ip?: string;
   utmSource?: string;
   utmMedium?: string;
@@ -46,6 +47,10 @@ const WaitlistSchema = new Schema<IWaitlist>(
       type: String,
       trim: true,
       default: 'Đồ chơi vận động',
+    },
+    surveyAnswers: {
+      type: Schema.Types.Mixed,
+      default: null,
     },
     ip: {
       type: String,

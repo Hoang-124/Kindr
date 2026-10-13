@@ -1035,6 +1035,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
       try {
         const payloadRole = selectedRole && selectedRole.value === 'genz' ? 'genz' : 'mom';
+        const storedSurvey = window.kindrSurveyAnswers || (() => {
+          try { return JSON.parse(localStorage.getItem('kindr_survey_answers')); } catch (e) { return null; }
+        })();
+
         const response = await fetch(`${API_BASE_URL}/api/waitlist`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -1043,6 +1047,7 @@ document.addEventListener('DOMContentLoaded', () => {
             phone: waitlistPhone ? waitlistPhone.value.trim() : '',
             userRole: payloadRole,
             interest: interestInput ? interestInput.value : 'Đồ chơi vận động',
+            surveyAnswers: storedSurvey || undefined,
             consent: true,
             utmSource: 'landing_compact',
             utmMedium: payloadRole,
@@ -1053,6 +1058,23 @@ document.addEventListener('DOMContentLoaded', () => {
         const json = await response.json();
 
         if (response.ok && json.success) {
+          // If phone was provided and survey answers exist, also sync to /api/survey
+          const cleanPhoneVal = waitlistPhone ? waitlistPhone.value.trim() : '';
+          if (cleanPhoneVal && storedSurvey && Object.keys(storedSurvey).length >= 5) {
+            try {
+              fetch(`${API_BASE_URL}/api/survey`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  ...storedSurvey,
+                  phone: cleanPhoneVal,
+                  campaign: 'fpt_plaza_popup',
+                  consent: true,
+                }),
+              }).catch(() => {});
+            } catch (e) {}
+          }
+
           const orderNum = json.orderNumber || json.data?.orderNumber || 1;
           const newTotal = json.total || json.data?.total;
           const newTarget = json.target || json.data?.target || 200;
