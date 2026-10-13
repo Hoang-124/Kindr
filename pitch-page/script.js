@@ -57,55 +57,55 @@ document.addEventListener('DOMContentLoaded', () => {
     1: {
       pill: 'Bước 1/5: Chọn Đồ',
       title: 'Khám phá đồ mẹ bé chất lượng cao trong bán kính 1km',
-      body: 'Giao diện thực tế app Kindr: Mẹ Lan duyệt nguồn cấp đồ chơi gần nhà tại cụm chung cư FPT Plaza. Người bán đã cọc trước 10% Safe Fee cam kết chuẩn mô tả.',
+      body: 'Giao diện thực tế ứng dụng Kindr: Mẹ Lan duyệt nguồn cấp đồ chơi gần nhà tại cụm chung cư FPT Plaza. Người bán đã cọc trước 10% Phí Bảo Đảm cam kết chuẩn mô tả.',
       h1: 'Ký quỹ kép song phương: Cả 2 bên đều được bảo hộ an toàn',
       h2: 'Vị trí siêu cục bộ: Cùng chung cư FPT Plaza 2 (cách 400m)',
       flow: 'escrow'
     },
     2: {
       pill: 'Bước 2/5: Ký Quỹ Kép',
-      title: 'Cơ chế Double Escrow bảo vệ giao dịch song phương',
-      body: 'Mẹ Lan bấm "Ký Quỹ Đổi Ngay (10 Xu)". Hệ thống tạm khóa 10 Xu vào Rương Escrow trung gian. Người bán cũng đã cọc sẵn 1 Xu Safe Fee (10%) từ trước.',
-      h1: 'Người bán cọc trước 10% Safe Fee - Chống hàng hỏng & tin ảo',
-      h2: 'Người mua khóa Xu vào Rương Escrow trung gian minh bạch',
+      title: 'Cơ chế Ký Quỹ Song Phương bảo vệ giao dịch an toàn',
+      body: 'Mẹ Lan bấm "Ký Quỹ Đổi Ngay (10 Xu)". Hệ thống tạm khóa 10 Xu vào Rương Ký Quỹ trung gian. Người bán cũng đã cọc sẵn 1 Xu Phí Bảo Đảm (10%) từ trước.',
+      h1: 'Người bán cọc trước 10% Phí Bảo Đảm - Chống hàng hỏng & tin ảo',
+      h2: 'Người mua khóa Xu vào Rương Ký Quỹ trung gian minh bạch',
       flow: 'escrow'
     },
     3: {
-      pill: 'Bước 3/5: Rương Escrow & PIN',
+      pill: 'Bước 3/5: Rương Ký Quỹ & Mã Nhận',
       title: 'Tạm khóa Xu ký quỹ & Cấp mã nhận hàng KND-889',
-      body: 'Rương Escrow bảo hộ an toàn 10 Xu. Hệ thống mở khóa ngay SĐT của mẹ bán để tự hẹn gặp, đồng thời cấp mã PIN 6 ký tự độc quyền cho mẹ mua giữ.',
-      h1: 'Mã xác thực PIN KND-889: Chống gian lận khi nhận đồ',
-      h2: 'Mở khóa SĐT 0905 123 456 & Chat P2P trực tiếp',
+      body: 'Rương Ký Quỹ bảo hộ an toàn 10 Xu. Hệ thống mở khóa ngay SĐT của mẹ bán để tự hẹn gặp, đồng thời cấp mã nhận hàng 6 ký tự độc quyền cho mẹ mua giữ.',
+      h1: 'Mã xác thực nhận hàng KND-889: Chống gian lận khi nhận đồ',
+      h2: 'Mở khóa SĐT 0905 123 456 & Nhắn tin trao đổi trực tiếp',
       flow: 'escrow'
     },
     4: {
       pill: 'Bước 4/5: Hẹn Sảnh & Giao Đồ',
-      title: 'Nhắn tin P2P thỏa thuận giờ gặp tại sảnh chung cư',
+      title: 'Nhắn tin trực tiếp thỏa thuận giờ gặp tại sảnh chung cư',
       body: 'Hai mẹ nhắn tin hẹn gặp tại Sảnh B FPT Plaza 2 lúc 17h15 tiện đường đón con. Khi gặp mặt kiểm tra đồ, mẹ bấm xác nhận để bắt đầu 6 Giờ Kiểm Định.',
-      h1: 'Widget Escrow ghim cố định: Xem trạng thái cọc & mã nhận KND-889',
-      h2: 'Bấm xác nhận bàn giao tại sảnh để kích hoạt 6H kiểm định',
+      h1: 'Khung trạng thái Ký Quỹ ghim cố định: Xem trạng thái cọc & mã nhận KND-889',
+      h2: 'Bấm xác nhận bàn giao tại sảnh để kích hoạt 6 giờ kiểm định',
       flow: 'escrow'
     },
     5: {
       pill: 'Bước 5/5: 6H Kiểm Định & Tất Toán',
       title: 'Mang về phòng cho bé kiểm tra 6 tiếng trước khi tất toán',
-      body: 'Đồng hồ 6H Safeful Time chạy trực tiếp. Nếu đồ đúng mô tả, mẹ bấm Giải phóng Xu (Người bán nhận 10 Xu + hoàn 1 Xu cọc). Nếu sai lệch, bấm Khiếu nại để đóng băng bảo vệ 100% Xu.',
-      h1: 'Đồng hồ đếm ngược 6 giờ Safeful Time chạy trực tiếp tại nhà',
-      h2: 'Tất toán Escrow minh bạch: Hoàn 100% cọc cho người bán uy tín',
+      body: 'Đồng hồ đếm ngược 6 giờ kiểm định chạy trực tiếp. Nếu đồ đúng mô tả, mẹ bấm Giải phóng Xu (Người bán nhận 10 Xu + hoàn 1 Xu cọc). Nếu sai lệch, bấm Khiếu nại để đóng băng bảo vệ 100% Xu.',
+      h1: 'Đồng hồ đếm ngược 6 giờ kiểm định chạy trực tiếp tại nhà',
+      h2: 'Tất toán Ký Quỹ minh bạch: Hoàn 100% cọc cho người bán uy tín',
       flow: 'escrow'
     },
     post: {
       pill: 'Tính Năng: Mẹ Bán Đăng Đồ',
-      title: 'Kindr AI Vision định giá & Cam kết Safe Fee 10%',
-      body: 'Kindr AI Vision tự nhận diện đồ chơi & gợi ý phân loại. Người bán cọc trước 10% Safe Fee (1 Xu) để cam kết trung thực và loại bỏ 100% tin ảo rác.',
-      h1: 'AI Vision nhận diện ảnh: gợi ý tên, độ tuổi bé, tình trạng mới',
-      h2: 'Cọc Safe Fee 10%: Hoàn 100% khi mẹ mua ưng ý sau 6 giờ',
+      title: 'Trí tuệ nhân tạo Kindr AI định giá & Cam kết Phí Bảo Đảm 10%',
+      body: 'Trí tuệ nhân tạo Kindr AI tự nhận diện đồ chơi & gợi ý phân loại. Người bán cọc trước 10% Phí Bảo Đảm (1 Xu) để cam kết trung thực và loại bỏ 100% tin ảo rác.',
+      h1: 'Trí tuệ nhân tạo nhận diện ảnh: gợi ý tên, độ tuổi bé, tình trạng mới',
+      h2: 'Cọc Phí Bảo Đảm 10%: Hoàn 100% khi mẹ mua ưng ý sau 6 giờ',
       flow: 'post'
     },
     wallet: {
       pill: 'Tính Năng: Ví Xu & Uy Tín',
       title: 'Quản lý Ví Kindr Xu & Điểm Mẹ Bỉm Văn Minh 99/100',
-      body: 'Minh bạch số dư khả dụng (90 Xu) và Xu đang trong rương ký quỹ Escrow (10 Xu). Điểm uy tín cộng dồn qua mỗi giao dịch trung thực, mở khóa đặc quyền tiên phong.',
+      body: 'Minh bạch số dư khả dụng (90 Xu) và Xu đang trong rương ký quỹ trung gian (10 Xu). Điểm uy tín cộng dồn qua mỗi giao dịch trung thực, mở khóa đặc quyền tiên phong.',
       h1: '1 Xu = 10.000 VNĐ, quản lý nạp rút & tiền cọc ký quỹ',
       h2: 'Điểm uy tín 99/100 chứng nhận "Mẹ Bỉm Tin Cậy"',
       flow: 'wallet'
@@ -403,7 +403,7 @@ document.addEventListener('DOMContentLoaded', () => {
     btnActionStep2.addEventListener('click', () => {
       setFlowStep(3);
       stopAutoPlay();
-      showPhoneToast('Đã khóa 10 Xu vào Rương Escrow', 'lock');
+      showPhoneToast('Đã khóa 10 Xu vào Rương Ký Quỹ', 'lock');
     });
   }
 
@@ -413,7 +413,7 @@ document.addEventListener('DOMContentLoaded', () => {
     btnStep3ToChat.addEventListener('click', () => {
       setFlowStep(4);
       stopAutoPlay();
-      showPhoneToast('Mở chat hẹn gặp sảnh chung cư', 'chat');
+      showPhoneToast('Mở trò chuyện hẹn gặp sảnh chung cư', 'chat');
     });
   }
 
@@ -631,7 +631,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (postXuVal) postXuVal.textContent = '10 Xu';
       if (postSafeFeeVal) postSafeFeeVal.textContent = '1 Xu';
       if (postNetRefund) postNetRefund.textContent = '10 Xu + hoàn 1 Xu cọc';
-      if (btnSubmitPostLabel) btnSubmitPostLabel.textContent = 'Đăng Tin & Ký Quỹ 1 Xu Safe Fee';
+      if (btnSubmitPostLabel) btnSubmitPostLabel.textContent = 'Đăng Tin & Ký Quỹ 1 Xu Phí Bảo Đảm';
     });
 
     chipModeDonate.addEventListener('click', () => {
@@ -646,7 +646,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (btnSubmitPostDemo) {
     btnSubmitPostDemo.addEventListener('click', () => {
-      showPhoneToast('Đăng đồ thành công! Tin đã xuất hiện trên Feed', 'check');
+      showPhoneToast('Đăng đồ thành công! Tin đã xuất hiện trên Trang Chủ', 'check');
       setTimeout(() => {
         setFlowStep(1);
       }, 1500);
@@ -1110,6 +1110,142 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // ================= POP-UP FPT PLAZA SURVEY (POST /api/survey) =================
+  (() => {
+    const form = document.getElementById('surveyForm');
+    if (!form) return;
+
+    const CAMPAIGN = 'fpt_plaza_popup';
+    const TOTAL_QUESTIONS = 5;
+    const steps = Array.from(form.querySelectorAll('.survey-step'));
+    const progress = document.getElementById('surveyProgress');
+    const progressFill = document.getElementById('surveyProgressFill');
+    const stepLabel = document.getElementById('surveyStepLabel');
+    const backBtn = document.getElementById('btn-survey-back');
+    const slotsEl = document.getElementById('surveySlotsLeft');
+    const phoneInput = document.getElementById('surveyPhone');
+    const consentInput = document.getElementById('surveyConsent');
+    const errorEl = document.getElementById('surveyError');
+    const submitBtn = document.getElementById('btn-submit-survey');
+    const resultEl = document.getElementById('surveyResult');
+    const navEl = backBtn ? backBtn.parentElement : null;
+    const CHECK_SVG = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>';
+
+    const answers = {};
+    let current = 1;
+
+    const showStep = (n, moveFocus = true) => {
+      current = n;
+      steps.forEach((s) => s.classList.toggle('active', Number(s.dataset.step) === n));
+      const answered = Math.min(n - 1, steps.length);
+      progressFill.style.width = `${(answered / steps.length) * 100}%`;
+      progress.setAttribute('aria-valuenow', String(answered));
+      stepLabel.textContent = n <= TOTAL_QUESTIONS ? `Câu ${n} / ${TOTAL_QUESTIONS}` : 'Bước cuối: nhận thưởng';
+      backBtn.disabled = n === 1;
+      const active = steps[n - 1];
+      const focusTarget = n <= TOTAL_QUESTIONS
+        ? active.querySelector('.survey-choice.selected') || active.querySelector('.survey-choice')
+        : phoneInput;
+      if (moveFocus && focusTarget) focusTarget.focus({ preventScroll: true });
+    };
+
+    const setSlots = (remaining) => {
+      if (slotsEl && Number.isFinite(remaining)) slotsEl.textContent = String(remaining);
+    };
+
+    fetch(`${API_BASE_URL}/api/survey/stats?campaign=${CAMPAIGN}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((json) => json && json.data && setSlots(json.data.waiverRemaining))
+      .catch(() => { /* offline: keep default */ });
+
+    form.addEventListener('click', (e) => {
+      const btn = e.target.closest('.survey-choice');
+      if (!btn) return;
+      const { key, value } = btn.dataset;
+      answers[key] = value === 'true' ? true : value === 'false' ? false : value;
+      btn.parentElement.querySelectorAll('.survey-choice').forEach((b) => {
+        const isSel = b === btn;
+        b.classList.toggle('selected', isSel);
+        b.setAttribute('aria-pressed', String(isSel));
+      });
+      setTimeout(() => showStep(Math.min(current + 1, steps.length)), 220);
+    });
+
+    backBtn.addEventListener('click', () => {
+      if (current > 1) showStep(current - 1);
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errorEl.textContent = '';
+
+      const phone = phoneInput.value.replace(/[\s.-]/g, '');
+      if (!/^(0[35789])[0-9]{8}$/.test(phone)) {
+        errorEl.textContent = 'Số điện thoại phải là 10 chữ số Việt Nam hợp lệ (ví dụ: 0905123456).';
+        phoneInput.focus();
+        return;
+      }
+      if (!consentInput.checked) {
+        errorEl.textContent = 'Vui lòng đồng ý Chính sách bảo mật để nhận ưu đãi.';
+        consentInput.focus();
+        return;
+      }
+      const missing = ['hasItemsToDeclutter', 'motivation', 'fearsFacebookScams', 'findsAppUseful', 'referralIntent']
+        .findIndex((k) => answers[k] === undefined);
+      if (missing !== -1) {
+        showStep(missing + 1);
+        return;
+      }
+
+      const origHtml = submitBtn.innerHTML;
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="animation: spin 0.8s linear infinite;" aria-hidden="true"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg><span>Đang gửi...</span>';
+
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/survey`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...answers, phone, campaign: CAMPAIGN, consent: true }),
+        });
+        const json = await res.json();
+        if (!res.ok || !json.success) {
+          errorEl.textContent = json.error || 'Có lỗi xảy ra, mẹ vui lòng thử lại nhé!';
+          return;
+        }
+
+        const d = json.data;
+        setSlots(d.waiverRemaining);
+        document.getElementById('surveyResultTitle').textContent = json.alreadySubmitted
+          ? 'Mẹ đã nhận ưu đãi rồi!'
+          : 'Cảm ơn mẹ đã chia sẻ!';
+        document.getElementById('surveyRewardCode').textContent = d.rewardCode;
+
+        const perks = [`<strong>${d.starterXu} Xu Tân Thủ</strong> vào ví khi kích hoạt ứng dụng`];
+        if (d.safeFeeWaiver) perks.push('<strong>Miễn 100% Phí Bảo Đảm</strong> cho 3 bài đăng đầu tiên');
+        perks.push('Đăng bài tại Bàn trải nghiệm: <strong>ghim vị trí Đầu Trang Chủ FPT Plaza 3 ngày</strong>');
+        perks.push('Mời bạn chung cư: <strong>+2 Xu cho cả hai</strong>');
+        document.getElementById('surveyPerks').innerHTML = perks.map((p) => `<li>${CHECK_SVG}<span>${p}</span></li>`).join('');
+
+        form.hidden = true;
+        if (navEl) navEl.hidden = true;
+        stepLabel.hidden = true;
+        progressFill.style.width = '100%';
+        progress.setAttribute('aria-valuenow', String(steps.length));
+        resultEl.hidden = false;
+        resultEl.setAttribute('tabindex', '-1');
+        resultEl.focus({ preventScroll: true });
+      } catch (err) {
+        console.error('Survey submit error:', err);
+        errorEl.textContent = 'Không thể kết nối máy chủ. Mẹ vui lòng kiểm tra mạng nhé!';
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = origHtml;
+      }
+    });
+
+    showStep(1, false);
+  })();
+
   if (successModalClose) {
     successModalClose.addEventListener('click', closeSuccessModal);
   }
@@ -1167,8 +1303,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const mascotQuote = document.getElementById('mascotQuote');
 
   const mascotQuotes = [
-    'Chào mẹ! Em là Gấu Kindy — Xu được bảo chứng minh bạch qua Ký Quỹ Double Escrow nhé!',
-    'Khung giờ 6H Safeful Time: Mẹ mang đồ về phòng ngủ kiểm tra êm ái, ưng ý mới chuyển Xu cho người bán!',
+    'Chào mẹ! Em là Gấu Kindy — Xu được bảo chứng an toàn qua Ký Quỹ Song Phương minh bạch nhé!',
+    'Khung giờ 6 tiếng kiểm định: Mẹ mang đồ về phòng kiểm tra êm ái, ưng ý mới bấm chuyển Xu cho người bán!',
     'Người bán cọc 10% Xu cam kết mô tả trung thực — hạn chế tối đa tình trạng đồ lỗi hay ảnh mạng!',
     'Mẹ để lại email bên dưới để nhận ngay 5 Xu Tiên Phong (tương đương 50.000 VNĐ) vào ví nhé!',
     'Gặp nhau ngay sảnh chung cư hoặc công viên gần nhà — siêu cục bộ Đà Nẵng, an tâm và tiện lợi!'

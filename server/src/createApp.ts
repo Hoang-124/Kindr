@@ -17,6 +17,7 @@ import adminRoutes from './routes/admin';
 import uploadRoutes from './routes/upload';
 import waitlistRoutes from './routes/waitlist';
 import categoryRoutes from './routes/categories';
+import surveyRoutes from './routes/survey';
 import { isOriginAllowed } from './utils/cors';
 import { ENV } from './config/env';
 
@@ -81,6 +82,7 @@ export function createApp(): Express {
   app.use('/api/upload', uploadRoutes);
   app.use('/api/waitlist', waitlistRoutes);
   app.use('/api/categories', categoryRoutes);
+  app.use('/api/survey', surveyRoutes);
 
   // 5. Global error handler
   app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
