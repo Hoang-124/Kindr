@@ -1,3 +1,19 @@
 {
-  "cleanUrls": true
+  "version": 2,
+  "buildCommand": "cd ../web && npm install && npm run build && rm -rf ../pitch-page/.dist && mkdir -p ../pitch-page/.dist/pitch-page && cp -r ../pitch-page/*.html ../pitch-page/*.css ../pitch-page/*.js ../pitch-page/*.png ../pitch-page/.dist/pitch-page/ && cp -r dist/* ../pitch-page/.dist/",
+  "outputDirectory": ".dist",
+  "rewrites": [
+    {
+      "source": "/pitch-page",
+      "destination": "/pitch-page/index.html"
+    },
+    {
+      "source": "/pitch-page/(.*)",
+      "destination": "/pitch-page/$1"
+    },
+    {
+      "source": "/((?!pitch-page/).*)",
+      "destination": "/index.html"
+    }
+  ]
 }

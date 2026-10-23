@@ -149,7 +149,7 @@ router.get('/orders/:orderCode/status', requireAuth, async (req: AuthRequest, re
  * Simulate an incoming SePay / Casso / VietQR bank transfer webhook for a pending TopupOrder (demo/dev mode).
  */
 router.post('/orders/:orderCode/simulate-webhook', requireAuth, async (req: AuthRequest, res: Response): Promise<void> => {
-  if (!ENV.ENABLE_DEMO_TOPUP || ENV.NODE_ENV === 'production') {
+  if (!ENV.ENABLE_DEMO_TOPUP) {
     res.status(403).json({ error: 'Chức năng mô phỏng Webhook ngân hàng chỉ khả dụng ở môi trường Demo/Dev.' });
     return;
   }
@@ -224,7 +224,7 @@ router.post('/orders/:orderCode/simulate-webhook', requireAuth, async (req: Auth
  * Immediate simulated topup (useful for test/demo mode)
  */
 router.post('/topup', requireAuth, async (req: AuthRequest, res: Response): Promise<void> => {
-  if (!ENV.ENABLE_DEMO_TOPUP || ENV.NODE_ENV === 'production') {
+  if (!ENV.ENABLE_DEMO_TOPUP) {
     res.status(403).json({ error: 'Chức năng nạp Xu trực tiếp chỉ được phép trong chế độ demo (ENABLE_DEMO_TOPUP).' });
     return;
   }

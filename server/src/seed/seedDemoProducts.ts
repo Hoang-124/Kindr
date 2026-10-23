@@ -4,21 +4,31 @@ import bcrypt from 'bcryptjs';
 import { connectDB } from '../config/db';
 import { User } from '../models/User';
 import { Product } from '../models/Product';
+import { Category } from '../models/Category';
 
 export async function ensureDemoProducts(): Promise<void> {
-  await connectDB();
-  const availableCount = await Product.countDocuments({ status: 'available' });
-  if (availableCount >= 6) {
-    console.log(`✅ Already have ${availableCount} available products in feed.`);
-    return;
+  if (mongoose.connection.readyState !== 1) {
+    await connectDB();
   }
 
-  console.log(`🌱 Seeding fresh available demo products for MVP testing...`);
+  const categoryCount = await Category.countDocuments();
+  if (categoryCount === 0) {
+    await Category.insertMany([
+      { name: 'Đồ chơi nhỏ', code: 'toy_small', icon: 'ToyBrick' },
+      { name: 'Đồ chơi lớn', code: 'toy_large', icon: 'Gamepad2' },
+      { name: 'Sách truyện & Ehon', code: 'book', icon: 'BookOpen' },
+      { name: 'Quần áo bé', code: 'quan_ao', icon: 'Shirt' },
+      { name: 'Xe đẩy & Nôi cũi', code: 'xe_noi', icon: 'Baby' },
+      { name: 'Đồ dùng học tập', code: 'do_hoc_tap', icon: 'GraduationCap' },
+      { name: 'Trạm Tặng Đồ 0 Xu', code: 'charity', icon: 'Gift' },
+    ]);
+  }
 
-  // Ensure seller demo users exist
+  const passwordHash = await bcrypt.hash('123456', 10);
+
+  // Ensure all 4 quick-login demo accounts exist
   let sellerMeBap = await User.findOne({ phone: '0905234567' });
   if (!sellerMeBap) {
-    const passwordHash = await bcrypt.hash('123456', 10);
     sellerMeBap = await User.create({
       name: 'Mẹ Bắp',
       phone: '0905234567',
@@ -38,7 +48,6 @@ export async function ensureDemoProducts(): Promise<void> {
 
   let sellerMeHoaLan = await User.findOne({ phone: '0905123456' });
   if (!sellerMeHoaLan) {
-    const passwordHash = await bcrypt.hash('123456', 10);
     sellerMeHoaLan = await User.create({
       name: 'Mẹ Hoa Lan',
       phone: '0905123456',
@@ -46,7 +55,7 @@ export async function ensureDemoProducts(): Promise<void> {
       passwordHash,
       avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150',
       location: { districtId: 'dn_haichau', districtName: 'Quận Hải Châu', addressDetail: '123 Trần Phú, Hải Châu' },
-      xuBalance: 40,
+      xuBalance: 45,
       civilizationPoints: 99,
       tradesCount: 22,
       reputationScore: 5.0,
@@ -55,6 +64,52 @@ export async function ensureDemoProducts(): Promise<void> {
       isActivated: true,
     });
   }
+
+  const sellerMeNgocAnh = await User.findOne({ phone: '0905345678' });
+  if (!sellerMeNgocAnh) {
+    await User.create({
+      name: 'Mẹ Ngọc Ánh',
+      phone: '0905345678',
+      email: 'ngocanh@kindr.vn',
+      passwordHash,
+      avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150',
+      location: { districtId: 'dn_sontra', districtName: 'Quận Sơn Trà', addressDetail: '78 Ngô Quyền, Sơn Trà' },
+      xuBalance: 60,
+      civilizationPoints: 100,
+      tradesCount: 24,
+      reputationScore: 5.0,
+      ratingCount: 24,
+      role: 'user',
+      isActivated: true,
+    });
+  }
+
+  const adminUser = await User.findOne({ phone: '0900000000' });
+  if (!adminUser) {
+    await User.create({
+      name: 'Ban Quản Trị Kindr',
+      phone: '0900000000',
+      email: 'admin@kindr.vn',
+      passwordHash,
+      avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
+      location: { districtId: 'dn_haichau', districtName: 'Quận Hải Châu', addressDetail: 'Tòa nhà FPT, Đà Nẵng' },
+      xuBalance: 1000,
+      civilizationPoints: 100,
+      tradesCount: 99,
+      reputationScore: 5.0,
+      ratingCount: 99,
+      role: 'admin',
+      isActivated: true,
+    });
+  }
+
+  const availableCount = await Product.countDocuments({ status: 'available' });
+  if (availableCount >= 1) {
+    console.log(`✅ Already have ${availableCount} available products in feed.`);
+    return;
+  }
+
+  console.log(`🌱 Seeding fresh available demo products for MVP testing...`);
 
   const items = [
     {

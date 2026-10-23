@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "buildCommand": "cd web && npm install && npm run build",
+  "buildCommand": "cd web && npm install && npm run build && mkdir -p dist/pitch-page && cp -r ../pitch-page/*.html ../pitch-page/*.css ../pitch-page/*.js ../pitch-page/*.png dist/pitch-page/",
   "outputDirectory": "web/dist",
   "rewrites": [
     {
