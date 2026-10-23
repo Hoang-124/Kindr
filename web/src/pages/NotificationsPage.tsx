@@ -159,34 +159,35 @@ export const NotificationsPage: React.FC = () => {
           gap: 16,
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0, flex: 1 }}>
           <div
             style={{
-              width: 52,
-              height: 52,
-              borderRadius: 16,
+              width: 44,
+              height: 44,
+              borderRadius: 14,
               background: 'var(--color-primary-soft)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
+              flexShrink: 0,
             }}
           >
-            <Bell size={26} color="var(--color-primary)" />
+            <Bell size={22} color="var(--color-primary)" />
           </div>
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <h1 style={{ fontSize: 24, fontWeight: 800 }}>Trung tâm Thông báo</h1>
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
+              <h1 style={{ fontSize: 22, fontWeight: 800, margin: 0 }}>Trung tâm Thông báo</h1>
               {unreadNotifCount > 0 && (
                 <span className="kw-badge kw-badge-primary">{unreadNotifCount} chưa đọc</span>
               )}
             </div>
-            <p style={{ fontSize: 13, color: 'var(--color-text-secondary)', marginTop: 4 }}>
+            <p style={{ fontSize: 12, color: 'var(--color-text-secondary)', marginTop: 4 }}>
               Cập nhật tức thì qua Socket.IO: Bàn giao PIN 6 ký tự, giải ngân Xu, khiếu nại và duyệt bài.
             </p>
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: 10 }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
           <button
             type="button"
             className="kw-btn kw-btn-outline kw-btn-sm"

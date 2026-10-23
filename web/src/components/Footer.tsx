@@ -9,7 +9,7 @@ export const Footer: React.FC = () => (
     style={{
       backgroundColor: 'var(--color-card)',
       borderTop: '1px solid var(--color-border)',
-      padding: 'var(--space-10) var(--space-5)',
+      padding: 'var(--space-8) var(--space-4) 84px',
       marginTop: 'auto',
     }}
   >

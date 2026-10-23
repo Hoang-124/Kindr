@@ -168,6 +168,9 @@ export const AddressMapPreview: React.FC<AddressMapPreviewProps> = ({
   return (
     <div
       style={{
+        position: 'relative',
+        zIndex: 1,
+        isolation: 'isolate',
         borderRadius: 'var(--radius-default)',
         border: '1px solid var(--color-border)',
         overflow: 'hidden',
@@ -176,31 +179,54 @@ export const AddressMapPreview: React.FC<AddressMapPreviewProps> = ({
     >
       <div
         style={{
-          padding: '10px 14px',
+          padding: '10px 12px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
+          gap: 8,
+          flexWrap: 'wrap',
           borderBottom: '1px solid var(--color-border)',
           backgroundColor: 'var(--color-surface-subtle)',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, fontWeight: 700 }}>
-          <MapPin size={16} color="var(--color-primary)" />
-          <span>{resolvedLabel}</span>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            fontSize: 12,
+            fontWeight: 700,
+            minWidth: 0,
+            flex: 1,
+          }}
+        >
+          <MapPin size={15} color="var(--color-primary)" style={{ flexShrink: 0 }} />
+          <span
+            style={{
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+            }}
+          >
+            {resolvedLabel}
+          </span>
         </div>
         <button
           type="button"
           className="kw-btn kw-btn-outline kw-btn-sm"
           onClick={handleUseMyGps}
-          style={{ minHeight: 36, padding: '0 12px', fontSize: 12 }}
+          style={{ minHeight: 32, padding: '0 10px', fontSize: 11, flexShrink: 0 }}
         >
-          <Navigation size={13} />
+          <Navigation size={12} />
           Vị trí của tôi
         </button>
       </div>
       <div
         ref={mapContainerRef}
         style={{
+          position: 'relative',
+          zIndex: 1,
+          isolation: 'isolate',
           width: '100%',
           height,
           backgroundColor: 'var(--color-surface-subtle)',

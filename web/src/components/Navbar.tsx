@@ -248,7 +248,7 @@ export const Navbar: React.FC = () => {
                   )}
                 </Link>
 
-                {/* Notification Bell + Popover */}
+                {/* Notification Bell */}
                 <div style={{ position: 'relative' }}>
                   <button
                     type="button"
@@ -284,124 +284,6 @@ export const Navbar: React.FC = () => {
                       </span>
                     )}
                   </button>
-
-                  {notifOpen && (
-                    <div
-                      style={{
-                        position: 'fixed',
-                        right: 12,
-                        top: 62,
-                        width: 'min(360px, calc(100vw - 24px))',
-                        maxHeight: '72vh',
-                        overflowY: 'auto',
-                        backgroundColor: 'var(--color-card)',
-                        border: '1px solid var(--color-border-strong)',
-                        borderRadius: 'var(--radius-md)',
-                        boxShadow: 'var(--shadow-elevated)',
-                        zIndex: 150,
-                      }}
-                    >
-                      <div
-                        style={{
-                          padding: '12px 16px',
-                          borderBottom: '1px solid var(--color-border)',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                        }}
-                      >
-                        <span style={{ fontWeight: 800, fontSize: 14 }}>
-                          Thông báo hệ thống ({unreadNotifCount})
-                        </span>
-                        <button
-                          type="button"
-                          onClick={handleMarkAllRead}
-                          className="kw-btn kw-btn-ghost kw-btn-sm"
-                          style={{ minHeight: 32, padding: '0 8px', fontSize: 12 }}
-                        >
-                          <CheckCheck size={14} /> Đọc tất cả
-                        </button>
-                      </div>
-
-                      {systemNotifs.length === 0 ? (
-                        <div
-                          style={{
-                            padding: 28,
-                            textAlign: 'center',
-                            color: 'var(--color-text-muted)',
-                            fontSize: 13,
-                          }}
-                        >
-                          Chưa có thông báo mới nào.
-                        </div>
-                      ) : (
-                        systemNotifs.slice(0, 12).map((n) => (
-                          <div
-                            key={n.id}
-                            onClick={() => handleNotificationClick(n)}
-                            style={{
-                              padding: '12px 16px',
-                              borderBottom: '1px solid var(--color-border)',
-                              backgroundColor: n.isRead
-                                ? 'var(--color-card)'
-                                : 'var(--color-primary-light)',
-                              cursor: 'pointer',
-                            }}
-                          >
-                            <div
-                              style={{
-                                fontWeight: 700,
-                                fontSize: 13,
-                                color: 'var(--color-text)',
-                                marginBottom: 3,
-                              }}
-                            >
-                              {n.title}
-                            </div>
-                            <div
-                              style={{
-                                fontSize: 12,
-                                color: 'var(--color-text-muted)',
-                                marginBottom: 4,
-                              }}
-                            >
-                              {n.body}
-                            </div>
-                            <div
-                              style={{
-                                fontSize: 12,
-                                color: 'var(--color-text-dim)',
-                                fontWeight: 600,
-                              }}
-                            >
-                              {timeAgo(n.createdAt)}
-                            </div>
-                          </div>
-                        ))
-                      )}
-                      <div
-                        style={{
-                          padding: '10px 16px',
-                          borderTop: '1px solid var(--color-border)',
-                          textAlign: 'center',
-                          backgroundColor: 'var(--color-surface-subtle)',
-                        }}
-                      >
-                        <Link
-                          to="/notifications"
-                          onClick={() => setNotifOpen(false)}
-                          style={{
-                            fontSize: 13,
-                            fontWeight: 800,
-                            color: 'var(--color-primary)',
-                            textDecoration: 'none',
-                          }}
-                        >
-                          Xem tất cả tại Trung tâm Thông báo →
-                        </Link>
-                      </div>
-                    </div>
-                  )}
                 </div>
 
                 {/* Profile Button */}
@@ -548,23 +430,193 @@ export const Navbar: React.FC = () => {
         </NavLink>
       </nav>
 
+      {/* Compact Notification Popover (outside navbar backdrop-filter, with outside click & X button) */}
+      {notifOpen && (
+        <>
+          <div
+            style={{
+              position: 'fixed',
+              inset: 0,
+              zIndex: 1180,
+              backgroundColor: 'transparent',
+            }}
+            onClick={() => setNotifOpen(false)}
+          />
+          <div
+            style={{
+              position: 'fixed',
+              right: 12,
+              top: 60,
+              width: 'min(320px, calc(100vw - 24px))',
+              maxHeight: 'min(350px, 48dvh)',
+              display: 'flex',
+              flexDirection: 'column',
+              overflow: 'hidden',
+              backgroundColor: 'var(--color-card)',
+              border: '1px solid var(--color-border-strong)',
+              borderRadius: 'var(--radius-default)',
+              boxShadow: 'var(--shadow-elevated)',
+              zIndex: 1190,
+            }}
+          >
+            <div
+              style={{
+                padding: '10px 12px',
+                borderBottom: '1px solid var(--color-border)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: 6,
+                flexShrink: 0,
+                backgroundColor: 'var(--color-card)',
+              }}
+            >
+              <span style={{ fontWeight: 800, fontSize: 13 }}>
+                Thông báo ({unreadNotifCount})
+              </span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                {unreadNotifCount > 0 && (
+                  <button
+                    type="button"
+                    onClick={handleMarkAllRead}
+                    className="kw-btn kw-btn-ghost kw-btn-sm"
+                    style={{ minHeight: 28, padding: '0 8px', fontSize: 11 }}
+                  >
+                    <CheckCheck size={13} /> Đọc hết
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setNotifOpen(false)}
+                  className="kw-btn kw-btn-ghost kw-btn-sm"
+                  style={{ minHeight: 28, width: 28, padding: 0 }}
+                  aria-label="Đóng thông báo"
+                >
+                  <X size={15} />
+                </button>
+              </div>
+            </div>
+
+            <div style={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>
+              {systemNotifs.length === 0 ? (
+                <div
+                  style={{
+                    padding: 20,
+                    textAlign: 'center',
+                    color: 'var(--color-text-muted)',
+                    fontSize: 12,
+                  }}
+                >
+                  Chưa có thông báo mới nào.
+                </div>
+              ) : (
+                systemNotifs.slice(0, 5).map((n) => (
+                  <div
+                    key={n.id}
+                    onClick={() => handleNotificationClick(n)}
+                    style={{
+                      padding: '10px 12px',
+                      borderBottom: '1px solid var(--color-border)',
+                      backgroundColor: n.isRead
+                        ? 'var(--color-card)'
+                        : 'var(--color-primary-light)',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'baseline',
+                        gap: 8,
+                        marginBottom: 2,
+                      }}
+                    >
+                      <div
+                        style={{
+                          fontWeight: 700,
+                          fontSize: 12,
+                          color: 'var(--color-text)',
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          flex: 1,
+                        }}
+                      >
+                        {n.title}
+                      </div>
+                      <span
+                        style={{
+                          fontSize: 10,
+                          color: 'var(--color-text-dim)',
+                          fontWeight: 600,
+                          flexShrink: 0,
+                        }}
+                      >
+                        {timeAgo(n.createdAt)}
+                      </span>
+                    </div>
+                    <div
+                      style={{
+                        fontSize: 11,
+                        color: 'var(--color-text-muted)',
+                        lineHeight: 1.35,
+                        display: '-webkit-box',
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: 'vertical',
+                        overflow: 'hidden',
+                      }}
+                    >
+                      {n.body}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            <div
+              style={{
+                padding: '8px 12px',
+                borderTop: '1px solid var(--color-border)',
+                textAlign: 'center',
+                backgroundColor: 'var(--color-surface-subtle)',
+                flexShrink: 0,
+              }}
+            >
+              <Link
+                to="/notifications"
+                onClick={() => setNotifOpen(false)}
+                style={{
+                  fontSize: 12,
+                  fontWeight: 800,
+                  color: 'var(--color-primary)',
+                  textDecoration: 'none',
+                }}
+              >
+                Xem tất cả tại Trung tâm Thông báo →
+              </Link>
+            </div>
+          </div>
+        </>
+      )}
+
       {/* 3-Slide Interactive Onboarding Modal (matching Mobile OnboardingScreen.tsx) */}
       {onboardingOpen && (
         <div className="kw-modal-backdrop" onClick={() => setOnboardingOpen(false)}>
           <div
             className="kw-modal-box"
-            style={{ maxWidth: 620, textAlign: 'center', padding: 32 }}
+            style={{ maxWidth: 560, textAlign: 'center', padding: 24 }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-              <span className="kw-badge kw-badge-teal">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, gap: 8 }}>
+              <span className="kw-badge kw-badge-teal" style={{ fontSize: 11 }}>
                 {ONBOARDING_SLIDES[slideIdx].step} — {ONBOARDING_SLIDES[slideIdx].badge}
               </span>
               <button
                 type="button"
                 onClick={() => setOnboardingOpen(false)}
                 className="kw-btn kw-btn-ghost kw-btn-sm"
-                style={{ minHeight: 32, padding: 6 }}
+                style={{ minHeight: 32, padding: 6, flexShrink: 0 }}
               >
                 <X size={18} />
               </button>
@@ -572,10 +624,10 @@ export const Navbar: React.FC = () => {
 
             <div
               style={{
-                width: 150,
-                height: 150,
-                margin: '0 auto 20px',
-                borderRadius: 'var(--radius-lg)',
+                width: 108,
+                height: 108,
+                margin: '0 auto 14px',
+                borderRadius: 'var(--radius-default)',
                 backgroundColor: 'var(--color-secondary-light)',
                 border: '2px solid var(--color-secondary)',
                 display: 'flex',
@@ -591,34 +643,42 @@ export const Navbar: React.FC = () => {
               />
             </div>
 
-            <h2 style={{ fontSize: 22, fontWeight: 800, lineHeight: 1.3, marginBottom: 12 }}>
+            <h2 style={{ fontSize: 19, fontWeight: 800, lineHeight: 1.3, marginBottom: 8 }}>
               {ONBOARDING_SLIDES[slideIdx].title}
             </h2>
-            <p style={{ fontSize: 14, color: 'var(--color-text-muted)', lineHeight: 1.6, marginBottom: 24 }}>
+            <p style={{ fontSize: 13, color: 'var(--color-text-muted)', lineHeight: 1.55, marginBottom: 16 }}>
               {ONBOARDING_SLIDES[slideIdx].desc}
             </p>
 
             {/* Feature Pills */}
-            <div className="kw-grid-3" style={{ marginBottom: 24, textAlign: 'left' }}>
-              <div style={{ padding: 12, borderRadius: 12, backgroundColor: 'var(--color-surface-subtle)', fontSize: 12 }}>
-                <Sparkles size={16} color="var(--color-primary)" />
-                <div style={{ fontWeight: 800, marginTop: 4 }}>1 Xu = 10.000đ</div>
-                <div style={{ color: 'var(--color-text-muted)' }}>Giá niêm yết cố định</div>
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+                gap: 8,
+                marginBottom: 18,
+                textAlign: 'left',
+              }}
+            >
+              <div style={{ padding: 10, borderRadius: 12, backgroundColor: 'var(--color-surface-subtle)', fontSize: 11 }}>
+                <Sparkles size={15} color="var(--color-primary)" />
+                <div style={{ fontWeight: 800, marginTop: 4 }}>1 Xu = 10k</div>
+                <div style={{ color: 'var(--color-text-muted)' }}>Giá cố định</div>
               </div>
-              <div style={{ padding: 12, borderRadius: 12, backgroundColor: 'var(--color-surface-subtle)', fontSize: 12 }}>
-                <ShieldCheck size={16} color="var(--color-secondary-dark)" />
-                <div style={{ fontWeight: 800, marginTop: 4 }}>Cọc 10% Safe Fee</div>
-                <div style={{ color: 'var(--color-text-muted)' }}>Chống hàng sai mô tả</div>
+              <div style={{ padding: 10, borderRadius: 12, backgroundColor: 'var(--color-surface-subtle)', fontSize: 11 }}>
+                <ShieldCheck size={15} color="var(--color-secondary-dark)" />
+                <div style={{ fontWeight: 800, marginTop: 4 }}>Cọc 10%</div>
+                <div style={{ color: 'var(--color-text-muted)' }}>Đúng mô tả</div>
               </div>
-              <div style={{ padding: 12, borderRadius: 12, backgroundColor: 'var(--color-surface-subtle)', fontSize: 12 }}>
-                <Clock size={16} color="var(--color-warning)" />
-                <div style={{ fontWeight: 800, marginTop: 4 }}>6 Giờ Safeful Time</div>
-                <div style={{ color: 'var(--color-text-muted)' }}>Kiểm đồ kỹ tại nhà</div>
+              <div style={{ padding: 10, borderRadius: 12, backgroundColor: 'var(--color-surface-subtle)', fontSize: 11 }}>
+                <Clock size={15} color="var(--color-warning)" />
+                <div style={{ fontWeight: 800, marginTop: 4 }}>6h Kiểm đồ</div>
+                <div style={{ color: 'var(--color-text-muted)' }}>Safeful Time</div>
               </div>
             </div>
 
             {/* Dots + Navigation */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
               <button
                 type="button"
                 disabled={slideIdx === 0}
@@ -628,15 +688,15 @@ export const Navbar: React.FC = () => {
                 <ArrowLeft size={15} /> Trước
               </button>
 
-              <div style={{ display: 'flex', gap: 8 }}>
+              <div style={{ display: 'flex', gap: 6 }}>
                 {ONBOARDING_SLIDES.map((_, i) => (
                   <button
                     key={i}
                     type="button"
                     onClick={() => setSlideIdx(i)}
                     style={{
-                      width: i === slideIdx ? 24 : 10,
-                      height: 10,
+                      width: i === slideIdx ? 20 : 8,
+                      height: 8,
                       borderRadius: 99,
                       border: 'none',
                       backgroundColor:
@@ -665,7 +725,7 @@ export const Navbar: React.FC = () => {
                   }}
                   className="kw-btn kw-btn-primary kw-btn-sm"
                 >
-                  {currentUser ? 'Khám phá ngay' : 'Đăng nhập / Trải nghiệm'} <ArrowRight size={15} />
+                  {currentUser ? 'Khám phá' : 'Trải nghiệm'} <ArrowRight size={15} />
                 </button>
               )}
             </div>
@@ -678,21 +738,21 @@ export const Navbar: React.FC = () => {
         <div
           style={{
             position: 'fixed',
-            top: 68,
+            top: 64,
             right: 12,
             left: 12,
             marginLeft: 'auto',
-            zIndex: 250,
-            maxWidth: 380,
+            zIndex: 1300,
+            maxWidth: 340,
             backgroundColor: 'var(--color-card)',
             border: '2px solid var(--color-primary)',
             borderRadius: 'var(--radius-default)',
             boxShadow: 'var(--shadow-elevated)',
-            padding: '12px 14px',
+            padding: '10px 12px',
             display: 'flex',
             alignItems: 'flex-start',
             justifyContent: 'space-between',
-            gap: 10,
+            gap: 8,
           }}
         >
           <div
@@ -700,12 +760,21 @@ export const Navbar: React.FC = () => {
               if (toast.link) navigate(toast.link);
               dismissToast();
             }}
-            style={{ cursor: toast.link ? 'pointer' : 'default', flex: 1 }}
+            style={{ cursor: toast.link ? 'pointer' : 'default', flex: 1, minWidth: 0 }}
           >
-            <div style={{ fontWeight: 800, fontSize: 14, marginBottom: 4 }}>
+            <div style={{ fontWeight: 800, fontSize: 13, marginBottom: 2 }}>
               {toast.title}
             </div>
-            <div style={{ fontSize: 13, color: 'var(--color-text-muted)' }}>
+            <div
+              style={{
+                fontSize: 12,
+                color: 'var(--color-text-muted)',
+                display: '-webkit-box',
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: 'vertical',
+                overflow: 'hidden',
+              }}
+            >
               {toast.message}
             </div>
           </div>
@@ -713,9 +782,9 @@ export const Navbar: React.FC = () => {
             type="button"
             onClick={dismissToast}
             className="kw-btn kw-btn-ghost kw-btn-sm"
-            style={{ minHeight: 28, padding: 4 }}
+            style={{ minHeight: 26, width: 26, padding: 0, flexShrink: 0 }}
           >
-            <X size={16} />
+            <X size={15} />
           </button>
         </div>
       )}

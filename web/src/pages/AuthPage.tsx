@@ -352,7 +352,7 @@ export const AuthPage: React.FC = () => {
             Chọn nhanh 1 trong 4 vai trò dưới đây để kiểm thử luồng Đổi đồ, Bàn giao mã PIN, Khiếu nại và Trọng tài Admin:
           </p>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {DEMO_ACCOUNTS.map((acc) => (
               <button
                 key={acc.phone}
@@ -362,17 +362,19 @@ export const AuthPage: React.FC = () => {
                 className="kw-btn kw-btn-outline"
                 style={{
                   justifyContent: 'space-between',
-                  padding: '0 16px',
+                  padding: '8px 12px',
                   borderRadius: 'var(--radius-default)',
+                  flexWrap: 'wrap',
+                  textAlign: 'left',
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <KindrCoin size={18} />
-                  <span style={{ fontWeight: 700 }}>{acc.label}</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0, flex: 1 }}>
+                  <KindrCoin size={16} />
+                  <span style={{ fontWeight: 700, fontSize: 13, wordBreak: 'break-word' }}>{acc.label}</span>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <span className="kw-badge kw-badge-coral">{acc.roleBadge}</span>
-                  <ArrowRight size={15} />
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+                  <span className="kw-badge kw-badge-coral" style={{ fontSize: 11 }}>{acc.roleBadge}</span>
+                  <ArrowRight size={14} />
                 </div>
               </button>
             ))}
@@ -386,12 +388,12 @@ export const AuthPage: React.FC = () => {
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
-            gap: 6,
+            gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+            gap: 4,
             backgroundColor: 'var(--color-surface-subtle)',
-            padding: 6,
+            padding: 5,
             borderRadius: 'var(--radius-default)',
-            marginBottom: 24,
+            marginBottom: 20,
           }}
         >
           <button
@@ -403,6 +405,7 @@ export const AuthPage: React.FC = () => {
             className={`kw-btn kw-btn-sm ${
               mode === 'login' ? 'kw-btn-primary' : 'kw-btn-ghost'
             }`}
+            style={{ padding: '0 6px', fontSize: 12 }}
           >
             Đăng nhập
           </button>
@@ -415,6 +418,7 @@ export const AuthPage: React.FC = () => {
             className={`kw-btn kw-btn-sm ${
               mode === 'register' ? 'kw-btn-primary' : 'kw-btn-ghost'
             }`}
+            style={{ padding: '0 6px', fontSize: 12 }}
           >
             Đăng ký (+10 Xu)
           </button>
@@ -428,6 +432,7 @@ export const AuthPage: React.FC = () => {
             className={`kw-btn kw-btn-sm ${
               mode === 'forgot' || mode === 'activate' ? 'kw-btn-primary' : 'kw-btn-ghost'
             }`}
+            style={{ padding: '0 6px', fontSize: 12 }}
           >
             OTP / Quên MK
           </button>

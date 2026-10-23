@@ -511,27 +511,29 @@ export const TransactionDetailPage: React.FC = () => {
                   onClick={() => navigate(`/transactions/${tx.id}`)}
                   className="kw-card"
                   style={{
-                    padding: 16,
+                    padding: 14,
                     cursor: 'pointer',
+                    overflow: 'hidden',
+                    maxWidth: '100%',
                     border: active
                       ? '2px solid var(--color-primary)'
                       : '1px solid var(--color-border)',
                     backgroundColor: active ? 'var(--color-primary-light)' : 'var(--color-card)',
                   }}
                 >
-                  <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                  <div style={{ display: 'flex', gap: 12, alignItems: 'center', minWidth: 0, maxWidth: '100%' }}>
                     <img
                       src={tx.productImage}
                       alt={tx.productName}
                       style={{
-                        width: 64,
-                        height: 64,
+                        width: 60,
+                        height: 60,
                         borderRadius: 'var(--radius-sm)',
                         objectFit: 'cover',
                         flexShrink: 0,
                       }}
                     />
-                    <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ flex: 1, minWidth: 0, maxWidth: '100%', overflow: 'hidden' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
                         <span
                           style={{
@@ -542,17 +544,18 @@ export const TransactionDetailPage: React.FC = () => {
                         >
                           {userRoleLabel}
                         </span>
-                        <span style={{ fontSize: 11, color: 'var(--color-text-secondary)' }}>
+                        <span style={{ fontSize: 11, color: 'var(--color-text-secondary)', flexShrink: 0 }}>
                           {formatFullDate(tx.createdAt)}
                         </span>
                       </div>
                       <div
                         style={{
                           fontWeight: 800,
-                          fontSize: 15,
+                          fontSize: 14,
                           whiteSpace: 'nowrap',
                           overflow: 'hidden',
                           textOverflow: 'ellipsis',
+                          maxWidth: '100%',
                           marginTop: 2,
                         }}
                       >
@@ -563,12 +566,13 @@ export const TransactionDetailPage: React.FC = () => {
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'space-between',
-                          marginTop: 8,
-                          gap: 8,
+                          flexWrap: 'wrap',
+                          marginTop: 6,
+                          gap: 6,
                         }}
                       >
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontWeight: 800 }}>
-                          <KindrCoin size={16} />
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontWeight: 800, fontSize: 13 }}>
+                          <KindrCoin size={15} />
                           <span>{tx.productPrice === 0 ? '0 Xu (Tặng)' : `${tx.productPrice} Xu`}</span>
                         </div>
                         {getStatusBadge(tx.status)}
@@ -583,7 +587,7 @@ export const TransactionDetailPage: React.FC = () => {
 
         {/* TRANSACTION DETAIL PANEL */}
         {id && (
-          <div className="kw-card" style={{ padding: 24 }}>
+          <div className="kw-card" style={{ padding: 24, minWidth: 0, maxWidth: '100%', overflow: 'hidden' }}>
             <button
               type="button"
               onClick={() => navigate('/transactions')}
@@ -608,7 +612,7 @@ export const TransactionDetailPage: React.FC = () => {
                 </button>
               </div>
             ) : (
-              <div>
+              <div style={{ minWidth: 0, maxWidth: '100%' }}>
                 {/* Header */}
                 <div
                   style={{
@@ -621,28 +625,29 @@ export const TransactionDetailPage: React.FC = () => {
                     borderBottom: '1px solid var(--color-border)',
                   }}
                 >
-                  <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+                  <div style={{ display: 'flex', gap: 14, alignItems: 'center', minWidth: 0, flex: 1 }}>
                     <img
                       src={selectedTx.productImage}
                       alt={selectedTx.productName}
                       style={{
-                        width: 80,
-                        height: 80,
+                        width: 68,
+                        height: 68,
                         borderRadius: 'var(--radius-default)',
                         objectFit: 'cover',
+                        flexShrink: 0,
                       }}
                     />
-                    <div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                    <div style={{ minWidth: 0, flex: 1 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 8, marginBottom: 6 }}>
                         {getStatusBadge(selectedTx.status)}
                         <span style={{ fontSize: 12, color: 'var(--color-text-secondary)' }}>
                           Mã GD: #{selectedTx.id.slice(-6).toUpperCase()}
                         </span>
                       </div>
-                      <h2 style={{ fontSize: 20, fontWeight: 800, margin: 0 }}>
+                      <h2 style={{ fontSize: 18, fontWeight: 800, margin: 0, wordBreak: 'break-word' }}>
                         {selectedTx.productName}
                       </h2>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 6, fontSize: 13 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 8, marginTop: 6, fontSize: 12 }}>
                         <span>
                           Người bán: <strong>{selectedTx.sellerName}</strong>
                         </span>
@@ -951,16 +956,18 @@ export const TransactionDetailPage: React.FC = () => {
                           </div>
                         )}
 
-                        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', maxWidth: 520 }}>
+                        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', maxWidth: 520 }}>
                           <input
                             type="text"
                             maxLength={6}
                             className="kw-input"
                             style={{
-                              flex: 1,
-                              fontSize: 20,
+                              flex: '1 1 150px',
+                              minWidth: 0,
+                              width: '100%',
+                              fontSize: 18,
                               fontWeight: 800,
-                              letterSpacing: 6,
+                              letterSpacing: 5,
                               textTransform: 'uppercase',
                               textAlign: 'center',
                             }}

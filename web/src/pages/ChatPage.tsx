@@ -372,7 +372,7 @@ export const ChatPage: React.FC = () => {
             </div>
           </div>
 
-          <div style={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>
+          <div style={{ flex: 1, minHeight: 0, minWidth: 0, width: '100%', overflowY: 'auto', overflowX: 'hidden' }}>
             {filteredChats.length === 0 ? (
               <div style={{ padding: 32, textAlign: 'center', color: 'var(--color-text-secondary)' }}>
                 <MessageCircle size={32} style={{ opacity: 0.4, marginBottom: 8 }} />
@@ -393,9 +393,12 @@ export const ChatPage: React.FC = () => {
                     key={c.id}
                     onClick={() => navigate(`/chat/${c.id}`)}
                     style={{
-                      padding: '14px 16px',
+                      width: '100%',
+                      maxWidth: '100%',
+                      overflow: 'hidden',
+                      padding: '12px 14px',
                       display: 'flex',
-                      gap: 12,
+                      gap: 10,
                       alignItems: 'center',
                       cursor: 'pointer',
                       borderBottom: '1px solid var(--color-divider)',
@@ -404,11 +407,22 @@ export const ChatPage: React.FC = () => {
                         : 'transparent',
                     }}
                   >
-                    <Avatar uri={otherAvatar} name={otherName} size={44} />
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span style={{ fontWeight: 800, fontSize: 14 }}>{otherName}</span>
-                        <span style={{ fontSize: 11, color: 'var(--color-text-secondary)' }}>
+                    <Avatar uri={otherAvatar} name={otherName} size={42} />
+                    <div style={{ flex: 1, minWidth: 0, maxWidth: '100%', overflow: 'hidden' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+                        <span
+                          style={{
+                            fontWeight: 800,
+                            fontSize: 14,
+                            minWidth: 0,
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                          }}
+                        >
+                          {otherName}
+                        </span>
+                        <span style={{ fontSize: 11, color: 'var(--color-text-secondary)', flexShrink: 0 }}>
                           {timeAgo(c.lastMessageTime)}
                         </span>
                       </div>
@@ -420,6 +434,7 @@ export const ChatPage: React.FC = () => {
                           whiteSpace: 'nowrap',
                           overflow: 'hidden',
                           textOverflow: 'ellipsis',
+                          maxWidth: '100%',
                         }}
                       >
                         {c.productName}
@@ -431,6 +446,7 @@ export const ChatPage: React.FC = () => {
                           whiteSpace: 'nowrap',
                           overflow: 'hidden',
                           textOverflow: 'ellipsis',
+                          maxWidth: '100%',
                           marginTop: 2,
                         }}
                       >
@@ -444,6 +460,7 @@ export const ChatPage: React.FC = () => {
                         style={{
                           minWidth: 20,
                           height: 20,
+                          flexShrink: 0,
                           borderRadius: 'var(--radius-pill)',
                           backgroundColor: 'var(--color-primary)',
                           color: 'var(--color-text-white)',
