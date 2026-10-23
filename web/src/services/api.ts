@@ -14,14 +14,20 @@ const isLocalOrLanHost =
   /^10\.\d+\.\d+\.\d+$/.test(currentHostname) ||
   /^172\.(1[6-9]|2\d|3[0-1])\.\d+\.\d+$/.test(currentHostname);
 
+const isViteDevServer = Boolean((import.meta as any).env?.DEV);
+
 export const API_BASE_URL =
   (import.meta as any).env?.VITE_API_URL ||
-  (isLocalOrLanHost
+  (isViteDevServer
+    ? '/api'
+    : isLocalOrLanHost
     ? `http://${currentHostname}:5000/api`
     : 'https://kindr-backend-rl2t.onrender.com/api');
 export const SOCKET_BASE_URL =
   (import.meta as any).env?.VITE_SOCKET_URL ||
-  (isLocalOrLanHost
+  (isViteDevServer && typeof window !== 'undefined'
+    ? window.location.origin
+    : isLocalOrLanHost
     ? `http://${currentHostname}:5000`
     : 'https://kindr-backend-rl2t.onrender.com');
 
