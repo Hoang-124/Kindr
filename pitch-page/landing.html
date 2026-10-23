@@ -1,0 +1,2013 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kindr — Nền Tảng Hoán Đổi Đồ Mẹ &amp; Bé Siêu Cục Bộ | Ký Quỹ Song Phương An Toàn</title>
+  <meta name="description" content="Kindr kết nối cộng đồng mẹ bỉm sữa hoán đổi đồ dùng trẻ em qua Ví Xu nội bộ &amp; thuật toán Ký Quỹ Song Phương An Toàn với 6 giờ kiểm định tại nhà.">
+  
+  <!-- Favicon & Touch Icons -->
+  <link rel="icon" type="image/png" href="kindr-mascot.png">
+  <link rel="apple-touch-icon" href="kindr-mascot.png">
+
+  <!-- Open Graph & Social Sharing -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Kindr — Hoán Đổi Đồ Mẹ &amp; Bé Siêu Cục Bộ | Ký Quỹ Song Phương An Toàn">
+  <meta property="og:description" content="Nền tảng hoán đổi đồ dùng trẻ em Đà Nẵng qua Ví Xu nội bộ &amp; 6 giờ kiểm định tại nhà. Nhận ngay 5 Xu Tiên Phong!">
+  <meta property="og:image" content="https://kindr-hoang-124s-projects.vercel.app/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://kindr-hoang-124s-projects.vercel.app/og-image.png">
+
+  <!-- Modern Typography Pairing -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,700;1,9..144,600&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+  
+  <!-- Artisanal Design System Styles -->
+  <link rel="stylesheet" href="styles.css">
+
+  <!-- Google Analytics 4 (GA4) - Gated by window.KINDR_GA_ID -->
+  <script>
+    window.KINDR_GA_ID = window.KINDR_GA_ID || '';
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+
+    if (window.KINDR_GA_ID && window.KINDR_GA_ID.trim()) {
+      const gaScript = document.createElement('script');
+      gaScript.async = true;
+      gaScript.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(window.KINDR_GA_ID);
+      document.head.appendChild(gaScript);
+
+      gtag('js', new Date());
+      gtag('config', window.KINDR_GA_ID);
+    }
+    
+    function trackKindrEvent(eventName, params = {}) {
+      if (typeof gtag === 'function' && window.KINDR_GA_ID) {
+        gtag('event', eventName, {
+          ...params,
+          timestamp: new Date().toISOString()
+        });
+      }
+    }
+  </script>
+</head>
+<body>
+
+  <!-- ================= TOP COMPACT NAVBAR ================= -->
+  <header class="navbar" id="navbar">
+    <div class="container navbar-container">
+      <a href="#" class="brand-logo" id="main-logo" aria-label="Kindr Trang Chủ">
+        <div class="brand-symbol">
+          <img src="kindr-mascot.png" alt="Biểu tượng Gấu Kindy" class="brand-mascot-img" width="36" height="36" decoding="async">
+        </div>
+        <span class="brand-text">Kindr</span>
+      </a>
+
+      <nav class="nav-desktop">
+        <ul class="nav-links">
+          <li><a href="#signature-bento" class="nav-link">Đặc trưng cốt lõi</a></li>
+          <li><a href="#mvp-showcase" class="nav-link">Bản dùng thử</a></li>
+          <li><a href="#popup-campaign" class="nav-link">Điểm hẹn FPT Plaza</a></li>
+          <li><a href="#founding-card" class="nav-link">Thẻ Sáng Lập</a></li>
+          <li><a href="#waitlist" class="nav-link highlight-pill">Mốc 200 Mẹ</a></li>
+        </ul>
+      </nav>
+
+      <div class="nav-actions">
+        <div class="live-status-pill" id="navWaitlistPill">
+          <span class="status-pulse-dot"></span>
+          <span class="status-text"><strong id="navWaitlistCount">—</strong>/200<span class="status-region-txt"> Mẹ Đà Nẵng</span></span>
+        </div>
+        <a href="#waitlist" class="btn btn-primary btn-sm" id="btn-header-waitlist">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+          <span class="nav-cta-desktop">Đăng Ký Giữ Chỗ (5 Xu)</span>
+          <span class="nav-cta-mobile">Nhận 5 Xu</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Semantic Main Wrapper -->
+  <main id="main-content">
+
+  <!-- ================= ACT 1: HERO & INTERACTIVE COMMAND STAGE ================= -->
+  <section class="hero-stage" id="hero">
+    <div class="hero-ambient-glow"></div>
+    <div class="container hero-layout">
+      <!-- Left Column: Vision & Action Hub -->
+      <div class="hero-left">
+        <div class="hero-badge-row">
+          <div class="hero-pill-badge">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            <span>Dự Án Sinh Viên ĐH FPT • Đà Nẵng</span>
+          </div>
+        </div>
+
+        <h1 class="hero-heading">
+          Đổi đồ cho con.<br>
+          Nhẹ ví cho mẹ.<br>
+          <span class="editorial-highlight"><em>Gặp nhau trong 1km.</em></span>
+        </h1>
+
+        <p class="hero-lede">
+          Nền tảng hoán đổi đồ dùng mẹ &amp; bé tuần hoàn siêu cục bộ. Xóa bỏ mặc cả bằng <strong>Ví Xu nội bộ</strong>, giảm thiểu rủi ro nhờ thuật toán <strong>Ký Quỹ Song Phương An Toàn</strong> và <strong>6 Giờ kiểm định tại nhà</strong>.
+        </p>
+
+        <div class="hero-cta-cluster">
+          <a href="#waitlist" class="btn btn-primary btn-lg" id="btn-hero-launch">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+            <span>Đăng Ký Nhận 5 Xu Tiên Phong</span>
+          </a>
+          <a href="#signature-bento" class="btn btn-outline btn-lg" id="btn-hero-scroll-waitlist">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <span>Khám Phá Bản Dùng Thử</span>
+          </a>
+        </div>
+
+        <div class="hero-stat-trio">
+          <div class="stat-bubble">
+            <strong>0 VNĐ</strong>
+            <span>Mặc cả &amp; ép giá</span>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-bubble">
+            <strong>100%</strong>
+            <span>Ký quỹ bảo chứng</span>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-bubble">
+            <strong>6 Giờ</strong>
+            <span>Kiểm định tại nhà</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Interactive App Stage (iPhone Simulator + Side Companion) -->
+      <div class="hero-right">
+        <div class="hero-showcase-cluster" id="interactive-simulator">
+          <!-- Flow Narrator & Walkthrough Controller Box (Placed Beside Phone) -->
+          <aside class="flow-narrator-panel" id="flowNarratorPanel">
+            <!-- Flow Mode Selector Strip -->
+            <div class="flow-selector-strip" role="tablist" aria-label="Chọn Luồng Trải Nghiệm Kindr">
+              <button type="button" class="flow-sel-pill active" id="selFlowEscrow" data-flow="escrow" role="tab" aria-selected="true" title="Luồng Đổi Đồ 5 bước">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                <span>Luồng Đổi Đồ (5 bước)</span>
+              </button>
+              <button type="button" class="flow-sel-pill" id="selFlowPost" data-flow="post" role="tab" aria-selected="false" title="Mẹ Bán Đăng Đồ & Cọc Phí Bảo Đảm">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                <span>Mẹ Bán Đăng Đồ</span>
+              </button>
+              <button type="button" class="flow-sel-pill" id="selFlowWallet" data-flow="wallet" role="tab" aria-selected="false" title="Ví Xu & Điểm Uy Tín">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><path d="M12 9v6"/></svg>
+                <span>Ví Xu &amp; Uy Tín</span>
+              </button>
+              <button type="button" class="flow-sel-pill" id="selFlowSearch" data-flow="search" role="tab" aria-selected="false" title="Lọc Bán Kính <1km">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                <span>Lọc &lt; 1km</span>
+              </button>
+            </div>
+
+            <div class="narrator-meta-row">
+              <span class="narrator-step-pill" id="narratorStepPill">Bước 1: Chọn Đồ</span>
+              <button type="button" class="autoplay-toggle-btn" id="btnAutoPlayToggle">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" id="autoPlayIcon"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                <span id="autoPlayLabel">Tự chạy</span>
+              </button>
+            </div>
+            <h3 class="narrator-header-title" id="narratorHeaderTitle">Khám phá đồ mẹ bé chất lượng cao trong bán kính 1km</h3>
+            <p class="narrator-body-text" id="narratorBodyText">Người bán đã cọc trước 10% Xu cam kết mô tả trung thực. Mẹ không lo mua phải hàng hỏng vặt hay gặp tin ảo.</p>
+
+            <!-- Rich Feature Highlights Box -->
+            <div class="narrator-feature-highlights" id="narratorFeatureHighlights">
+              <div class="narrator-highlight-item">
+                <span class="nh-icon" id="narratorHighlightIcon1">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2.3"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                </span>
+                <span class="nh-text" id="narratorHighlight1">Ký quỹ kép song phương: Cả 2 bên đều được bảo hộ</span>
+              </div>
+              <div class="narrator-highlight-item">
+                <span class="nh-icon" id="narratorHighlightIcon2">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#E05A36" stroke-width="2.3"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                </span>
+                <span class="nh-text" id="narratorHighlight2">Hẹn gặp sảnh chung cư tiện đường đón con / đi chợ</span>
+              </div>
+            </div>
+
+            <div class="narrator-controls-bar">
+              <button type="button" class="narrator-nav-btn" id="btnNarratorPrev" disabled>← Trước</button>
+              <div class="narrator-dots" id="narratorDotsWrap">
+                <span class="n-dot active" data-step="1"></span>
+                <span class="n-dot" data-step="2"></span>
+                <span class="n-dot" data-step="3"></span>
+                <span class="n-dot" data-step="4"></span>
+                <span class="n-dot" data-step="5"></span>
+              </div>
+              <button type="button" class="narrator-nav-btn narrator-nav-next" id="btnNarratorNext">Tiếp theo →</button>
+            </div>
+          </aside>
+
+          <!-- Smartphone Mockup -->
+          <div class="smartphone-mockup" id="phoneMockup">
+            <div class="phone-outer-frame">
+            <div class="phone-inner-screen">
+              <!-- Phone Top Status Bar with integrated Dynamic Island -->
+              <div class="phone-status-bar">
+                <span class="status-time">09:41</span>
+                <div class="phone-dynamic-island">
+                  <span class="island-camera-lens"></span>
+                  <span class="island-sensor-dot"></span>
+                </div>
+                <div class="status-icons">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12.55a11 11 0 0 1 14.08 0M1.42 9a16 16 0 0 1 21.16 0M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01"/></svg>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="7" width="18" height="10" rx="2" ry="2"/><line x1="22" y1="11" x2="22" y2="13"/></svg>
+                </div>
+              </div>
+
+            <!-- Phone Screen Viewport (Authentic Kindr Native Mobile App) -->
+            <div class="phone-screen-viewport" id="phoneViewport">
+
+              <!-- In-Phone Dynamic Island / System Toast Notification -->
+              <div class="phone-dynamic-toast" id="phoneDynamicToast" role="alert" aria-live="assertive">
+                <span class="p-toast-icon" id="phoneToastIcon">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                </span>
+                <span class="p-toast-msg" id="phoneToastMsg">Đang kích hoạt...</span>
+              </div>
+
+              <!-- ================= SCREEN 1: TRANG CHỦ (HOMESCREEN) ================= -->
+              <div class="flow-screen active" id="flowScreen1">
+                <!-- Native Header: Profile Summary -->
+                <div class="app-native-header">
+                  <div class="native-user-profile" id="btnNativeProfileTrigger" role="button" tabindex="0" title="Xem ví Xu & hồ sơ mẹ bỉm">
+                    <div class="native-avatar-ring">
+                      <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100" alt="Mẹ Lan" class="native-avatar-img" width="32" height="32" decoding="async">
+                    </div>
+                    <div class="native-greeting-col">
+                      <span class="native-greeting-hint">Chào mẹ,</span>
+                      <strong class="native-user-name">Lan</strong>
+                    </div>
+                  </div>
+                  <div class="native-header-actions">
+                    <div class="native-wallet-pill" id="btnNativeWalletTrigger" role="button" tabindex="0" title="Xem ví Xu">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2.2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><path d="M12 9v6"/></svg>
+                      <span id="flowUserXu">100 Xu</span>
+                    </div>
+                    <div class="native-bell-btn">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                      <span class="native-bell-badge">4</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Scrollable Home Content -->
+                <div class="native-scroll-body">
+                  <!-- Search Bar Trigger -->
+                  <div class="native-search-bar" id="nativeSearchTrigger" role="button" tabindex="0" title="Mở bộ lọc tìm kiếm">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8E7C80" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                    <span class="native-search-placeholder">Mẹ muốn tìm món gì cho bé?</span>
+                  </div>
+
+                  <!-- Declutter Banner with Kindr Mascot -->
+                  <div class="native-declutter-banner">
+                    <div class="declutter-text-side">
+                      <span class="declutter-mini-tag">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 3px;"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+                        GÓC CHIA SẺ MẸ BỈM
+                      </span>
+                      <div class="declutter-main-title">Hôm nay dọn nhà cho bé đỡ chật nhé mẹ ơi!</div>
+                      <p class="declutter-sub-title">Đổi đồ chơi cũ lấy Xu, thêm niềm vui cho con</p>
+                      <button type="button" class="native-post-btn" id="btnHomePostTrigger">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        <span>Đăng đồ ngay</span>
+                      </button>
+                    </div>
+                    <div class="declutter-mascot-side">
+                      <img src="kindr-mascot.png" alt="Gấu Kindy" class="declutter-bear-img" width="48" height="48" decoding="async">
+                    </div>
+                  </div>
+
+                  <!-- Bento Categories Grid (6 Icons) -->
+                  <div class="native-categories-row">
+                    <div class="cat-pill-item">
+                      <div class="cat-circle" style="background: #FFE8E8; color: #FF6B6B;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="8" width="18" height="4" rx="1"/><rect x="5" y="12" width="6" height="8" rx="1"/><rect x="13" y="12" width="6" height="8" rx="1"/></svg>
+                      </div>
+                      <span>Đồ chơi</span>
+                    </div>
+                    <div class="cat-pill-item">
+                      <div class="cat-circle" style="background: #E0F7F5; color: #26A69A;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                      </div>
+                      <span>Sách truyện</span>
+                    </div>
+                    <div class="cat-pill-item">
+                      <div class="cat-circle" style="background: #E8EDFB; color: #4361EE;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+                      </div>
+                      <span>Đồ học tập</span>
+                    </div>
+                    <div class="cat-pill-item">
+                      <div class="cat-circle" style="background: #FFF3D6; color: #D97706;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/></svg>
+                      </div>
+                      <span>Quần áo bé</span>
+                    </div>
+                    <div class="cat-pill-item">
+                      <div class="cat-circle" style="background: #E5F8ED; color: #2EC4B6;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18.5" cy="17.5" r="3.5"/><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="15" cy="5" r="1"/><path d="M12 17.5V14l-3-3 4-3 2 3h2"/></svg>
+                      </div>
+                      <span>Xe &amp; Nôi cũi</span>
+                    </div>
+                    <div class="cat-pill-item">
+                      <div class="cat-circle" style="background: #FFEBF0; color: #E63946;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
+                      </div>
+                      <span>Trạm Tặng</span>
+                    </div>
+                  </div>
+
+                  <!-- Feed Title -->
+                  <div class="native-feed-header">
+                    <span class="native-feed-title">Gần mẹ hôm nay</span>
+                    <span class="native-feed-filter">Đà Nẵng &lt; 1km</span>
+                  </div>
+
+                  <!-- 2-Column Product Grid -->
+                  <div class="native-products-grid">
+                    <!-- Item 1 (Interactive Demo Product) -->
+                    <div class="native-prod-card prod-clickable" id="btnActionStep1" role="button" tabindex="0" aria-label="Xem chi tiết Bộ đường ray tàu gỗ">
+                      <div class="native-card-media">
+                        <img src="https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?w=500" alt="Bộ đường ray tàu gỗ" class="native-card-img" width="160" height="110" decoding="async">
+                        <span class="native-loc-chip">400m • FPT Plaza 2</span>
+                        <span class="native-cond-badge">Mới 90%</span>
+                      </div>
+                      <div class="native-card-body">
+                        <div class="native-card-name">Bộ đường ray tàu gỗ (mới 90%)</div>
+                        <div class="native-card-bottom">
+                          <div class="native-seller-row">
+                            <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=80" alt="Mẹ Mai Thảo" class="native-seller-avt" width="24" height="24" decoding="async">
+                            <span class="native-seller-name">Mẹ Mai Thảo</span>
+                          </div>
+                          <div class="native-price-tag">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2.5"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><path d="M12 9v6"/></svg>
+                            <span>10 Xu</span>
+                          </div>
+                        </div>
+                        <div class="native-card-action-hint">
+                          <span>Chạm để đổi đồ</span>
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Item 2 (Realistic Neighbor Post) -->
+                    <div class="native-prod-card">
+                      <div class="native-card-media">
+                        <img src="https://images.unsplash.com/photo-1581235720704-06d3acfcb36f?w=500" alt="Ô tô mô hình cổ điển" class="native-card-img" width="160" height="110" decoding="async">
+                        <span class="native-loc-chip">800m • FPT Plaza 1</span>
+                        <span class="native-cond-badge">Mới 95%</span>
+                      </div>
+                      <div class="native-card-body">
+                        <div class="native-card-name">Ô tô mô hình cổ điển</div>
+                        <div class="native-card-bottom">
+                          <div class="native-seller-row">
+                            <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=80" alt="Mẹ Hoa Lan" class="native-seller-avt" width="24" height="24" decoding="async">
+                            <span class="native-seller-name">Mẹ Hoa Lan</span>
+                          </div>
+                          <div class="native-price-tag">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2.5"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><path d="M12 9v6"/></svg>
+                            <span>4 Xu</span>
+                          </div>
+                        </div>
+                        <div class="native-card-status-hint">Đã kiểm duyệt</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- ================= SCREEN 2: CHI TIẾT MÓN ĐỒ (PRODUCTDETAILSCREEN) ================= -->
+              <div class="flow-screen" id="flowScreen2">
+                <!-- Screen Header with Back & Heart -->
+                <div class="native-sub-header">
+                  <button type="button" class="native-header-back-btn" id="btnBackToHome">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2D2325" stroke-width="2.4"><path d="m15 18-6-6 6-6"/></svg>
+                  </button>
+                  <span class="native-sub-header-title">Chi Tiết Tin Đăng</span>
+                  <button type="button" class="native-header-heart-btn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="#EF4444" stroke="#EF4444" stroke-width="2"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+                  </button>
+                </div>
+
+                <!-- Product Detail Scroll Content -->
+                <div class="native-scroll-body detail-scroll-body">
+                  <!-- Product Image Hero -->
+                  <div class="native-detail-hero">
+                    <img src="https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?w=600" alt="Bộ đường ray tàu gỗ" class="native-detail-img" width="340" height="220" loading="lazy" decoding="async">
+                    <div class="native-img-counter">1 / 3</div>
+                  </div>
+
+                  <!-- Details Sheet -->
+                  <div class="native-sheet-content">
+                    <div class="native-sheet-top-row">
+                      <div class="native-cat-time">
+                        <span class="native-cat-label">Đồ chơi</span>
+                        <span class="native-dot-sep">•</span>
+                        <span class="native-time-ago">Vừa đăng 15p</span>
+                      </div>
+                      <div class="native-price-box">
+                        <div class="native-price-main">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2.5"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><path d="M12 9v6"/></svg>
+                          <strong>10</strong>
+                          <span>Xu</span>
+                        </div>
+                        <span class="native-fiat-sub">~ 100.000 VNĐ</span>
+                      </div>
+                    </div>
+
+                    <div class="native-detail-title">Bộ đường ray tàu gỗ (mới 90%)</div>
+
+                    <!-- Attribute Tag Pills -->
+                    <div class="native-tags-row">
+                      <span class="attr-pill pill-cond">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 3px;"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+                        Mới 90%
+                      </span>
+                      <span class="attr-pill pill-age">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 3px;"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+                        Bé 1-3 tuổi
+                      </span>
+                      <span class="attr-pill pill-loc">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 3px;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                        FPT Plaza 2 • 400m
+                      </span>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="native-desc-card">
+                      <span class="desc-card-title">Mô tả từ mẹ bán</span>
+                      <p class="desc-card-text">Bộ ray gỗ tự nhiên bền đẹp, các khớp nối chuẩn xác, kèm 3 toa tàu từ tính chạy êm. Bé nhà mình chơi giữ rất sạch, các góc cạnh mài nhẵn an toàn, đã lau cồn tiệt trùng thơm tho.</p>
+                    </div>
+
+                    <!-- Seller Card -->
+                    <div class="native-seller-card">
+                      <div class="seller-card-avatar-wrap">
+                        <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100" alt="Mẹ Mai Thảo" class="seller-card-avatar" width="44" height="44" loading="lazy" decoding="async">
+                        <span class="seller-online-dot"></span>
+                      </div>
+                      <div class="seller-card-info">
+                        <div class="seller-card-name-row">
+                          <strong>Mẹ Mai Thảo</strong>
+                        </div>
+                        <div class="seller-card-meta">
+                          <span class="star-rating">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="#D97706" style="vertical-align: middle; margin-right: 2px;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                            4.9
+                          </span>
+                          <span class="reputation-text">Mẹ Bỉm Văn Minh (98đ)</span>
+                        </div>
+                        <span class="phone-unlocked-hint">
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 3px;"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                          SĐT: 0905 *** 456 (Mở khóa khi đổi)
+                        </span>
+                      </div>
+                    </div>
+
+                    <!-- Double Escrow Guarantee Card -->
+                    <div class="native-escrow-trust-card">
+                      <div class="escrow-trust-header">
+                        <div class="escrow-shield-circle">
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E05A36" stroke-width="2.4"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+                        </div>
+                        <div>
+                          <strong>Bảo chứng Ký Quỹ Song Phương An Toàn</strong>
+                          <span>Giảm thiểu rủi ro, bảo vệ quyền lợi cả hai mẹ</span>
+                        </div>
+                      </div>
+                      <div class="escrow-trust-body">
+                        <div class="escrow-bullet">
+                          <span class="bullet-dot"></span>
+                          <span><strong>Người bán đã cọc:</strong> 1 Xu phí bảo đảm (10%) cam kết chất lượng chuẩn mô tả.</span>
+                        </div>
+                        <div class="escrow-bullet">
+                          <span class="bullet-dot"></span>
+                          <span><strong>6 Giờ Kiểm Định Tại Nhà:</strong> Mẹ nhận đồ mang về kiểm tra an toàn, hết 6h mới giải ngân Xu.</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Sticky Bottom Action Bar -->
+                <div class="native-bottom-cta-bar">
+                  <button type="button" class="native-chat-cta-btn" id="btnDetailChatTrigger" title="Nhắn tin với người bán">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    <span>Nhắn tin</span>
+                  </button>
+                  <button type="button" class="native-primary-exchange-btn" id="btnActionStep2">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                    <span>Ký Quỹ Đổi Ngay (10 Xu)</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- ================= SCREEN 3: CHI TIẾT KÝ QUỸ AN TOÀN (TRANSACTIONDETAILSCREEN) ================= -->
+              <div class="flow-screen" id="flowScreen3">
+                <!-- Screen Header: Chi tiết Ký Quỹ An Toàn -->
+                <div class="native-sub-header">
+                  <button type="button" class="native-header-back-btn" id="btnBackTo2">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2D2325" stroke-width="2.4"><path d="m15 18-6-6 6-6"/></svg>
+                  </button>
+                  <span class="native-sub-header-title">Chi tiết Ký Quỹ An Toàn</span>
+                  <div class="native-bell-btn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                    <span class="native-bell-badge">4</span>
+                  </div>
+                </div>
+
+                <!-- Transaction Scroll Body -->
+                <div class="native-scroll-body transaction-scroll-body">
+                  <!-- Yellow Status Banner: ĐANG TẠM KHÓA XU KÝ QUỸ -->
+                  <div class="native-status-banner banner-yellow">
+                    <div class="status-banner-icon">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    </div>
+                    <div class="status-banner-texts">
+                      <div class="status-banner-title">ĐANG TẠM KHÓA XU KÝ QUỸ</div>
+                      <p class="status-banner-sub">Xu cả 2 bên được bảo hộ an toàn trong Rương ký quỹ an toàn.</p>
+                    </div>
+                  </div>
+
+                  <!-- Product Summary Card -->
+                  <div class="native-tx-product-card">
+                    <img src="https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?w=200" alt="Bộ đường ray tàu gỗ" class="tx-product-img" width="56" height="56" loading="lazy" decoding="async">
+                    <div class="tx-product-info">
+                      <strong class="tx-product-name">Bộ đường ray tàu gỗ</strong>
+                      <div class="tx-product-price-row">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2.5"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><path d="M12 9v6"/></svg>
+                        <span>Giá đổi: 10 Xu</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Mascot Speech Dialogue -->
+                  <div class="native-mascot-speech-wrap">
+                    <img src="kindr-mascot.png" alt="Gấu Kindy" class="native-mascot-speech-avatar" width="32" height="32" loading="lazy" decoding="async">
+                    <div class="native-mascot-speech-bubble">
+                      Mẹ an tâm! Gấu đang giữ hộ Xu trong rương, kiểm tra 6 tiếng thoải mái nhé!
+                    </div>
+                  </div>
+
+                  <!-- Unlocked Contact Information -->
+                  <div class="native-contact-unlocked-card">
+                    <div class="contact-unlocked-header">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E05A36" stroke-width="2.2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                      <div>
+                        <strong>Thông tin liên hệ trực tiếp (Đã mở khóa)</strong>
+                        <span>Dùng để hai bên tự thỏa thuận giao nhận tiện đường đi chợ/đón con</span>
+                      </div>
+                    </div>
+                    <div class="contact-info-row">
+                      <span class="info-label">Mẹ đăng bán:</span>
+                      <strong class="info-value-name">Mai Thảo</strong>
+                    </div>
+                    <div class="contact-info-row">
+                      <span class="info-label">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                      </span>
+                      <strong class="info-value">0905 123 456</strong>
+                    </div>
+                    <div class="contact-info-row">
+                      <span class="info-label">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                      </span>
+                      <strong class="info-value">Tin nhắn Kindr: Mẹ Mai Thảo</strong>
+                    </div>
+                    <button type="button" class="native-contact-chat-btn" id="btnContactChatTrigger">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                      <span>Mở tin nhắn hẹn gặp tại sảnh</span>
+                    </button>
+                  </div>
+
+                  <!-- Exclusive Handover PIN Card -->
+                  <div class="native-handover-pin-card">
+                    <span class="pin-card-tag">MÃ XÁC THỰC BÀN GIAO CỦA MẸ</span>
+                    <div class="pin-code-highlight">
+                      <span class="pin-code-chars">KND-889</span>
+                      <span class="pin-copy-chip">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                        <span>Mã xác thực 6 số</span>
+                      </span>
+                    </div>
+                    <p class="pin-explain-txt">Mẹ giữ mã này! Khi gặp mặt tại sảnh, bé kiểm tra đồ ưng ý mẹ mới đọc mã này cho người bán nhập.</p>
+                  </div>
+
+                  <!-- Escrow Split Breakdown Box -->
+                  <div class="native-escrow-split-box">
+                    <div class="split-col">
+                      <span class="split-label">Mẹ Mua (Khóa 100%)</span>
+                      <strong class="split-value">10 Xu</strong>
+                    </div>
+                    <div class="split-line-divider"></div>
+                    <div class="split-col">
+                      <span class="split-label">Mẹ Bán (Phí bảo đảm 10%)</span>
+                      <strong class="split-value">1 Xu</strong>
+                    </div>
+                  </div>
+
+                  <!-- Primary CTA: Move to Chat to arrange meetup -->
+                  <button type="button" class="btn btn-primary btn-full native-handover-confirm-btn" id="btnStep3ToChat">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    <span>Nhắn tin hẹn sảnh chung cư (Bước 4) →</span>
+                  </button>
+                  <p style="font-size: 0.7rem; color: var(--text-muted); text-align: center; margin-top: 6px;">
+                    Hai mẹ tự hẹn giờ tiện đường đón con / đi chợ
+                  </p>
+                </div>
+              </div>
+
+              <!-- ================= SCREEN 4: 6H SAFEFUL TIME & GIẢI NGÂN ================= -->
+              <div class="flow-screen" id="flowScreen4">
+                <!-- Screen Header -->
+                <div class="native-sub-header">
+                  <button type="button" class="native-header-back-btn" id="btnBackTo3">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2D2325" stroke-width="2.4"><path d="m15 18-6-6 6-6"/></svg>
+                  </button>
+                  <span class="native-sub-header-title">Chi tiết Ký Quỹ An Toàn</span>
+                  <div class="native-bell-btn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                    <span class="native-bell-badge">4</span>
+                  </div>
+                </div>
+
+                <!-- Scroll Body -->
+                <div class="native-scroll-body transaction-scroll-body">
+                  <!-- Substate 4A: 6H Safeful Time Countdown Active -->
+                  <div id="inspectionActiveBox">
+                    <!-- Teal Status Banner: BẢO CHỨNG 6 GIỜ KIỂM ĐỊNH -->
+                    <div class="native-status-banner banner-teal">
+                      <div class="status-banner-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                      </div>
+                      <div class="status-banner-texts">
+                        <div class="status-banner-title">BẢO CHỨNG 6 GIỜ KIỂM ĐỊNH</div>
+                        <p class="status-banner-sub">Đếm ngược kiểm định tại nhà: <strong id="liveSafefulDigits">06h 00m 00s</strong></p>
+                      </div>
+                    </div>
+
+                    <!-- Product Card Summary -->
+                    <div class="native-tx-product-card">
+                      <img src="https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?w=200" alt="Bộ đường ray tàu gỗ" class="tx-product-img" width="56" height="56" loading="lazy" decoding="async">
+                      <div class="tx-product-info">
+                        <strong class="tx-product-name">Bộ đường ray tàu gỗ</strong>
+                        <div class="tx-product-price-row">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2.5"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><path d="M12 9v6"/></svg>
+                          <span>Giá đổi: 10 Xu</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Mascot Dialogue for 6H -->
+                    <div class="native-mascot-speech-wrap">
+                      <img src="kindr-mascot.png" alt="Gấu Kindy" class="native-mascot-speech-avatar" width="32" height="32" loading="lazy" decoding="async">
+                      <div class="native-mascot-speech-bubble">
+                        Bé thử đồ chơi có ưng ý không mẹ? Nếu chuẩn cam kết, mẹ bấm Hoàn tất để giải ngân Xu cho mẹ bán nhé!
+                      </div>
+                    </div>
+
+                    <!-- Escrow Split Breakdown Box -->
+                    <div class="native-escrow-split-box">
+                      <div class="split-col">
+                        <span class="split-label">Mẹ Mua (Khóa 100%)</span>
+                        <strong class="split-value">10 Xu</strong>
+                      </div>
+                      <div class="split-line-divider"></div>
+                      <div class="split-col">
+                        <span class="split-label">Mẹ Bán (Phí bảo đảm 10%)</span>
+                        <strong class="split-value">1 Xu</strong>
+                      </div>
+                    </div>
+
+                    <!-- Dual Actions: Hài lòng giải ngân / Khiếu nại -->
+                    <div class="native-safeful-actions-col">
+                      <button type="button" class="btn btn-primary btn-full native-release-confirm-btn" id="btnConfirmReleaseXu">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                        <span>Đúng mô tả 100% - Giải phóng Xu ngay</span>
+                      </button>
+                      <button type="button" class="native-dispute-link-btn" id="btnSimulateDispute">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                        <span>Báo lỗi / Khiếu nại chất lượng (Trong 6h)</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Substate 4C: Trạng Thái Khiếu Nại (Dispute In-Screen Mock) -->
+                  <div id="disputeActiveBox" class="hidden" style="display: none;">
+                    <div class="native-status-banner banner-amber" style="background: #FEF3C7; border: 1.5px solid #FCD34D;">
+                      <div class="status-banner-icon" style="background: #D97706;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.4"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                      </div>
+                      <div class="status-banner-texts">
+                        <div class="status-banner-title" style="color: #92400E; font-weight: 800; font-size: 0.85rem;">ĐÃ TIẾP NHẬN KHIẾU NẠI</div>
+                        <p class="status-banner-sub" style="color: #B45309; font-size: 0.76rem;">Lệnh giải ngân Xu đã tạm khóa. Ban quản trị Kindr đang xem xét bằng chứng.</p>
+                      </div>
+                    </div>
+                    <div class="native-tx-product-card">
+                      <img src="https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?w=200" alt="Bộ đường ray tàu gỗ" class="tx-product-img" width="56" height="56" loading="lazy" decoding="async">
+                      <div class="tx-product-info">
+                        <strong class="tx-product-name">Bộ đường ray tàu gỗ</strong>
+                        <div class="tx-product-price-row">
+                          <span style="color: #D97706; font-weight: 700; font-size: 0.8rem;">Đang trong 6 giờ kiểm định tại nhà</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="native-mascot-speech-wrap">
+                      <img src="kindr-mascot.png" alt="Gấu Kindy" class="native-mascot-speech-avatar" width="32" height="32" loading="lazy" decoding="async">
+                      <div class="native-mascot-speech-bubble" style="font-size: 0.78rem;">
+                        Kindr đã ghi nhận khiếu nại! Khiếu nại hợp lệ sẽ được hoàn đủ 10 Xu về ví mẹ nhé.
+                      </div>
+                    </div>
+                    <button type="button" class="btn btn-outline btn-full" id="btnCancelDispute" style="margin-top: 10px;">
+                      <span>Quay lại màn hình kiểm định</span>
+                    </button>
+                  </div>
+
+                  <!-- Substate 4B: Giao Dịch Thành Công (Celebration) -->
+                  <div id="exchangeCelebrationBox" class="hidden" style="display: none;">
+                    <!-- Green Status Banner: GIAO DỊCH THÀNH CÔNG -->
+                    <div class="native-status-banner banner-green">
+                      <div class="status-banner-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.4"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+                      </div>
+                      <div class="status-banner-texts">
+                        <div class="status-banner-title">GIAO DỊCH THÀNH CÔNG</div>
+                        <p class="status-banner-sub">Xu đã tự động giải phóng vào ví người bán.</p>
+                      </div>
+                    </div>
+
+                    <!-- Product Summary Card -->
+                    <div class="native-tx-product-card">
+                      <img src="https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?w=200" alt="Bộ đường ray tàu gỗ" class="tx-product-img" width="56" height="56" loading="lazy" decoding="async">
+                      <div class="tx-product-info">
+                        <strong class="tx-product-name">Bộ đường ray tàu gỗ</strong>
+                        <div class="tx-product-price-row">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                          <span style="color: #059669; font-weight: 700;">Đã hoàn tất trao đổi</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Mascot Dialogue Success -->
+                    <div class="native-mascot-speech-wrap">
+                      <img src="kindr-mascot.png" alt="Gấu Kindy" class="native-mascot-speech-avatar" width="32" height="32" loading="lazy" decoding="async">
+                      <div class="native-mascot-speech-bubble">
+                        Gấu Kindy đã giải phóng Xu thành công cho 2 mẹ nhé! Cảm ơn 2 mẹ đã trao đổi văn minh!
+                      </div>
+                    </div>
+
+                    <!-- Outcome Metrics -->
+                    <div class="native-escrow-split-box">
+                      <div class="split-col">
+                        <span class="split-label">Người bán nhận</span>
+                        <strong class="split-value" style="color: #059669;">10 Xu + hoàn 1 Xu phí bảo đảm</strong>
+                      </div>
+                      <div class="split-line-divider"></div>
+                      <div class="split-col">
+                        <span class="split-label">Mẹ mua kiểm định</span>
+                        <strong class="split-value" style="color: #059669;">6 Giờ an tâm</strong>
+                      </div>
+                    </div>
+
+                    <button type="button" class="btn btn-primary btn-full native-handover-confirm-btn" id="btnRestartFlow">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+                      <span>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="#D97706" style="vertical-align: middle; margin-right: 4px;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                        Đánh giá 5 sao &amp; Về Trang Chủ
+                      </span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- ================= SCREEN 5: ĐĂNG ĐỒ & CỌC PHÍ BẢO ĐẢM 10% (POSTITEMSCREEN) ================= -->
+              <div class="flow-screen" id="flowScreenPost">
+                <div class="native-sub-header">
+                  <button type="button" class="native-header-back-btn" id="btnBackFromPost">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2D2325" stroke-width="2.4"><path d="m15 18-6-6 6-6"/></svg>
+                  </button>
+                  <span class="native-sub-header-title">Đăng Đồ Dọn Nhà</span>
+                  <span class="native-cond-badge" style="position: static; font-size: 0.68rem; background: var(--brand-primary-soft); color: var(--brand-primary); border: 1px solid var(--brand-primary-border);">Bảo chứng 10%</span>
+                </div>
+
+                <div class="native-scroll-body post-scroll-body">
+                  <!-- Kindr AI Vision Scanner Banner -->
+                  <div class="native-ai-vision-card">
+                    <div class="ai-vision-preview-wrap">
+                      <img src="https://images.unsplash.com/photo-1516627145497-ae6968895b74?w=400" alt="Xe thăng bằng Cruzee" class="ai-vision-img" width="60" height="60" loading="lazy" decoding="async">
+                      <div class="ai-scan-sparkle">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="#FF6B6B"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3L12 3Z"/></svg>
+                      </div>
+                    </div>
+                    <div class="ai-vision-info">
+                      <div class="ai-badge-pill">
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3L12 3Z"/></svg>
+                        <span>Trí tuệ nhân tạo Kindr AI</span>
+                      </div>
+                      <strong>Xe thăng bằng nhôm Cruzee</strong>
+                      <p>Gợi ý: Đồ dùng xe trẻ em 2-5 tuổi • Mới ~92%</p>
+                    </div>
+                  </div>
+
+                  <!-- Item Title -->
+                  <div class="native-form-group">
+                    <label class="native-form-label">Tiêu đề tin đăng</label>
+                    <div class="native-fake-input">Xe thăng bằng Cruzee siêu nhẹ (mới 92%)</div>
+                  </div>
+
+                  <!-- Trade Mode: Xu or Donate -->
+                  <div class="native-form-group">
+                    <label class="native-form-label">Hình thức giao lưu</label>
+                    <div class="native-mode-chips">
+                      <button type="button" class="mode-chip-item active" id="chipModeXu">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><path d="M12 9v6"/></svg>
+                        <span>Đổi lấy Xu (10 Xu)</span>
+                      </button>
+                      <button type="button" class="mode-chip-item" id="chipModeDonate">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/></svg>
+                        <span>Trạm Tặng (0 Xu)</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Safe Fee Guarantee Box -->
+                  <div class="native-safefee-explain-card" id="safefeeCard">
+                    <div class="safefee-card-header">
+                      <div class="safefee-icon-bubble">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#E05A36" stroke-width="2.4"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                      </div>
+                      <div>
+                        <strong class="safefee-title">Cam Kết Chất Lượng (Cọc Phí Bảo Đảm 10%)</strong>
+                        <span class="safefee-sub">Triệt tiêu tin ảo • Bảo vệ mẹ mua an tâm</span>
+                      </div>
+                    </div>
+                    <div class="safefee-calc-row">
+                      <span>Mức Xu đăng đổi: <strong id="postXuVal">10 Xu</strong></span>
+                      <span class="safefee-amount">Cọc phí bảo đảm: <strong id="postSafeFeeVal">1 Xu</strong></span>
+                    </div>
+                    <p class="safefee-note">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2.2" style="vertical-align: middle; margin-right: 3px;"><path d="M9 18h6M10 22h4M15 2a6 6 0 0 0-6 6c0 2 1 3.5 2 4.5V15h4v-2.5c1-1 2-2.5 2-4.5a6 6 0 0 0-6-6z"/></svg><strong>Hoàn cọc 100%:</strong> Khi mẹ mua nhận đồ và qua 6 Giờ kiểm định không phát sinh tranh chấp, mẹ nhận đủ <strong id="postNetRefund">10 Xu + hoàn 1 Xu cọc</strong> về ví.
+                    </p>
+                  </div>
+
+                  <!-- Location auto-fill -->
+                  <div class="native-loc-detect-card">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FF6B6B" stroke-width="2.2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                    <span>Hẹn gặp tiện đường: <strong>Sảnh FPT Plaza 2 (&lt; 400m)</strong></span>
+                  </div>
+
+                  <!-- Submit Post Button -->
+                  <button type="button" class="btn btn-primary btn-full native-submit-post-btn" id="btnSubmitPostDemo">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="20 6 9 17 4 12"/></svg>
+                    <span id="btnSubmitPostLabel">Đăng Tin &amp; Cọc 1 Xu Phí Bảo Đảm</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- ================= SCREEN 6: NHẮN TIN TRỰC TIẾP & HẸN GẶP SẢNH CHUNG CƯ (CHATSCREEN) ================= -->
+              <div class="flow-screen" id="flowScreenChat">
+                <div class="native-chat-header">
+                  <button type="button" class="native-header-back-btn" id="btnBackFromChat">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2D2325" stroke-width="2.4"><path d="m15 18-6-6 6-6"/></svg>
+                  </button>
+                  <div class="chat-header-user">
+                    <div class="chat-avatar-wrap">
+                      <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=80" alt="Mẹ Mai Thảo" class="chat-header-avatar" width="30" height="30">
+                      <span class="chat-online-badge"></span>
+                    </div>
+                    <div class="chat-header-meta">
+                      <strong>Mẹ Mai Thảo</strong>
+                      <span class="chat-reputation-tag">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="#D97706" style="vertical-align: middle; margin-right: 2px;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>4.9 • Sảnh FPT Plaza 2
+                      </span>
+                    </div>
+                  </div>
+                  <button type="button" class="chat-call-btn" id="btnChatCall" title="Gọi thoại trực tiếp đã mở khóa">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FF6B6B" stroke-width="2.2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                  </button>
+                </div>
+
+                <!-- Pinned Escrow Banner inside Chat -->
+                <div class="chat-pinned-escrow">
+                  <div class="pinned-escrow-left">
+                    <div class="pinned-shield-icon">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    </div>
+                    <div class="pinned-text-wrap">
+                      <span class="pinned-label">Ký Quỹ: Bộ đường ray tàu gỗ</span>
+                      <strong class="pinned-amount">10 Xu ký quỹ • Mã nhận: KND-889</strong>
+                    </div>
+                  </div>
+                  <button type="button" class="pinned-view-tx-btn" id="btnChatViewEscrow">Xem Ký Quỹ</button>
+                </div>
+
+                <!-- Chat Stream -->
+                <div class="native-scroll-body chat-messages-stream" id="chatMessagesStream">
+                  <div class="chat-time-stamp">Hôm nay 09:30</div>
+
+                  <!-- Seller message -->
+                  <div class="chat-bubble chat-bubble-incoming">
+                    <div class="bubble-text">Chào mẹ Lan ạ! Em nhận được thông báo mẹ vừa ký quỹ 10 Xu bộ ray tàu gỗ rồi nè.</div>
+                    <div class="bubble-time">09:30</div>
+                  </div>
+
+                  <!-- Buyer message (User) -->
+                  <div class="chat-bubble chat-bubble-outgoing">
+                    <div class="bubble-text">Chào mẹ Thảo! Chiều nay tầm 17h15 mẹ có nhà không? Mình đón con trường Mầm non về tiện ghé sảnh lấy luôn ạ.</div>
+                    <div class="bubble-time">09:32</div>
+                  </div>
+
+                  <!-- Seller response -->
+                  <div class="chat-bubble chat-bubble-incoming">
+                    <div class="bubble-text">Dạ tiện quá mẹ ơi! Tầm đó em đang ở sảnh B chung cư FPT Plaza 2 luôn. Em đã xịt cồn tiệt trùng đóng túi sạch sẽ cho bé rồi nha.</div>
+                    <div class="bubble-time">09:33</div>
+                  </div>
+
+                  <!-- Buyer code share -->
+                  <div class="chat-bubble chat-bubble-outgoing">
+                    <div class="bubble-text">Tuyệt vời quá! Mã nhận đồ của mình là <strong>KND-889</strong> nhé mẹ. Tới sảnh mình nháy máy mẹ liền.</div>
+                    <div class="bubble-time">09:35</div>
+                  </div>
+
+                  <!-- System Announcement in chat -->
+                  <div class="chat-system-announcement">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                    <span>Điểm hẹn: Sảnh B, Chung cư FPT Plaza 2 (Cách bạn 400m)</span>
+                  </div>
+                </div>
+
+                <!-- Handover Action Bar inside Chat -->
+                <div class="chat-handover-action-card">
+                  <div class="chat-handover-top">
+                    <span class="handover-pin-badge">Mã nhận đồ: <strong>KND-889</strong></span>
+                    <span class="handover-loc-hint">
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="vertical-align: middle; margin-right: 2px;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Sảnh B FPT Plaza 2
+                    </span>
+                  </div>
+                  <button type="button" class="btn btn-primary btn-full chat-confirm-handover-btn" id="btnChatToInspection">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    <span>Đã gặp tại sảnh • Bắt đầu 6H kiểm định (Bước 5) →</span>
+                  </button>
+                </div>
+
+                <!-- Chat Quick Send Box -->
+                <div class="chat-input-toolbar">
+                  <div class="chat-input-fake" id="chatInputTrigger" role="button" tabindex="0">
+                    <span id="chatFakePlaceholder">Nhắn cho Mẹ Mai Thảo...</span>
+                  </div>
+                  <button type="button" class="chat-send-btn" id="btnDemoSendMsg" title="Gửi tin nhắn mẫu">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.4"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                  </button>
+                </div>
+              </div>
+
+              <!-- ================= SCREEN 7: VÍ XU & ĐIỂM UY TÍN MẸ BỈM (WALLETSCREEN) ================= -->
+              <div class="flow-screen" id="flowScreenWallet">
+                <div class="native-sub-header">
+                  <button type="button" class="native-header-back-btn" id="btnBackFromWallet">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2D2325" stroke-width="2.4"><path d="m15 18-6-6 6-6"/></svg>
+                  </button>
+                  <span class="native-sub-header-title">Ví Xu &amp; Hồ Sơ Mẹ Bỉm</span>
+                  <span class="native-cond-badge" style="position: static; font-size: 0.68rem; background: #FFF3D6; color: #D97706; border: 1px solid rgba(217, 119, 6, 0.3);">#042 Tiên Phong</span>
+                </div>
+
+                <div class="native-scroll-body wallet-scroll-body">
+                  <!-- User Profile & Reputation Summary Card -->
+                  <div class="native-wallet-profile-card">
+                    <div class="wallet-avatar-col">
+                      <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100" alt="Mẹ Lan" class="wallet-avatar-img" width="44" height="44">
+                      <span class="wallet-verified-check">
+                        <svg width="9" height="9" viewBox="0 0 24 24" fill="#FFFFFF"><polyline points="20 6 9 17 4 12"/></svg>
+                      </span>
+                    </div>
+                    <div class="wallet-profile-text">
+                      <div class="wallet-name-row">
+                        <strong>Mẹ Lan</strong>
+                        <span class="reputation-badge-gold">
+                          <svg width="11" height="11" viewBox="0 0 24 24" fill="#D97706"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                          99/100 Uy Tín
+                        </span>
+                      </div>
+                      <div class="wallet-badge-subtitle">Cư dân FPT Plaza 2 • 15 lần trao đổi • 0 vi phạm</div>
+                    </div>
+                  </div>
+
+                  <!-- Premium Kindr Xu Pass Card -->
+                  <div class="native-xu-pass-card">
+                    <div class="xu-pass-top">
+                      <span class="xu-pass-label">SỐ DƯ VÍ KINDR XU</span>
+                      <span class="xu-pass-chip">Bảo chứng Ký Quỹ</span>
+                    </div>
+                    <div class="xu-pass-main-val">
+                      <strong id="walletPassXuNum">100</strong>
+                      <span>Xu</span>
+                      <span class="xu-fiat-equiv">~ 1.000.000 VNĐ</span>
+                    </div>
+                    <div class="xu-split-status">
+                      <div class="xu-split-item">
+                        <span class="dot-available"></span>
+                        <span>Khả dụng: <strong id="walletPassAvail">90 Xu</strong></span>
+                      </div>
+                      <div class="xu-split-item">
+                        <span class="dot-escrow"></span>
+                        <span>Đang Ký Quỹ: <strong id="walletPassLocked">10 Xu</strong></span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Quick Action Buttons Grid -->
+                  <div class="wallet-actions-grid">
+                    <button type="button" class="w-action-btn" id="btnWalletTopUp">
+                      <div class="w-action-icon icon-coral">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                      </div>
+                      <span>Nạp Xu</span>
+                    </button>
+                    <button type="button" class="w-action-btn" id="btnWalletWithdraw">
+                      <div class="w-action-icon icon-teal">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                      </div>
+                      <span>Rút Xu</span>
+                    </button>
+                    <button type="button" class="w-action-btn" id="btnWalletEscrowHistory">
+                      <div class="w-action-icon icon-amber">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                      </div>
+                      <span>Rương Ký Quỹ</span>
+                    </button>
+                    <button type="button" class="w-action-btn" id="btnWalletDonate">
+                      <div class="w-action-icon icon-rose">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/></svg>
+                      </div>
+                      <span>Trạm Tặng</span>
+                    </button>
+                  </div>
+
+                  <!-- Escrow & Ledger History List -->
+                  <div class="native-tx-history-box">
+                    <div class="tx-history-title">Biến Động Ký Quỹ &amp; Ví Xu</div>
+                    <div class="tx-history-item">
+                      <div class="tx-item-icon icon-lock">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                      </div>
+                      <div class="tx-item-content">
+                        <strong>Ký quỹ đổi: Bộ ray tàu gỗ</strong>
+                        <span>Đang trong 6 giờ kiểm định tại nhà</span>
+                      </div>
+                      <div class="tx-item-amount amount-lock">-10 Xu</div>
+                    </div>
+                    <div class="tx-history-item">
+                      <div class="tx-item-icon icon-plus">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#2EC4B6" stroke-width="2.2"><polyline points="20 6 9 17 4 12"/></svg>
+                      </div>
+                      <div class="tx-item-content">
+                        <strong>Hoàn cọc phí bảo đảm (Ghế ăn dặm)</strong>
+                        <span>Giao dịch thành công 100%</span>
+                      </div>
+                      <div class="tx-item-amount amount-plus">+1 Xu</div>
+                    </div>
+                    <div class="tx-history-item">
+                      <div class="tx-item-icon icon-gift">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#FF6B6B" stroke-width="2.2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                      </div>
+                      <div class="tx-item-content">
+                        <strong>Thưởng Mẹ Bỉm Tiên Phong</strong>
+                        <span>Gia nhập đợt 1 Đà Nẵng</span>
+                      </div>
+                      <div class="tx-item-amount amount-plus">+5 Xu</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- ================= SCREEN 8: TÌM KIẾM & LỌC BÁN KÍNH < 1KM (SEARCHSCREEN) ================= -->
+              <div class="flow-screen" id="flowScreenSearch">
+                <div class="native-search-header-wrap">
+                  <button type="button" class="native-header-back-btn" id="btnBackFromSearch">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2D2325" stroke-width="2.4"><path d="m15 18-6-6 6-6"/></svg>
+                  </button>
+                  <div class="native-search-input-field">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8E7C80" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                    <input type="text" class="search-real-input" id="searchRealInput" value="Đồ chơi gỗ cho bé" placeholder="Tìm đồ chơi, sách truyện..." aria-label="Tìm kiếm món đồ">
+                  </div>
+                </div>
+
+                <div class="native-scroll-body search-scroll-body">
+                  <!-- Distance Filter Row -->
+                  <div class="search-filter-section">
+                    <div class="filter-section-title">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#FF6B6B" stroke-width="2.2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                      <span>Bán Kính Quanh Mẹ (Đà Nẵng)</span>
+                    </div>
+                    <div class="filter-pills-row">
+                      <button type="button" class="search-filter-pill active" data-radius="500">&lt; 500m (Cùng Chung Cư)</button>
+                      <button type="button" class="search-filter-pill" data-radius="1000">&lt; 1km (Đi bộ 10p)</button>
+                      <button type="button" class="search-filter-pill" data-radius="3000">&lt; 3km (Hòa Hải / Hòa Xuân)</button>
+                    </div>
+                  </div>
+
+                  <!-- Age Filter Row -->
+                  <div class="search-filter-section">
+                    <div class="filter-section-title">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4ECDC4" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/></svg>
+                      <span>Độ Tuổi Bé</span>
+                    </div>
+                    <div class="filter-pills-row">
+                      <button type="button" class="search-filter-pill active">1-3 tuổi</button>
+                      <button type="button" class="search-filter-pill">3-6 tuổi</button>
+                      <button type="button" class="search-filter-pill">Sơ sinh 0-1 tuổi</button>
+                    </div>
+                  </div>
+
+                  <!-- Search Results Meta -->
+                  <div class="search-results-meta">
+                    <strong>Tìm thấy 3 món đồ gần mẹ</strong>
+                    <span>Đã cọc phí bảo đảm 10%</span>
+                  </div>
+
+                  <!-- Results List -->
+                  <div class="search-results-list">
+                    <!-- Result 1 -->
+                    <div class="search-result-item" id="searchItemResult1" role="button" tabindex="0">
+                      <img src="https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?w=300" alt="Bộ đường ray tàu gỗ" class="search-res-img" width="52" height="52" loading="lazy">
+                      <div class="search-res-info">
+                        <div class="search-res-name">Bộ đường ray tàu gỗ (mới 90%)</div>
+                        <div class="search-res-loc">
+                          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="vertical-align: middle; margin-right: 2px;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>400m • FPT Plaza 2 • Mẹ Mai Thảo
+                        </div>
+                        <div class="search-res-price">10 Xu <span class="search-fiat-sub">~ 100.000đ</span></div>
+                      </div>
+                      <div class="search-res-action">Đổi &gt;</div>
+                    </div>
+
+                    <!-- Result 2 -->
+                    <div class="search-result-item" id="searchItemResult2" role="button" tabindex="0">
+                      <img src="https://images.unsplash.com/photo-1581235720704-06d3acfcb36f?w=300" alt="Ô tô mô hình cổ điển" class="search-res-img" width="52" height="52" loading="lazy">
+                      <div class="search-res-info">
+                        <div class="search-res-name">Ô tô mô hình cổ điển</div>
+                        <div class="search-res-loc">
+                          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="vertical-align: middle; margin-right: 2px;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>800m • FPT Plaza 1 • Mẹ Hoa Lan
+                        </div>
+                        <div class="search-res-price">4 Xu <span class="search-fiat-sub">~ 40.000đ</span></div>
+                      </div>
+                      <div class="search-res-action">Đổi &gt;</div>
+                    </div>
+
+                    <!-- Result 3: Trạm Tặng 0 Xu -->
+                    <div class="search-result-item" id="searchItemResult3" role="button" tabindex="0">
+                      <img src="https://images.unsplash.com/photo-1584362917165-526a968579e8?w=300" alt="Thú bông voi Ikea" class="search-res-img" width="52" height="52" loading="lazy">
+                      <div class="search-res-info">
+                        <div class="search-res-name">Gấu bông Voi Ikea tiệt trùng</div>
+                        <div class="search-res-loc">
+                          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="vertical-align: middle; margin-right: 2px;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>250m • Tòa A FPT Plaza 2
+                        </div>
+                        <div class="search-res-price donate-zero">Trạm Tặng (0 Xu)</div>
+                      </div>
+                      <div class="search-res-action donate-tag">Nhận &gt;</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div> <!-- End phone-screen-viewport -->
+
+            <!-- Native App Bottom Navigation Wrap (Tab Bar + Safe Home Indicator) -->
+            <div class="phone-bottom-nav-wrap">
+              <div class="phone-bottom-tabbar" role="navigation" aria-label="Thanh điều hướng ứng dụng Kindr">
+                <div class="phone-tab-item active" id="tabHome">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                  <span>Trang chủ</span>
+                </div>
+                <div class="phone-tab-item" id="tabSearch">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                  <span>Tìm kiếm</span>
+                </div>
+                <!-- Floating Center Post Item Button -->
+                <div class="phone-tab-fab" id="tabFabPost" title="Đăng đồ">
+                  <div class="fab-circle">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.8"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  </div>
+                </div>
+                <div class="phone-tab-item" id="tabChat">
+                  <div class="tab-icon-wrap">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    <span class="tab-badge-num">1</span>
+                  </div>
+                  <span>Tin nhắn</span>
+                </div>
+                <div class="phone-tab-item" id="tabProfile">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                  <span>Cá nhân</span>
+                </div>
+              </div>
+
+              <!-- Phone Home Indicator Bar -->
+              <div class="phone-home-indicator"></div>
+            </div> <!-- End phone-bottom-nav-wrap -->
+          </div> <!-- End phone-inner-screen -->
+        </div> <!-- End phone-outer-frame -->
+      </div> <!-- End smartphone-mockup -->
+    </div> <!-- End hero-showcase-cluster -->
+  </div> <!-- End hero-right -->
+</div> <!-- End container hero-layout -->
+</section> <!-- End section hero-stage -->
+
+  <!-- ================= HYPER-LOCAL RESIDENT NETWORK TICKER (ĐÀ NẴNG) ================= -->
+  <section class="danang-network-strip">
+    <div class="container network-strip-inner">
+      <div class="network-badge-label">
+        <span class="live-dot-green"></span>
+        <span>Cụm Cư Dân Đà Nẵng Đang Kết Nối Hoán Đổi:</span>
+      </div>
+      <div class="network-badges-scroll">
+        <div class="network-pill">
+          <svg class="loc-svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          <strong>Chung cư FPT Plaza 1 &amp; 2</strong>
+          <span>(Q. Ngũ Hành Sơn • Thí điểm đợt 1)</span>
+        </div>
+        <div class="network-pill">
+          <svg class="loc-svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          <strong>KĐT Sinh Thái Hòa Xuân</strong>
+          <span>(Q. Cẩm Lệ • Thí điểm đợt 1)</span>
+        </div>
+        <div class="network-pill">
+          <svg class="loc-svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          <strong>Chung cư The Monarchy</strong>
+          <span>(Q. Sơn Trà • Thí điểm đợt 2)</span>
+        </div>
+        <div class="network-pill">
+          <svg class="loc-svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          <strong>Căn Hộ Blue House</strong>
+          <span>(Q. Sơn Trà • Thí điểm đợt 2)</span>
+        </div>
+        <div class="network-pill">
+          <svg class="loc-svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          <strong>HAGL Lake View</strong>
+          <span>(Q. Thanh Khê • Thí điểm đợt 3)</span>
+        </div>
+        <div class="network-pill">
+          <svg class="loc-svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          <strong>KĐT Phước Lý</strong>
+          <span>(Q. Liên Chiểu • Khu vực khảo sát)</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= ACT 2: SIGNATURE BENTO GRID (ALL CORE VALUES UNIFIED) ================= -->
+  <section class="section bento-section" id="signature-bento">
+    <div class="container">
+      <div class="section-heading text-center">
+        <div class="section-pill">Bản Sắc Độc Bản</div>
+        <h2 class="section-title">Hệ Sinh Thái Ký Quỹ <span class="editorial-highlight">Khác Biệt Hoàn Toàn</span></h2>
+        <p class="section-subtitle">Tất cả những gì mẹ bỉm cần để đổi đồ cũ an tâm và minh bạch, gói gọn trong một nền tảng văn minh.</p>
+      </div>
+
+      <div class="bento-grid">
+        <!-- Tile 1 (Large 2 cols): Double Escrow Architecture -->
+        <div class="bento-card bento-escrow-core">
+          <div class="bento-tag">Trọng Tâm Bảo Mật</div>
+          <h3>Thuật Toán Ký Quỹ Song Phương An Toàn</h3>
+          <p class="bento-desc">
+            Không giống Chợ Tốt hay hội nhóm Facebook nơi bạn phải tự chịu mọi rủi ro, Kindr là <strong>người trung gian giữ niềm tin</strong>.
+          </p>
+
+          <div class="escrow-process-flow">
+            <div class="flow-step">
+              <div class="flow-num">1</div>
+              <strong>Khóa 10% Người Bán</strong>
+              <span>Cam kết đồ đúng 90% thực tế</span>
+            </div>
+            <div class="flow-arrow">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+            </div>
+            <div class="flow-step">
+              <div class="flow-num">2</div>
+              <strong>Khóa 100% Người Mua</strong>
+              <span>Xu chuyển vào Hộp Ký Quỹ</span>
+            </div>
+            <div class="flow-arrow">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+            </div>
+            <div class="flow-step">
+              <div class="flow-num">3</div>
+              <strong>Mã Nhận 6 Ký Tự</strong>
+              <span>Giao nhận sảnh chung cư</span>
+            </div>
+            <div class="flow-arrow">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+            </div>
+            <div class="flow-step flow-step-active">
+              <div class="flow-num">4</div>
+              <strong>6H Kiểm Định Tại Nhà</strong>
+              <span>Hài lòng mới tất toán Xu</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tile 2: 6 Hours Safeful Time -->
+        <div class="bento-card bento-safeful-clock">
+          <div class="bento-tag tag-teal">Bảo Chứng Tận Tay</div>
+          <div class="clock-visual-widget">
+            <div class="clock-circle">
+              <svg class="clock-progress-svg" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="42" fill="none" stroke="#E2EBE8" stroke-width="6"/>
+                <circle cx="50" cy="50" r="42" fill="none" stroke="var(--accent-sage)" stroke-width="6" stroke-dasharray="264" stroke-dashoffset="66" stroke-linecap="round"/>
+              </svg>
+              <div class="clock-center-content">
+                <strong>6 Giờ</strong>
+                <span>Kiểm Định An Tâm</span>
+              </div>
+            </div>
+          </div>
+          <h3>Khung Giờ 6H Kiểm Tra Tại Nhà</h3>
+          <p>Mẹ có 6 tiếng kiểm tra bánh xe, chi tiết máy, lắp thử pin. Nếu có tranh chấp phát sinh, Ban quản trị hỗ trợ đối soát dựa trên ảnh chụp và xác thực hai bên.</p>
+        </div>
+
+        <!-- Tile 3: Contrast Table: Facebook/Cho Tot vs Kindr -->
+        <div class="bento-card bento-contrast">
+          <div class="bento-tag tag-amber">Đối Soát Nỗi Đau</div>
+          <h3>Chợ Tốt &amp; Facebook vs Kindr</h3>
+          <div class="contrast-mini-table">
+            <div class="contrast-row">
+              <span class="c-item">Mặc cả trả giá</span>
+              <span class="c-bad">Nhắn tin trả từng 20k-50k</span>
+              <span class="c-good">Ví Xu cố định, 0đ mặc cả</span>
+            </div>
+            <div class="contrast-row">
+              <span class="c-item">Hẹn gặp giao đồ</span>
+              <span class="c-bad">Bom hàng, đứng chờ nắng</span>
+              <span class="c-good">Mã nhận đồ, cọc 10% uy tín</span>
+            </div>
+            <div class="contrast-row">
+              <span class="c-item">Đồ nứt hỏng</span>
+              <span class="c-bad">Chặn số, mất trắng tiền</span>
+              <span class="c-good">Khóa Xu 6H, bảo lưu quyền lợi</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tile 4: Hyper-local 1km Radar (Da Nang) -->
+        <div class="bento-card bento-radar">
+          <div class="bento-tag tag-coral">Bán Kính 1km Cực Bộ</div>
+          <div class="radar-visual">
+            <div class="radar-pulse"></div>
+            <div class="radar-hub-dot dot-1" title="Điểm hẹn FPT Plaza 2"><span>Ngũ Hành Sơn</span></div>
+            <div class="radar-hub-dot dot-2" title="Điểm hẹn Hòa Xuân"><span>Cẩm Lệ</span></div>
+            <div class="radar-hub-dot dot-3" title="Điểm hẹn Hải Châu"><span>Hải Châu</span></div>
+          </div>
+          <h3>Giao Nhận Tiện Đường Trong 1km</h3>
+          <p>Hai mẹ tự hẹn điểm giao tiện đường: sảnh chung cư, cổng trường mầm non, công viên. Không qua trung gian vận chuyển cồng kềnh.</p>
+        </div>
+
+        <!-- Tile 5: 4 Baby Stages -->
+        <div class="bento-card bento-stages">
+          <div class="bento-tag">Vòng Đời Trẻ Thơ</div>
+          <h3>Đổi Đồ Theo Từng Cột Mốc Bé Lớn</h3>
+          <div class="stages-pill-strip">
+            <div class="stage-chip active">
+              <strong>0–6M Sơ Sinh</strong>
+              <span>Nôi rung, máy hâm sữa</span>
+            </div>
+            <div class="stage-chip">
+              <strong>6–12M Ăn Dặm</strong>
+              <span>Ghế ăn, xe tập đi</span>
+            </div>
+            <div class="stage-chip">
+              <strong>1–2Y Vận Động</strong>
+              <span>Xe chòi chân, bập bênh</span>
+            </div>
+            <div class="stage-chip">
+              <strong>2Y+ Giáo Cụ</strong>
+              <span>Sách Ehon, giáo cụ mầm non</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= ACT 3: BẢN DÙNG THỬ & THỬ NGHIỆM ĐÀ NẴNG ================= -->
+  <section class="section mvp-cta-section" id="mvp-showcase">
+    <div class="container">
+      <div class="mvp-action-card">
+        <div class="mvp-card-left">
+          <div class="section-pill pill-warm">Lộ Trình Ra Mắt Ứng Dụng</div>
+          <h2 class="mvp-title">Kiến Trúc Hoán Đổi Tuần Hoàn<br><span class="editorial-highlight">Sẵn Sàng Ra Mắt Tại Đà Nẵng</span></h2>
+          <p class="mvp-desc">
+            Kindr đang trong giai đoạn hoàn thiện kiểm thử các tính năng cốt lõi (Ký quỹ song phương, Ví Xu nội bộ, và Khung giờ 6 tiếng kiểm tra tại nhà). Hệ thống sẽ kích hoạt cụm thử nghiệm đầu tiên tại các cụm dân cư Đà Nẵng ngay khi chạm mốc <strong>200 mẹ đăng ký giữ chỗ</strong>.
+          </p>
+
+          <div class="mvp-step-indicators">
+            <div class="step-chip">
+              <span class="chip-num">1</span>
+              <span>Ký Quỹ Độc Lập 6H</span>
+            </div>
+            <div class="step-chip">
+              <span class="chip-num">2</span>
+              <span>Ví Xu Tiên Phong</span>
+            </div>
+            <div class="step-chip">
+              <span class="chip-num">3</span>
+              <span>Thử Nghiệm Cục Bộ ĐN</span>
+            </div>
+          </div>
+
+          <div class="mvp-btn-row">
+            <a href="#waitlist" class="btn btn-primary btn-xl" id="btn-mvp-join-waitlist">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+              <span>Đăng Ký Nhận 5 Xu Tiên Phong Ngay</span>
+            </a>
+            <a href="#signature-bento" class="btn btn-outline btn-xl">
+              <span>Xem 4 Trụ Cột Giải Pháp</span>
+            </a>
+          </div>
+        </div>
+
+        <div class="mvp-card-right">
+          <div class="mvp-transparency-card">
+            <div class="transparency-col ready-col">
+              <div class="transparency-header">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                <span>Đã hoàn thiện thử nghiệm</span>
+              </div>
+              <ul class="transparency-list">
+                <li><strong>Ký quỹ song phương an toàn:</strong> Người bán cọc 10%, người mua thanh toán qua Xu trung gian.</li>
+                <li><strong>6 Giờ kiểm định tại nhà:</strong> Mang đồ về nhà kiểm tra kỹ lưỡng trước khi hệ thống tất toán Xu.</li>
+                <li><strong>Mã xác nhận 6 ký tự:</strong> Bàn giao đối soát trực tiếp, tránh nhận nhầm hàng.</li>
+                <li><strong>Ví Xu &amp; VietQR:</strong> Nạp và tích lũy Xu nội bộ minh bạch theo tỷ lệ 1 Xu = 10.000 VNĐ.</li>
+              </ul>
+            </div>
+            <div class="transparency-col roadmap-col">
+              <div class="transparency-header">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                <span>Đang phát triển theo lộ trình</span>
+              </div>
+              <ul class="transparency-list">
+                <li><strong>Trợ lý AI định giá:</strong> Tự động phân tích tình trạng và gợi ý mức Xu hợp lý từ ảnh chụp.</li>
+                <li><strong>Điểm hẹn đối tác:</strong> Liên kết các trường mầm non và sảnh chung cư làm trạm giao nhận cố định.</li>
+                <li><strong>Kiểm định cộng đồng:</strong> Mạng lưới cộng tác viên hỗ trợ xác thực đồ giá trị cao.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= ACT 3.5: ĐIỂM TRẢI NGHIỆM FPT PLAZA ================= -->
+  <section class="section popup-section" id="popup-campaign" aria-labelledby="popup-title">
+    <div class="container">
+      <header class="popup-head">
+        <div class="section-pill pill-warm">Điểm Trải Nghiệm Trực Tiếp • Chung Cư FPT Plaza</div>
+        <h2 class="popup-title" id="popup-title">Ưu Đãi <span class="editorial-highlight">0 Đồng</span> — Đánh Đúng Tính Năng Ứng Dụng</h2>
+        <p class="popup-sub">Không phát tiền mặt, không bù tiền vận chuyển. Mọi phần thưởng đều là Xu nội bộ, đặc quyền hiển thị và huy hiệu — chi phí vận hành bằng 0 nhưng giá trị thật với mẹ bỉm.</p>
+      </header>
+
+      <!-- Journey: 3 stages -->
+      <ol class="popup-journey" aria-label="Hành trình 3 chặng tại bàn trải nghiệm">
+        <li class="journey-stage">
+          <span class="journey-tag">Bàn Trải Nghiệm</span>
+          <div class="journey-icon" aria-hidden="true">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14v.01M14 20h.01M17 20h4v-3"/></svg>
+          </div>
+          <strong class="journey-action">Quét QR tại Standee</strong>
+          <span class="journey-reward">Mở Gói Tân Thủ 0đ</span>
+        </li>
+        <li class="journey-arrow" aria-hidden="true">
+          <svg width="32" height="16" viewBox="0 0 32 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 8h26M22 2l6 6-6 6"/></svg>
+        </li>
+        <li class="journey-stage">
+          <span class="journey-tag">Khảo Sát 30 Giây</span>
+          <div class="journey-icon" aria-hidden="true">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          </div>
+          <strong class="journey-action">Trả lời 5 câu hỏi nhanh</strong>
+          <span class="journey-reward">Nhận 5 Xu Tân Thủ</span>
+        </li>
+        <li class="journey-arrow" aria-hidden="true">
+          <svg width="32" height="16" viewBox="0 0 32 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 8h26M22 2l6 6-6 6"/></svg>
+        </li>
+        <li class="journey-stage">
+          <span class="journey-tag">Nhận 5 Xu Tiên Phong</span>
+          <div class="journey-icon" aria-hidden="true">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+          </div>
+          <strong class="journey-action">Điền khung ở bên dưới</strong>
+          <span class="journey-reward">Giữ Suất Tiên Phong</span>
+        </li>
+      </ol>
+
+      <div class="popup-grid">
+        <!-- Offer cards -->
+        <div class="popup-offers">
+          <article class="offer-card">
+            <div class="offer-head">
+              <span class="offer-num">01</span>
+              <h3>Tải Ứng Dụng &amp; Quét QR Khảo Sát</h3>
+            </div>
+            <ul class="offer-list">
+              <li>
+                <svg class="offer-ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M14.8 9.2A3 3 0 0 0 12 8c-1.7 0-3 .9-3 2s1.3 1.7 3 2 3 .9 3 2-1.3 2-3 2a3 3 0 0 1-2.8-1.2M12 6v2M12 16v2"/></svg>
+                <div><strong>Gói Xu Tân Thủ (5 Xu):</strong> Làm xong 5 câu khảo sát ở khung bên cạnh, nhận ngay 5 Xu Kindr vào ví ứng dụng.</div>
+              </li>
+              <li>
+                <svg class="offer-ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+                <div><strong>Miễn 100% tiền cọc bảo đảm 10%</strong> cho 3 bài đăng đầu — dành riêng 50 mẹ đầu tiên tại FPT Plaza. Mẹ chưa có Xu vẫn đăng bài được ngay.</div>
+              </li>
+              <li>
+                <svg class="offer-ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 17v5M9 10.8V4h6v6.8l3 3.2H6z"/></svg>
+                <div><strong>Bài Đăng Nổi Bật:</strong> Đăng bài ngay tại bàn trải nghiệm được ghim Đầu Trang chủ FPT Plaza trong 3 ngày — vị trí vàng, đổi đồ nhanh hơn.</div>
+              </li>
+            </ul>
+          </article>
+
+          <article class="offer-card">
+            <div class="offer-head">
+              <span class="offer-num">02</span>
+              <h3>Giới Thiệu Bạn Chung Cư</h3>
+            </div>
+            <ul class="offer-list">
+              <li>
+                <svg class="offer-ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg>
+                <div><strong>Thưởng Xu Đôi (+2 Xu cho cả hai):</strong> Mẹ gửi mã giới thiệu, bạn tải ứng dụng — người mời và người được mời đều nhận 2 Xu.</div>
+              </li>
+              <li>
+                <svg class="offer-ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="9" r="6"/><path d="M8.5 14L7 22l5-3 5 3-1.5-8"/></svg>
+                <div><strong>Huy hiệu "Mẹ Bỉm Thân Thiện":</strong> Mời đủ 3 bạn để mở khóa huy hiệu trên ảnh đại diện — bài đăng được ưu tiên đầu trang tìm kiếm.</div>
+              </li>
+            </ul>
+          </article>
+
+          <article class="offer-card">
+            <div class="offer-head">
+              <span class="offer-num">03</span>
+              <h3>Hoàn Thành Đơn &amp; Đánh Giá</h3>
+            </div>
+            <ul class="offer-list">
+              <li>
+                <svg class="offer-ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18M5 21V8l7-5 7 5v13"/><path d="M10 21v-6h4v6"/></svg>
+                <div><strong>Giao Đồ 0đ — Hẹn gặp sảnh chung cư:</strong> Chọn "Đổi trực tiếp tại Sảnh/Công viên FPT Plaza", hai mẹ đi bộ xuống trao tay.</div>
+              </li>
+              <li>
+                <svg class="offer-ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 8v4l3 2"/></svg>
+                <div><strong>Hoàn 100% Phí Sàn bằng Xu:</strong> Xong giao dịch đầu tiên + đăng ảnh đánh giá lên ứng dụng / Facebook — hoàn lại phí sàn 10% và tặng thêm 1 Xu Đánh Giá.</div>
+              </li>
+            </ul>
+          </article>
+        </div>
+
+        <!-- Interactive survey -->
+        <aside class="survey-card" id="popupSurvey" aria-labelledby="survey-title">
+          <div class="survey-top">
+            <div>
+              <span class="survey-kicker">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+                Khảo sát 30 giây
+              </span>
+              <h3 id="survey-title">Khảo sát ý kiến — Nhận 5 Xu vào ví</h3>
+            </div>
+            <div class="survey-slots" aria-live="polite">
+              <strong id="surveySlotsLeft">50</strong>
+              <span>/ 50 suất Miễn Cọc Đăng Bài</span>
+            </div>
+          </div>
+
+          <div class="survey-progress" role="progressbar" aria-valuemin="0" aria-valuemax="5" aria-valuenow="0" id="surveyProgress">
+            <div class="survey-progress-fill" id="surveyProgressFill"></div>
+          </div>
+          <p class="survey-step-label" id="surveyStepLabel">Câu hỏi 1 / 5</p>
+
+          <form id="surveyForm" novalidate>
+            <fieldset class="survey-step active" data-step="1">
+              <legend>Chị có đồ chơi hoặc quần áo cũ của bé muốn dọn dẹp cho gọn nhà không?</legend>
+              <div class="survey-choices">
+                <button type="button" class="survey-choice" data-key="hasItemsToDeclutter" data-value="true" id="sq1-yes">Có, nhiều đồ cần dọn</button>
+                <button type="button" class="survey-choice" data-key="hasItemsToDeclutter" data-value="false" id="sq1-no">Hiện tại chưa có</button>
+              </div>
+            </fieldset>
+
+            <fieldset class="survey-step" data-step="2">
+              <legend>Khi tham gia đổi đồ tại chung cư, chị mong muốn điều gì nhất?</legend>
+              <div class="survey-choices survey-choices-col">
+                <button type="button" class="survey-choice" data-key="motivation" data-value="save_money" id="sq2-save">Tiết kiệm chi phí mua sắm</button>
+                <button type="button" class="survey-choice" data-key="motivation" data-value="declutter" id="sq2-declutter">Dọn nhà cho gọn gàng, đỡ chật</button>
+                <button type="button" class="survey-choice" data-key="motivation" data-value="new_items" id="sq2-new">Tìm thêm đồ chơi, sách mới cho con</button>
+              </div>
+            </fieldset>
+
+            <fieldset class="survey-step" data-step="3">
+              <legend>Chị có ngại thanh lý đồ trên các hội nhóm vì sợ bị ép giá hoặc mất thời gian không?</legend>
+              <div class="survey-choices">
+                <button type="button" class="survey-choice" data-key="fearsFacebookScams" data-value="true" id="sq3-yes">Có, rất phiền và mất thời gian</button>
+                <button type="button" class="survey-choice" data-key="fearsFacebookScams" data-value="false" id="sq3-no">Không, tôi thấy bình thường</button>
+              </div>
+            </fieldset>
+
+            <fieldset class="survey-step" data-step="4">
+              <legend>Ứng dụng trao đổi đồ 0 đồng bằng Xu Kindr tại chung cư có hữu ích với gia đình chị không?</legend>
+              <div class="survey-choices">
+                <button type="button" class="survey-choice" data-key="findsAppUseful" data-value="true" id="sq4-yes">Rất hữu ích, tôi sẽ tham gia</button>
+                <button type="button" class="survey-choice" data-key="findsAppUseful" data-value="false" id="sq4-no">Cần tìm hiểu thêm</button>
+              </div>
+            </fieldset>
+
+            <fieldset class="survey-step" data-step="5">
+              <legend>Chị có sẵn lòng rủ thêm các mẹ cùng chung cư tham gia Kindr không?</legend>
+              <div class="survey-choices">
+                <button type="button" class="survey-choice" data-key="referralIntent" data-value="willing" id="sq5-willing">Sẵn lòng giới thiệu cho mọi người</button>
+                <button type="button" class="survey-choice" data-key="referralIntent" data-value="try_first" id="sq5-try">Để tôi dùng thử trải nghiệm trước</button>
+              </div>
+            </fieldset>
+          </form>
+
+          <div class="survey-nav">
+            <button type="button" class="survey-back" id="btn-survey-back" disabled>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+              Quay lại câu trước
+            </button>
+          </div>
+
+          <div class="survey-result" id="surveyResult" hidden>
+            <div class="survey-result-icon" aria-hidden="true">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+            </div>
+            <h4 id="surveyResultTitle">Đã hoàn thành 5/5 câu hỏi!</h4>
+            <p id="surveyResultDesc">Cảm ơn chị đã chia sẻ. Để nhận ngay <strong>5 Xu Tiên Phong (50.000 VNĐ)</strong> vào ví và giữ quyền lợi Miễn cọc, mời chị điền thông tin đăng ký ở khung bên dưới.</p>
+            <a href="#waitlist" class="btn btn-primary survey-cta-scroll" id="btn-survey-scroll-waitlist">
+              <span>Điền thông tin ở khung bên dưới</span>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
+            </a>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= ACT 4: MILESTONE 200 WAITLIST & COMPACT FAQ ================= -->
+  <section class="section waitlist-section" id="waitlist">
+    <div class="container waitlist-two-col">
+      <!-- Left: Real-time Waitlist Card -->
+      <div class="waitlist-card-box">
+        <div class="section-pill pill-sage">Mốc Cộng Đồng Đà Nẵng</div>
+        <h2 class="waitlist-title">Cùng Cán Mốc <span class="editorial-highlight">200 Mẹ Tiên Phong</span></h2>
+        <p class="waitlist-sub">
+          Đạt mốc 200 thành viên, Kindr kích hoạt cụm thử nghiệm đầu tiên tại Đà Nẵng và tặng ngay <strong>5 Xu Tiên Phong (tương đương 50.000 VNĐ)</strong> vào ví tài khoản của mẹ/gia đình!
+        </p>
+
+        <!-- Founding Member Virtual Gold Gift Card (Physical Perception) -->
+        <div class="founding-gold-card" id="founding-card">
+          <div class="gold-card-header">
+            <div class="gold-card-brand">
+              <img src="kindr-mascot.png" alt="Biểu tượng Gấu Kindy" class="gold-card-mascot" width="40" height="40" loading="lazy" decoding="async">
+              <div>
+                <span class="gold-pass-title">THẺ THÀNH VIÊN SÁNG LẬP</span>
+                <span class="gold-pass-sub">THẺ THÀNH VIÊN SÁNG LẬP • ĐÀ NẴNG</span>
+              </div>
+            </div>
+            <div class="gold-card-chip">
+              <svg width="28" height="20" viewBox="0 0 32 24" fill="none"><rect width="32" height="24" rx="4" fill="#D97706" opacity="0.35"/><path d="M0 8h32M0 16h32M10 0v24M22 0v24" stroke="#B45309" stroke-width="1.2"/></svg>
+            </div>
+          </div>
+
+          <div class="gold-card-body">
+            <div class="gold-amount-row">
+              <div class="gold-amount">5 XU TIÊN PHONG</div>
+              <div class="gold-fiat-val">≈ 50.000 VNĐ Chi Tiêu</div>
+            </div>
+            <div class="gold-perks-row">
+              <span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#B45309" stroke-width="2.5" style="vertical-align: middle; margin-right: 3px;"><polyline points="20 6 9 17 4 12"/></svg>5 Xu tặng ví khi kích hoạt (*)</span>
+              <span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#B45309" stroke-width="2.5" style="vertical-align: middle; margin-right: 3px;"><polyline points="20 6 9 17 4 12"/></svg>Ưu tiên nhận đồ Trạm 0 Xu</span>
+              <span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#B45309" stroke-width="2.5" style="vertical-align: middle; margin-right: 3px;"><polyline points="20 6 9 17 4 12"/></svg>Huy hiệu Thành viên Sáng Lập</span>
+            </div>
+          </div>
+
+          <div class="gold-card-footer">
+            <span class="card-serial" id="goldCardSerial">MÃ THẺ: #KD-0001/200</span>
+            <span class="card-scarcity" id="goldCardScarcity">Chỉ còn 200 suất đầu tiên</span>
+          </div>
+        </div>
+        <div class="gold-card-disclaimer">(*) 5 Xu (trị giá 50.000 VNĐ) là điểm thưởng cộng đồng để trải nghiệm hoán đổi trên ứng dụng Kindr, không thể rút về tài khoản ngân hàng.</div>
+
+        <!-- Real-time Progress Bar from /api/waitlist/stats -->
+        <div class="waitlist-meter-box">
+          <div class="meter-header">
+            <span class="meter-text">Tiến độ cộng đồng:</span>
+            <strong class="meter-num" id="waitlistCounter">0 / 200 Mẹ</strong>
+            <span class="meter-badge" id="waitlistPercent">0% Đạt Mốc</span>
+          </div>
+
+          <div class="meter-track">
+            <div class="meter-fill" id="waitlistProgressBar" style="width: 0%;"></div>
+          </div>
+
+          <div class="meter-markers">
+            <span>50 Mẹ (Hải Châu)</span>
+            <span>100 Mẹ (Sơn Trà &amp; Thanh Khê)</span>
+            <strong class="text-coral">200 Mẹ (Toàn TP)</strong>
+          </div>
+
+          <div class="meter-alert">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="vertical-align: middle; margin-right: 4px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <span>Chỉ còn <strong id="waitlistRemaining">200 suất</strong> nhận gói quà khởi động 5 Xu tiên phong!</span>
+          </div>
+        </div>
+
+        <!-- Submission Form (AJAX connected to POST /api/waitlist) -->
+        <form class="waitlist-compact-form" id="waitlistForm" novalidate>
+          <!-- Role Selector (Mom vs Gen Z) -->
+          <div class="form-field">
+            <label class="field-title">Mẹ hoặc bạn tham gia với vai trò:</label>
+            <div class="chips-selector role-chips">
+              <label class="chip-option">
+                <input type="radio" name="userRole" value="mom" checked>
+                <span>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 4px;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                  Mẹ bỉm sữa (Đổi đồ cho bé)
+                </span>
+              </label>
+              <label class="chip-option">
+                <input type="radio" name="userRole" value="genz">
+                <span>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 4px;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                  Gen Z / Người thân (Đăng ký tặng gia đình)
+                </span>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-inputs-row">
+            <div class="form-field flex-2">
+              <label for="waitlistEmail" id="labelEmail">Địa chỉ Thư điện tử (Email) nhận thông báo <span class="text-coral">*</span></label>
+              <input type="email" id="waitlistEmail" class="form-control" placeholder="ví dụ: maianh.danang@gmail.com" required autocomplete="email">
+              <div class="form-field-error" id="emailError" role="alert" style="display: none;"></div>
+            </div>
+            <div class="form-field flex-1">
+              <label for="waitlistPhone">Số điện thoại liên hệ <span class="text-subtle">(tùy chọn)</span></label>
+              <input type="tel" id="waitlistPhone" class="form-control" placeholder="0905 xxx xxx" autocomplete="tel">
+              <div class="form-field-error" id="phoneError" role="alert" style="display: none;"></div>
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label class="field-title">Món đồ mẹ mong muốn đổi nhất:</label>
+            <div class="chips-selector">
+              <label class="chip-option">
+                <input type="radio" name="interest" value="Đồ chơi vận động" checked>
+                <span>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 4px;"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+                  Đồ chơi vận động
+                </span>
+              </label>
+              <label class="chip-option">
+                <input type="radio" name="interest" value="Xe đẩy, nôi cũi">
+                <span>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 4px;"><circle cx="18.5" cy="17.5" r="3.5"/><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="15" cy="5" r="1"/><path d="M12 17.5V14l-3-3 4-3 2 3h2"/></svg>
+                  Xe đẩy, nôi cũi
+                </span>
+              </label>
+              <label class="chip-option">
+                <input type="radio" name="interest" value="Quần áo Nous/cotton">
+                <span>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 4px;"><path d="M20.38 3.46L16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.5a2 2 0 0 0 2 1.67h1.14v9.14A2 2 0 0 0 8 22h8a2 2 0 0 0 2-2V10.86h1.14a2 2 0 0 0 2-1.67l.58-3.5a2 2 0 0 0-1.34-2.23z"/></svg>
+                  Quần áo Nous/cotton
+                </span>
+              </label>
+              <label class="chip-option">
+                <input type="radio" name="interest" value="Sách Ehon">
+                <span>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 4px;"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M4 4.5A2.5 2.5 0 0 1 6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15z"/></svg>
+                  Sách Ehon
+                </span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Consent Checkbox under Decree 13/2023/ND-CP -->
+          <div class="form-field consent-field">
+            <label class="consent-checkbox-label">
+              <input type="checkbox" id="waitlistConsent" name="consent" required>
+              <span>Tôi đồng ý để Kindr lưu trữ email/SĐT nhằm thông báo khi mở đợt thử nghiệm theo <a href="privacy.html" target="_blank" rel="noopener">Chính sách bảo mật</a>.</span>
+            </label>
+            <div class="form-field-error" id="consentError" role="alert" style="display: none;"></div>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-lg btn-full" id="btn-submit-waitlist">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="vertical-align: middle; margin-right: 6px;"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+            <span>Đăng Ký Giữ Chỗ &amp; Nhận 5 Xu Tiên Phong</span>
+          </button>
+
+          <p class="privacy-note">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 3px;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <span>Kindr tôn trọng quyền riêng tư theo Nghị định 13/2023/NĐ-CP. Đọc chi tiết tại <a href="privacy.html" target="_blank" rel="noopener">Chính sách bảo mật</a>.</span>
+          </p>
+        </form>
+      </div>
+
+      <!-- Right: Compact Top FAQ -->
+      <div class="faq-compact-box" id="faq">
+        <div class="section-pill">Hỏi Nhanh Đáp Gọn</div>
+        <h3 class="faq-box-title">Giải Đáp Cốt Lõi</h3>
+
+        <div class="faq-stack">
+          <div class="faq-item active">
+            <button type="button" class="faq-q">
+              <span>Thuật toán Ký Quỹ Song Phương hoạt động thế nào?</span>
+              <svg class="faq-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="faq-a">
+              <p>Người bán cọc 10% Xu cam kết mô tả trung thực. Người mua khóa 100% Xu vào Hộp Ký Quỹ Trung Gian. Sau khi hai bên gặp giao nhận, người mua có 6 tiếng mang đồ về phòng kiểm tra kỹ. Đúng cam kết mới chuyển Xu cho người bán.</p>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button type="button" class="faq-q">
+              <span>Nếu mang đồ về nhà phát hiện bị nứt hỏng thì sao?</span>
+              <svg class="faq-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="faq-a">
+              <p>Trong 6 tiếng kiểm định an toàn tại nhà, mẹ chỉ cần bấm nút "Khiếu Nại" và gửi ảnh đồ hỏng. Hệ thống lập tức dừng chuyển Xu và hoàn trả 100% Xu cho mẹ.</p>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button type="button" class="faq-q">
+              <span>Chưa có đồ đăng thì có nhận đồ được không?</span>
+              <svg class="faq-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="faq-a">
+              <p>Mẹ có thể nạp Xu tự động qua VietQR (1 Xu = 10.000 VNĐ) để đổi đồ ngay, hoặc vào "Trạm 0 Xu" để nhận đồ được các gia đình hảo tâm tặng miễn phí.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  </main>
+
+  <!-- ================= EDITORIAL ARTISANAL FOOTER ================= -->
+  <footer class="site-footer" id="siteFooter">
+    <div class="footer-top-glow"></div>
+    <div class="container footer-content-wrap">
+      <!-- Main Footer Columns Grid -->
+      <div class="footer-main-grid">
+        <!-- Col 1: Brand & Origin -->
+        <div class="footer-brand-col">
+          <div class="footer-brand-header">
+            <div class="brand-symbol">
+              <img src="kindr-mascot.png" alt="Biểu tượng Gấu Kindy" class="brand-mascot-img" width="36" height="36" loading="lazy" decoding="async">
+            </div>
+            <span class="brand-text">Kindr</span>
+            <span class="brand-badge-pill">Thử Nghiệm Đà Nẵng 2026</span>
+          </div>
+          <p class="footer-mission-text">
+            Nền tảng hoán đổi đồ mẹ &amp; bé siêu cục bộ. Xóa bỏ mặc cả bằng <strong>Ví Xu nội bộ</strong>, giảm thiểu rủi ro mua bán nhờ cơ chế <strong>Ký Quỹ Song Phương An Toàn</strong> và <strong>6 Giờ kiểm định tại nhà</strong>.
+          </p>
+          <div class="footer-trust-chips">
+            <span class="trust-chip">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              Bảo Chứng Ký Quỹ Song Phương
+            </span>
+            <span class="trust-chip">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              6 Giờ Kiểm Định Tại Nhà
+            </span>
+            <span class="trust-chip">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="10" r="3"/><path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z"/></svg>
+              Bán Kính &lt; 1km Đà Nẵng
+            </span>
+          </div>
+        </div>
+
+        <!-- Col 2: Core Solution Navigation -->
+        <div class="footer-nav-col">
+          <h4 class="footer-col-title">Giải Pháp &amp; Cơ Chế</h4>
+          <ul class="footer-nav-list">
+            <li><a href="#signature-bento">Ký Quỹ Song Phương An Toàn</a></li>
+            <li><a href="#interactive-simulator">Quy Trình 4 Bước Hoán Đổi</a></li>
+            <li><a href="#founding-card">Gói Quà 5 Xu Tiên Phong</a></li>
+            <li><a href="#faq">Trạm 0 Xu &amp; 6 Giờ Kiểm Định</a></li>
+            <li><a href="#waitlist">Đăng Ký Danh Sách Chờ 200 Mẹ</a></li>
+            <li><a href="privacy.html">Chính Sách Bảo Mật Dữ Liệu</a></li>
+          </ul>
+        </div>
+
+        <!-- Col 3: Pilot Regions & Community -->
+        <div class="footer-nav-col">
+          <h4 class="footer-col-title">Khu Vực Triển Khai</h4>
+          <ul class="footer-nav-list">
+            <li><span class="footer-region-item"><strong>Mốc 50 Mẹ:</strong> Q. Hải Châu</span></li>
+            <li><span class="footer-region-item"><strong>Mốc 100 Mẹ:</strong> Sơn Trà &amp; Thanh Khê</span></li>
+            <li><span class="footer-region-item"><strong>Mốc 150 Mẹ:</strong> Ngũ Hành Sơn &amp; FPT City</span></li>
+            <li><span class="footer-region-item text-coral"><strong>Mốc 200 Mẹ:</strong> Mở Ứng Dụng Toàn Thành Phố</span></li>
+            <li><a href="#waitlist" class="footer-region-cta">Góp 1 Suất Mở Mốc Sớm ↗</a></li>
+          </ul>
+        </div>
+
+        <!-- Col 4: Project Info & Attribution -->
+        <div class="footer-nav-col">
+          <h4 class="footer-col-title">Khởi Nghiệp Sinh Viên</h4>
+          <p class="footer-team-desc">
+            Dự án Khởi nghiệp Sáng tạo bởi sinh viên <strong>Đại học FPT Đà Nẵng</strong> nhằm giải quyết áp lực kinh tế và rác thải đồ dùng mẹ bé.
+          </p>
+          <div class="footer-contact-links">
+            <a href="https://github.com/Hoang-124/Kindr" target="_blank" rel="noopener" class="footer-social-link">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+              <span>GitHub: Hoang-124/Kindr ↗</span>
+            </a>
+            <div class="footer-contact-item">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+              <span>Thư điện tử: support@kindr.vn</span>
+            </div>
+            <div class="footer-contact-item">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 14 14"/></svg>
+              <span>Đà Nẵng, Việt Nam • 2026</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer Divider -->
+      <div class="footer-divider-line"></div>
+
+      <!-- Footer Bottom Copyright & Badges -->
+      <div class="footer-bottom-row">
+        <div class="footer-copy-text">
+          © 2026 <strong>Hệ sinh thái Kindr</strong>. Dự án Khởi nghiệp SV Đại học FPT Đà Nẵng — <em>"Đổi đồ cho bé • Tiết kiệm cho mẹ • Gắn kết tương lai"</em>
+        </div>
+        <div class="footer-bottom-actions">
+          <a href="privacy.html" class="footer-security-pill" style="text-decoration: none;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            Nghị định 13/2023/NĐ-CP
+          </a>
+          <a href="#navbar" class="footer-back-top-btn" id="btnBackToTop" aria-label="Cuộn lên đầu trang">
+            <span>Lên đầu trang</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ================= CELEBRATION MODAL ================= -->
+  <div class="modal-overlay" id="successModalOverlay" role="dialog" aria-modal="true" aria-labelledby="successModalTitle">
+    <div class="modal-box">
+      <button class="modal-close" id="successModalClose" aria-label="Đóng cửa sổ">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+
+      <div class="modal-celebrate-badge">
+        <img src="kindr-mascot.png" alt="Biểu tượng Gấu Kindy" class="modal-mascot-img" width="56" height="56" loading="lazy" decoding="async">
+      </div>
+
+      <h3 class="modal-title" id="successModalTitle">Chào Mừng Mẹ Tiên Phong!</h3>
+      <div class="modal-order-tag" id="successOrderBadge">Mẹ/Bạn là thành viên thứ #1</div>
+
+      <p class="modal-desc" id="successModalDesc">
+        Kindr đã ghi nhận thông tin và gửi thư xác nhận đến hòm thư của bạn! Gói quà <strong>5 Xu Tiên Phong</strong> đã được khóa bảo lưu và sẽ gửi thẳng vào ví tài khoản của bạn khi hệ thống chính thức mở cửa!
+      </p>
+
+      <div class="modal-actions">
+        <button type="button" class="btn btn-primary btn-full" id="btnModalCloseSecondary">
+          <span>Hoàn Tất &amp; Khám Phá Thêm Giải Pháp</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= FLOATING MASCOT COMPANION WIDGET ================= -->
+  <aside class="mascot-floating-widget" id="mascotFloatingWidget" aria-label="Gấu Kindy Trợ Lý">
+    <div class="mascot-speech-bubble hidden" id="mascotBubble">
+      <div class="bubble-header">
+        <span class="bubble-author">Gấu Kindy</span>
+        <button type="button" class="bubble-close-btn" id="bubbleCloseBtn" aria-label="Thu gọn lời nhắn">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <p id="mascotQuote">Chào mẹ! Em là Gấu Kindy — Xu được bảo chứng minh bạch qua Ký Quỹ Song Phương An Toàn nhé!</p>
+      <div class="bubble-action-hint">Bấm vào em để nhận mẹo an tâm nhé!</div>
+    </div>
+    <button type="button" class="mascot-avatar-btn" id="mascotAvatarBtn" aria-label="Gấu Kindy hỗ trợ">
+      <span class="mascot-pulse-ring"></span>
+      <span class="mascot-avatar-frame">
+        <img src="kindr-mascot.png" alt="Gấu Kindy" class="floating-mascot-img" width="48" height="48" loading="lazy" decoding="async">
+      </span>
+      <span class="mascot-online-dot"></span>
+    </button>
+  </aside>
+
+  <script src="script.js"></script>
+</body>
+</html>

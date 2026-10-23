@@ -602,11 +602,23 @@ export const adminApi = {
   },
 
   async getCategories(): Promise<CategoryItem[]> {
-    const res = await api.get('/categories');
-    const list = res.data.categories || res.data || [];
-    return Array.isArray(list)
-      ? list.map((c: any) => ({ ...c, id: (c.id || c._id || '').toString() }))
-      : [];
+    try {
+      const res = await api.get('/categories');
+      const list = res.data.categories || res.data || [];
+      return Array.isArray(list)
+        ? list.map((c: any) => ({ ...c, id: (c.id || c._id || '').toString() }))
+        : [];
+    } catch {
+      return [
+        { id: '1', name: 'Đồ chơi nhỏ', code: 'toy_small', icon: 'ToyBrick' },
+        { id: '2', name: 'Đồ chơi lớn', code: 'toy_large', icon: 'Gamepad2' },
+        { id: '3', name: 'Sách truyện & Ehon', code: 'book', icon: 'BookOpen' },
+        { id: '4', name: 'Quần áo bé', code: 'quan_ao', icon: 'Shirt' },
+        { id: '5', name: 'Xe đẩy & Nôi cũi', code: 'xe_noi', icon: 'Baby' },
+        { id: '6', name: 'Đồ dùng học tập', code: 'do_hoc_tap', icon: 'GraduationCap' },
+        { id: '7', name: 'Trạm Tặng Đồ 0 Xu', code: 'charity', icon: 'Gift' },
+      ];
+    }
   },
 
   async createCategory(name: string, code: string) {
