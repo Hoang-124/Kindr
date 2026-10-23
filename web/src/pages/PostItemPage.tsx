@@ -720,7 +720,7 @@ export const PostItemPage: React.FC = () => {
 
         {/* RIGHT COLUMN: PRICING MATRIX & DOUBLE ESCROW SUMMARY */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-          <div className="kw-card" style={{ padding: 24, position: 'sticky', top: 88 }}>
+          <div className="kw-card kw-sticky-panel" style={{ padding: 24, position: 'sticky', top: 88 }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
               <span className="kw-badge kw-badge-primary">Ma Trận Giá Cố Định</span>
               <button

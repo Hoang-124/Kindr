@@ -466,7 +466,7 @@ export const TransactionDetailPage: React.FC = () => {
       </div>
 
       {/* FILTER PILLS */}
-      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 20 }}>
+      <div className="kw-tab-bar" style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 20 }}>
         {[
           { id: 'all', label: `Tất cả (${transactions.length})` },
           { id: 'awaiting_handover', label: 'Chờ gặp mặt' },

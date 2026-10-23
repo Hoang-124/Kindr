@@ -349,7 +349,7 @@ export const ProfilePage: React.FC = () => {
       </div>
 
       {/* TABS */}
-      <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 20 }}>
+      <div className="kw-tab-bar" style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 20 }}>
         <button
           type="button"
           onClick={() => setActiveTab('posts')}

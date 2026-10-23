@@ -110,73 +110,77 @@ export const SearchAndMapPage: React.FC = () => {
           </div>
         </div>
 
-        <div className="kw-field">
-          <label className="kw-label">Danh mục sản phẩm</label>
-          <select
-            className="kw-select"
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-          >
-            <option value="all">Tất cả danh mục</option>
-            {CATEGORY_OPTIONS.map((c) => (
-              <option key={c.value} value={c.value}>
-                {c.label} ({c.badge})
-              </option>
-            ))}
-          </select>
+        <div className="kw-search-filter-pair">
+          <div className="kw-field">
+            <label className="kw-label">Danh mục sản phẩm</label>
+            <select
+              className="kw-select"
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+            >
+              <option value="all">Tất cả danh mục</option>
+              {CATEGORY_OPTIONS.map((c) => (
+                <option key={c.value} value={c.value}>
+                  {c.label} ({c.badge})
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="kw-field">
+            <label className="kw-label">Quận / Huyện tại Đà Nẵng</label>
+            <select
+              className="kw-select"
+              value={districtId}
+              onChange={(e) => setDistrictId(e.target.value)}
+            >
+              <option value="all">Toàn TP. Đà Nẵng</option>
+              {DANANG_DISTRICTS.map((d) => (
+                <option key={d.id} value={d.id}>
+                  {d.name}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
-        <div className="kw-field">
-          <label className="kw-label">Quận / Huyện tại Đà Nẵng</label>
-          <select
-            className="kw-select"
-            value={districtId}
-            onChange={(e) => setDistrictId(e.target.value)}
-          >
-            <option value="all">Toàn TP. Đà Nẵng</option>
-            {DANANG_DISTRICTS.map((d) => (
-              <option key={d.id} value={d.id}>
-                {d.name}
-              </option>
-            ))}
-          </select>
-        </div>
+        <div className="kw-search-filter-pair">
+          <div className="kw-field">
+            <label className="kw-label">Độ mới cam kết</label>
+            <select
+              className="kw-select"
+              value={condition}
+              onChange={(e) => setCondition(e.target.value)}
+            >
+              <option value="all">Tất cả độ mới</option>
+              {CONDITION_OPTIONS.map((c) => (
+                <option key={c.value} value={c.value}>
+                  {c.label} — {c.desc}
+                </option>
+              ))}
+            </select>
+          </div>
 
-        <div className="kw-field">
-          <label className="kw-label">Độ mới cam kết</label>
-          <select
-            className="kw-select"
-            value={condition}
-            onChange={(e) => setCondition(e.target.value)}
-          >
-            <option value="all">Tất cả độ mới</option>
-            {CONDITION_OPTIONS.map((c) => (
-              <option key={c.value} value={c.value}>
-                {c.label} — {c.desc}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="kw-field">
-          <label className="kw-label">Khoảng giá Xu (1 Xu = 10.000đ)</label>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-            <input
-              type="number"
-              min={0}
-              className="kw-input"
-              placeholder="Từ (Xu)"
-              value={minXu}
-              onChange={(e) => setMinXu(e.target.value)}
-            />
-            <input
-              type="number"
-              min={0}
-              className="kw-input"
-              placeholder="Đến (Xu)"
-              value={maxXu}
-              onChange={(e) => setMaxXu(e.target.value)}
-            />
+          <div className="kw-field">
+            <label className="kw-label">Khoảng giá Xu (1 Xu = 10.000đ)</label>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+              <input
+                type="number"
+                min={0}
+                className="kw-input"
+                placeholder="Từ (Xu)"
+                value={minXu}
+                onChange={(e) => setMinXu(e.target.value)}
+              />
+              <input
+                type="number"
+                min={0}
+                className="kw-input"
+                placeholder="Đến (Xu)"
+                value={maxXu}
+                onChange={(e) => setMaxXu(e.target.value)}
+              />
+            </div>
           </div>
         </div>
       </aside>
@@ -189,22 +193,24 @@ export const SearchAndMapPage: React.FC = () => {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: 8,
               marginBottom: 12,
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <MapPin size={18} color="var(--color-primary)" />
-              <span style={{ fontWeight: 800, fontSize: 16 }}>
-                Bản đồ món đồ quanh mẹ tại Đà Nẵng ({filtered.length} điểm)
+              <span style={{ fontWeight: 800, fontSize: 15 }}>
+                Bản đồ món đồ quanh mẹ ({filtered.length} điểm)
               </span>
             </div>
             <span className="kw-badge kw-badge-teal">
-              Bấm vào chấm đỏ trên bản đồ để mở món đồ
+              Bấm chấm đỏ để xem đồ
             </span>
           </div>
           <AddressMapPreview
             districtId={districtId === 'all' ? 'dn_haichau' : districtId}
-            height={300}
+            height={260}
             products={filtered}
             onSelectProduct={(id) => navigate(`/products/${id}`)}
           />
@@ -224,7 +230,7 @@ export const SearchAndMapPage: React.FC = () => {
               </button>
             </div>
           ) : (
-            <div className="kw-grid-3">
+            <div className="kw-grid-4">
               {filtered.map((p) => (
                 <ProductCard key={p.id} product={p} currentUserId={currentUser?.id} />
               ))}

@@ -26,8 +26,9 @@ export const KindrLogo: React.FC<{
   showWordmark?: boolean;
   tagline?: string;
 }> = ({ size = 44, showWordmark = true, tagline }) => (
-  <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}>
+  <div className="kw-brand-logo" style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}>
     <div
+      className="kw-brand-logo-circle"
       style={{
         width: size,
         height: size,
@@ -51,6 +52,7 @@ export const KindrLogo: React.FC<{
     {showWordmark && (
       <div style={{ display: 'flex', flexDirection: 'column' }}>
         <span
+          className="kw-brand-logo-title"
           style={{
             fontSize: Math.max(20, Math.round(size * 0.5)),
             fontWeight: 800,
@@ -62,7 +64,10 @@ export const KindrLogo: React.FC<{
           Kindr
         </span>
         {tagline && (
-          <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-text-muted)' }}>
+          <span
+            className="kw-brand-logo-tagline"
+            style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-text-muted)' }}
+          >
             {tagline}
           </span>
         )}

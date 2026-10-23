@@ -143,23 +143,64 @@ textarea {
 
 @media (max-width: 860px) {
   .kw-main {
-    padding: 12px 10px 84px;
+    padding: 12px 12px 84px;
   }
 
   .kw-main.kw-main-chat {
     padding: 6px 8px 66px;
   }
 
-  .kw-card {
-    padding: 16px;
+  /* Prevent double/triple nested container padding on mobile */
+  .kw-container {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    padding-top: 4px !important;
+    padding-bottom: 16px !important;
+  }
+
+  .kw-card:not(.kw-card-flush) {
+    padding: 16px !important;
     border-radius: var(--radius-default);
   }
 
+  /* Responsive Typography Scale on Mobile */
+  .kw-main h1 {
+    font-size: clamp(20px, 5.4vw, 24px) !important;
+    line-height: 1.25 !important;
+  }
+
+  .kw-main h2 {
+    font-size: clamp(17px, 4.6vw, 20px) !important;
+    line-height: 1.3 !important;
+  }
+
+  /* Top Mobile Navbar Balance */
   .kw-navbar-inner {
     min-height: 56px;
     padding: 6px 12px;
     flex-wrap: nowrap;
     gap: 8px;
+  }
+
+  .kw-brand-logo {
+    gap: 8px !important;
+  }
+
+  .kw-brand-logo-circle {
+    width: 34px !important;
+    height: 34px !important;
+  }
+
+  .kw-brand-logo-title {
+    font-size: 20px !important;
+  }
+
+  .kw-brand-logo-tagline {
+    display: none !important;
+  }
+
+  .kw-navbar-actions {
+    gap: 6px !important;
   }
 
   .kw-nav-links {
@@ -170,6 +211,7 @@ textarea {
     display: none !important;
   }
 
+  /* Fixed Symmetrical 6-Tab Bottom Navigation Bar */
   .kw-mobile-bottom-nav {
     position: fixed;
     bottom: 0;
@@ -191,7 +233,7 @@ textarea {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 2px;
+    gap: 3px;
     height: 100%;
     font-size: 10px;
     font-weight: 700;
@@ -201,8 +243,118 @@ textarea {
     white-space: nowrap;
   }
 
+  .kw-mobile-tab-icon {
+    height: 22px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .kw-mobile-tab-cta {
+    color: var(--color-primary);
+    font-weight: 800;
+  }
+
   .kw-mobile-tab.active {
     color: var(--color-primary);
+  }
+
+  /* Horizontal Scrollable Category Strip on Mobile (No Orphan Row) */
+  .kw-bento-cats {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto;
+    gap: 8px !important;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+  }
+
+  .kw-bento-cats::-webkit-scrollbar {
+    display: none;
+  }
+
+  .kw-bento-cats > button {
+    flex: 0 0 132px;
+    min-height: 64px !important;
+    padding: 10px 12px !important;
+  }
+
+  /* Single-Row Scrollable Tab Bars (Wallet, Profile, Transactions, Notifications) */
+  .kw-tab-bar {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto;
+    gap: 8px !important;
+    padding-bottom: 4px !important;
+    scrollbar-width: none;
+  }
+
+  .kw-tab-bar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .kw-tab-bar > .kw-btn {
+    flex-shrink: 0;
+    white-space: nowrap;
+    min-height: 38px;
+    padding: 0 14px;
+    font-size: 13px;
+  }
+
+  /* Hero Mascot Box Compaction on Mobile */
+  .kw-hero-mascot-img {
+    width: 64px !important;
+    height: 64px !important;
+  }
+
+  /* Product Detail Page Mobile Order: Gallery -> Info/Buy CTA -> Escrow -> Map -> Reviews */
+  .kw-product-detail-grid {
+    display: flex !important;
+    flex-direction: column;
+    gap: 14px !important;
+  }
+
+  .kw-pd-col {
+    display: contents !important;
+  }
+
+  .kw-pd-gallery {
+    order: 1;
+  }
+
+  .kw-pd-info {
+    order: 2;
+  }
+
+  .kw-pd-escrow {
+    order: 3;
+  }
+
+  .kw-pd-map {
+    order: 4;
+  }
+
+  .kw-pd-reviews {
+    order: 5;
+  }
+
+  /* Admin Sidebar & Sticky Panels on Mobile */
+  .kw-admin-sidebar-nav {
+    position: static !important;
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px !important;
+    padding: 10px !important;
+  }
+
+  .kw-sticky-panel {
+    position: static !important;
+  }
+
+  .kw-search-filter-pair {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
   }
 
   /* Mobile Chat: Full-screen single pane (either List OR Active Thread) */
@@ -236,6 +388,19 @@ textarea {
 
   .kw-escrow-steps {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  /* Compact Tables on Mobile */
+  .kw-table th,
+  .kw-table td {
+    padding: 10px 10px;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  .kw-modal-box {
+    padding: 18px !important;
+    border-radius: var(--radius-default);
   }
 }
 
@@ -512,10 +677,14 @@ textarea {
 }
 
 @media (max-width: 860px) {
-  .kw-grid-4,
+  .kw-grid-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
   .kw-grid-3,
   .kw-grid-2 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
   }
   .kw-nav-links {
     overflow-x: auto;
@@ -523,10 +692,47 @@ textarea {
 }
 
 @media (max-width: 580px) {
-  .kw-grid-4,
+  /* Keep 2-column marketplace product grid & 2x2 KPI grid on phones */
+  .kw-grid-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
   .kw-grid-3,
   .kw-grid-2 {
     grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  /* Compact Product Cards for 2-Column Mobile Grid */
+  .kw-product-card-body {
+    padding: 10px 10px !important;
+    gap: 6px !important;
+  }
+
+  .kw-product-card-cat {
+    font-size: 10px !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .kw-product-card-title {
+    font-size: 13px !important;
+    line-height: 1.3 !important;
+    min-height: 34px;
+  }
+
+  .kw-product-card-price-row {
+    margin-bottom: 6px !important;
+  }
+
+  .kw-product-card-price {
+    font-size: 14px !important;
+  }
+
+  .kw-product-card-escrow {
+    display: none !important;
   }
 }
 

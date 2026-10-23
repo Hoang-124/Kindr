@@ -356,17 +356,18 @@ export const ProductDetailPage: React.FC = () => {
 
       {/* Main 2-Column Showcase */}
       <div
+        className="kw-product-detail-grid"
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-          gap: 'var(--space-8)',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+          gap: 'var(--space-6)',
           alignItems: 'start',
         }}
       >
         {/* Left: Image Gallery + Double Escrow Guarantee + Map Preview */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-5)' }}>
+        <div className="kw-pd-col" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-5)' }}>
           <div
-            className="kw-card"
+            className="kw-card kw-pd-gallery"
             style={{ padding: 'var(--space-4)', overflow: 'hidden' }}
           >
             <div
@@ -426,7 +427,7 @@ export const ProductDetailPage: React.FC = () => {
 
           {/* Double Escrow Explanation Card */}
           <div
-            className="kw-card"
+            className="kw-card kw-pd-escrow"
             style={{
               backgroundColor: 'var(--color-secondary-light)',
               borderColor: 'var(--color-secondary)',
@@ -469,7 +470,7 @@ export const ProductDetailPage: React.FC = () => {
           </div>
 
           {/* Pickup Location Map in Đà Nẵng */}
-          <div className="kw-card" style={{ padding: 16 }}>
+          <div className="kw-card kw-pd-map" style={{ padding: 16 }}>
             <div style={{ fontWeight: 800, fontSize: 15, marginBottom: 10, display: 'flex', alignItems: 'center', gap: 8 }}>
               <MapPin size={17} color="var(--color-primary)" />
               <span>Bản đồ khu vực hẹn gặp ({product.locationName || 'Đà Nẵng'})</span>
@@ -484,8 +485,8 @@ export const ProductDetailPage: React.FC = () => {
         </div>
 
         {/* Right: Product Info, Seller Card, Reviews & Action Triggers */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-5)' }}>
-          <div className="kw-card" style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+        <div className="kw-pd-col" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-5)' }}>
+          <div className="kw-card kw-pd-info" style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
             <div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
                 <span className="kw-badge kw-badge-teal">
@@ -714,7 +715,7 @@ export const ProductDetailPage: React.FC = () => {
           </div>
 
           {/* Seller Community Ratings & Reviews Card */}
-          <div className="kw-card">
+          <div className="kw-card kw-pd-reviews">
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
               <h3 style={{ fontSize: 16, fontWeight: 800 }}>
                 Nhận xét từ các mẹ đã giao dịch với {product.sellerName}

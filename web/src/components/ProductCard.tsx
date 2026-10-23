@@ -19,6 +19,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, currentUserId
   return (
     <Link
       to={`/products/${product.id}`}
+      className="kw-product-card"
       style={{
         display: 'flex',
         flexDirection: 'column',
@@ -116,6 +117,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, currentUserId
 
       {/* Card Body */}
       <div
+        className="kw-product-card-body"
         style={{
           padding: '14px 16px',
           display: 'flex',
@@ -127,6 +129,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, currentUserId
       >
         <div>
           <div
+            className="kw-product-card-cat"
             style={{
               fontSize: 12,
               fontWeight: 700,
@@ -138,6 +141,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, currentUserId
             {product.ageRange ? ` • Bé ${product.ageRange}` : ''}
           </div>
           <h3
+            className="kw-product-card-title"
             style={{
               fontSize: 15,
               fontWeight: 700,
@@ -156,18 +160,22 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, currentUserId
         <div>
           {/* Price Row */}
           <div
+            className="kw-product-card-price-row"
             style={{
               display: 'flex',
               alignItems: 'baseline',
               justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: 4,
               marginBottom: 10,
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <KindrCoin size={18} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+              <KindrCoin size={16} />
               <span
+                className="kw-product-card-price"
                 style={{
-                  fontSize: 18,
+                  fontSize: 17,
                   fontWeight: 800,
                   color: isCharity ? 'var(--color-secondary-dark)' : 'var(--color-primary)',
                 }}
@@ -175,24 +183,25 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, currentUserId
                 {isCharity ? '0 Xu (Tặng)' : `${product.price} Xu`}
               </span>
             </div>
-            <span style={{ fontSize: 12, color: 'var(--color-text-muted)', fontWeight: 600 }}>
+            <span style={{ fontSize: 11, color: 'var(--color-text-muted)', fontWeight: 600 }}>
               {isCharity ? 'Miễn phí' : `~ ${formatXuToVND(product.price)}`}
             </span>
           </div>
 
           {/* Seller Footer */}
           <div
+            className="kw-product-card-footer"
             style={{
-              paddingTop: 10,
+              paddingTop: 8,
               borderTop: '1px solid var(--color-border)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              gap: 8,
+              gap: 6,
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
-              <Avatar uri={product.sellerAvatar} name={product.sellerName} size={26} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0, flex: 1 }}>
+              <Avatar uri={product.sellerAvatar} name={product.sellerName} size={24} />
               <span
                 style={{
                   fontSize: 12,
@@ -207,18 +216,20 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, currentUserId
               </span>
             </div>
             <span
+              className="kw-product-card-escrow"
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: 4,
-                fontSize: 12,
+                gap: 3,
+                fontSize: 11,
                 fontWeight: 700,
                 color: 'var(--color-secondary-dark)',
+                flexShrink: 0,
               }}
               title="Đã ký quỹ bảo chứng chất lượng"
             >
-              <ShieldCheck size={14} />
-              Escrow
+              <ShieldCheck size={13} />
+              <span>Escrow</span>
             </span>
           </div>
         </div>

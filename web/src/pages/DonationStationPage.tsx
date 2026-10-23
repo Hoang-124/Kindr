@@ -165,7 +165,7 @@ export const DonationStationPage: React.FC = () => {
           {STATIONS.map((st) => (
             <div
               key={st.id}
-              className="kw-card"
+              className="kw-card kw-card-flush"
               style={{
                 padding: 0,
                 overflow: 'hidden',

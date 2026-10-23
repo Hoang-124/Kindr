@@ -208,7 +208,7 @@ export const NotificationsPage: React.FC = () => {
       </div>
 
       {/* Filter Bar */}
-      <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 12, marginBottom: 12 }}>
+      <div className="kw-tab-bar" style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 12, marginBottom: 12 }}>
         {[
           { id: 'all', label: `Tất cả (${notifications.length})` },
           { id: 'unread', label: `Chưa đọc (${unreadNotifCount})` },

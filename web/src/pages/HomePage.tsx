@@ -324,7 +324,7 @@ export const HomePage: React.FC = () => {
                 style={{ position: 'absolute', left: 14, top: 15 }}
               />
             </div>
-            <Link to="/post" className="kw-btn kw-btn-primary">
+            <Link to="/post" className="kw-btn kw-btn-primary" style={{ flex: '1 1 135px' }}>
               <PlusCircle size={18} />
               <span>Đăng đồ nhận Xu</span>
             </Link>
@@ -332,6 +332,7 @@ export const HomePage: React.FC = () => {
               type="button"
               onClick={() => navigate('/search')}
               className="kw-btn kw-btn-outline"
+              style={{ flex: '1 1 135px' }}
             >
               <SlidersHorizontal size={16} />
               <span>Bản đồ & Bộ lọc</span>
@@ -341,6 +342,7 @@ export const HomePage: React.FC = () => {
 
         {/* Right Hero Box with Real Mobile Mascot Full Artwork */}
         <div
+          className="kw-hero-mascot-box"
           style={{
             display: 'flex',
             flexDirection: 'column',
@@ -352,13 +354,14 @@ export const HomePage: React.FC = () => {
             boxShadow: 'var(--shadow-soft)',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
             <img
+              className="kw-hero-mascot-img"
               src="/assets/images/kindr-mascot-full.png"
               alt="Gấu Kindy Mascot"
               style={{
-                width: 96,
-                height: 96,
+                width: 84,
+                height: 84,
                 objectFit: 'contain',
                 borderRadius: 'var(--radius-default)',
                 backgroundColor: 'var(--color-primary-light)',
@@ -453,6 +456,7 @@ export const HomePage: React.FC = () => {
         </div>
 
         <div
+          className="kw-bento-cats"
           style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(145px, 1fr))',

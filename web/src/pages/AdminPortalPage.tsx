@@ -356,7 +356,7 @@ export const AdminPortalPage: React.FC = () => {
       <div className="kw-admin-layout">
         {/* LEFT SIDEBAR NAVIGATION */}
         <div
-          className="kw-card"
+          className="kw-card kw-admin-sidebar-nav"
           style={{
             padding: 12,
             display: 'flex',

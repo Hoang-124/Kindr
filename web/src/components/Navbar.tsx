@@ -207,15 +207,15 @@ export const Navbar: React.FC = () => {
           </nav>
 
           {/* Right Actions */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div className="kw-navbar-actions" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <button
               type="button"
               onClick={toggleTheme}
               className="kw-btn kw-btn-outline kw-btn-sm"
-              style={{ width: 42, padding: 0 }}
+              style={{ width: 38, minHeight: 38, padding: 0 }}
               title={theme === 'light' ? 'Chuyển sang Giao diện Tối' : 'Chuyển sang Giao diện Sáng'}
             >
-              {theme === 'light' ? <Moon size={17} /> : <Sun size={17} />}
+              {theme === 'light' ? <Moon size={16} /> : <Sun size={16} />}
             </button>
 
             {currentUser ? (
@@ -469,7 +469,9 @@ export const Navbar: React.FC = () => {
           end
           className={({ isActive }) => `kw-mobile-tab ${isActive ? 'active' : ''}`}
         >
-          <Home size={19} />
+          <span className="kw-mobile-tab-icon">
+            <Home size={19} />
+          </span>
           <span>Khám phá</span>
         </NavLink>
 
@@ -477,24 +479,29 @@ export const Navbar: React.FC = () => {
           to="/search"
           className={({ isActive }) => `kw-mobile-tab ${isActive ? 'active' : ''}`}
         >
-          <Search size={19} />
+          <span className="kw-mobile-tab-icon">
+            <Search size={19} />
+          </span>
           <span>Bản đồ</span>
         </NavLink>
 
         <NavLink
           to="/post"
-          className={({ isActive }) => `kw-mobile-tab ${isActive ? 'active' : ''}`}
-          style={{ color: 'var(--color-primary)' }}
+          className={({ isActive }) => `kw-mobile-tab kw-mobile-tab-cta ${isActive ? 'active' : ''}`}
         >
-          <PlusCircle size={22} />
-          <span style={{ fontWeight: 800 }}>Đăng đồ</span>
+          <span className="kw-mobile-tab-icon">
+            <PlusCircle size={20} />
+          </span>
+          <span>Đăng đồ</span>
         </NavLink>
 
         <NavLink
           to="/transactions"
           className={({ isActive }) => `kw-mobile-tab ${isActive ? 'active' : ''}`}
         >
-          <Lock size={19} />
+          <span className="kw-mobile-tab-icon">
+            <Lock size={19} />
+          </span>
           <span>Ký quỹ</span>
         </NavLink>
 
@@ -502,13 +509,13 @@ export const Navbar: React.FC = () => {
           to="/chat"
           className={({ isActive }) => `kw-mobile-tab ${isActive ? 'active' : ''}`}
         >
-          <div style={{ position: 'relative', display: 'inline-flex' }}>
+          <span className="kw-mobile-tab-icon" style={{ position: 'relative' }}>
             <MessageCircle size={19} />
             {unreadChatCount > 0 && (
               <span
                 style={{
                   position: 'absolute',
-                  top: -5,
+                  top: -4,
                   right: -8,
                   backgroundColor: 'var(--color-error)',
                   color: '#fff',
@@ -526,7 +533,7 @@ export const Navbar: React.FC = () => {
                 {unreadChatCount > 9 ? '9+' : unreadChatCount}
               </span>
             )}
-          </div>
+          </span>
           <span>Tin nhắn</span>
         </NavLink>
 
@@ -534,7 +541,9 @@ export const Navbar: React.FC = () => {
           to={currentUser?.role === 'admin' ? '/admin' : currentUser ? '/profile' : '/login'}
           className={({ isActive }) => `kw-mobile-tab ${isActive ? 'active' : ''}`}
         >
-          {currentUser?.role === 'admin' ? <Shield size={19} /> : <UserIcon size={19} />}
+          <span className="kw-mobile-tab-icon">
+            {currentUser?.role === 'admin' ? <Shield size={19} /> : <UserIcon size={19} />}
+          </span>
           <span>{currentUser?.role === 'admin' ? 'Admin' : 'Cá nhân'}</span>
         </NavLink>
       </nav>
@@ -669,19 +678,21 @@ export const Navbar: React.FC = () => {
         <div
           style={{
             position: 'fixed',
-            top: 84,
-            right: 24,
+            top: 68,
+            right: 12,
+            left: 12,
+            marginLeft: 'auto',
             zIndex: 250,
             maxWidth: 380,
             backgroundColor: 'var(--color-card)',
             border: '2px solid var(--color-primary)',
             borderRadius: 'var(--radius-default)',
             boxShadow: 'var(--shadow-elevated)',
-            padding: '14px 16px',
+            padding: '12px 14px',
             display: 'flex',
             alignItems: 'flex-start',
             justifyContent: 'space-between',
-            gap: 12,
+            gap: 10,
           }}
         >
           <div

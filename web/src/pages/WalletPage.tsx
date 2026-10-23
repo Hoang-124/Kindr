@@ -301,7 +301,7 @@ export const WalletPage: React.FC = () => {
       </div>
 
       {/* TABS */}
-      <div style={{ display: 'flex', gap: 10, marginBottom: 20, flexWrap: 'wrap' }}>
+      <div className="kw-tab-bar" style={{ display: 'flex', gap: 10, marginBottom: 20, flexWrap: 'wrap' }}>
         <button
           type="button"
           onClick={() => setActiveTab('topup')}
