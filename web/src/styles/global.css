@@ -49,6 +49,11 @@ textarea {
   padding: var(--space-6) var(--space-5) var(--space-12);
 }
 
+.kw-main.kw-main-chat {
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+
 .kw-container {
   width: 100%;
   max-width: 1280px;
@@ -66,8 +71,8 @@ textarea {
 .kw-chat-layout {
   display: grid;
   grid-template-columns: 340px minmax(0, 1fr);
-  height: calc(100dvh - 130px);
-  min-height: 540px;
+  height: calc(100dvh - 104px);
+  min-height: 480px;
   max-height: 820px;
   border-radius: var(--radius-lg);
   border: 1px solid var(--color-border);
@@ -141,6 +146,10 @@ textarea {
     padding: 12px 10px 84px;
   }
 
+  .kw-main.kw-main-chat {
+    padding: 6px 8px 66px;
+  }
+
   .kw-card {
     padding: 16px;
     border-radius: var(--radius-default);
@@ -203,8 +212,8 @@ textarea {
 
   .kw-chat-layout {
     grid-template-columns: 1fr;
-    height: calc(100dvh - 122px);
-    min-height: 420px;
+    height: calc(100dvh - 132px);
+    min-height: 360px;
     max-height: none;
     border-radius: var(--radius-default);
   }

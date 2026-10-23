@@ -47,7 +47,9 @@ export const ChatPage: React.FC = () => {
   const [reportReason, setReportReason] = useState('Yêu cầu chuyển khoản ngoài sàn / không qua Double Escrow');
   const [reporting, setReporting] = useState(false);
 
-  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const messagesContainerRef = useRef<HTMLDivElement | null>(null);
+  const lastChatIdRef = useRef<string | undefined>(undefined);
+  const lastMessageIdRef = useRef<string | undefined>(undefined);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Auto-select first chat on desktop if none selected
@@ -156,10 +158,49 @@ export const ChatPage: React.FC = () => {
     };
   }, [chatId, currentUser?.id]);
 
-  // Scroll to bottom when messages change
+  // Scroll ONLY the inner messages container (never the outer window/footer!)
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, partnerTyping]);
+    const container = messagesContainerRef.current;
+    if (!container) return;
+
+    const latestMsgId = messages[messages.length - 1]?.id;
+    const isChatSwitch = lastChatIdRef.current !== chatId;
+    const isNewMessage = latestMsgId !== lastMessageIdRef.current;
+
+    if (isChatSwitch) {
+      window.scrollTo(0, 0);
+      requestAnimationFrame(() => {
+        if (messagesContainerRef.current) {
+          messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+        }
+      });
+      if (!loadingMessages) {
+        lastChatIdRef.current = chatId;
+        lastMessageIdRef.current = latestMsgId;
+      }
+      return;
+    }
+
+    if (isNewMessage) {
+      lastMessageIdRef.current = latestMsgId;
+      container.scrollTo({
+        top: container.scrollHeight,
+        behavior: 'smooth',
+      });
+      return;
+    }
+
+    if (partnerTyping) {
+      const distanceFromBottom =
+        container.scrollHeight - container.scrollTop - container.clientHeight;
+      if (distanceFromBottom < 160) {
+        container.scrollTo({
+          top: container.scrollHeight,
+          behavior: 'smooth',
+        });
+      }
+    }
+  }, [chatId, messages, loadingMessages, partnerTyping]);
 
   if (!currentUser) {
     return (
@@ -306,7 +347,7 @@ export const ChatPage: React.FC = () => {
   };
 
   return (
-    <div className="kw-container kw-chat-page-wrap" style={{ padding: '12px 0 24px' }}>
+    <div className="kw-container kw-chat-page-wrap" style={{ padding: 0 }}>
       <div className={`kw-chat-layout ${chatId ? 'has-active-chat' : ''}`}>
         {/* LEFT SIDEBAR: CHAT LIST */}
         <div className="kw-chat-sidebar">
@@ -588,10 +629,12 @@ export const ChatPage: React.FC = () => {
 
               {/* Messages Container */}
               <div
+                ref={messagesContainerRef}
                 style={{
                   flex: 1,
                   minHeight: 0,
                   overflowY: 'auto',
+                  overscrollBehavior: 'contain',
                   padding: '14px 12px',
                   display: 'flex',
                   flexDirection: 'column',
@@ -699,8 +742,6 @@ export const ChatPage: React.FC = () => {
                     {partnerTyping} đang soạn tin nhắn...
                   </div>
                 )}
-
-                <div ref={messagesEndRef} />
               </div>
 
               {/* Quick Replies Bar */}

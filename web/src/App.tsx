@@ -19,17 +19,20 @@ import { NotificationsPage } from './pages/NotificationsPage';
 const ScrollToTop: React.FC = () => {
   const { pathname } = useLocation();
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo(0, 0);
   }, [pathname]);
   return null;
 };
 
 export const App: React.FC = () => {
+  const { pathname } = useLocation();
+  const isChatRoute = pathname.startsWith('/chat');
+
   return (
     <div className="kw-app-shell">
       <ScrollToTop />
       <Navbar />
-      <main className="kw-main">
+      <main className={`kw-main ${isChatRoute ? 'kw-main-chat' : ''}`}>
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/auth" element={<AuthPage />} />
@@ -51,7 +54,7 @@ export const App: React.FC = () => {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
-      <Footer />
+      {!isChatRoute && <Footer />}
     </div>
   );
 };
