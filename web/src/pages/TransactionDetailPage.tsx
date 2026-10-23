@@ -1278,7 +1278,11 @@ export const TransactionDetailPage: React.FC = () => {
                       <CheckCircle2 size={20} />
                       <span>
                         {selectedTx.status === 'completed'
-                          ? 'Giao dịch đã hoàn tất & giải ngân Xu thành công!'
+                          ? `Giao dịch hoàn tất! Người bán nhận +${selectedTx.buyerEscrowFrozen} Xu tiền đồ${
+                              selectedTx.sellerEscrowFrozen > 0
+                                ? ` (+ hoàn lại ${selectedTx.sellerEscrowFrozen} Xu cọc Safe Fee lúc đăng bài)`
+                                : ''
+                            }`
                           : 'Giao dịch đã được hoàn Xu về ví người mua'}
                       </span>
                     </div>

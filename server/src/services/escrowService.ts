@@ -360,7 +360,10 @@ export async function finalizeTransaction(transactionId: string): Promise<{
     userId: tx.sellerId,
     type: 'xu_released',
     title: 'Giao dịch hoàn tất! Xu đã vào ví',
-    body: `Hệ thống đã giải phóng ${totalXuToSeller} Xu vào ví của mẹ. Đừng quên đánh giá nhé!`,
+    body:
+      tx.sellerEscrowFrozen > 0
+        ? `Mẹ đã nhận +${tx.buyerEscrowFrozen} Xu tiền bán đồ và được hoàn trả +${tx.sellerEscrowFrozen} Xu cọc Safe Fee lúc đăng bài (tổng +${totalXuToSeller} Xu về ví khả dụng).`
+        : `Hệ thống đã giải ngân +${tx.buyerEscrowFrozen} Xu vào ví của mẹ. Đừng quên đánh giá nhé!`,
     relatedTransactionId: tx._id,
   });
   emitToUser(tx.sellerId.toString(), 'notification_new', sellerNotif);
@@ -397,7 +400,9 @@ export async function finalizeTransaction(transactionId: string): Promise<{
     tx.buyerId,
     tx.sellerId,
     tx.productId,
-    `🎉 [HỆ THỐNG KINDR] Giao dịch món "${tx.productName}" đã hoàn tất! Đã giải ngân ${totalXuToSeller} Xu vào ví Người bán.`
+    tx.sellerEscrowFrozen > 0
+      ? `🎉 [HỆ THỐNG KINDR] Giao dịch món "${tx.productName}" đã hoàn tất! Người bán nhận +${tx.buyerEscrowFrozen} Xu giá trị món đồ (và được mở khóa hoàn lại ${tx.sellerEscrowFrozen} Xu cọc Safe Fee lúc đăng bài).`
+      : `🎉 [HỆ THỐNG KINDR] Giao dịch món "${tx.productName}" đã hoàn tất! Đã giải ngân +${tx.buyerEscrowFrozen} Xu vào ví Người bán.`
   ).catch(() => {});
   sendPushToUser(tx.buyerId, {
     title: buyerNotif.title,
