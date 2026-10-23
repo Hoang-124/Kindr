@@ -58,7 +58,7 @@ router.get('/dashboard', async (_req: AuthRequest, res: Response): Promise<void>
       Transaction.countDocuments({ status: 'disputed' }),
       WithdrawRequest.countDocuments({ status: 'pending' }),
       Report.countDocuments({ status: 'open' }),
-      Transaction.find({ status: { $in: ['frozen', 'shipped', 'in_safeful_time'] } })
+      Transaction.find({ status: { $in: ['awaiting_handover', 'in_safeful_time', 'disputed', 'frozen', 'shipped'] } })
         .select('buyerEscrowFrozen sellerEscrowFrozen')
         .lean(),
     ]);
@@ -471,6 +471,9 @@ router.put('/withdraws/:id/approve', async (req: AuthRequest, res: Response): Pr
       body: `BQT Kindr đã hoàn tất chuyển ${request.payoutVnd?.toLocaleString('vi-VN') || ''}đ về tài khoản ngân hàng của mẹ.`,
     });
     emitToUser(request.userId.toString(), 'notification_new', notif);
+    emitToUser(request.userId.toString(), 'wallet_updated', {
+      reason: 'withdraw_approved',
+    });
     sendPushToUser(request.userId, {
       title: notif.title,
       body: notif.body,
@@ -517,6 +520,9 @@ router.put('/withdraws/:id/reject', async (req: AuthRequest, res: Response): Pro
       body: `Lý do: ${request.adminNote}. Số Xu (${request.xuAmount} Xu) đã được hoàn trả lại ví của mẹ.`,
     });
     emitToUser(request.userId.toString(), 'notification_new', notif);
+    emitToUser(request.userId.toString(), 'wallet_updated', {
+      reason: 'withdraw_approved',
+    });
     sendPushToUser(request.userId, {
       title: notif.title,
       body: notif.body,

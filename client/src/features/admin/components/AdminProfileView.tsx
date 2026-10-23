@@ -204,6 +204,18 @@ export const AdminProfileView = () => {
       iconColor: COLORS.primaryDark,
       iconBg: COLORS.primaryLight,
     },
+    {
+      id: 'waitlist',
+      title: 'Danh sách Chờ Tiên Phong',
+      subtitle: 'Quản lý 200 suất Mẹ Tiên Phong đăng ký sớm từ Landing Page',
+      icon: ShieldCheck,
+      route: 'ManageWaitlist' as keyof AppStackParamList,
+      count: null,
+      countLabel: '',
+      isWarning: false,
+      iconColor: COLORS.secondary,
+      iconBg: COLORS.secondaryLight,
+    },
   ];
 
   return (

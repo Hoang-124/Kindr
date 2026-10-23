@@ -21,19 +21,19 @@ import FormError from '../../../components/form/FormError';
 import * as productService from '../../../services/productService';
 
 const CATEGORIES = [
-  { id: 'do_choi', name: 'Đồ chơi' },
+  { id: 'toy_small', name: 'Đồ chơi nhỏ' },
+  { id: 'toy_large', name: 'Đồ chơi lớn' },
+  { id: 'book', name: 'Sách truyện' },
   { id: 'quan_ao', name: 'Quần áo bé' },
-  { id: 'sach_truyen', name: 'Sách truyện' },
+  { id: 'xe_noi', name: 'Xe đẩy & Nôi cũi' },
   { id: 'do_hoc_tap', name: 'Đồ học tập' },
-  { id: 'xe_noi', name: 'Xe & Nôi cũi' },
-  { id: 'tu_thien', name: 'Trạm Tặng Đồ' },
+  { id: 'charity', name: 'Trạm Tặng Đồ (0 Xu)' },
 ];
 
 const CONDITIONS = [
-  { id: 'new', label: 'Mới tinh (100%)' },
-  { id: 'like_new', label: 'Như mới (>90%)' },
-  { id: 'good', label: 'Khá tốt (70-90%)' },
-  { id: 'fair', label: 'Cũ / Đã dùng nhiều (<70%)' },
+  { id: '90', label: 'Mới 90% (Rất mới, ít dùng)' },
+  { id: '80', label: 'Mới 80% (Khá mới, dùng tốt)' },
+  { id: '70', label: 'Mới 70% (Đã dùng nhiều, nguyên vẹn)' },
 ];
 
 export const EditPostScreen = () => {
@@ -48,8 +48,8 @@ export const EditPostScreen = () => {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [priceStr, setPriceStr] = useState('');
-  const [category, setCategory] = useState('do_choi');
-  const [condition, setCondition] = useState('good');
+  const [category, setCategory] = useState('toy_small');
+  const [condition, setCondition] = useState('90');
   
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -59,8 +59,8 @@ export const EditPostScreen = () => {
       setName(product.name);
       setDescription(product.description);
       setPriceStr(product.price.toString());
-      setCategory(product.category);
-      setCondition(product.condition);
+      setCategory(product.category || 'toy_small');
+      setCondition(['90', '80', '70'].includes(product.condition) ? product.condition : '90');
     }
   }, [product]);
 
@@ -101,7 +101,7 @@ export const EditPostScreen = () => {
 
     setLoading(true);
 
-    const conditionLabel = CONDITIONS.find(c => c.id === condition)?.label || 'Khá tốt';
+    const conditionLabel = CONDITIONS.find(c => c.id === condition)?.label || `Mới ${condition}%`;
 
     try {
       await productService.updateProduct(postId, {

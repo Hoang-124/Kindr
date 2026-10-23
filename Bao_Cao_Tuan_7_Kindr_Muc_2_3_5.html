@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Báo Cáo Tuần 7 Kindr — Bản Rút Gọn 4 Phút (Chuẩn Google Docs)</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.55;
+      color: #1f2937;
+      background: #f3f4f6;
+      margin: 0;
+      padding: 24px;
+    }
+    .toolbar {
+      position: sticky;
+      top: 12px;
+      z-index: 100;
+      max-width: 960px;
+      margin: 0 auto 20px;
+      background: #111827;
+      color: #ffffff;
+      padding: 14px 20px;
+      border-radius: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    }
+    .btn-copy {
+      background: #e05a36;
+      color: #ffffff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .btn-copy:hover {
+      background: #c84927;
+    }
+    .doc-container {
+      max-width: 960px;
+      margin: 0 auto;
+      background: #ffffff;
+      padding: 36px 44px;
+      border-radius: 8px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+    }
+    h1 {
+      font-size: 18pt;
+      color: #111827;
+      border-bottom: 2px solid #e05a36;
+      padding-bottom: 8px;
+      margin-top: 8px;
+    }
+    h2 {
+      font-size: 14pt;
+      color: #c84927;
+      margin-top: 22px;
+      margin-bottom: 8px;
+    }
+    h3 {
+      font-size: 11.5pt;
+      color: #1f2937;
+      margin-top: 14px;
+      margin-bottom: 6px;
+    }
+    p, li {
+      font-size: 11pt;
+      color: #1f2937;
+      margin: 6px 0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 10px 0 18px;
+      font-size: 10.5pt;
+    }
+    th, td {
+      border: 1px solid #cbd5e1;
+      padding: 8px 10px;
+      vertical-align: top;
+      text-align: left;
+    }
+    th {
+      background-color: #fdf2ef;
+      color: #9a3412;
+      font-weight: bold;
+    }
+    .script-box {
+      background-color: #f8fafc;
+      border-left: 4px solid #e05a36;
+      padding: 12px 16px;
+      margin: 10px 0 18px;
+    }
+  </style>
+</head>
+<body>
+  <div class="toolbar">
+    <div>
+      <strong>Báo cáo Tuần 7 Kindr (Bản rút gọn 4 phút — Mục 2, 3, 5)</strong> — Bấm nút bên phải rồi sang Google Docs bấm <code>Ctrl + V</code>!
+    </div>
+    <button class="btn-copy" onclick="copyToGoogleDocs()" id="copyBtn">
+      📋 Copy toàn bộ dán vào Google Docs
+    </button>
+  </div>
+
+  <div class="doc-container" id="docContent">
+    <h1>BÁO CÁO TUẦN 7 DỰ ÁN KINDR (TỔNG KẾT TUẦN 5 &amp; TUẦN 6 — BẢN RÚT GỌN 4 PHÚT)</h1>
+
+    <h2>2. Báo cáo &amp; So sánh hoạt động Marketing giữa Tuần 5 và Tuần 6 (Kèm Evidence Data)</h2>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Chỉ số đo lường (Data Metrics)</th>
+          <th>Tuần 5 (06/10 – 13/10)<br/>(Phỏng vấn Offline 1-1)</th>
+          <th>Tuần 6 (14/10 – 20/10)<br/>(Đẩy mạnh Kênh Online)</th>
+          <th>Tổng 2 Tuần &amp; Tăng trưởng<br/>(Báo cáo tại Tuần 7)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>1. Kênh triển khai chính</strong></td>
+          <td>Gặp trực tiếp 1-1 tại chung cư (mở máy của nhóm cho mẹ xem thử)</td>
+          <td>Chia sẻ link lên hội nhóm Mẹ &amp; Bé / Cư dân Đà Nẵng (<code>pilot_danang</code>)</td>
+          <td>Chuyển từ <strong>Offline 1-1</strong> sang <strong>Lan tỏa Online</strong></td>
+        </tr>
+        <tr>
+          <td><strong>2. Lượng CDN Requests (Vercel)</strong></td>
+          <td><strong>85 Requests</strong> (~2,5 MB)</td>
+          <td><strong>2.248 Requests</strong> (~110,2 MB; riêng 17–20/10 đạt <strong>2.126 Requests</strong>)</td>
+          <td><strong>Tổng: 2.333 Requests (112,7 MB)</strong><br/>(<strong>Tăng gấp 26,4 lần / +2.544%</strong>)</td>
+        </tr>
+        <tr>
+          <td><strong>3. Lượt tiếp cận (Reach)</strong></td>
+          <td><strong>30 phụ huynh</strong> gặp trực tiếp</td>
+          <td><strong>~300+ lượt mở trang Online</strong></td>
+          <td><strong>~330+ lượt tiếp cận</strong></td>
+        </tr>
+        <tr>
+          <td><strong>4. Khách để lại Email (Leads)</strong></td>
+          <td><strong>19 / 30 mẹ (63,3%)</strong> ghi phiếu khảo sát (+ 2 bản ghi Web đầu)</td>
+          <td><strong>+5 người mới</strong> tự điền Form trên Web (<code>#KD-0003</code> → <code>#KD-0007</code>)</td>
+          <td><strong>26 Email tiềm năng</strong><br/>(19 Offline + 7 Web Cloud)</td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>Evidence đính kèm:</strong> (1) Ảnh Vercel <code>Oct 6 – Oct 21: 2,333 Requests</code>; (2) Ảnh Vercel <code>Oct 17 – Oct 21: 2,126 Requests</code> &amp; <code>116,55 MB</code>; (3) Bảng khảo sát 30 phụ huynh Tuần 5.</p>
+
+    <div class="script-box">
+      <p><strong>🎤 Lời nói Mục 2 (Phút 0:00 – 1:15):</strong></p>
+      <p>"Thưa thầy/cô và các bạn, em xin trình bày báo cáo Marketing, Feedback khách hàng và Đánh giá KPIs sau 2 tuần triển khai là <strong>Tuần 5 và Tuần 6</strong>. Đầu tiên ở <strong>Mục 2</strong>: Ở <strong>Tuần 5 (06/10 – 13/10)</strong>, nhóm triển khai kênh <strong>Offline 1-1</strong>, trực tiếp gặp 30 phụ huynh tại chung cư và mở trang web ngay trên điện thoại của nhóm cho các mẹ dùng thử, nên trên biểu đồ Vercel chỉ phát sinh <strong>85 CDN Requests</strong> (~2,5 MB). Sang <strong>Tuần 6 (14/10 – 20/10)</strong>, sau khi tối ưu trang web từ góp ý của 30 mẹ ở Tuần 5, nhóm đẩy mạnh kênh <strong>Online</strong> qua các hội nhóm Mẹ &amp; Bé và cư dân Đà Nẵng. Kết quả là lưu lượng trên Vercel tăng vọt <strong>gấp 26,4 lần</strong>, đạt <strong>2.248 Requests</strong> (riêng 4 ngày cuối tuần từ 17–20/10 đạt <strong>2.126 Requests</strong>). Tính chung cả 2 tuần đạt chính xác <strong>2.333 Requests (112,7 MB)</strong>, tương đương <strong>hơn 300 lượt mở trang Online</strong> và có thêm <strong>5 khách hàng tự điền Form trên Web</strong>, nâng bộ đếm trên trang Deploy lên <strong>7 / 200 Mẹ</strong>."</p>
+    </div>
+
+    <hr/>
+
+    <h2>3. Số lượng khách hàng đã tiếp cận, người dùng thử và Feedback nhận được</h2>
+
+    <h3>3.1. Tóm tắt Phễu khách hàng &amp; Kết quả dùng thử</h3>
+    <ul>
+      <li><strong>Tổng tiếp cận:</strong> <strong>~330+ lượt</strong> (~300 lượt mở trang Online + 30 phụ huynh tiếp cận trực tiếp).</li>
+      <li><strong>Người dùng thử &amp; khảo sát sâu (~10%):</strong> <strong>30 phụ huynh</strong> trải nghiệm theo kịch bản 5 bước ở Tuần 5:
+        <ul>
+          <li><strong>83,3% (25/30 mẹ)</strong> hiểu mô hình đổi đồ bằng Xu (50% hiểu rõ ngay, 33,3% hiểu ý chính).</li>
+          <li><strong>63,3% (19/30 mẹ)</strong> để lại Email nhận thông báo (+ <strong>7 người</strong> tự điền trên Web Cloud = <strong>26 Leads</strong>).</li>
+          <li><strong>30,0% (9/30 mẹ)</strong> sẵn sàng nạp Xu ngay; <strong>46,7% (14/30 mẹ)</strong> phân vân (tổng <strong>76,7%</strong> tiềm năng).</li>
+        </ul>
+      </li>
+    </ul>
+
+    <h3>3.2. Tóm tắt 4 Nhóm Feedback lớn nhất từ 30 Phụ huynh (Gom từ 9 nhóm rào cản — 33 ý kiến)</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Nhóm Feedback cốt lõi</th>
+          <th>Tỷ trọng</th>
+          <th>Ý kiến điển hình của Phụ huynh (Tuần 5)</th>
+          <th>Hướng xử lý trên Sản phẩm (Tuần 6)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>1. Niềm tin &amp; Giao nhận tại chung cư</strong><br/>(Nhóm 5 &amp; 7)</td>
+          <td><strong>10 / 33 ý kiến (30%)</strong></td>
+          <td>• Ngại dự án sinh viên, chưa thấy số người dùng (#9, #14)<br/>• Bảo vệ không cho người lạ vào, ngại gặp buổi tối (#10, #12)</td>
+          <td>• Hiện bộ đếm thành viên thật (<code>7/200</code>), Điểm Văn Minh<br/>• Hẹn giao tại <strong>Sảnh chung cư ban ngày</strong></td>
+        </tr>
+        <tr>
+          <td><strong>2. Quy đổi Xu &amp; Minh bạch giá</strong><br/>(Nhóm 1 &amp; 2)</td>
+          <td><strong>8 / 33 ý kiến (24%)</strong></td>
+          <td>• Phải nhẩm <code>1 Xu = 10k</code> trong đầu (#4)<br/>• Nạp Xu dùng không hết có rút về tiền được không (#13)</td>
+          <td>• Ghi song song <strong>Giá Xu + VNĐ</strong><br/>• Cho <strong>Rút Xu về ngân hàng</strong> &amp; <strong>AI gợi ý giá</strong></td>
+        </tr>
+        <tr>
+          <td><strong>3. Kiểm định 6h &amp; Chất lượng vệ sinh</strong><br/>(Nhóm 3 &amp; 4)</td>
+          <td><strong>6 / 33 ý kiến (18%)</strong></td>
+          <td>• 6 tiếng kiểm định là sao, ai phân xử khi đồ lỗi (#5, #7, #30)<br/>• Cấm bán bình sữa/núm ti cũ (#26)</td>
+          <td>• Đồng hồ đếm ngược 6h trực quan<br/>• <strong>Admin duyệt bài &amp; phân xử hoàn 100% Xu</strong></td>
+        </tr>
+        <tr>
+          <td><strong>4. Bảo mật SĐT &amp; Đơn giản thao tác</strong><br/>(Nhóm 6, 8, 9)</td>
+          <td><strong>9 / 33 ý kiến (28%)</strong></td>
+          <td>• Chỉ cho Email, ngại lộ SĐT sợ spam (#6, #27 — khớp với 2/7 người trên Web bỏ trống SĐT)<br/>• Cần thao tác gọn hơn (#23)</td>
+          <td>• Bỏ bắt buộc SĐT, thêm <strong>Đăng nhập Google 1 chạm</strong><br/>• Ra mắt <strong>Bản Web App</strong> dùng ngay không cần cài đặt</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>3.3. Danh sách 7 khách hàng tự điền Form trên Web Deploy (MongoDB Atlas — Khớp bộ đếm 7/200)</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Mã Thẻ</th>
+          <th>Email đăng ký</th>
+          <th>Số điện thoại</th>
+          <th>Mối quan tâm</th>
+          <th>Thời gian điền (UTC+7)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>#KD-0001</strong></td><td>thienthien122004@gmail.com</td><td>0965489745</td><td>Đồ chơi vận động</td><td>02/10/2026 - 16:12</td></tr>
+        <tr><td><strong>#KD-0002</strong></td><td>hoanghoang010204@gmail.com</td><td>0946137284</td><td>Đồ chơi vận động</td><td>02/10/2026 - 16:33</td></tr>
+        <tr><td><strong>#KD-0003</strong></td><td>phananhtramy9114@gmail.com</td><td>(Không điền - Nhóm 6)</td><td>Đồ chơi vận động</td><td>15/10/2026 - 18:23 (Tuần 6)</td></tr>
+        <tr><td><strong>#KD-0004</strong></td><td>hoanganh28081994@gmail.com</td><td>0931121806</td><td>Đồ chơi vận động</td><td>15/10/2026 - 18:38 (Tuần 6)</td></tr>
+        <tr><td><strong>#KD-0005</strong></td><td>hoangtqbde180962@fpt.edu.vn</td><td>0963254712</td><td>Đồ chơi vận động</td><td>15/10/2026 - 19:10 (Tuần 6)</td></tr>
+        <tr><td><strong>#KD-0006</strong></td><td>ngochong249ksqp@gmail.com</td><td>0377309688</td><td>Sách Ehon</td><td>18/10/2026 - 13:09 (Tuần 6)</td></tr>
+        <tr><td><strong>#KD-0007</strong></td><td>tramvinh2010@gmail.com</td><td>(Không điền - Nhóm 6)</td><td>Đồ chơi vận động</td><td>18/10/2026 - 16:41 (Tuần 6)</td></tr>
+      </tbody>
+    </table>
+
+    <div class="script-box">
+      <p><strong>🎤 Lời nói Mục 3 (Phút 1:15 – 2:45):</strong></p>
+      <p>"Tiếp theo ở <strong>Mục 3</strong>: Qua 2 tuần, nhóm đã tiếp cận <strong>hơn 330 lượt khách hàng</strong> (~300 lượt mở trang Online và 30 phụ huynh gặp trực tiếp). Trong đó có <strong>30 phụ huynh (~10% lượng tiếp cận)</strong> trực tiếp dùng thử và trả lời phỏng vấn 5 bước: <strong>83,3% (25/30 mẹ)</strong> hiểu mô hình; <strong>63,3% (19/30 mẹ)</strong> để lại Email trong phiếu khảo sát (cộng với <strong>7 người</strong> tự điền trên Web Cloud là <strong>26 Leads</strong>); <strong>30% (9/30 mẹ)</strong> sẵn sàng nạp Xu ngay và <strong>46,7% (14/30 mẹ)</strong> đang phân vân. Từ 33 ý kiến đóng góp, nhóm gom thành 4 nhóm rào cản chính: (1) <strong>Giao nhận &amp; Niềm tin (30%)</strong>: ngại bảo vệ chung cư không cho người lạ vào và ngại gặp buổi tối nên cần điểm hẹn tại sảnh ban ngày; (2) <strong>Quy đổi Xu (24%)</strong>: ngại nhẩm 1 Xu = 10k và muốn đổi được Xu dư về tiền mặt; (3) <strong>Kiểm định 6h &amp; Vệ sinh (18%)</strong>: cần làm rõ 6 tiếng kiểm định và cấm bán bình sữa/núm ti cũ; (4) <strong>Bảo mật SĐT (28%)</strong>: các mẹ chỉ muốn để lại Email chứ ngại lộ SĐT sợ quảng cáo — khớp 100% với việc trên Web Cloud có 2/7 mẹ (#KD-0003, #KD-0007) chỉ điền Email và bỏ trống SĐT."</p>
+    </div>
+
+    <hr/>
+
+    <h2>5. Dự kiến KPIs đang theo dõi &amp; Đánh giá tính khả thi của dự án</h2>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Chỉ số KPI theo dõi (Tuần 5 – Tuần 6)</th>
+          <th>Mục tiêu (Target)</th>
+          <th>Kết quả thực tế (Actual)</th>
+          <th>Đánh giá Tính khả thi (Feasibility)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>1. Tiếp cận Online (Web Traffic)</strong></td>
+          <td>~250 – 300 lượt mở trang</td>
+          <td><strong>2.333 Requests (112,7 MB)</strong> ≈ <strong>~300+ lượt mở trang</strong></td>
+          <td><strong>Đạt ~120% KPI</strong> — Tuần 6 tăng gấp <strong>26,4 lần</strong> Tuần 5 với 0đ quảng cáo.</td>
+        </tr>
+        <tr>
+          <td><strong>2. Dùng thử &amp; Khảo sát sâu (Trial)</strong></td>
+          <td><strong>30 phụ huynh</strong> (~10% tiếp cận)</td>
+          <td><strong>30 / 30 phụ huynh hoàn tất</strong> (83,3% hiểu mô hình)</td>
+          <td><strong>Đạt 100% KPI</strong> — Nhu cầu đổi xe đẩy, nôi cũi, quần áo sơ sinh, đồ chơi rất lớn.</td>
+        </tr>
+        <tr>
+          <td><strong>3. Thu thập Email chờ mở App (Leads)</strong></td>
+          <td>≥ 50% người khảo sát</td>
+          <td><strong>63,3% (19/30 mẹ)</strong> Offline + <strong>7 người</strong> tự điền Web (<strong>26 Leads</strong>)</td>
+          <td><strong>Vượt KPI (+13,3%)</strong> — Chuyển đổi tốt khi không ép lộ SĐT/số căn hộ.</td>
+        </tr>
+        <tr>
+          <td><strong>4. Sẵn sàng Nạp Xu (Monetization)</strong></td>
+          <td>≥ 25% sẵn sàng nạp Xu</td>
+          <td><strong>30,0% (9/30) nạp ngay</strong> + <strong>46,7% (14/30) phân vân</strong></td>
+          <td><strong>Vượt KPI (+5%)</strong> — Tổng <strong>76,7%</strong> tiềm năng khi đã cho rút Xu dư về ngân hàng.</td>
+        </tr>
+        <tr>
+          <td><strong>5. Sẵn sàng Sản phẩm (Product)</strong></td>
+          <td>Khắc phục rào cản khách hàng</td>
+          <td><strong>Hoàn thiện 100% Web App + Mobile App + Server</strong></td>
+          <td><strong>Sẵn sàng vận hành thật:</strong> Mời 26 Leads lên đăng bài giao dịch thật ở tuần tới.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="script-box">
+      <p><strong>🎤 Lời nói Mục 5 (Phút 2:45 – 4:00):</strong></p>
+      <p>"Cuối cùng ở <strong>Mục 5 — Đối chiếu KPIs và đánh giá tính khả thi</strong>: Cả 5 chỉ số KPI của nhóm đều đạt và vượt mục tiêu: Tiếp cận đạt <strong>2.333 Requests (~300+ lượt mở trang)</strong>; Khảo sát dùng thử đạt <strong>30/30 phụ huynh (~10%)</strong>; Tỷ lệ để lại Email đạt <strong>63,3%</strong> (vượt mốc 50%); và Tỷ lệ sẵn sàng nạp Xu ngay đạt <strong>30%</strong> (vượt mốc 25%). Dự án được đánh giá có tính khả thi rất cao vì tệp <strong>46,7% phụ huynh đang phân vân</strong> đều cho biết sẽ yên tâm sử dụng khi giải quyết được 4 nhóm rào cản trên. Ngay trong Tuần 6, nhóm đã hoàn thiện cả <strong>Bản Web App và Mobile App</strong> tích hợp đủ: Hiển thị song song <strong>Giá Xu kèm VNĐ</strong>, cho phép <strong>Rút Xu về ngân hàng</strong>, <strong>Đăng nhập 1 chạm bằng Google</strong> không ép nhập SĐT, và <strong>AI gợi ý giá</strong>. KPI tuần tới của nhóm là mời <strong>26 khách hàng đã để lại Email</strong> trực tiếp đăng món đồ đầu tiên lên sàn để phát sinh giao dịch Ký Quỹ thực tế. Em xin cảm ơn thầy/cô và các bạn đã lắng nghe!"</p>
+    </div>
+  </div>
+
+  <script>
+    function copyToGoogleDocs() {
+      const content = document.getElementById('docContent');
+      const range = document.createRange();
+      range.selectNodeContents(content);
+      const selection = window.getSelection();
+      selection.removeAllRanges();
+      selection.addRange(range);
+      document.execCommand('copy');
+      selection.removeAllRanges();
+      const btn = document.getElementById('copyBtn');
+      btn.textContent = '✅ Đã Copy! Giờ hãy sang Google Docs bấm Ctrl + V';
+      btn.style.background = '#16a34a';
+      setTimeout(() => {
+        btn.textContent = '📋 Copy toàn bộ dán vào Google Docs';
+        btn.style.background = '#e05a36';
+      }, 4000);
+    }
+  </script>
+</body>
+</html>

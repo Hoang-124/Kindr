@@ -5,15 +5,18 @@
   "description": "Kindr - Nền tảng trao đổi đồ cho bé với Bảo Chứng Kép",
   "scripts": {
     "dev": "concurrently -n \"SERVER,CLIENT\" -c \"blue.bold,magenta.bold\" \"npm --prefix server run dev\" \"npm --prefix client start\"",
+    "dev:web": "concurrently -n \"SERVER,WEB\" -c \"blue.bold,cyan.bold\" \"npm --prefix server run dev\" \"npm --prefix web run dev\"",
     "client": "npm --prefix client start",
     "client:android": "npm --prefix client run android",
     "client:ios": "npm --prefix client run ios",
     "client:web": "npm --prefix client run web",
+    "web": "npm --prefix web run dev",
+    "web:build": "npm --prefix web run build",
     "server": "npm --prefix server run dev",
     "server:seed": "npm --prefix server run seed",
     "pitch": "npx serve pitch-page -p 3000",
-    "build": "echo 'Landing page ready'",
-    "typecheck": "npm --prefix client run typecheck && npm --prefix server run typecheck",
+    "build": "npm --prefix web run build",
+    "typecheck": "npm --prefix client run typecheck && npm --prefix server run typecheck && npm --prefix web run typecheck",
     "test": "npm --prefix server test"
   },
   "dependencies": {

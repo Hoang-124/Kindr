@@ -4,6 +4,8 @@ import { z } from 'zod';
 import rateLimit from 'express-rate-limit';
 import { Waitlist } from '../models/Waitlist';
 import { Counter } from '../models/Counter';
+import { User } from '../models/User';
+import { claimWaitlistReward } from './auth';
 import { sendWaitlistWelcomeEmail, isEmailConfigured } from '../services/emailService';
 import { requireAuth, requireAdmin, AuthRequest } from '../middleware/auth';
 import { ENV } from '../config/env';
@@ -232,6 +234,16 @@ router.post('/', waitlistSubmitLimiter, async (req: Request, res: Response): Pro
       consentVersion: '2026-10',
       xuClaimed: false,
     });
+
+    // If an active user account already exists with this email or phone, credit the 5 Xu immediately
+    if (isFounding) {
+      const userOr: any[] = [{ email }];
+      if (cleanPhone) userOr.push({ phone: cleanPhone });
+      const existingUser = await User.findOne({ $or: userOr }).select('_id').lean();
+      if (existingUser) {
+        await claimWaitlistReward(existingUser._id, email, cleanPhone);
+      }
+    }
 
     // Check if active email provider configured
     const emailConfigured = isEmailConfigured();

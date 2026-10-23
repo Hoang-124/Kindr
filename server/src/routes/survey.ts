@@ -12,6 +12,8 @@ import {
   SurveyCampaign,
 } from '../models/PopupSurvey';
 import { Counter } from '../models/Counter';
+import { User } from '../models/User';
+import { claimSurveyReward } from './auth';
 import { requireAuth, requireAdmin, AuthRequest } from '../middleware/auth';
 import { ENV } from '../config/env';
 
@@ -161,8 +163,14 @@ router.post('/', surveyLimiter, async (req: Request, res: Response): Promise<voi
     const { consent: _consent, ...answers } = parsed.data;
     const { campaign, phone } = answers;
 
-    const existing = await PopupSurvey.findOne({ campaign, phone }).lean<{ rewardCode: string; safeFeeWaiver: boolean }>();
+    const existing = await PopupSurvey.findOne({ campaign, phone }).lean<{ rewardCode: string; safeFeeWaiver: boolean; xuClaimed?: boolean }>();
     if (existing) {
+      if (!existing.xuClaimed) {
+        const existingUser = await User.findOne({ phone }).select('_id').lean();
+        if (existingUser) {
+          await claimSurveyReward(existingUser._id, phone);
+        }
+      }
       res.json({
         success: true,
         alreadySubmitted: true,
@@ -195,6 +203,11 @@ router.post('/', surveyLimiter, async (req: Request, res: Response): Promise<voi
       ip: clientIp,
       consentAt: new Date(),
     });
+
+    const existingUser = await User.findOne({ phone }).select('_id').lean();
+    if (existingUser) {
+      await claimSurveyReward(existingUser._id, phone);
+    }
 
     res.status(201).json({
       success: true,

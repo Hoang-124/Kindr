@@ -286,12 +286,18 @@ router.post('/:id/messages', requireAuth, async (req: AuthRequest, res: Response
         timestamp: message.createdAt.toISOString(),
       };
 
-      io.to(`chat:${chat._id.toString()}`).emit('message_received', {
-        chatId: chat._id.toString(),
-        message: messagePayload,
-      });
-
       const otherUserId = isBuyer ? chat.sellerId.toString() : chat.buyerId.toString();
+      const senderUserId = req.userId!;
+
+      // Deduplicated broadcast across the chat room and both participants' personal rooms (supports multi-device sync)
+      io.to(`chat:${chat._id.toString()}`)
+        .to(`user:${otherUserId}`)
+        .to(`user:${senderUserId}`)
+        .emit('message_received', {
+          chatId: chat._id.toString(),
+          message: messagePayload,
+        });
+
       io.to(`user:${otherUserId}`).emit('chat_updated', {
         chatId: chat._id.toString(),
         lastMessageText: content,
@@ -299,10 +305,11 @@ router.post('/:id/messages', requireAuth, async (req: AuthRequest, res: Response
         unreadCount: isBuyer ? chat.sellerUnreadCount : chat.buyerUnreadCount,
       });
 
-      // Deliver message payload to other user's personal channel in case they aren't inside the chat room
-      io.to(`user:${otherUserId}`).emit('message_received', {
+      io.to(`user:${senderUserId}`).emit('chat_updated', {
         chatId: chat._id.toString(),
-        message: messagePayload,
+        lastMessageText: content,
+        lastMessageTime: new Date(),
+        unreadCount: 0,
       });
     } catch (e) {
       // Socket emission is best-effort

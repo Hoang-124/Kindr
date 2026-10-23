@@ -161,6 +161,25 @@ export async function createEscrow(buyerId: string, productId: string): Promise<
   });
 
   emitToUser(seller._id.toString(), 'notification_new', notif);
+  emitToUser(seller._id.toString(), 'transaction_updated', {
+    transactionId: tx._id.toString(),
+    status: 'awaiting_handover',
+  });
+  emitToUser(buyer._id.toString(), 'transaction_updated', {
+    transactionId: tx._id.toString(),
+    status: 'awaiting_handover',
+  });
+  emitToUser(buyer._id.toString(), 'wallet_updated', {
+    xuBalance: updatedBuyer.xuBalance,
+    xuFrozen: updatedBuyer.xuFrozen,
+    reason: 'escrow_created',
+  });
+  postSystemChatMessage(
+    buyer._id,
+    seller._id,
+    product._id,
+    `🔒 [HỆ THỐNG KINDR] ${buyer.name} đã kích hoạt Ký Quỹ Bảo Chứng Kép (${product.price} Xu) cho món "${product.name}". Khi gặp mặt trực tiếp, Người mua vui lòng đọc Mã PIN 6 ký tự cho Người bán nhập để bắt đầu 6 giờ kiểm định.`
+  ).catch(() => {});
   sendPushToUser(seller._id, {
     title: notif.title,
     body: notif.body,
@@ -259,6 +278,22 @@ export async function confirmHandover(
     relatedTransactionId: tx._id,
   });
   emitToUser(tx.sellerId.toString(), 'notification_new', sellerNotif);
+  emitToUser(tx.buyerId.toString(), 'transaction_updated', {
+    transactionId: tx._id.toString(),
+    status: 'in_safeful_time',
+    safefulTimeExpiresAt: sixHoursLater.toISOString(),
+  });
+  emitToUser(tx.sellerId.toString(), 'transaction_updated', {
+    transactionId: tx._id.toString(),
+    status: 'in_safeful_time',
+    safefulTimeExpiresAt: sixHoursLater.toISOString(),
+  });
+  postSystemChatMessage(
+    tx.buyerId,
+    tx.sellerId,
+    tx.productId,
+    `⏱️ [HỆ THỐNG KINDR] Hai bên đã xác nhận bàn giao món "${tx.productName}" thành công! Khung 6 Giờ Kiểm Định tại nhà đã bắt đầu.`
+  ).catch(() => {});
   sendPushToUser(tx.sellerId, {
     title: sellerNotif.title,
     body: sellerNotif.body,
@@ -344,6 +379,26 @@ export async function finalizeTransaction(transactionId: string): Promise<{
     relatedTransactionId: tx._id,
   });
   emitToUser(tx.buyerId.toString(), 'notification_new', buyerNotif);
+  emitToUser(tx.sellerId.toString(), 'transaction_updated', {
+    transactionId: tx._id.toString(),
+    status: 'completed',
+  });
+  emitToUser(tx.buyerId.toString(), 'transaction_updated', {
+    transactionId: tx._id.toString(),
+    status: 'completed',
+  });
+  emitToUser(tx.sellerId.toString(), 'wallet_updated', {
+    reason: 'escrow_completed',
+  });
+  emitToUser(tx.buyerId.toString(), 'wallet_updated', {
+    reason: 'escrow_completed',
+  });
+  postSystemChatMessage(
+    tx.buyerId,
+    tx.sellerId,
+    tx.productId,
+    `🎉 [HỆ THỐNG KINDR] Giao dịch món "${tx.productName}" đã hoàn tất! Đã giải ngân ${totalXuToSeller} Xu vào ví Người bán.`
+  ).catch(() => {});
   sendPushToUser(tx.buyerId, {
     title: buyerNotif.title,
     body: buyerNotif.body,
@@ -760,3 +815,111 @@ export async function resolveDispute(
 
   return { success: true };
 }
+
+/**
+ * Cancel an escrow transaction BEFORE physical handover (status === 'awaiting_handover').
+ * Refunds 100% of buyer's frozen Xu (including promo Xu) and restores Product status to 'available'.
+ */
+export async function cancelEscrow(
+  transactionId: string,
+  userId: string,
+  reason?: string
+): Promise<{ success: boolean; error?: string }> {
+  const existingTx = await Transaction.findById(transactionId);
+  if (!existingTx) return { success: false, error: 'Giao dịch không tồn tại.' };
+
+  const isBuyer = existingTx.buyerId.toString() === userId;
+  const isSeller = existingTx.sellerId.toString() === userId;
+
+  if (!isBuyer && !isSeller) {
+    return { success: false, error: 'Chỉ người mua hoặc người bán mới có quyền hủy giao dịch này.' };
+  }
+
+  if (existingTx.status !== 'awaiting_handover') {
+    return {
+      success: false,
+      error: 'Chỉ có thể hủy giao dịch khi chưa bàn giao đồ (trạng thái Chờ bàn giao). Nếu đã nhận đồ, vui lòng sử dụng tính năng Khiếu nại.',
+    };
+  }
+
+  const cancelReason = reason?.trim() || (isBuyer ? 'Người mua chủ động hủy lịch hẹn bàn giao' : 'Người bán chủ động hủy lịch hẹn bàn giao');
+
+  const tx = await Transaction.findOneAndUpdate(
+    { _id: transactionId, status: 'awaiting_handover' },
+    {
+      $set: {
+        status: 'refunded',
+        disputeReason: cancelReason,
+        finalizedAt: new Date(),
+      },
+    },
+    { new: true }
+  );
+
+  if (!tx) {
+    return { success: false, error: 'Giao dịch không còn ở trạng thái chờ bàn giao.' };
+  }
+
+  const buyerPromo = (tx as any).buyerPromoXu || 0;
+  const updatedBuyer = await User.findByIdAndUpdate(
+    tx.buyerId,
+    {
+      $inc: {
+        xuBalance: tx.buyerEscrowFrozen,
+        xuFrozen: -tx.buyerEscrowFrozen,
+        welcomeCreditRemaining: buyerPromo,
+      },
+    },
+    { new: true }
+  );
+
+  // Restore product back to 'available' so other mothers can exchange it
+  await Product.findByIdAndUpdate(tx.productId, { $set: { status: 'available' } });
+
+  const buyerIdStr = tx.buyerId.toString();
+  const sellerIdStr = tx.sellerId.toString();
+  const txIdStr = tx._id.toString();
+  const actorLabel = isBuyer ? 'Người mua' : 'Người bán';
+
+  const buyerNotif = await Notification.create({
+    userId: tx.buyerId,
+    type: 'system',
+    title: 'Đã hủy giao dịch & Hoàn 100% Xu',
+    body: `${actorLabel} đã hủy giao dịch món "${tx.productName}" (${cancelReason}). Hệ thống đã hoàn trả ${tx.buyerEscrowFrozen} Xu về ví khả dụng của mẹ.`,
+    relatedTransactionId: tx._id,
+  });
+  emitToUser(buyerIdStr, 'notification_new', buyerNotif);
+
+  const sellerNotif = await Notification.create({
+    userId: tx.sellerId,
+    type: 'system',
+    title: 'Giao dịch đã được hủy trước bàn giao',
+    body: `${actorLabel} đã hủy giao dịch món "${tx.productName}" (${cancelReason}). Món đồ của mẹ đã được mở lại trạng thái Sẵn sàng trên sàn.`,
+    relatedTransactionId: tx._id,
+  });
+  emitToUser(sellerIdStr, 'notification_new', sellerNotif);
+
+  postSystemChatMessage(
+    tx.buyerId,
+    tx.sellerId,
+    tx.productId,
+    `🔄 [HỆ THỐNG KINDR] ${actorLabel} đã hủy giao dịch cho món "${tx.productName}" trước khi bàn giao (${cancelReason}). Đã hoàn trả 100% Xu bảo chứng cho Người mua và mở lại món đồ trên chợ.`
+  ).catch(() => {});
+
+  emitToUser(buyerIdStr, 'wallet_updated', {
+    xuBalance: updatedBuyer?.xuBalance,
+    xuFrozen: updatedBuyer?.xuFrozen,
+    reason: 'escrow_cancelled_refund',
+  });
+  emitToUser(buyerIdStr, 'transaction_updated', {
+    transactionId: txIdStr,
+    status: 'refunded',
+  });
+  emitToUser(sellerIdStr, 'transaction_updated', {
+    transactionId: txIdStr,
+    status: 'refunded',
+  });
+
+  return { success: true };
+}
+

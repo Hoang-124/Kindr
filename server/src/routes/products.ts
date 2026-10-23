@@ -438,10 +438,16 @@ router.put('/:id', validateObjectId('id'), requireAuth, async (req: AuthRequest,
     }
 
     // Only allow updating specific fields
-    const allowedFields = ['name', 'description', 'image', 'additionalImages', 'ageRange', 'locationName', 'wardId', 'districtId'];
+    const allowedFields = ['name', 'description', 'category', 'conditionLabel', 'image', 'additionalImages', 'ageRange', 'locationName', 'wardId', 'districtId'];
     for (const field of allowedFields) {
       if (req.body[field] !== undefined) {
         (product as any)[field] = req.body[field];
+      }
+    }
+    if (req.body.condition !== undefined && ['70', '80', '90'].includes(req.body.condition)) {
+      product.condition = req.body.condition;
+      if (!req.body.conditionLabel) {
+        product.conditionLabel = `Mới ${req.body.condition}%`;
       }
     }
 

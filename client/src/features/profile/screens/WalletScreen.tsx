@@ -39,9 +39,14 @@ export const WalletScreen = () => {
     tx => tx.buyerId === currentUser.id || tx.sellerId === currentUser.id
   );
 
-  // Active escrowed transactions (frozen/shipped/disputed)
+  // Active escrowed transactions
   const activeEscrowTx = userTransactions.filter(
-    tx => tx.status === 'frozen' || tx.status === 'shipped' || tx.status === 'disputed'
+    tx =>
+      tx.status === 'awaiting_handover' ||
+      tx.status === 'in_safeful_time' ||
+      tx.status === 'disputed' ||
+      tx.status === 'frozen' ||
+      tx.status === 'shipped'
   );
 
   // Calculate total frozen xu
@@ -81,7 +86,7 @@ export const WalletScreen = () => {
               <Lock size={16} color="rgba(255,255,255,0.8)" />
               <Text style={styles.escrowLabel}>Số dư tạm khóa (Bảo chứng)</Text>
             </View>
-            <Text style={styles.escrowValue}>{frozenBalance} Xu</Text>
+            <Text style={styles.escrowValue}>{currentUser.xuFrozen ?? frozenBalance} Xu</Text>
           </View>
         </Card>
 
@@ -126,6 +131,7 @@ export const WalletScreen = () => {
             {userTransactions.map((tx) => {
               const isBuyer = tx.buyerId === currentUser.id;
               const isCompleted = tx.status === 'completed';
+              const isRefunded = tx.status === 'refunded';
               
               // Decide styling based on role & status
               let amountText = '';
@@ -144,12 +150,28 @@ export const WalletScreen = () => {
                   icon = <ArrowDownLeft size={18} color={COLORS.primary} />;
                 }
                 statusLabel = 'Hoàn tất';
+              } else if (isRefunded) {
+                if (isBuyer) {
+                  amountText = `+${tx.buyerEscrowFrozen} Xu`;
+                  amountColor = COLORS.success;
+                  icon = <ArrowDownLeft size={18} color={COLORS.success} />;
+                  statusLabel = 'Đã hoàn Xu';
+                } else {
+                  amountText = `-${tx.sellerEscrowFrozen} Xu`;
+                  amountColor = COLORS.error;
+                  icon = <ArrowUpRight size={18} color={COLORS.error} />;
+                  statusLabel = 'Khấu trừ cọc';
+                }
               } else {
                 amountText = isBuyer ? `-${tx.buyerEscrowFrozen} Xu` : `-${tx.sellerEscrowFrozen} Xu`;
                 amountColor = COLORS.outline;
                 icon = <Lock size={18} color={COLORS.outline} />;
-                statusLabel = tx.status === 'frozen' ? 'Tạm khóa' : 
-                              tx.status === 'shipped' ? 'Chờ kiểm hàng' : 'Tranh chấp';
+                statusLabel =
+                  tx.status === 'awaiting_handover' || tx.status === 'frozen'
+                    ? 'Chờ bàn giao'
+                    : tx.status === 'in_safeful_time' || tx.status === 'shipped'
+                    ? '6h kiểm định'
+                    : 'Tranh chấp';
               }
 
               return (

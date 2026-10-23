@@ -35,7 +35,7 @@ const STATIONS: Station[] = [
     phone: '0905 111 222',
     hours: '08:00 - 17:30 (T2 - CN)',
     itemsCount: 15,
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBTJXjwnrZcS6bvtvVGWEi2tgqKWa9ZUihAtwHbDF5FHJ6SmwQevjLyXaXIrAtfdPiKD0X3NB8cA7OmXnMoPqOEk0J7Vubi1HernCg11sY9BXocOex5JLEZlMpLtn5Z6FLZ67i3zxsXqXPy0mNHhJcwSB0R298mme5On8ZjDhGjixiZ6XkIxFJo7NCSfiC0XQ9WTCxEsnlR60ZCnXJLogV3_crlu1T1VegS8ic5aO3E0KNBGS6AlejNMMEUv80oWWGHpKasRTY4RXuw',
+    image: 'https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=800&auto=format&fit=crop&q=80',
   },
   {
     id: 'st_2',
@@ -45,7 +45,7 @@ const STATIONS: Station[] = [
     phone: '0905 333 444',
     hours: '08:00 - 17:30 (T2 - CN)',
     itemsCount: 8,
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCHLm7v1mrikcPBK320JSApGO85xBmOXjFLT-iASjSP3fSYUgLSRRmzhHjw9zxoQbzRtW_96jdRqPdEB2bgCgOF6oNN4yqphf9Her3dQ_YkIZjANWvtkDjfhO3rKTfJEEUssk6PG20LxQRsxuLLxf5GfCXqn_RpKi2ImHQc-ZqgkicshoXurNiiEZzReeFfdkb_O7-ulQ1G_ArHN8q-8QJN92rwT2Cio4oSD59_H5htNFcQj3beQ99lH0DLyzcjgYJ27i08arcO4ahC',
+    image: 'https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?w=800&auto=format&fit=crop&q=80',
   },
   {
     id: 'st_3',
@@ -55,7 +55,7 @@ const STATIONS: Station[] = [
     phone: '0905 555 666',
     hours: '08:30 - 17:00 (T2 - T7)',
     itemsCount: 12,
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDEymEhhOzQ94Wb75d90oia7jzn7EW3FrnOW69g4JOwMYfnuF8a5ZkOPeLopzXieitglTsgKuVJav8unMM6YsBFfr5CSqZZ3lCsFzz0aAqzNfwkCPXLDCeU8XYzTcw4CO1_ldMzPO6Yx5T_-zuXnRIGUxZwfeCAsM8UCgUmwWlCtvS-VGpM2Vz3lZ1D3l6OHRhMnWQAvNc2QQccfdEAfp2FGTYfu-FT8j7PAb2d2-IXGqBuqkKYMTDjzCzwAY_JE_c8ArC19QFm3Api',
+    image: 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=800&auto=format&fit=crop&q=80',
   },
 ];
 

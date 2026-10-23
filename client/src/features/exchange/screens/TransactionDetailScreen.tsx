@@ -99,8 +99,21 @@ export const TransactionDetailScreen = () => {
     };
 
     loadTx();
+    const syncTimer = setInterval(async () => {
+      if (!isMounted) return;
+      try {
+        const data = await transactionService.getTransactionById(id);
+        if (isMounted && data) {
+          setLocalTx(data);
+          dispatch(upsertTransaction(data));
+        }
+      } catch {
+        // Ignore silent sync error
+      }
+    }, 5000);
     return () => {
       isMounted = false;
+      clearInterval(syncTimer);
     };
   }, [id, dispatch]);
 

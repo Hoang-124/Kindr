@@ -14,6 +14,7 @@ import { Transaction } from '../models/Transaction';
 import { WithdrawRequest } from '../models/WithdrawRequest';
 import { Notification } from '../models/Notification';
 import { Waitlist } from '../models/Waitlist';
+import { PopupSurvey } from '../models/PopupSurvey';
 import { requireAuth, AuthRequest } from '../middleware/auth';
 import { ENV } from '../config/env';
 import { registerPushToken, unregisterPushToken } from '../services/pushNotificationService';
@@ -27,10 +28,17 @@ const RegisterSchema = z.object({
   name: z.string().min(2, 'Tên phải ít nhất 2 ký tự'),
   phone: z.string().regex(/^0\d{9}$/, 'Số điện thoại Việt Nam không hợp lệ (VD: 0905123456)'),
   password: z.string().min(6, 'Mật khẩu phải ít nhất 6 ký tự'),
-  email: z.string().email().optional(),
+  email: z.string().email().optional().or(z.literal('')),
   districtId: z.string().optional(),
   districtName: z.string().optional(),
   addressDetail: z.string().optional(),
+  location: z
+    .object({
+      districtId: z.string().optional(),
+      districtName: z.string().optional(),
+      addressDetail: z.string().optional(),
+    })
+    .optional(),
 });
 
 const LoginSchema = z.object({
@@ -103,6 +111,50 @@ export async function claimWaitlistReward(
   return true;
 }
 
+/**
+ * Claim 5 Xu Pop-up Survey Reward if user matches an unclaimed PopupSurvey entry by phone.
+ * Increments xuBalance (+5) and welcomeCreditRemaining (+5). Non-withdrawable.
+ */
+export async function claimSurveyReward(
+  userId: any,
+  phone?: string | null
+): Promise<boolean> {
+  if (!phone || !phone.trim()) return false;
+  const cleanPhone = phone.trim().replace(/[\s.-]/g, '');
+
+  const entry = await PopupSurvey.findOneAndUpdate(
+    {
+      phone: cleanPhone,
+      xuClaimed: { $ne: true },
+    },
+    {
+      $set: {
+        xuClaimed: true,
+        xuClaimedAt: new Date(),
+        claimedByUserId: userId,
+      },
+    },
+    { new: true }
+  );
+
+  if (!entry) return false;
+
+  const bonusXu = entry.starterXu || 5;
+  await User.updateOne(
+    { _id: userId },
+    { $inc: { xuBalance: bonusXu, welcomeCreditRemaining: bonusXu } }
+  );
+
+  await Notification.create({
+    userId,
+    type: 'welcome_credit',
+    title: `Mẹ nhận ${bonusXu} Xu Khảo Sát Tân Thủ!`,
+    body: `Cảm ơn Mẹ đã hoàn thành khảo sát Kindr (Mã: ${entry.rewardCode}). ${bonusXu} Xu Tân Thủ đã được cộng vào ví của Mẹ!`,
+  });
+
+  return true;
+}
+
 // ---- Routes ----
 
 /**
@@ -118,35 +170,30 @@ router.post('/register', async (req: AuthRequest, res: Response): Promise<void> 
       return;
     }
 
-    const { name, phone, password, email, districtId, districtName, addressDetail } = parsed.data;
+    const { name, phone, password, email, districtId, districtName, addressDetail, location } = parsed.data;
+    const cleanEmail = email && email.trim() ? email.trim().toLowerCase() : undefined;
 
-    // 2. Check if email is Gmail (Gmail should use Google Sign-In)
-    if (email && /@(gmail|googlemail)\.com$/i.test(email.trim())) {
-      res.status(400).json({ error: 'Địa chỉ Gmail vui lòng sử dụng nút "Đăng ký nhanh với Google". Ô này chỉ dành cho Outlook, Yahoo, iCloud hoặc email khác.' });
-      return;
-    }
-
-    // 3. Check duplicate phone
+    // 2. Check duplicate phone
     const existing = await User.findOne({ phone });
     if (existing) {
       res.status(409).json({ error: 'Số điện thoại này đã được đăng ký.' });
       return;
     }
 
-    // 4. Check duplicate email (if provided)
-    if (email) {
-      const existingEmail = await User.findOne({ email: email.trim().toLowerCase() });
+    // 3. Check duplicate email (if provided)
+    if (cleanEmail) {
+      const existingEmail = await User.findOne({ email: cleanEmail });
       if (existingEmail) {
         res.status(409).json({ error: 'Địa chỉ email này đã được đăng ký trong hệ thống. Vui lòng dùng email khác hoặc đăng nhập.' });
         return;
       }
     }
 
-    // 5. Hash password
+    // 4. Hash password
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(password, salt);
 
-    const hasEmail = Boolean(email && email.trim());
+    const hasEmail = Boolean(cleanEmail);
     let activationOtp: string | undefined;
     let activationOtpExpires: Date | undefined;
 
@@ -155,19 +202,19 @@ router.post('/register', async (req: AuthRequest, res: Response): Promise<void> 
       activationOtpExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
     }
 
-    // 6. Create user with 10 Xu welcome credit
+    // 5. Create user with 10 Xu welcome credit
     const user = await User.create({
       name,
       phone,
-      email: email ? email.trim().toLowerCase() : undefined,
+      email: cleanEmail,
       passwordHash,
       isActivated: !hasEmail,
       activationOtp,
       activationOtpExpires,
       location: {
-        districtId: districtId || '',
-        districtName: districtName || '',
-        addressDetail: addressDetail || '',
+        districtId: location?.districtId || districtId || '',
+        districtName: location?.districtName || districtName || '',
+        addressDetail: location?.addressDetail || addressDetail || '',
       },
       xuBalance: 10,
       welcomeCreditRemaining: 10,
@@ -180,6 +227,15 @@ router.post('/register', async (req: AuthRequest, res: Response): Promise<void> 
     });
 
     const claimedWaitlist = await claimWaitlistReward(user._id, user.email, user.phone);
+    if (claimedWaitlist) {
+      user.xuBalance += 5;
+      user.welcomeCreditRemaining += 5;
+    }
+    const claimedSurvey = await claimSurveyReward(user._id, user.phone);
+    if (claimedSurvey) {
+      user.xuBalance += 5;
+      user.welcomeCreditRemaining += 5;
+    }
 
     // 7. Create welcome notification
     await Notification.create({
@@ -198,6 +254,7 @@ router.post('/register', async (req: AuthRequest, res: Response): Promise<void> 
         needsActivation: true,
         email: user.email,
         foundingMemberClaimed: claimedWaitlist,
+        ...(ENV.NODE_ENV !== 'production' ? { devOtp: activationOtp } : {}),
       });
       return;
     }
@@ -285,6 +342,7 @@ router.post('/login', async (req: AuthRequest, res: Response): Promise<void> => 
         error: 'Tài khoản của bạn chưa được kích hoạt. Kindr đã gửi mã xác thực kích hoạt 6 số về email của bạn. Vui lòng kích hoạt tài khoản để tiếp tục.',
         needsActivation: true,
         email: user.email,
+        ...(ENV.NODE_ENV !== 'production' ? { devOtp: activationOtp } : {}),
       });
       return;
     }
@@ -592,6 +650,13 @@ router.post('/google', async (req: AuthRequest, res: Response): Promise<void> =>
       if (claimedWaitlist) {
         user.xuBalance += 5;
         user.welcomeCreditRemaining += 5;
+      }
+      const claimedSurvey = await claimSurveyReward(user._id, user.phone);
+      if (claimedSurvey) {
+        user.xuBalance += 5;
+        user.welcomeCreditRemaining += 5;
+      }
+      if (claimedWaitlist || claimedSurvey) {
         await user.save();
       }
     } else {
@@ -649,6 +714,11 @@ const UpdateProfileSchema = z.object({
   districtId: z.string().optional(),
   districtName: z.string().optional(),
   addressDetail: z.string().optional(),
+  location: z.object({
+    districtId: z.string().optional(),
+    districtName: z.string().optional(),
+    addressDetail: z.string().optional(),
+  }).optional(),
 });
 
 /**
@@ -663,7 +733,10 @@ router.put('/profile', requireAuth, async (req: AuthRequest, res: Response): Pro
       return;
     }
 
-    const { name, phone, avatar, bio, districtId, districtName, addressDetail } = parsed.data;
+    const { name, phone, avatar, bio, districtId, districtName, addressDetail, location } = parsed.data;
+    const nextDistrictId = districtId !== undefined ? districtId : location?.districtId;
+    const nextDistrictName = districtName !== undefined ? districtName : location?.districtName;
+    const nextAddressDetail = addressDetail !== undefined ? addressDetail : location?.addressDetail;
 
     const user = await User.findById(req.userId);
     if (!user) {
@@ -685,11 +758,11 @@ router.put('/profile', requireAuth, async (req: AuthRequest, res: Response): Pro
     if (avatar !== undefined) user.avatar = avatar;
     if (bio !== undefined) user.bio = bio;
 
-    if (districtId !== undefined || districtName !== undefined || addressDetail !== undefined) {
+    if (nextDistrictId !== undefined || nextDistrictName !== undefined || nextAddressDetail !== undefined) {
       user.location = {
-        districtId: districtId !== undefined ? districtId : (user.location?.districtId || ''),
-        districtName: districtName !== undefined ? districtName : (user.location?.districtName || ''),
-        addressDetail: addressDetail !== undefined ? addressDetail : (user.location?.addressDetail || ''),
+        districtId: nextDistrictId !== undefined ? nextDistrictId : (user.location?.districtId || ''),
+        districtName: nextDistrictName !== undefined ? nextDistrictName : (user.location?.districtName || ''),
+        addressDetail: nextAddressDetail !== undefined ? nextAddressDetail : (user.location?.addressDetail || ''),
       };
     }
 
@@ -851,7 +924,7 @@ router.post('/forgot-password', async (req: AuthRequest, res: Response): Promise
 
     const result = await sendPasswordResetOtpEmail(user.email || email, user.name, otp);
 
-    if (!result.success) {
+    if (!result.success && ENV.NODE_ENV === 'production') {
       res.status(500).json({ error: result.error || 'Không thể gửi email. Vui lòng kiểm tra lại cấu hình email hệ thống.' });
       return;
     }
@@ -859,6 +932,7 @@ router.post('/forgot-password', async (req: AuthRequest, res: Response): Promise
     res.json({
       message: 'Mã xác thực OTP đã được gửi đến email của bạn. Vui lòng kiểm tra hộp thư (cả thư mục Rác/Spam).',
       email: user.email,
+      ...(ENV.NODE_ENV !== 'production' ? { devOtp: otp } : {}),
     });
   } catch (error: any) {
     console.error('Forgot password error:', error);
@@ -1072,6 +1146,11 @@ router.post('/activate-account', async (req: AuthRequest, res: Response): Promis
       user.xuBalance += 5;
       user.welcomeCreditRemaining += 5;
     }
+    const claimedSurvey = await claimSurveyReward(user._id, user.phone);
+    if (claimedSurvey) {
+      user.xuBalance += 5;
+      user.welcomeCreditRemaining += 5;
+    }
 
     // Generate tokens for immediate login
     const accessToken = generateAccessToken(user._id.toString(), user.role);
@@ -1126,12 +1205,15 @@ router.post('/resend-activation', async (req: AuthRequest, res: Response): Promi
     await user.save();
 
     const result = await sendAccountActivationOtpEmail(user.email || email, user.name, otp);
-    if (!result.success) {
+    if (!result.success && ENV.NODE_ENV === 'production') {
       res.status(500).json({ error: result.error || 'Không thể gửi email kích hoạt.' });
       return;
     }
 
-    res.json({ message: 'Mã kích hoạt mới đã được gửi đến email của bạn.' });
+    res.json({
+      message: 'Mã kích hoạt mới đã được gửi đến email của bạn.',
+      ...(ENV.NODE_ENV !== 'production' ? { devOtp: otp } : {}),
+    });
   } catch (error: any) {
     console.error('Resend activation error:', error);
     res.status(500).json({ error: 'Lỗi hệ thống khi gửi lại mã kích hoạt.' });

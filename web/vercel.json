@@ -1,0 +1,17 @@
+{
+  "version": 2,
+  "rewrites": [
+    {
+      "source": "/pitch-page",
+      "destination": "/pitch-page/index.html"
+    },
+    {
+      "source": "/pitch-page/(.*)",
+      "destination": "/pitch-page/$1"
+    },
+    {
+      "source": "/((?!pitch-page/).*)",
+      "destination": "/index.html"
+    }
+  ]
+}

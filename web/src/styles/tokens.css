@@ -1,0 +1,136 @@
+/* d:\Kindr\web\src\styles\tokens.css */
+/* Strictly tokenized from DESIGN.md — Supports Light & Dark Mode */
+
+:root,
+[data-theme="light"] {
+  /* Semantic Brand Palette */
+  --color-primary: #FF6B6B;
+  --color-primary-dark: #E05353;
+  --color-primary-light: #FFE8E8;
+  --color-primary-soft: #FFE8E8;
+  --color-secondary: #4ECDC4;
+  --color-secondary-dark: #3AB5AC;
+  --color-secondary-light: #E0F7F5;
+  --color-secondary-soft: #E0F7F5;
+  --color-accent: #FFD166;
+
+  /* Surfaces & Canvas */
+  --color-bg: #F8F9FA;
+  --color-card: #FFFFFF;
+  --color-surface: #FFFFFF;
+  --color-surface-elevated: #FFFFFF;
+  --color-surface-subtle: #F1F3F5;
+  --color-surface-hover: #E9ECEF;
+
+  /* Typography Colors (WCAG AA compliant) */
+  --color-text: #1A1D20;
+  --color-text-primary: #1A1D20;
+  --color-text-muted: #6C757D;
+  --color-text-secondary: #6C757D;
+  --color-text-tertiary: #868E96;
+  --color-text-dim: #ADB5BD;
+  --color-on-primary: #FFFFFF;
+  --color-text-white: #FFFFFF;
+
+  /* Borders & Overlays */
+  --border: rgba(0, 0, 0, 0.08);
+  --color-border: rgba(0, 0, 0, 0.08);
+  --color-border-strong: rgba(0, 0, 0, 0.14);
+  --color-divider: rgba(0, 0, 0, 0.06);
+  --color-overlay: rgba(0, 0, 0, 0.45);
+  --color-scrim: rgba(26, 29, 32, 0.6);
+
+  /* Status & Currency */
+  --color-success: #2EC4B6;
+  --color-success-bg: #E0F7F5;
+  --color-warning: #FF9F1C;
+  --color-warning-bg: #FFF8E1;
+  --color-error: #E63946;
+  --color-error-bg: #FFE8E8;
+  --color-danger: #E63946;
+  --color-danger-bg: #FFE8E8;
+  --color-info: #3AB5AC;
+  --color-info-bg: #E0F7F5;
+
+  --color-coin-gold: #FFD166;
+  --color-coin-orange: #FF9F1C;
+  --color-coin-bg: #FFF8E1;
+  --color-coin-text: #8C6500;
+
+  --color-admin-badge: #FFE8E8;
+  --color-admin-badge-text: #B73232;
+
+  /* Typography Stack */
+  --font-sans: 'Plus Jakarta Sans', 'Inter', 'Be Vietnam Pro', system-ui, -apple-system, sans-serif;
+
+  /* Spacing Grid (4pt / 8pt) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+
+  /* Border Radius Tokens */
+  --radius-sm: 8px;
+  --radius-default: 16px;
+  --radius-md: 20px;
+  --radius-lg: 28px;
+  --radius-xl: 40px;
+  --radius-full: 9999px;
+  --radius-pill: 9999px;
+
+  /* Ambient Shadows */
+  --shadow-soft: 0 2px 10px rgba(26, 29, 32, 0.04);
+  --shadow-card: 0 6px 24px rgba(26, 29, 32, 0.06);
+  --shadow-elevated: 0 14px 36px rgba(26, 29, 32, 0.12);
+  --shadow-btn: 0 6px 16px rgba(255, 107, 107, 0.26);
+}
+
+[data-theme="dark"] {
+  --color-primary: #FF7B7B;
+  --color-primary-dark: #FF9494;
+  --color-primary-light: rgba(255, 107, 107, 0.16);
+  --color-primary-soft: rgba(255, 107, 107, 0.16);
+  --color-secondary: #4ECDC4;
+  --color-secondary-dark: #72DFD7;
+  --color-secondary-light: rgba(78, 205, 196, 0.16);
+  --color-secondary-soft: rgba(78, 205, 196, 0.16);
+  --color-accent: #FFD166;
+
+  --color-bg: #121518;
+  --color-card: #1C2025;
+  --color-surface: #1C2025;
+  --color-surface-elevated: #252A30;
+  --color-surface-subtle: #252A30;
+  --color-surface-hover: #2E343B;
+
+  --color-text: #F1F3F5;
+  --color-text-primary: #F1F3F5;
+  --color-text-muted: #9BA3AE;
+  --color-text-secondary: #9BA3AE;
+  --color-text-tertiary: #7D8692;
+  --color-text-dim: #6C757D;
+  --color-on-primary: #FFFFFF;
+  --color-text-white: #FFFFFF;
+
+  --border: rgba(255, 255, 255, 0.1);
+  --color-border: rgba(255, 255, 255, 0.1);
+  --color-border-strong: rgba(255, 255, 255, 0.18);
+  --color-divider: rgba(255, 255, 255, 0.07);
+  --color-overlay: rgba(0, 0, 0, 0.65);
+  --color-scrim: rgba(0, 0, 0, 0.75);
+
+  --color-success-bg: rgba(46, 196, 182, 0.16);
+  --color-warning-bg: rgba(255, 159, 28, 0.16);
+  --color-error-bg: rgba(230, 57, 70, 0.18);
+  --color-danger: #FF6B6B;
+  --color-danger-bg: rgba(230, 57, 70, 0.18);
+  --color-info: #4ECDC4;
+  --color-info-bg: rgba(78, 205, 196, 0.16);
+  --color-coin-bg: rgba(255, 209, 102, 0.15);
+  --color-coin-text: #FFD166;
+}

@@ -41,8 +41,10 @@ export function setupChatHandler(io: Server, socket: Socket, userId: string): vo
    * Client emits: 'join_chat' { chatId: string }
    * Server: joins socket to chat room
    */
-  socket.on('join_chat', async ({ chatId }: { chatId: string }) => {
+  socket.on('join_chat', async (payload: { chatId?: string } | string) => {
     try {
+      const chatId = typeof payload === 'string' ? payload : payload?.chatId;
+      if (!chatId) return;
       const chat = await findChatSafe(chatId, userId);
       if (!chat) return;
 
@@ -123,31 +125,30 @@ export function setupChatHandler(io: Server, socket: Socket, userId: string): vo
         timestamp: message.createdAt.toISOString(),
       };
 
-      // Broadcast to all other participants in the canonical chat room (prevents echoing back to sender)
-      socket.broadcast.to(`chat:${chat._id.toString()}`).emit('message_received', {
-        chatId: chat._id.toString(),
-        message: messagePayload,
-      });
-
-      // Confirm back to the sender socket with matching tempId
-      socket.emit('message_received', {
-        chatId: chat._id.toString(),
-        message: messagePayload,
-        tempId,
-      });
-
-      // Also notify the other user's personal room (for chat list update & bottom tab badge)
       const otherUserId = isBuyer ? chat.sellerId.toString() : chat.buyerId.toString();
+
+      // Deduplicated broadcast to chat room and both users' personal rooms (supports 2+ phones per user & cross-device sync)
+      io.to(`chat:${chat._id.toString()}`)
+        .to(`user:${otherUserId}`)
+        .to(`user:${userId}`)
+        .emit('message_received', {
+          chatId: chat._id.toString(),
+          message: messagePayload,
+          tempId,
+        });
+
       io.to(`user:${otherUserId}`).emit('chat_updated', {
         chatId: chat._id.toString(),
         lastMessageText: content.trim(),
         lastMessageTime: new Date(),
         unreadCount: isBuyer ? chat.sellerUnreadCount : chat.buyerUnreadCount,
       });
-      // Deliver message payload to other user's personal channel in case they aren't inside the chat room
-      io.to(`user:${otherUserId}`).emit('message_received', {
+
+      io.to(`user:${userId}`).emit('chat_updated', {
         chatId: chat._id.toString(),
-        message: messagePayload,
+        lastMessageText: content.trim(),
+        lastMessageTime: new Date(),
+        unreadCount: 0,
       });
 
       // Send background Push Notification
@@ -175,7 +176,8 @@ export function setupChatHandler(io: Server, socket: Socket, userId: string): vo
     socket.to(`chat:${chatId}`).emit('user_stop_typing', { chatId, userId });
   });
 
-  socket.on('leave_chat', ({ chatId }: { chatId: string }) => {
-    socket.leave(`chat:${chatId}`);
+  socket.on('leave_chat', (payload: { chatId?: string } | string) => {
+    const chatId = typeof payload === 'string' ? payload : payload?.chatId;
+    if (chatId) socket.leave(`chat:${chatId}`);
   });
 }

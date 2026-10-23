@@ -28,6 +28,9 @@ export interface IPopupSurvey extends Document {
   /** First N respondents get Safe Fee waived on their first 3 posts */
   safeFeeWaiver: boolean;
   orderNumber: number;
+  xuClaimed: boolean;
+  xuClaimedAt?: Date | null;
+  claimedByUserId?: mongoose.Types.ObjectId | null;
   ip?: string;
   consentAt: Date;
   consentVersion: string;
@@ -48,6 +51,9 @@ const PopupSurveySchema = new Schema<IPopupSurvey>(
     starterXu: { type: Number, required: true, default: 5 },
     safeFeeWaiver: { type: Boolean, default: false },
     orderNumber: { type: Number, required: true },
+    xuClaimed: { type: Boolean, default: false },
+    xuClaimedAt: { type: Date, default: null },
+    claimedByUserId: { type: Schema.Types.ObjectId, ref: 'User', default: null },
     ip: { type: String, default: '' },
     consentAt: { type: Date, default: Date.now },
     consentVersion: { type: String, default: '2026-10' },

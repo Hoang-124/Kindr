@@ -45,8 +45,15 @@ export const AdminDashboardScreen = () => {
     postsCount: products.length,
     disputesCount: transactions.filter(t => t.status === 'disputed').length,
     withdrawsCount: withdrawRequests.filter(r => r.status === 'pending').length,
+    reportsCount: 0,
     totalEscrow: transactions
-      .filter(t => t.status === 'frozen' || t.status === 'shipped')
+      .filter(t =>
+        t.status === 'awaiting_handover' ||
+        t.status === 'in_safeful_time' ||
+        t.status === 'disputed' ||
+        t.status === 'frozen' ||
+        t.status === 'shipped'
+      )
       .reduce((sum, t) => sum + t.buyerEscrowFrozen + t.sellerEscrowFrozen, 0),
   };
 
@@ -61,6 +68,7 @@ export const AdminDashboardScreen = () => {
             postsCount: res.data.totalProducts ?? res.data.postsCount ?? localStats.postsCount,
             disputesCount: res.data.pendingDisputes ?? res.data.disputesCount ?? localStats.disputesCount,
             withdrawsCount: res.data.pendingWithdraws ?? res.data.withdrawsCount ?? localStats.withdrawsCount,
+            reportsCount: res.data.openReports ?? localStats.reportsCount,
             totalEscrow: res.data.escrowLockedXu ?? res.data.totalEscrow ?? localStats.totalEscrow,
           });
         }
@@ -77,7 +85,7 @@ export const AdminDashboardScreen = () => {
     { name: 'Giám sát Giao dịch', icon: Activity, route: 'ManageTransactions', count: transactions.length, color: COLORS.warning, bg: COLORS.tertiaryContainer },
     { name: 'Xử lý Tranh chấp', icon: ShieldAlert, route: 'ManageDisputes', count: stats.disputesCount, color: COLORS.error, bg: COLORS.errorContainer, badge: true },
     { name: 'Duyệt Rút tiền', icon: Wallet, route: 'ManageWithdraws', count: stats.withdrawsCount, color: COLORS.secondary, bg: COLORS.secondaryLight, badge: true },
-    { name: 'Báo cáo Vi phạm', icon: AlertOctagon, route: 'ManageReports', count: 1, color: COLORS.primaryDark, bg: COLORS.primaryLight },
+    { name: 'Báo cáo Vi phạm', icon: AlertOctagon, route: 'ManageReports', count: stats.reportsCount, color: COLORS.primaryDark, bg: COLORS.primaryLight },
     { name: 'Danh sách Chờ Landing Page', icon: UserCheck, route: 'ManageWaitlist', count: null, color: COLORS.primary, bg: COLORS.primaryLight },
   ];
 

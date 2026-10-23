@@ -145,6 +145,81 @@ router.get('/orders/:orderCode/status', requireAuth, async (req: AuthRequest, re
 });
 
 /**
+ * POST /api/wallet/orders/:orderCode/simulate-webhook
+ * Simulate an incoming SePay / Casso / VietQR bank transfer webhook for a pending TopupOrder (demo/dev mode).
+ */
+router.post('/orders/:orderCode/simulate-webhook', requireAuth, async (req: AuthRequest, res: Response): Promise<void> => {
+  if (!ENV.ENABLE_DEMO_TOPUP || ENV.NODE_ENV === 'production') {
+    res.status(403).json({ error: 'Chức năng mô phỏng Webhook ngân hàng chỉ khả dụng ở môi trường Demo/Dev.' });
+    return;
+  }
+  try {
+    const order = await TopupOrder.findOne({ orderCode: req.params.orderCode, userId: req.userId });
+    if (!order) {
+      res.status(404).json({ error: 'Không tìm thấy đơn nạp VietQR.' });
+      return;
+    }
+
+    if (order.status === 'completed') {
+      res.status(200).json({
+        success: true,
+        message: 'Đơn nạp Xu này đã được hoàn tất trước đó.',
+        order,
+      });
+      return;
+    }
+
+    const completedOrder = await TopupOrder.findOneAndUpdate(
+      { _id: order._id, status: { $in: ['pending', 'expired'] } },
+      {
+        $set: {
+          status: 'completed',
+          transactionRef: `SEPAY_SIM_${Date.now()}`,
+          gatewayName: 'sepay_simulated',
+          completedAt: new Date(),
+        },
+      },
+      { new: true }
+    );
+
+    if (!completedOrder) {
+      res.status(400).json({ error: 'Đơn nạp Xu đã được xử lý.' });
+      return;
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      completedOrder.userId,
+      { $inc: { xuBalance: completedOrder.xuAmount } },
+      { new: true }
+    );
+
+    const notif = await Notification.create({
+      userId: completedOrder.userId,
+      type: 'xu_released',
+      title: 'Nạp Xu VietQR Tự Động Thành Công!',
+      body: `Ngân hàng vừa xác nhận chuyển khoản ${completedOrder.vndAmount.toLocaleString('vi-VN')}đ (${completedOrder.memo}). Đã cộng +${completedOrder.xuAmount} Xu vào ví của mẹ!`,
+    });
+    emitToUser(completedOrder.userId.toString(), 'notification_new', notif);
+
+    emitToUser(completedOrder.userId.toString(), 'topup_success', {
+      orderCode: completedOrder.orderCode,
+      xuAmount: completedOrder.xuAmount,
+      newBalance: updatedUser?.xuBalance,
+    });
+
+    res.json({
+      success: true,
+      message: `Webhook Ngân hàng xác nhận thành công! Đã cộng +${completedOrder.xuAmount} Xu vào ví.`,
+      order: completedOrder,
+      newBalance: updatedUser?.xuBalance,
+    });
+  } catch (error) {
+    console.error('Simulate webhook error:', error);
+    res.status(500).json({ error: 'Lỗi hệ thống khi mô phỏng Webhook.' });
+  }
+});
+
+/**
  * POST /api/wallet/topup
  * Immediate simulated topup (useful for test/demo mode)
  */
@@ -471,11 +546,12 @@ router.post('/withdraw', requireAuth, async (req: AuthRequest, res: Response): P
  */
 router.get('/history', requireAuth, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const withdrawRequests = await WithdrawRequest.find({ userId: req.userId })
-      .sort({ createdAt: -1 })
-      .lean();
+    const [withdrawRequests, topupOrders] = await Promise.all([
+      WithdrawRequest.find({ userId: req.userId }).sort({ createdAt: -1 }).lean(),
+      TopupOrder.find({ userId: req.userId }).sort({ createdAt: -1 }).limit(30).lean(),
+    ]);
 
-    res.json({ withdrawRequests });
+    res.json({ withdrawRequests, topupOrders });
   } catch (error) {
     console.error('Get wallet history error:', error);
     res.status(500).json({ error: 'Lỗi hệ thống khi lấy lịch sử ví.' });

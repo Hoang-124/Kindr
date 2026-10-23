@@ -4,12 +4,14 @@
 node_modules/
 client/node_modules/
 server/node_modules/
+web/node_modules/
 
 # Expo & Web builds
 .expo/
 client/.expo/
 dist/
 client/dist/
+web/dist/
 web-build/
 client/web-build/
 expo-env.d.ts
@@ -45,6 +47,8 @@ server/.env
 server/.env*.local
 client/.env
 client/.env*.local
+web/.env
+web/.env*.local
 
 # typescript
 *.tsbuildinfo

@@ -268,4 +268,29 @@ router.post('/:id/dispute', validateObjectId('id'), requireAuth, async (req: Aut
   }
 });
 
+/**
+ * POST /api/transactions/:id/cancel
+ * Cancel transaction while in 'awaiting_handover' -> Refunds 100% buyer Xu and restores Product to 'available'
+ */
+router.post('/:id/cancel', validateObjectId('id'), requireAuth, async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const id = req.params.id as string;
+    const reason = typeof req.body?.reason === 'string' ? req.body.reason : undefined;
+    const result = await escrowService.cancelEscrow(id, req.userId!, reason);
+
+    if (!result.success) {
+      res.status(400).json({ error: result.error });
+      return;
+    }
+
+    res.json({
+      message: 'Đã hủy giao dịch thành công! 100% Xu bảo chứng đã được hoàn trả về ví khả dụng.',
+    });
+  } catch (error) {
+    console.error('Cancel transaction error:', error);
+    res.status(500).json({ error: 'Lỗi hệ thống khi hủy giao dịch.' });
+  }
+});
+
 export default router;
+

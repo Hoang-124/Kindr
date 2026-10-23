@@ -173,8 +173,22 @@ export const ChatDetailScreen = () => {
     socketService.on('user_typing', handleUserTyping);
     socketService.on('user_stop_typing', handleUserStopTyping);
 
+    const syncInterval = setInterval(async () => {
+      if (!isMounted) return;
+      try {
+        const targetId = chatRef.current?.id || chatId;
+        const { messages } = await chatService.getMessages(targetId);
+        if (isMounted && messages) {
+          dispatch(setChatMessages({ chatId: targetId, messages }));
+        }
+      } catch {
+        // Ignore silent sync error
+      }
+    }, 4000);
+
     return () => {
       isMounted = false;
+      clearInterval(syncInterval);
       if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
       socketService.emit('leave_chat', { chatId });
       const currentChat = chatRef.current;

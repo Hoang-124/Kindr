@@ -60,6 +60,7 @@ export const ProfileScreen = () => {
   const dispatch = useAppDispatch();
 
   const currentUser = useAppSelector((state) => state.auth.currentUser);
+  const products = useAppSelector((state) => state.home.products);
   const transactions = useAppSelector((state) => state.exchange.transactions);
   const ratings = useAppSelector((state) => state.rating.ratings);
 
@@ -78,6 +79,10 @@ export const ProfileScreen = () => {
   if (currentUser.role === 'admin') {
     return <AdminProfileView />;
   }
+
+  const myActivePostsCount = products.filter(
+    p => p.sellerId === currentUser.id && (p.status === 'available' || p.status === 'escrow')
+  ).length;
 
   const userTransactions = transactions.filter(
     tx => tx.buyerId === currentUser.id || tx.sellerId === currentUser.id
@@ -219,7 +224,7 @@ export const ProfileScreen = () => {
           {/* Mini Stats Summary Bar */}
           <View style={styles.statsBar}>
             <View style={styles.statItem}>
-              <Text style={styles.statValue}>0</Text>
+              <Text style={styles.statValue}>{myActivePostsCount}</Text>
               <Text style={styles.statLabel}>Đồ đang đăng</Text>
             </View>
             <View style={styles.statDivider} />

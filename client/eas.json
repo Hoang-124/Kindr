@@ -9,12 +9,18 @@
     },
     "preview": {
       "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_API_HOST": "https://kindr-backend-rl2t.onrender.com"
+      },
       "android": {
         "buildType": "apk"
       }
     },
     "production": {
-      "autoIncrement": true
+      "autoIncrement": true,
+      "env": {
+        "EXPO_PUBLIC_API_HOST": "https://kindr-backend-rl2t.onrender.com"
+      }
     }
   },
   "submit": {

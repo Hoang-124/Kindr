@@ -105,7 +105,7 @@ export const ManageWithdrawsScreen = () => {
           onPress={() => setActiveTab('pending')}
         >
           <Text style={[styles.tabText, activeTab === 'pending' && styles.tabTextActive]}>
-            Chờ duyệt ({withdrawRequests.filter(r => r.status === 'pending').length})
+            Chờ duyệt ({allRequests.filter(r => r.status === 'pending').length})
           </Text>
         </TouchableOpacity>
 
@@ -114,7 +114,7 @@ export const ManageWithdrawsScreen = () => {
           onPress={() => setActiveTab('approved')}
         >
           <Text style={[styles.tabText, activeTab === 'approved' && styles.tabTextActive]}>
-            Đã duyệt ({withdrawRequests.filter(r => r.status === 'approved').length})
+            Đã duyệt ({allRequests.filter(r => r.status === 'approved').length})
           </Text>
         </TouchableOpacity>
 
@@ -123,7 +123,7 @@ export const ManageWithdrawsScreen = () => {
           onPress={() => setActiveTab('rejected')}
         >
           <Text style={[styles.tabText, activeTab === 'rejected' && styles.tabTextActive]}>
-            Từ chối ({withdrawRequests.filter(r => r.status === 'rejected').length})
+            Từ chối ({allRequests.filter(r => r.status === 'rejected').length})
           </Text>
         </TouchableOpacity>
       </View>
@@ -141,14 +141,14 @@ export const ManageWithdrawsScreen = () => {
         renderItem={({ item }) => {
           const rate = 10000;
           const rawCash = item.xuAmount * rate;
-          const payout = rawCash * 0.98; // Deduct 2% fee
+          const payout = rawCash * 0.90; // Deduct 10% fee
 
           return (
             <View style={styles.requestCard}>
               <View style={styles.cardHeader}>
                 <Coins size={16} color={COLORS.tertiary} />
                 <Text style={styles.requestAmount}>{item.xuAmount} Xu</Text>
-                <Text style={styles.cashVal}>(Thực nhận: {formatNumber(payout)}đ)</Text>
+                <Text style={styles.cashVal}>(Thực nhận: {formatNumber(payout)}đ • Phí 10%)</Text>
               </View>
 
               <Text style={styles.requester}>Mẹ bỉm yêu cầu: {item.userName}</Text>

@@ -52,15 +52,19 @@ export const ManageTransactionsScreen = () => {
   const getStatusConfig = (status: string) => {
     switch (status) {
       case 'completed':
-        return { label: 'Hoàn tất', color: COLORS.primary, bg: COLORS.primaryLight, icon: CheckCircle2 };
+        return { label: 'Hoàn tất', color: COLORS.success, bg: COLORS.secondaryLight, icon: CheckCircle2 };
+      case 'awaiting_handover':
       case 'frozen':
-        return { label: 'Đang khóa xu', color: COLORS.outline, bg: COLORS.surfaceContainer, icon: Lock };
+        return { label: 'Chờ bàn giao', color: COLORS.outline, bg: COLORS.surfaceContainer, icon: Lock };
+      case 'in_safeful_time':
       case 'shipped':
-        return { label: 'Chờ nhận hàng', color: COLORS.warning, bg: COLORS.tertiaryContainer, icon: Lock };
+        return { label: 'Bảo chứng 6h', color: COLORS.warning, bg: COLORS.tertiaryContainer, icon: Lock };
       case 'disputed':
         return { label: 'Tranh chấp', color: COLORS.error, bg: COLORS.errorContainer, icon: ShieldAlert };
+      case 'refunded':
+        return { label: 'Đã hoàn Xu', color: COLORS.primary, bg: COLORS.primaryLight, icon: CheckCircle2 };
       default:
-        return { label: 'Không rõ', color: COLORS.outline, bg: COLORS.surfaceContainer, icon: Lock };
+        return { label: 'Đang xử lý', color: COLORS.outline, bg: COLORS.surfaceContainer, icon: Lock };
     }
   };
 

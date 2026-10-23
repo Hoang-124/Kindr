@@ -1,18 +1,19 @@
 {
   "version": 2,
-  "cleanUrls": true,
+  "buildCommand": "cd web && npm install && npm run build",
+  "outputDirectory": "web/dist",
   "rewrites": [
     {
-      "source": "/",
+      "source": "/pitch-page",
       "destination": "/pitch-page/index.html"
     },
     {
-      "source": "/email-preview",
-      "destination": "/pitch-page/email-preview.html"
+      "source": "/pitch-page/(.*)",
+      "destination": "/pitch-page/$1"
     },
     {
-      "source": "/(.*)",
-      "destination": "/pitch-page/$1"
+      "source": "/((?!pitch-page/).*)",
+      "destination": "/index.html"
     }
   ]
 }

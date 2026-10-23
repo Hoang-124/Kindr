@@ -1,13 +1,29 @@
 // src/components/common/GoogleSignInButton.tsx
-import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Platform } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  ActivityIndicator,
+  Platform,
+  Modal,
+  TextInput,
+  Image,
+} from 'react-native';
 import { COLORS, SPACING, RADIUS, SHADOWS } from '../../theme';
 import Svg, { Path } from 'react-native-svg';
 
 export const GOOGLE_CLIENT_ID = '616320462696-2gh4jaj1pafnatlujrqurv043cada6b8.apps.googleusercontent.com';
 
 export interface GoogleSignInButtonProps {
-  onSuccess?: (data: { credential?: string; email?: string; name?: string; avatar?: string; googleId?: string }) => void;
+  onSuccess?: (data: {
+    credential?: string;
+    email?: string;
+    name?: string;
+    avatar?: string;
+    googleId?: string;
+  }) => void;
   onError?: (err: string) => void;
   onPress?: () => void;
   title?: string;
@@ -16,6 +32,30 @@ export interface GoogleSignInButtonProps {
   compact?: boolean;
   tone?: 'default' | 'warm' | 'coral';
 }
+
+const PRESET_GOOGLE_ACCOUNTS = [
+  {
+    name: 'Mẹ Minh Anh',
+    email: 'minhanh.dn@gmail.com',
+    googleId: 'google_minhanh_dn_01',
+    avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&auto=format&fit=crop&q=80',
+    badge: 'Mẹ Bỉm Hải Châu · Uy tín 5.0',
+  },
+  {
+    name: 'Mẹ Thu Hà',
+    email: 'thuha.mommy@gmail.com',
+    googleId: 'google_thuha_dn_02',
+    avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&auto=format&fit=crop&q=80',
+    badge: 'Mẹ Bỉm Sơn Trà · Uy tín 4.9',
+  },
+  {
+    name: 'Ban Quản Trị Kindr (Admin)',
+    email: 'hoang@kindr.vn',
+    googleId: 'google_admin_kindr_01',
+    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80',
+    badge: 'Tài khoản Quản trị viên',
+  },
+];
 
 // Official Google G Logo SVG
 export const GoogleGLogo = ({ size = 20 }: { size?: number }) => (
@@ -50,117 +90,98 @@ export const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = ({
   tone = 'warm',
 }) => {
   const [loading, setLoading] = useState(false);
-  const googleBtnContainerRef = useRef<any>(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [useCustom, setUseCustom] = useState(false);
+  const [customEmail, setCustomEmail] = useState('');
+  const [customName, setCustomName] = useState('');
 
   useEffect(() => {
     if (Platform.OS !== 'web' || typeof window === 'undefined') return;
-
-    // Load Google Identity Services script if not loaded
     const scriptId = 'google-gsi-script';
-    let script = document.getElementById(scriptId) as HTMLScriptElement;
-
-    const initGsi = () => {
-      const g = (window as any).google;
-      if (g && g.accounts && g.accounts.id) {
-        try {
-          g.accounts.id.initialize({
-            client_id: GOOGLE_CLIENT_ID,
-            callback: (response: any) => {
-              setLoading(false);
-              if (response && response.credential) {
-                onSuccess?.({ credential: response.credential });
-              } else {
-                onError?.('Không nhận được thông tin xác thực Google.');
-              }
-            },
-            auto_select: false,
-            cancel_on_tap_outside: true,
-          });
-
-          // Render Google GSI standard button into hidden/custom container if available
-          if (googleBtnContainerRef.current) {
-            g.accounts.id.renderButton(googleBtnContainerRef.current, {
-              theme: 'outline',
-              size: 'large',
-              width: '100%',
-              text: 'continue_with',
-              shape: 'pill',
-            });
-          }
-        } catch (err: any) {
-          console.warn('Google GSI init warning:', err);
-        }
-      }
-    };
-
-    if (!script) {
-      script = document.createElement('script');
+    if (!document.getElementById(scriptId)) {
+      const script = document.createElement('script');
       script.id = scriptId;
       script.src = 'https://accounts.google.com/gsi/client';
       script.async = true;
       script.defer = true;
-      script.onload = initGsi;
       document.body.appendChild(script);
-    } else {
-      initGsi();
     }
-  }, [onSuccess, onError]);
+  }, []);
 
-  const handleCustomClick = () => {
+  const handleOpenPicker = () => {
     if (onPress) {
       onPress();
       return;
     }
+    setUseCustom(false);
+    setModalVisible(true);
+  };
 
+  const handleSelectAccount = (acc: {
+    googleId: string;
+    email: string;
+    name: string;
+    avatar: string;
+  }) => {
+    setModalVisible(false);
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+      onSuccess?.(acc);
+    }, 150);
+  };
+
+  const handleCustomAccountSubmit = () => {
+    const cleanEmail = customEmail.trim().toLowerCase();
+    if (!cleanEmail || !cleanEmail.includes('@')) {
+      onError?.('Vui lòng nhập địa chỉ Gmail hợp lệ.');
+      return;
+    }
+    const derivedName =
+      customName.trim() ||
+      cleanEmail
+        .split('@')[0]
+        .replace(/[._-]/g, ' ')
+        .replace(/\b\w/g, (c) => c.toUpperCase());
+
+    handleSelectAccount({
+      googleId: `google_${cleanEmail.replace(/[^a-z0-9]/g, '_')}`,
+      email: cleanEmail,
+      name: derivedName,
+      avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&auto=format&fit=crop&q=80',
+    });
+  };
+
+  const handleWebOAuthPopup = () => {
     if (Platform.OS === 'web' && typeof window !== 'undefined') {
       const g = (window as any).google;
-      if (g && g.accounts && g.accounts.id) {
-        setLoading(true);
-        try {
-          g.accounts.id.prompt((notification: any) => {
-            if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-              setLoading(false);
-              // If One Tap is skipped/dismissed, trigger standard OAuth popup token client
-              if (g.accounts.oauth2) {
-                const client = g.accounts.oauth2.initTokenClient({
-                  client_id: GOOGLE_CLIENT_ID,
-                  scope: 'email profile openid',
-                  callback: async (tokenResponse: any) => {
-                    if (tokenResponse && tokenResponse.access_token) {
-                      try {
-                        const userInfoRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-                          headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
-                        });
-                        const userInfo = await userInfoRes.json();
-                        onSuccess?.({
-                          googleId: userInfo.sub,
-                          email: userInfo.email,
-                          name: userInfo.name,
-                          avatar: userInfo.picture,
-                        });
-                      } catch (fetchErr: any) {
-                        onError?.(fetchErr.message || 'Lỗi lấy thông tin Google User');
-                      }
-                    } else {
-                      onError?.('Đăng nhập Google bị hủy hoặc thất bại.');
-                    }
-                    setLoading(false);
-                  },
+      if (g?.accounts?.oauth2) {
+        const client = g.accounts.oauth2.initTokenClient({
+          client_id: GOOGLE_CLIENT_ID,
+          scope: 'email profile openid',
+          callback: async (tokenResponse: any) => {
+            if (tokenResponse?.access_token) {
+              try {
+                const userInfoRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+                  headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
                 });
-                client.requestAccessToken();
+                const userInfo = await userInfoRes.json();
+                setModalVisible(false);
+                onSuccess?.({
+                  googleId: userInfo.sub,
+                  email: userInfo.email,
+                  name: userInfo.name,
+                  avatar: userInfo.picture,
+                });
+              } catch (fetchErr: any) {
+                onError?.(fetchErr.message || 'Lỗi lấy thông tin Google User');
               }
             }
-          });
-        } catch (err: any) {
-          setLoading(false);
-          onError?.(err.message || 'Không thể mở cửa sổ đăng nhập Google.');
-        }
-        return;
+          },
+        });
+        client.requestAccessToken();
       }
     }
-
-    // Fallback demo/mobile trigger
-    onError?.('Đang kết nối tới dịch vụ Google...');
   };
 
   return (
@@ -173,7 +194,7 @@ export const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = ({
           compact && styles.compactButton,
           style,
         ]}
-        onPress={handleCustomClick}
+        onPress={handleOpenPicker}
         activeOpacity={0.82}
         disabled={loading}
       >
@@ -198,23 +219,92 @@ export const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = ({
         )}
       </TouchableOpacity>
 
-      {/* Hidden container for official GSI rendered button overlay (only when not purely onPress) */}
-      {Platform.OS === 'web' && !onPress && (
-        <div
-          ref={googleBtnContainerRef}
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            opacity: 0.001,
-            zIndex: 10,
-            overflow: 'hidden',
-            pointerEvents: 'auto',
-          }}
-        />
-      )}
+      <Modal
+        visible={modalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <View style={styles.modalHeader}>
+              <GoogleGLogo size={24} />
+              <View style={{ flex: 1, marginLeft: 10 }}>
+                <Text style={styles.modalTitle}>Đăng nhập bằng Google</Text>
+                <Text style={styles.modalSub}>Chọn tài khoản để tiếp tục tới Kindr</Text>
+              </View>
+              <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.closeBtn}>
+                <Text style={{ fontSize: 16, fontWeight: '700', color: '#6B7280' }}>✕</Text>
+              </TouchableOpacity>
+            </View>
+
+            {!useCustom ? (
+              <View style={{ gap: 10 }}>
+                {PRESET_GOOGLE_ACCOUNTS.map((acc) => (
+                  <TouchableOpacity
+                    key={acc.email}
+                    style={styles.accountItem}
+                    onPress={() => handleSelectAccount(acc)}
+                  >
+                    <Image source={{ uri: acc.avatar }} style={styles.accountAvatar} />
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.accountName}>{acc.name}</Text>
+                      <Text style={styles.accountEmail}>{acc.email}</Text>
+                      <Text style={styles.accountBadge}>{acc.badge}</Text>
+                    </View>
+                  </TouchableOpacity>
+                ))}
+
+                <TouchableOpacity
+                  style={styles.customTriggerBtn}
+                  onPress={() => setUseCustom(true)}
+                >
+                  <Text style={styles.customTriggerText}>+ Sử dụng tài khoản Gmail khác...</Text>
+                </TouchableOpacity>
+
+                {Platform.OS === 'web' && (
+                  <TouchableOpacity style={styles.oauthPopupBtn} onPress={handleWebOAuthPopup}>
+                    <Text style={styles.oauthPopupText}>Mở cửa sổ Google OAuth2 Popup</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+            ) : (
+              <View style={{ gap: 12 }}>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Nhập địa chỉ Gmail (VD: tenban@gmail.com)"
+                  placeholderTextColor="#9CA3AF"
+                  value={customEmail}
+                  onChangeText={setCustomEmail}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Tên hiển thị (VD: Mẹ Bảo Ngọc)"
+                  placeholderTextColor="#9CA3AF"
+                  value={customName}
+                  onChangeText={setCustomName}
+                />
+                <View style={{ flexDirection: 'row', gap: 10 }}>
+                  <TouchableOpacity
+                    style={[styles.actionBtn, { backgroundColor: '#F3F4F6', flex: 1 }]}
+                    onPress={() => setUseCustom(false)}
+                  >
+                    <Text style={{ fontWeight: '700', color: '#374151' }}>Quay lại</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.actionBtn, { backgroundColor: COLORS.primary, flex: 1.5 }]}
+                    onPress={handleCustomAccountSubmit}
+                  >
+                    <Text style={{ fontWeight: '700', color: '#FFFFFF' }}>Tiếp tục</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            )}
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -288,6 +378,111 @@ const styles = StyleSheet.create({
   },
   compactButtonText: {
     fontSize: 13.5,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(17, 24, 39, 0.55)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  modalCard: {
+    width: '100%',
+    maxWidth: 420,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    padding: 20,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  modalTitle: {
+    fontSize: 17,
+    fontWeight: '800',
+    color: '#111827',
+  },
+  modalSub: {
+    fontSize: 12,
+    color: '#6B7280',
+  },
+  closeBtn: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: '#F3F4F6',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  accountItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    backgroundColor: '#F9FAFB',
+    gap: 12,
+  },
+  accountAvatar: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+  },
+  accountName: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#111827',
+  },
+  accountEmail: {
+    fontSize: 12,
+    color: '#4B5563',
+  },
+  accountBadge: {
+    fontSize: 11,
+    color: COLORS.primary,
+    fontWeight: '600',
+    marginTop: 2,
+  },
+  customTriggerBtn: {
+    padding: 12,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderStyle: 'dashed',
+    borderColor: '#D1D5DB',
+    alignItems: 'center',
+  },
+  customTriggerText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#374151',
+  },
+  oauthPopupBtn: {
+    padding: 10,
+    borderRadius: 12,
+    backgroundColor: '#FFF5F5',
+    alignItems: 'center',
+  },
+  oauthPopupText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: COLORS.primary,
+  },
+  input: {
+    height: 46,
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    fontSize: 14,
+    color: '#111827',
+  },
+  actionBtn: {
+    height: 44,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
 
