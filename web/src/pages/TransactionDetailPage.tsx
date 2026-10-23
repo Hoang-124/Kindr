@@ -487,16 +487,9 @@ export const TransactionDetailPage: React.FC = () => {
         ))}
       </div>
 
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: id ? 'minmax(290px, 360px) 1fr' : '1fr',
-          gap: 24,
-          alignItems: 'start',
-        }}
-      >
+      <div className={`kw-tx-layout ${id ? 'has-selected-tx' : ''}`}>
         {/* TRANSACTION LIST */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div className="kw-tx-list-pane" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           {filteredList.length === 0 ? (
             <div className="kw-card" style={{ padding: 32, textAlign: 'center' }}>
               <ShieldCheck size={36} color="var(--color-secondary)" style={{ marginBottom: 10 }} />
@@ -590,7 +583,16 @@ export const TransactionDetailPage: React.FC = () => {
 
         {/* TRANSACTION DETAIL PANEL */}
         {id && (
-          <div className="kw-card" style={{ padding: 28 }}>
+          <div className="kw-card" style={{ padding: 24 }}>
+            <button
+              type="button"
+              onClick={() => navigate('/transactions')}
+              className="kw-btn kw-btn-outline kw-btn-sm kw-chat-mobile-back"
+              style={{ marginBottom: 14, width: 'fit-content' }}
+            >
+              <ArrowLeft size={16} />
+              Danh sách giao dịch
+            </button>
             {loadingTx && !selectedTx ? (
               <div style={{ padding: 40, textAlign: 'center', color: 'var(--color-text-secondary)' }}>
                 Đang tải chi tiết giao dịch...
@@ -665,14 +667,7 @@ export const TransactionDetailPage: React.FC = () => {
                 </div>
 
                 {/* 4-Step Stepper */}
-                <div
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(4, 1fr)',
-                    gap: 10,
-                    margin: '20px 0',
-                  }}
-                >
+                <div className="kw-escrow-steps">
                   {[
                     { step: 1, title: '1. Ký quỹ 2 chiều' },
                     { step: 2, title: '2. Trao tay PIN/QR' },

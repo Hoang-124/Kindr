@@ -221,7 +221,7 @@ export const Navbar: React.FC = () => {
             {currentUser ? (
               <>
                 {/* Post Item CTA */}
-                <Link to="/post" className="kw-btn kw-btn-primary kw-btn-sm">
+                <Link to="/post" className="kw-btn kw-btn-primary kw-btn-sm kw-hide-mobile">
                   <PlusCircle size={16} />
                   <span>Đăng đồ</span>
                 </Link>
@@ -231,17 +231,18 @@ export const Navbar: React.FC = () => {
                   to="/wallet"
                   className="kw-badge kw-badge-coin"
                   style={{
-                    minHeight: 42,
-                    padding: '0 14px',
-                    fontSize: 14,
+                    minHeight: 38,
+                    padding: '0 10px',
+                    fontSize: 13,
                     cursor: 'pointer',
+                    whiteSpace: 'nowrap',
                   }}
                   title="Ví Xu của mẹ"
                 >
-                  <KindrCoin size={18} />
+                  <KindrCoin size={16} />
                   <span>{currentUser.xuBalance} Xu</span>
                   {currentUser.xuFrozen > 0 && (
-                    <span style={{ fontSize: 12, opacity: 0.8 }}>
+                    <span className="kw-hide-mobile" style={{ fontSize: 12, opacity: 0.8 }}>
                       (Khóa {currentUser.xuFrozen})
                     </span>
                   )}
@@ -256,10 +257,10 @@ export const Navbar: React.FC = () => {
                       setNotifOpen((prev) => !prev);
                       refreshNotifications();
                     }}
-                    style={{ width: 42, padding: 0, position: 'relative' }}
+                    style={{ width: 38, minHeight: 38, padding: 0, position: 'relative' }}
                     aria-label="Thông báo"
                   >
-                    <Bell size={18} />
+                    <Bell size={17} />
                     {unreadNotifCount > 0 && (
                       <span
                         style={{
@@ -269,14 +270,14 @@ export const Navbar: React.FC = () => {
                           backgroundColor: 'var(--color-error)',
                           color: 'var(--color-on-primary)',
                           borderRadius: 'var(--radius-full)',
-                          minWidth: 20,
-                          height: 20,
-                          fontSize: 11,
+                          minWidth: 18,
+                          height: 18,
+                          fontSize: 10,
                           fontWeight: 800,
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          padding: '0 5px',
+                          padding: '0 4px',
                         }}
                       >
                         {unreadNotifCount > 9 ? '9+' : unreadNotifCount}
@@ -287,11 +288,11 @@ export const Navbar: React.FC = () => {
                   {notifOpen && (
                     <div
                       style={{
-                        position: 'absolute',
-                        right: 0,
-                        top: 50,
-                        width: 360,
-                        maxHeight: 460,
+                        position: 'fixed',
+                        right: 12,
+                        top: 62,
+                        width: 'min(360px, calc(100vw - 24px))',
+                        maxHeight: '72vh',
                         overflowY: 'auto',
                         backgroundColor: 'var(--color-card)',
                         border: '1px solid var(--color-border-strong)',
@@ -406,6 +407,7 @@ export const Navbar: React.FC = () => {
                 {/* Profile Button */}
                 <Link
                   to="/profile"
+                  className="kw-hide-mobile"
                   style={{
                     display: 'inline-flex',
                     alignItems: 'center',
@@ -414,10 +416,10 @@ export const Navbar: React.FC = () => {
                     borderRadius: 'var(--radius-full)',
                     border: '1px solid var(--color-border)',
                     backgroundColor: 'var(--color-surface-subtle)',
-                    minHeight: 42,
+                    minHeight: 38,
                   }}
                 >
-                  <Avatar uri={currentUser.avatar} name={currentUser.name} size={32} />
+                  <Avatar uri={currentUser.avatar} name={currentUser.name} size={30} />
                   <span
                     style={{
                       fontSize: 13,
@@ -440,18 +442,18 @@ export const Navbar: React.FC = () => {
                     navigate('/login');
                   }}
                   title="Đăng xuất"
-                  style={{ width: 40, padding: 0 }}
+                  style={{ width: 36, minHeight: 36, padding: 0 }}
                 >
-                  <LogOut size={17} />
+                  <LogOut size={16} />
                 </button>
               </>
             ) : (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <Link to="/login" className="kw-btn kw-btn-outline kw-btn-sm">
-                  <UserIcon size={16} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <Link to="/login" className="kw-btn kw-btn-outline kw-btn-sm" style={{ padding: '0 12px', minHeight: 36 }}>
+                  <UserIcon size={15} />
                   <span>Đăng nhập</span>
                 </Link>
-                <Link to="/login?tab=register" className="kw-btn kw-btn-primary kw-btn-sm">
+                <Link to="/login?tab=register" className="kw-btn kw-btn-primary kw-btn-sm kw-hide-mobile">
                   <span>Nhận 10 Xu Chào Mừng</span>
                 </Link>
               </div>
@@ -459,6 +461,83 @@ export const Navbar: React.FC = () => {
           </div>
         </div>
       </header>
+
+      {/* Mobile Native-Style Bottom Tab Bar (<= 860px) */}
+      <nav className="kw-mobile-bottom-nav" aria-label="Điều hướng di động">
+        <NavLink
+          to="/"
+          end
+          className={({ isActive }) => `kw-mobile-tab ${isActive ? 'active' : ''}`}
+        >
+          <Home size={19} />
+          <span>Khám phá</span>
+        </NavLink>
+
+        <NavLink
+          to="/search"
+          className={({ isActive }) => `kw-mobile-tab ${isActive ? 'active' : ''}`}
+        >
+          <Search size={19} />
+          <span>Bản đồ</span>
+        </NavLink>
+
+        <NavLink
+          to="/post"
+          className={({ isActive }) => `kw-mobile-tab ${isActive ? 'active' : ''}`}
+          style={{ color: 'var(--color-primary)' }}
+        >
+          <PlusCircle size={22} />
+          <span style={{ fontWeight: 800 }}>Đăng đồ</span>
+        </NavLink>
+
+        <NavLink
+          to="/transactions"
+          className={({ isActive }) => `kw-mobile-tab ${isActive ? 'active' : ''}`}
+        >
+          <Lock size={19} />
+          <span>Ký quỹ</span>
+        </NavLink>
+
+        <NavLink
+          to="/chat"
+          className={({ isActive }) => `kw-mobile-tab ${isActive ? 'active' : ''}`}
+        >
+          <div style={{ position: 'relative', display: 'inline-flex' }}>
+            <MessageCircle size={19} />
+            {unreadChatCount > 0 && (
+              <span
+                style={{
+                  position: 'absolute',
+                  top: -5,
+                  right: -8,
+                  backgroundColor: 'var(--color-error)',
+                  color: '#fff',
+                  borderRadius: 99,
+                  minWidth: 16,
+                  height: 16,
+                  fontSize: 9,
+                  fontWeight: 800,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '0 4px',
+                }}
+              >
+                {unreadChatCount > 9 ? '9+' : unreadChatCount}
+              </span>
+            )}
+          </div>
+          <span>Tin nhắn</span>
+        </NavLink>
+
+        <NavLink
+          to={currentUser?.role === 'admin' ? '/admin' : currentUser ? '/profile' : '/login'}
+          className={({ isActive }) => `kw-mobile-tab ${isActive ? 'active' : ''}`}
+        >
+          {currentUser?.role === 'admin' ? <Shield size={19} /> : <UserIcon size={19} />}
+          <span>{currentUser?.role === 'admin' ? 'Admin' : 'Cá nhân'}</span>
+        </NavLink>
+      </nav>
 
       {/* 3-Slide Interactive Onboarding Modal (matching Mobile OnboardingScreen.tsx) */}
       {onboardingOpen && (

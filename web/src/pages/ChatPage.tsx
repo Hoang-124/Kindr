@@ -11,6 +11,7 @@ import {
   ImagePlus,
   Flag,
   KeyRound,
+  ArrowLeft,
   X,
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
@@ -51,7 +52,7 @@ export const ChatPage: React.FC = () => {
 
   // Auto-select first chat on desktop if none selected
   useEffect(() => {
-    if (!chatId && chats.length > 0) {
+    if (!chatId && chats.length > 0 && window.innerWidth > 860) {
       navigate(`/chat/${chats[0].id}`, { replace: true });
     }
   }, [chatId, chats, navigate]);
@@ -305,32 +306,24 @@ export const ChatPage: React.FC = () => {
   };
 
   return (
-    <div className="kw-container" style={{ padding: '24px 16px 48px' }}>
-      <div className="kw-chat-layout">
+    <div className="kw-container kw-chat-page-wrap" style={{ padding: '12px 0 24px' }}>
+      <div className={`kw-chat-layout ${chatId ? 'has-active-chat' : ''}`}>
         {/* LEFT SIDEBAR: CHAT LIST */}
-        <div
-          style={{
-            borderRight: '1px solid var(--color-border)',
-            display: 'flex',
-            flexDirection: 'column',
-            height: '100%',
-            backgroundColor: 'var(--color-card)',
-          }}
-        >
-          <div style={{ padding: 16, borderBottom: '1px solid var(--color-border)' }}>
-            <h2 style={{ fontSize: 18, fontWeight: 800, margin: '0 0 12px' }}>
+        <div className="kw-chat-sidebar">
+          <div style={{ padding: '14px 16px', borderBottom: '1px solid var(--color-border)', flexShrink: 0 }}>
+            <h2 style={{ fontSize: 17, fontWeight: 800, margin: '0 0 10px' }}>
               Hộp thư Mẹ Bỉm ({chats.length})
             </h2>
             <div style={{ position: 'relative' }}>
               <Search
                 size={15}
                 color="var(--color-text-secondary)"
-                style={{ position: 'absolute', left: 12, top: 14 }}
+                style={{ position: 'absolute', left: 12, top: 13 }}
               />
               <input
                 type="text"
                 className="kw-input"
-                style={{ paddingLeft: 36, minHeight: 40, fontSize: 13 }}
+                style={{ paddingLeft: 36, minHeight: 40, height: 40, fontSize: 13 }}
                 placeholder="Tìm theo tên mẹ bỉm hoặc món đồ..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -338,7 +331,7 @@ export const ChatPage: React.FC = () => {
             </div>
           </div>
 
-          <div style={{ flex: 1, overflowY: 'auto' }}>
+          <div style={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>
             {filteredChats.length === 0 ? (
               <div style={{ padding: 32, textAlign: 'center', color: 'var(--color-text-secondary)' }}>
                 <MessageCircle size={32} style={{ opacity: 0.4, marginBottom: 8 }} />
@@ -432,14 +425,7 @@ export const ChatPage: React.FC = () => {
         </div>
 
         {/* RIGHT PANE: MESSAGE THREAD */}
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            height: '100%',
-            backgroundColor: 'var(--color-surface-subtle)',
-          }}
-        >
+        <div className="kw-chat-thread">
           {!activeChat ? (
             <div
               style={{
@@ -454,116 +440,149 @@ export const ChatPage: React.FC = () => {
             >
               <MascotIcon
                 size={64}
-                dialogue="Chọn một cuộc trò chuyện bên trái để hẹn giờ và địa điểm trao tay đồ cho bé nhé!"
+                dialogue="Chọn một cuộc trò chuyện để hẹn giờ và địa điểm trao tay đồ cho bé nhé!"
               />
             </div>
           ) : (
             <>
-              {/* Chat Header + Product & Escrow Ribbon */}
+              {/* Compact Chat Header + Product Ribbon */}
               <div
                 style={{
-                  padding: '12px 20px',
                   backgroundColor: 'var(--color-card)',
                   borderBottom: '1px solid var(--color-border)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  gap: 12,
-                  flexWrap: 'wrap',
+                  flexShrink: 0,
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <Avatar uri={partnerAvatar} name={partnerName} size={42} />
-                  <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <span style={{ fontWeight: 800, fontSize: 15 }}>{partnerName}</span>
-                      <button
-                        type="button"
-                        onClick={() => setReportModalOpen(true)}
-                        className="kw-btn kw-btn-ghost kw-btn-sm"
-                        style={{ minHeight: 26, padding: '0 8px', fontSize: 11, color: 'var(--color-text-secondary)' }}
-                        title="Báo cáo người dùng"
-                      >
-                        <Flag size={12} />
-                        <span>Báo cáo</span>
-                      </button>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--color-secondary-dark)' }}>
-                      <ShieldCheck size={14} />
-                      <span>Không mặc cả • Bảo vệ bởi Double Escrow</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-                  {relatedTx ? (
+                <div
+                  style={{
+                    padding: '10px 12px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: 8,
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0, flex: 1 }}>
                     <button
                       type="button"
-                      className="kw-btn kw-btn-primary kw-btn-sm"
-                      onClick={() => navigate(`/transactions/${relatedTx.id}`)}
+                      className="kw-btn kw-btn-ghost kw-btn-sm kw-chat-mobile-back"
+                      onClick={() => navigate('/chat')}
+                      style={{ minHeight: 36, width: 36, padding: 0, flexShrink: 0 }}
+                      title="Quay lại danh sách tin nhắn"
                     >
-                      <KeyRound size={15} />
-                      <span>
-                        {relatedTx.status === 'awaiting_handover'
-                          ? `Mở Mã PIN Bàn Giao${relatedTx.handoverCode ? ` (${relatedTx.handoverCode})` : ''}`
-                          : 'Xem Đơn Ký Quỹ Kép'}
-                      </span>
+                      <ArrowLeft size={18} />
                     </button>
-                  ) : (
-                    activeChat.productId && (
-                      <button
-                        type="button"
-                        className="kw-btn kw-btn-primary kw-btn-sm"
-                        onClick={() => navigate(`/products/${activeChat.productId}`)}
-                      >
-                        <ShieldCheck size={15} />
-                        <span>Đổi ngay (Ký Quỹ Kép)</span>
-                      </button>
-                    )
-                  )}
-
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 10,
-                      padding: '6px 12px',
-                      borderRadius: 'var(--radius-default)',
-                      backgroundColor: 'var(--color-surface-subtle)',
-                      border: '1px solid var(--color-border)',
-                    }}
-                  >
-                    {activeChat.productImage && (
-                      <img
-                        src={activeChat.productImage}
-                        alt={activeChat.productName}
-                        style={{ width: 36, height: 36, borderRadius: 6, objectFit: 'cover' }}
-                      />
-                    )}
-                    <div style={{ maxWidth: 160 }}>
+                    <Avatar uri={partnerAvatar} name={partnerName} size={38} />
+                    <div style={{ minWidth: 0, flex: 1 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <span
+                          style={{
+                            fontWeight: 800,
+                            fontSize: 14,
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                          }}
+                        >
+                          {partnerName}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setReportModalOpen(true)}
+                          className="kw-btn kw-btn-ghost kw-btn-sm"
+                          style={{ minHeight: 24, padding: '0 6px', fontSize: 11, color: 'var(--color-text-secondary)', flexShrink: 0 }}
+                          title="Báo cáo người dùng"
+                        >
+                          <Flag size={11} />
+                        </button>
+                      </div>
                       <div
                         style={{
-                          fontSize: 12,
-                          fontWeight: 700,
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 4,
+                          fontSize: 11,
+                          color: 'var(--color-secondary-dark)',
                           whiteSpace: 'nowrap',
                           overflow: 'hidden',
                           textOverflow: 'ellipsis',
                         }}
                       >
-                        {activeChat.productName}
+                        <ShieldCheck size={12} style={{ flexShrink: 0 }} />
+                        <span>Bảo vệ bởi Double Escrow</span>
                       </div>
                     </div>
-                    {activeChat.productId && (
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+                    {relatedTx ? (
                       <button
                         type="button"
-                        className="kw-btn kw-btn-ghost kw-btn-sm"
-                        style={{ minHeight: 32, padding: '0 8px', fontSize: 12 }}
-                        onClick={() => navigate(`/products/${activeChat.productId}`)}
+                        className="kw-btn kw-btn-primary kw-btn-sm"
+                        style={{ minHeight: 34, padding: '0 10px', fontSize: 12 }}
+                        onClick={() => navigate(`/transactions/${relatedTx.id}`)}
                       >
-                        <ExternalLink size={14} />
+                        <KeyRound size={13} />
+                        <span>
+                          {relatedTx.status === 'awaiting_handover'
+                            ? `PIN${relatedTx.handoverCode ? `: ${relatedTx.handoverCode}` : ''}`
+                            : 'Đơn Ký Quỹ'}
+                        </span>
                       </button>
+                    ) : (
+                      activeChat.productId && (
+                        <button
+                          type="button"
+                          className="kw-btn kw-btn-primary kw-btn-sm"
+                          style={{ minHeight: 34, padding: '0 10px', fontSize: 12 }}
+                          onClick={() => navigate(`/products/${activeChat.productId}`)}
+                        >
+                          <ShieldCheck size={13} />
+                          <span>Đổi ngay</span>
+                        </button>
+                      )
                     )}
                   </div>
+                </div>
+
+                {/* Sleek Product Context Sub-bar */}
+                <div
+                  onClick={() => activeChat.productId && navigate(`/products/${activeChat.productId}`)}
+                  style={{
+                    padding: '6px 12px',
+                    backgroundColor: 'var(--color-surface-subtle)',
+                    borderTop: '1px solid var(--color-divider)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: 8,
+                    cursor: activeChat.productId ? 'pointer' : 'default',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0, flex: 1 }}>
+                    {activeChat.productImage && (
+                      <img
+                        src={activeChat.productImage}
+                        alt={activeChat.productName}
+                        style={{ width: 26, height: 26, borderRadius: 6, objectFit: 'cover', flexShrink: 0 }}
+                      />
+                    )}
+                    <span
+                      style={{
+                        fontSize: 12,
+                        fontWeight: 700,
+                        color: 'var(--color-text)',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                      }}
+                    >
+                      Món đồ: {activeChat.productName}
+                    </span>
+                  </div>
+                  {activeChat.productId && (
+                    <ExternalLink size={13} color="var(--color-text-secondary)" style={{ flexShrink: 0 }} />
+                  )}
                 </div>
               </div>
 
@@ -571,11 +590,12 @@ export const ChatPage: React.FC = () => {
               <div
                 style={{
                   flex: 1,
+                  minHeight: 0,
                   overflowY: 'auto',
-                  padding: '20px',
+                  padding: '14px 12px',
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: 12,
+                  gap: 10,
                 }}
               >
                 {loadingMessages ? (
@@ -583,7 +603,7 @@ export const ChatPage: React.FC = () => {
                     Đang tải tin nhắn...
                   </div>
                 ) : messages.length === 0 ? (
-                  <div style={{ textAlign: 'center', color: 'var(--color-text-secondary)', padding: 32 }}>
+                  <div style={{ textAlign: 'center', color: 'var(--color-text-secondary)', padding: 24, fontSize: 13 }}>
                     Hãy gửi lời chào đầu tiên để hẹn thời gian và địa điểm giao nhận món đồ nhé!
                   </div>
                 ) : (
@@ -599,8 +619,8 @@ export const ChatPage: React.FC = () => {
                           key={msg.id}
                           style={{
                             alignSelf: 'center',
-                            maxWidth: '85%',
-                            padding: '10px 16px',
+                            maxWidth: '92%',
+                            padding: '8px 12px',
                             borderRadius: 'var(--radius-default)',
                             backgroundColor: 'var(--color-warning-bg)',
                             border: '1px solid var(--color-warning)',
@@ -620,7 +640,7 @@ export const ChatPage: React.FC = () => {
                         key={msg.id}
                         style={{
                           alignSelf: isMine ? 'flex-end' : 'flex-start',
-                          maxWidth: '72%',
+                          maxWidth: '82%',
                           display: 'flex',
                           flexDirection: 'column',
                           alignItems: isMine ? 'flex-end' : 'flex-start',
@@ -628,7 +648,7 @@ export const ChatPage: React.FC = () => {
                       >
                         <div
                           style={{
-                            padding: isImageMsg ? 6 : '10px 16px',
+                            padding: isImageMsg ? 6 : '9px 14px',
                             borderRadius: 16,
                             backgroundColor: isMine
                               ? 'var(--color-primary)'
@@ -639,6 +659,7 @@ export const ChatPage: React.FC = () => {
                             border: isMine ? 'none' : '1px solid var(--color-border)',
                             fontSize: 14,
                             lineHeight: 1.45,
+                            wordBreak: 'break-word',
                             boxShadow: 'var(--shadow-soft)',
                           }}
                         >
@@ -647,8 +668,8 @@ export const ChatPage: React.FC = () => {
                               src={imageUrl}
                               alt="Hình đính kèm"
                               style={{
-                                maxWidth: 260,
-                                maxHeight: 240,
+                                maxWidth: 'min(240px, 68vw)',
+                                maxHeight: 220,
                                 borderRadius: 12,
                                 display: 'block',
                                 objectFit: 'cover',
@@ -662,7 +683,7 @@ export const ChatPage: React.FC = () => {
                           style={{
                             fontSize: 10,
                             color: 'var(--color-text-secondary)',
-                            marginTop: 4,
+                            marginTop: 3,
                             padding: '0 4px',
                           }}
                         >
@@ -685,12 +706,13 @@ export const ChatPage: React.FC = () => {
               {/* Quick Replies Bar */}
               <div
                 style={{
-                  padding: '8px 16px',
+                  padding: '6px 10px',
                   backgroundColor: 'var(--color-card)',
                   borderTop: '1px solid var(--color-divider)',
                   display: 'flex',
-                  gap: 8,
+                  gap: 6,
                   overflowX: 'auto',
+                  flexShrink: 0,
                 }}
               >
                 {QUICK_REPLIES.map((reply) => (
@@ -700,14 +722,15 @@ export const ChatPage: React.FC = () => {
                     onClick={() => handleSendMessage(reply)}
                     className="kw-btn kw-btn-ghost kw-btn-sm"
                     style={{
-                      minHeight: 30,
+                      minHeight: 28,
                       padding: '0 10px',
                       fontSize: 11,
                       whiteSpace: 'nowrap',
                       border: '1px solid var(--color-border)',
+                      flexShrink: 0,
                     }}
                   >
-                    <Sparkles size={12} color="var(--color-primary)" />
+                    <Sparkles size={11} color="var(--color-primary)" />
                     <span>{reply}</span>
                   </button>
                 ))}
@@ -720,17 +743,26 @@ export const ChatPage: React.FC = () => {
                   handleSendMessage();
                 }}
                 style={{
-                  padding: '12px 16px',
+                  padding: '8px 10px',
                   backgroundColor: 'var(--color-card)',
                   borderTop: '1px solid var(--color-border)',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 10,
+                  gap: 8,
+                  flexShrink: 0,
                 }}
               >
                 <label
                   className="kw-btn kw-btn-outline kw-btn-sm"
-                  style={{ cursor: uploadingImg ? 'wait' : 'pointer', padding: '0 12px', minHeight: 44 }}
+                  style={{
+                    cursor: uploadingImg ? 'wait' : 'pointer',
+                    width: 40,
+                    height: 40,
+                    minHeight: 40,
+                    padding: 0,
+                    flexShrink: 0,
+                    borderRadius: 'var(--radius-full)',
+                  }}
                   title="Gửi hình ảnh thực tế món đồ / điểm hẹn"
                 >
                   <ImagePlus size={18} />
@@ -746,20 +778,36 @@ export const ChatPage: React.FC = () => {
                 <input
                   type="text"
                   className="kw-input"
+                  style={{
+                    flex: 1,
+                    minWidth: 0,
+                    minHeight: 40,
+                    height: 40,
+                    padding: '0 14px',
+                    borderRadius: 'var(--radius-full)',
+                    fontSize: 14,
+                  }}
                   placeholder={
                     uploadingImg
-                      ? 'Đang tải hình ảnh lên...'
-                      : 'Nhập tin nhắn hẹn thời gian, địa điểm giao nhận...'
+                      ? 'Đang tải ảnh...'
+                      : 'Nhập tin nhắn hẹn gặp...'
                   }
                   value={inputText}
                   onChange={(e) => handleInputChange(e.target.value)}
                 />
                 <button
                   type="submit"
-                  className="kw-btn kw-btn-primary"
+                  className="kw-btn kw-btn-primary kw-btn-sm"
+                  style={{
+                    minHeight: 40,
+                    height: 40,
+                    padding: '0 14px',
+                    flexShrink: 0,
+                    borderRadius: 'var(--radius-full)',
+                  }}
                   disabled={!inputText.trim() || sending}
                 >
-                  <Send size={17} />
+                  <Send size={16} />
                   <span>Gửi</span>
                 </button>
               </form>

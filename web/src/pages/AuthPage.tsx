@@ -301,10 +301,10 @@ export const AuthPage: React.FC = () => {
     <div
       style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(380px, 1fr))',
-        gap: 'var(--space-8)',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+        gap: 'var(--space-6)',
         alignItems: 'start',
-        paddingTop: 'var(--space-4)',
+        paddingTop: 'var(--space-3)',
       }}
     >
       {/* Left Column: Brand Value & Quick Demo Accounts */}

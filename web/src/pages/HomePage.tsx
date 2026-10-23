@@ -261,7 +261,7 @@ export const HomePage: React.FC = () => {
           background:
             'linear-gradient(135deg, var(--color-primary-light) 0%, var(--color-card) 58%, var(--color-secondary-light) 100%)',
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(270px, 1fr))',
           gap: 'var(--space-6)',
           alignItems: 'center',
         }}
@@ -606,7 +606,7 @@ export const HomePage: React.FC = () => {
             'linear-gradient(135deg, var(--color-secondary-light) 0%, var(--color-card) 65%, var(--color-primary-light) 100%)',
           borderColor: 'var(--color-secondary)',
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(270px, 1fr))',
           gap: 'var(--space-6)',
           alignItems: 'center',
         }}

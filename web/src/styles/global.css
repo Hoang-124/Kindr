@@ -65,14 +65,55 @@ textarea {
 
 .kw-chat-layout {
   display: grid;
-  grid-template-columns: 350px 1fr;
-  height: calc(100vh - 150px);
-  min-height: 580px;
+  grid-template-columns: 340px minmax(0, 1fr);
+  height: calc(100dvh - 130px);
+  min-height: 540px;
+  max-height: 820px;
   border-radius: var(--radius-lg);
   border: 1px solid var(--color-border);
   overflow: hidden;
   box-shadow: var(--shadow-card);
   background-color: var(--color-card);
+}
+
+.kw-chat-sidebar {
+  border-right: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  background-color: var(--color-card);
+}
+
+.kw-chat-thread {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
+  background-color: var(--color-surface-subtle);
+}
+
+.kw-chat-mobile-back {
+  display: none;
+}
+
+.kw-tx-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.kw-tx-layout.has-selected-tx {
+  grid-template-columns: 350px minmax(0, 1fr);
+}
+
+.kw-escrow-steps {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin: 20px 0;
 }
 
 .kw-admin-layout {
@@ -82,15 +123,110 @@ textarea {
   align-items: start;
 }
 
+.kw-mobile-bottom-nav {
+  display: none;
+}
+
 @media (max-width: 960px) {
   .kw-split-detail,
-  .kw-admin-layout {
+  .kw-admin-layout,
+  .kw-tx-layout,
+  .kw-tx-layout.has-selected-tx {
     grid-template-columns: 1fr;
   }
+}
+
+@media (max-width: 860px) {
+  .kw-main {
+    padding: 12px 10px 84px;
+  }
+
+  .kw-card {
+    padding: 16px;
+    border-radius: var(--radius-default);
+  }
+
+  .kw-navbar-inner {
+    min-height: 56px;
+    padding: 6px 12px;
+    flex-wrap: nowrap;
+    gap: 8px;
+  }
+
+  .kw-nav-links {
+    display: none !important;
+  }
+
+  .kw-hide-mobile {
+    display: none !important;
+  }
+
+  .kw-mobile-bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 62px;
+    background-color: var(--color-card);
+    border-top: 1px solid var(--color-border-strong);
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.06);
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    align-items: center;
+    z-index: 140;
+    padding: 0 4px env(safe-area-inset-bottom, 0px);
+  }
+
+  .kw-mobile-tab {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    height: 100%;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--color-text-muted);
+    position: relative;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .kw-mobile-tab.active {
+    color: var(--color-primary);
+  }
+
+  /* Mobile Chat: Full-screen single pane (either List OR Active Thread) */
+  .kw-chat-page-wrap {
+    padding: 0 !important;
+  }
+
   .kw-chat-layout {
     grid-template-columns: 1fr;
-    height: auto;
-    min-height: 640px;
+    height: calc(100dvh - 122px);
+    min-height: 420px;
+    max-height: none;
+    border-radius: var(--radius-default);
+  }
+
+  .kw-chat-layout.has-active-chat .kw-chat-sidebar {
+    display: none;
+  }
+
+  .kw-chat-layout:not(.has-active-chat) .kw-chat-thread {
+    display: none;
+  }
+
+  .kw-chat-mobile-back {
+    display: inline-flex;
+  }
+
+  .kw-tx-layout.has-selected-tx .kw-tx-list-pane {
+    display: none;
+  }
+
+  .kw-escrow-steps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
