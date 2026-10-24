@@ -51,6 +51,10 @@ textarea {
   display: flex;
   flex-direction: column;
   background-color: var(--color-bg);
+  background-image:
+    radial-gradient(circle at 8% 4%, var(--color-pastel-pink), transparent 34%),
+    radial-gradient(circle at 92% 10%, var(--color-pastel-butter), transparent 32%),
+    radial-gradient(circle at 50% 96%, var(--color-pastel-mint), transparent 38%);
 }
 
 .kw-main {
@@ -280,10 +284,13 @@ textarea {
   }
 
   .kw-mobile-tab-icon {
-    height: 22px;
+    height: 24px;
+    padding: 0 10px;
+    border-radius: var(--radius-full);
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    transition: background-color 0.16s ease, transform 0.16s ease;
   }
 
   .kw-mobile-tab-cta {
@@ -292,7 +299,13 @@ textarea {
   }
 
   .kw-mobile-tab.active {
-    color: var(--color-primary);
+    color: var(--color-primary-dark);
+    font-weight: 800;
+  }
+
+  .kw-mobile-tab.active .kw-mobile-tab-icon {
+    background-color: var(--color-primary-light);
+    transform: translateY(-1px);
   }
 
   /* Horizontal Scrollable Category Strip on Mobile (No Orphan Row) */
@@ -675,12 +688,14 @@ textarea {
   color: var(--color-secondary-dark);
 }
 
-.kw-badge-warning {
+.kw-badge-warning,
+.kw-badge-gold {
   background-color: var(--color-warning-bg);
   color: var(--color-coin-text);
 }
 
-.kw-badge-error {
+.kw-badge-error,
+.kw-badge-danger {
   background-color: var(--color-error-bg);
   color: var(--color-error);
 }

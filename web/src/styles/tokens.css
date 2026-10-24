@@ -1,67 +1,77 @@
 /* d:\Kindr\web\src\styles\tokens.css */
-/* Strictly tokenized from DESIGN.md — Supports Light & Dark Mode */
+/* Strictly tokenized from DESIGN.md — Warm Nursery & Mom-Friendly Palette (Light & Dark Mode) */
 
 :root,
 [data-theme="light"] {
-  /* Semantic Brand Palette */
+  /* Semantic Brand Palette — Warm Coral Peach, Mint Sky & Sunny Butter */
   --color-primary: #FF6B6B;
-  --color-primary-dark: #E05353;
-  --color-primary-light: #FFE8E8;
-  --color-primary-soft: #FFE8E8;
-  --color-secondary: #4ECDC4;
-  --color-secondary-dark: #3AB5AC;
-  --color-secondary-light: #E0F7F5;
-  --color-secondary-soft: #E0F7F5;
+  --color-primary-dark: #E04F4F;
+  --color-primary-light: #FFF0EE;
+  --color-primary-soft: #FFE5E2;
+  --color-secondary: #38B2AC;
+  --color-secondary-dark: #288B86;
+  --color-secondary-light: #E6FAF8;
+  --color-secondary-soft: #D5F5F1;
   --color-accent: #FFD166;
 
-  /* Surfaces & Canvas */
-  --color-bg: #F8F9FA;
+  /* Child-Friendly Nursery Pastel Tokens */
+  --color-pastel-pink: #FFF0F3;
+  --color-pastel-mint: #E8FBF8;
+  --color-pastel-butter: #FFF9DB;
+  --color-pastel-sky: #EBF8FF;
+  --color-pastel-lavender: #F3F0FF;
+  --color-pastel-peach: #FFF4E6;
+
+  /* Surfaces & Canvas — Warm Milky Cream (Easy on eyes for moms & first-time users) */
+  --color-bg: #FFFDF9;
   --color-card: #FFFFFF;
   --color-surface: #FFFFFF;
   --color-surface-elevated: #FFFFFF;
-  --color-surface-subtle: #F1F3F5;
-  --color-surface-hover: #E9ECEF;
+  --color-surface-subtle: #FFF7EE;
+  --color-surface-hover: #FFEFDF;
 
-  /* Typography Colors (WCAG AA compliant) */
-  --color-text: #1A1D20;
-  --color-text-primary: #1A1D20;
-  --color-text-muted: #6C757D;
-  --color-text-secondary: #6C757D;
-  --color-text-tertiary: #868E96;
-  --color-text-dim: #ADB5BD;
+  /* Typography Colors (WCAG AA compliant, warm dark cocoa charcoal) */
+  --color-text: #231F20;
+  --color-text-primary: #231F20;
+  --color-text-muted: #5C5552;
+  --color-text-secondary: #5C5552;
+  --color-text-tertiary: #7D7470;
+  --color-text-dim: #A69D99;
   --color-on-primary: #FFFFFF;
   --color-text-white: #FFFFFF;
 
-  /* Borders & Overlays */
-  --border: rgba(0, 0, 0, 0.08);
-  --color-border: rgba(0, 0, 0, 0.08);
-  --color-border-strong: rgba(0, 0, 0, 0.14);
-  --color-divider: rgba(0, 0, 0, 0.06);
-  --color-overlay: rgba(0, 0, 0, 0.45);
-  --color-scrim: rgba(26, 29, 32, 0.6);
+  /* Borders & Overlays — Warm soft outlines */
+  --border: rgba(255, 107, 107, 0.14);
+  --color-border: rgba(140, 101, 80, 0.12);
+  --color-border-strong: rgba(140, 101, 80, 0.22);
+  --color-divider: rgba(140, 101, 80, 0.09);
+  --color-overlay: rgba(35, 31, 32, 0.45);
+  --color-scrim: rgba(35, 31, 32, 0.58);
 
   /* Status & Currency */
-  --color-success: #2EC4B6;
-  --color-success-bg: #E0F7F5;
-  --color-warning: #FF9F1C;
-  --color-warning-bg: #FFF8E1;
-  --color-error: #E63946;
-  --color-error-bg: #FFE8E8;
-  --color-danger: #E63946;
-  --color-danger-bg: #FFE8E8;
-  --color-info: #3AB5AC;
-  --color-info-bg: #E0F7F5;
+  --color-success: #22A699;
+  --color-success-bg: #E6FAF8;
+  --color-warning: #F59E0B;
+  --color-warning-bg: #FFF9DB;
+  --color-warning-light: #FFF9DB;
+  --color-error: #E53E3E;
+  --color-error-bg: #FFF0F0;
+  --color-error-light: #FFF0F0;
+  --color-danger: #E53E3E;
+  --color-danger-bg: #FFF0F0;
+  --color-info: #38B2AC;
+  --color-info-bg: #E6FAF8;
 
   --color-coin-gold: #FFD166;
-  --color-coin-orange: #FF9F1C;
-  --color-coin-bg: #FFF8E1;
-  --color-coin-text: #8C6500;
+  --color-coin-orange: #F59E0B;
+  --color-coin-bg: #FFF9DB;
+  --color-coin-text: #8A5A00;
 
-  --color-admin-badge: #FFE8E8;
+  --color-admin-badge: #FFF0EE;
   --color-admin-badge-text: #B73232;
 
   /* Typography Stack */
-  --font-sans: 'Plus Jakarta Sans', 'Inter', 'Be Vietnam Pro', system-ui, -apple-system, sans-serif;
+  --font-sans: 'Plus Jakarta Sans', 'Be Vietnam Pro', 'Inter', system-ui, -apple-system, sans-serif;
 
   /* Spacing Grid (4pt / 8pt) */
   --space-1: 4px;
@@ -74,20 +84,20 @@
   --space-10: 40px;
   --space-12: 48px;
 
-  /* Border Radius Tokens */
-  --radius-sm: 8px;
-  --radius-default: 16px;
-  --radius-md: 20px;
+  /* Border Radius Tokens — Soft, Child-Safe Rounded Edges */
+  --radius-sm: 10px;
+  --radius-default: 18px;
+  --radius-md: 22px;
   --radius-lg: 28px;
   --radius-xl: 40px;
   --radius-full: 9999px;
   --radius-pill: 9999px;
 
-  /* Ambient Shadows */
-  --shadow-soft: 0 2px 10px rgba(26, 29, 32, 0.04);
-  --shadow-card: 0 6px 24px rgba(26, 29, 32, 0.06);
-  --shadow-elevated: 0 14px 36px rgba(26, 29, 32, 0.12);
-  --shadow-btn: 0 6px 16px rgba(255, 107, 107, 0.26);
+  /* Warm Ambient Shadows */
+  --shadow-soft: 0 4px 14px rgba(140, 101, 80, 0.06);
+  --shadow-card: 0 10px 28px rgba(140, 101, 80, 0.08);
+  --shadow-elevated: 0 18px 42px rgba(140, 101, 80, 0.16);
+  --shadow-btn: 0 8px 20px rgba(255, 107, 107, 0.30);
 }
 
 [data-theme="dark"] {
@@ -101,19 +111,26 @@
   --color-secondary-soft: rgba(78, 205, 196, 0.16);
   --color-accent: #FFD166;
 
-  --color-bg: #121518;
-  --color-card: #1C2025;
-  --color-surface: #1C2025;
-  --color-surface-elevated: #252A30;
-  --color-surface-subtle: #252A30;
-  --color-surface-hover: #2E343B;
+  --color-pastel-pink: rgba(255, 123, 123, 0.14);
+  --color-pastel-mint: rgba(78, 205, 196, 0.14);
+  --color-pastel-butter: rgba(255, 209, 102, 0.14);
+  --color-pastel-sky: rgba(99, 179, 237, 0.14);
+  --color-pastel-lavender: rgba(183, 148, 244, 0.14);
+  --color-pastel-peach: rgba(251, 182, 119, 0.14);
 
-  --color-text: #F1F3F5;
-  --color-text-primary: #F1F3F5;
-  --color-text-muted: #9BA3AE;
-  --color-text-secondary: #9BA3AE;
-  --color-text-tertiary: #7D8692;
-  --color-text-dim: #6C757D;
+  --color-bg: #161416;
+  --color-card: #211E21;
+  --color-surface: #211E21;
+  --color-surface-elevated: #2B272B;
+  --color-surface-subtle: #2B272B;
+  --color-surface-hover: #353035;
+
+  --color-text: #F8F5F2;
+  --color-text-primary: #F8F5F2;
+  --color-text-muted: #B5ABA6;
+  --color-text-secondary: #B5ABA6;
+  --color-text-tertiary: #8C827D;
+  --color-text-dim: #6E6560;
   --color-on-primary: #FFFFFF;
   --color-text-white: #FFFFFF;
 
@@ -126,7 +143,9 @@
 
   --color-success-bg: rgba(46, 196, 182, 0.16);
   --color-warning-bg: rgba(255, 159, 28, 0.16);
+  --color-warning-light: rgba(255, 159, 28, 0.16);
   --color-error-bg: rgba(230, 57, 70, 0.18);
+  --color-error-light: rgba(230, 57, 70, 0.18);
   --color-danger: #FF6B6B;
   --color-danger-bg: rgba(230, 57, 70, 0.18);
   --color-info: #4ECDC4;

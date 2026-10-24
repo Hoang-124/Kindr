@@ -29,14 +29,62 @@ import { MascotIcon, KindrCoin } from '../components/KindrCoin';
 import { surveyApi, waitlistApi } from '../services/domainServices';
 
 const BENTO_CATEGORIES = [
-  { id: 'all', label: 'Tất cả món đồ', desc: 'Toàn sàn Đà Nẵng', Icon: LayoutGrid },
-  { id: 'toy_small', label: 'Đồ chơi nhỏ', desc: 'Cố định 2 Xu', Icon: ToyBrick },
-  { id: 'toy_large', label: 'Đồ chơi lớn', desc: '5 – 10 Xu', Icon: Gamepad2 },
-  { id: 'book', label: 'Sách truyện & Ehon', desc: '1 – 2 Xu', Icon: BookOpen },
-  { id: 'quan_ao', label: 'Quần áo bé', desc: '2 – 5 Xu', Icon: Shirt },
-  { id: 'xe_noi', label: 'Xe đẩy & Nôi cũi', desc: '15 – 30 Xu', Icon: Baby },
-  { id: 'do_hoc_tap', label: 'Đồ học tập', desc: '2 – 4 Xu', Icon: GraduationCap },
-  { id: 'charity', label: 'Trạm Tặng 0 Xu', desc: 'Miễn cọc Safe Fee', Icon: Gift },
+  {
+    id: 'all',
+    label: 'Tất cả đồ cho bé',
+    desc: 'Xem toàn bộ tại Đà Nẵng',
+    bgToken: 'var(--color-pastel-pink)',
+    Icon: LayoutGrid,
+  },
+  {
+    id: 'toy_small',
+    label: 'Đồ chơi nhỏ',
+    desc: '2 Xu (20.000đ)',
+    bgToken: 'var(--color-pastel-butter)',
+    Icon: ToyBrick,
+  },
+  {
+    id: 'toy_large',
+    label: 'Đồ chơi lớn',
+    desc: '5–10 Xu (50–100k)',
+    bgToken: 'var(--color-pastel-peach)',
+    Icon: Gamepad2,
+  },
+  {
+    id: 'book',
+    label: 'Sách truyện & Ehon',
+    desc: '1–2 Xu (10–20k)',
+    bgToken: 'var(--color-pastel-sky)',
+    Icon: BookOpen,
+  },
+  {
+    id: 'quan_ao',
+    label: 'Quần áo bé',
+    desc: '2–5 Xu (20–50k)',
+    bgToken: 'var(--color-pastel-pink)',
+    Icon: Shirt,
+  },
+  {
+    id: 'xe_noi',
+    label: 'Xe đẩy & Nôi cũi',
+    desc: '15–30 Xu (150–300k)',
+    bgToken: 'var(--color-pastel-mint)',
+    Icon: Baby,
+  },
+  {
+    id: 'do_hoc_tap',
+    label: 'Đồ học tập',
+    desc: '2–4 Xu (20–40k)',
+    bgToken: 'var(--color-pastel-lavender)',
+    Icon: GraduationCap,
+  },
+  {
+    id: 'charity',
+    label: 'Trạm Tặng 0đ',
+    desc: 'Miễn phí 100%',
+    bgToken: 'var(--color-pastel-mint)',
+    Icon: Gift,
+  },
 ];
 
 export const HomePage: React.FC = () => {
@@ -254,12 +302,13 @@ export const HomePage: React.FC = () => {
         </div>
       )}
 
-      {/* Hero Command Stage with Real Mobile Mascot Illustration */}
+      {/* Hero Command Stage — Warm Nursery & Beginner-Friendly */}
       <div
         className="kw-card"
         style={{
           background:
-            'linear-gradient(135deg, var(--color-primary-light) 0%, var(--color-card) 58%, var(--color-secondary-light) 100%)',
+            'linear-gradient(135deg, var(--color-pastel-pink) 0%, var(--color-card) 52%, var(--color-pastel-butter) 100%)',
+          border: '1.5px solid var(--color-border-strong)',
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(270px, 1fr))',
           gap: 'var(--space-6)',
@@ -269,18 +318,18 @@ export const HomePage: React.FC = () => {
         <div>
           <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
             <span className="kw-badge kw-badge-coral">
-              <Sparkles size={13} /> Mạng Lưới Mẹ Bỉm Đà Nẵng
+              <Sparkles size={13} /> Hội Mẹ Bỉm Sữa Đà Nẵng
             </span>
             <span className="kw-badge kw-badge-teal">
-              <ShieldCheck size={13} /> 100% Double Escrow
+              <ShieldCheck size={13} /> Giữ Hộ Xu An Toàn 100%
             </span>
             <button
               type="button"
               onClick={() => setOnboardingOpen(true)}
               className="kw-badge kw-badge-warning"
-              style={{ cursor: 'pointer', border: 'none' }}
+              style={{ cursor: 'pointer', border: '1px solid var(--color-warning)' }}
             >
-              <HelpCircle size={13} /> Xem Cẩm Nang 3 Bước
+              <HelpCircle size={13} /> Hướng dẫn cho mẹ mới dùng
             </button>
           </div>
 
@@ -288,12 +337,12 @@ export const HomePage: React.FC = () => {
             style={{
               fontSize: 32,
               fontWeight: 800,
-              lineHeight: 1.2,
-              letterSpacing: -0.5,
+              lineHeight: 1.22,
+              letterSpacing: -0.4,
               marginBottom: 12,
             }}
           >
-            Hôm nay dọn nhà cho bé đỡ chật nhé mẹ ơi!
+            Đổi đồ chơi, quần áo & xe đẩy cho bé thật dễ dàng!
           </h1>
           <p
             style={{
@@ -301,10 +350,11 @@ export const HomePage: React.FC = () => {
               color: 'var(--color-text-muted)',
               marginBottom: 20,
               maxWidth: 580,
+              lineHeight: 1.6,
             }}
           >
-            Biến đồ chơi, sách truyện, xe đẩy bé đã chán thành <strong>Kindr Xu</strong> trong 30 giây.
-            Khung định giá chuẩn không mặc cả, bảo vệ cả hai mẹ bằng 6 giờ kiểm định tại nhà.
+            Món đồ bé đã chật hay chơi chán đều đổi được sang <strong>Kindr Xu (1 Xu = 10.000đ)</strong> để lấy món đồ mới.
+            Giá niêm yết sẵn <strong>không cần mặc cả</strong>, được mang về nhà <strong>kiểm tra 6 tiếng</strong> mới trừ Xu!
           </p>
 
           {/* Search & Quick CTA Row */}
@@ -313,18 +363,18 @@ export const HomePage: React.FC = () => {
               <input
                 type="text"
                 className="kw-input"
-                placeholder="Tìm xe đẩy, Lego, sách Ehon, ghế ăn dặm..."
+                placeholder="Gõ tên món đồ: Xe đẩy, Lego, sách vải, quần áo..."
                 value={quickQuery}
                 onChange={(e) => setQuickQuery(e.target.value)}
-                style={{ backgroundColor: 'var(--color-card)', paddingLeft: 40 }}
+                style={{ backgroundColor: 'var(--color-card)', paddingLeft: 42, fontSize: 15 }}
               />
               <Search
                 size={18}
-                color="var(--color-text-muted)"
+                color="var(--color-primary)"
                 style={{ position: 'absolute', left: 14, top: 15 }}
               />
             </div>
-            <Link to="/post" className="kw-btn kw-btn-primary" style={{ flex: '1 1 135px' }}>
+            <Link to="/post" className="kw-btn kw-btn-primary" style={{ flex: '1 1 150px' }}>
               <PlusCircle size={18} />
               <span>Đăng đồ nhận Xu</span>
             </Link>
@@ -332,10 +382,10 @@ export const HomePage: React.FC = () => {
               type="button"
               onClick={() => navigate('/search')}
               className="kw-btn kw-btn-outline"
-              style={{ flex: '1 1 135px' }}
+              style={{ flex: '1 1 140px' }}
             >
               <SlidersHorizontal size={16} />
-              <span>Bản đồ & Bộ lọc</span>
+              <span>Tìm theo Quận</span>
             </button>
           </div>
         </div>
@@ -350,7 +400,7 @@ export const HomePage: React.FC = () => {
             backgroundColor: 'var(--color-card)',
             padding: 'var(--space-5)',
             borderRadius: 'var(--radius-md)',
-            border: '1px solid var(--color-border)',
+            border: '1.5px solid var(--color-border)',
             boxShadow: 'var(--shadow-soft)',
           }}
         >
@@ -364,17 +414,17 @@ export const HomePage: React.FC = () => {
                 height: 84,
                 objectFit: 'contain',
                 borderRadius: 'var(--radius-default)',
-                backgroundColor: 'var(--color-primary-light)',
+                backgroundColor: 'var(--color-pastel-butter)',
                 padding: 6,
                 flexShrink: 0,
               }}
             />
             <div>
-              <div style={{ fontWeight: 800, fontSize: 15, color: 'var(--color-primary-dark)', marginBottom: 4 }}>
-                Trợ lý Gấu Kindy Bảo Chứng Kép
+              <div style={{ fontWeight: 800, fontSize: 16, color: 'var(--color-primary-dark)', marginBottom: 4 }}>
+                Gấu Kindy bảo vệ các mẹ bỉm thế nào?
               </div>
-              <p style={{ fontSize: 13, color: 'var(--color-text-muted)', lineHeight: 1.5, margin: 0 }}>
-                “Kindy giữ hộ Xu trong rương bảo chứng suốt <strong>6 giờ kiểm định tại nhà</strong>. Đồ đúng cam kết mới giải ngân Xu cho người bán!”
+              <p style={{ fontSize: 13, color: 'var(--color-text-muted)', lineHeight: 1.55, margin: 0 }}>
+                “Khi mẹ bấm đổi đồ, Kindy <strong>giữ hộ Xu trong két an toàn</strong>. Mẹ nhận đồ tận tay và mang về nhà <strong>kiểm tra 6 tiếng</strong> thấy ưng ý thì người bán mới nhận được Xu!”
               </p>
             </div>
           </div>
@@ -389,35 +439,213 @@ export const HomePage: React.FC = () => {
               textAlign: 'center',
             }}
           >
-            <div>
-              <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--color-primary)' }}>
+            <div
+              style={{
+                backgroundColor: 'var(--color-pastel-pink)',
+                padding: '8px 6px',
+                borderRadius: 'var(--radius-sm)',
+              }}
+            >
+              <div style={{ fontSize: 17, fontWeight: 800, color: 'var(--color-primary-dark)' }}>
                 10.000đ
               </div>
-              <div style={{ fontSize: 12, color: 'var(--color-text-muted)', fontWeight: 600 }}>
+              <div style={{ fontSize: 11, color: 'var(--color-text-muted)', fontWeight: 700 }}>
                 = 1 Kindr Xu
               </div>
             </div>
-            <div>
-              <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--color-secondary-dark)' }}>
-                10%
+            <div
+              style={{
+                backgroundColor: 'var(--color-pastel-mint)',
+                padding: '8px 6px',
+                borderRadius: 'var(--radius-sm)',
+              }}
+            >
+              <div style={{ fontSize: 17, fontWeight: 800, color: 'var(--color-secondary-dark)' }}>
+                Cọc 10%
               </div>
-              <div style={{ fontSize: 12, color: 'var(--color-text-muted)', fontWeight: 600 }}>
-                Cọc Safe Fee
+              <div style={{ fontSize: 11, color: 'var(--color-text-muted)', fontWeight: 700 }}>
+                Hoàn lại 100%
               </div>
             </div>
-            <div>
-              <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--color-warning)' }}>
-                6 Giờ
+            <div
+              style={{
+                backgroundColor: 'var(--color-pastel-butter)',
+                padding: '8px 6px',
+                borderRadius: 'var(--radius-sm)',
+              }}
+            >
+              <div style={{ fontSize: 17, fontWeight: 800, color: 'var(--color-coin-text)' }}>
+                6 Tiếng
               </div>
-              <div style={{ fontSize: 12, color: 'var(--color-text-muted)', fontWeight: 600 }}>
-                Safeful Time
+              <div style={{ fontSize: 11, color: 'var(--color-text-muted)', fontWeight: 700 }}>
+                Kiểm đồ tại nhà
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Bento Category Filter Bar with Icons */}
+      {/* Visual 3-Step Beginner Guide Strip (Designed for First-Time Internet Users) */}
+      <div
+        className="kw-card"
+        style={{
+          padding: '18px 20px',
+          backgroundColor: 'var(--color-card)',
+          border: '1.5px dashed var(--color-secondary)',
+        }}
+      >
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: 8,
+            marginBottom: 14,
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span
+              style={{
+                backgroundColor: 'var(--color-secondary)',
+                color: '#fff',
+                fontWeight: 800,
+                fontSize: 12,
+                padding: '3px 10px',
+                borderRadius: 99,
+              }}
+            >
+              Dành cho mẹ mới bắt đầu
+            </span>
+            <h2 style={{ fontSize: 18, fontWeight: 800, margin: 0 }}>
+              Cách đổi đồ cho bé chỉ với 3 bước đơn giản
+            </h2>
+          </div>
+          <button
+            type="button"
+            onClick={() => setOnboardingOpen(true)}
+            className="kw-btn kw-btn-ghost kw-btn-sm"
+            style={{ minHeight: 34, padding: '0 10px', fontSize: 12, color: 'var(--color-primary-dark)' }}
+          >
+            <HelpCircle size={14} /> Xem chi tiết từng bước
+          </button>
+        </div>
+
+        <div className="kw-grid-3" style={{ gap: 12 }}>
+          <div
+            style={{
+              padding: '14px 16px',
+              borderRadius: 'var(--radius-default)',
+              backgroundColor: 'var(--color-pastel-pink)',
+              display: 'flex',
+              alignItems: 'flex-start',
+              gap: 12,
+            }}
+          >
+            <div
+              style={{
+                width: 34,
+                height: 34,
+                borderRadius: '50%',
+                backgroundColor: 'var(--color-primary)',
+                color: '#fff',
+                fontWeight: 800,
+                fontSize: 16,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+              }}
+            >
+              1
+            </div>
+            <div>
+              <div style={{ fontWeight: 800, fontSize: 14, marginBottom: 4 }}>
+                Chọn đồ ưng ý hoặc Đăng đồ cũ
+              </div>
+              <div style={{ fontSize: 13, color: 'var(--color-text-muted)', lineHeight: 1.45 }}>
+                Mỗi món đồ đều có giá Xu rõ ràng (VD: 2 Xu = 20.000đ). Bấm <strong>"Đổi đồ"</strong> là hệ thống giữ món đồ đó cho mẹ ngay.
+              </div>
+            </div>
+          </div>
+
+          <div
+            style={{
+              padding: '14px 16px',
+              borderRadius: 'var(--radius-default)',
+              backgroundColor: 'var(--color-pastel-butter)',
+              display: 'flex',
+              alignItems: 'flex-start',
+              gap: 12,
+            }}
+          >
+            <div
+              style={{
+                width: 34,
+                height: 34,
+                borderRadius: '50%',
+                backgroundColor: 'var(--color-warning)',
+                color: '#fff',
+                fontWeight: 800,
+                fontSize: 16,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+              }}
+            >
+              2
+            </div>
+            <div>
+              <div style={{ fontWeight: 800, fontSize: 14, marginBottom: 4 }}>
+                Hẹn gặp trao tay & Đọc mã 6 số
+              </div>
+              <div style={{ fontSize: 13, color: 'var(--color-text-muted)', lineHeight: 1.45 }}>
+                Nhắn tin hoặc gọi điện hẹn gặp tại Đà Nẵng. Khi cầm món đồ trên tay, mẹ đọc <strong>Mã 6 số</strong> cho người bán.
+              </div>
+            </div>
+          </div>
+
+          <div
+            style={{
+              padding: '14px 16px',
+              borderRadius: 'var(--radius-default)',
+              backgroundColor: 'var(--color-pastel-mint)',
+              display: 'flex',
+              alignItems: 'flex-start',
+              gap: 12,
+            }}
+          >
+            <div
+              style={{
+                width: 34,
+                height: 34,
+                borderRadius: '50%',
+                backgroundColor: 'var(--color-secondary)',
+                color: '#fff',
+                fontWeight: 800,
+                fontSize: 16,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+              }}
+            >
+              3
+            </div>
+            <div>
+              <div style={{ fontWeight: 800, fontSize: 14, marginBottom: 4 }}>
+                Kiểm tra 6 tiếng tại nhà mới trừ Xu
+              </div>
+              <div style={{ fontSize: 13, color: 'var(--color-text-muted)', lineHeight: 1.45 }}>
+                Mẹ có thêm <strong>6 tiếng</strong> mang về nhà thử cho bé. Nếu đồ sai mô tả, bấm Khiếu nại để nhận lại 100% Xu!
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Bento Category Filter Bar with Playful Nursery Colors */}
       <div>
         <div
           style={{
@@ -429,28 +657,33 @@ export const HomePage: React.FC = () => {
             marginBottom: 14,
           }}
         >
-          <h2 style={{ fontSize: 20, fontWeight: 800 }}>Danh mục đồ cho bé</h2>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div>
+            <h2 style={{ fontSize: 20, fontWeight: 800 }}>Chọn nhóm đồ cho bé yêu</h2>
+            <p style={{ fontSize: 13, color: 'var(--color-text-muted)' }}>
+              Bấm vào từng ô màu bên dưới để lọc nhanh theo độ tuổi và loại đồ của bé
+            </p>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
             <button
               type="button"
               onClick={() => setSurveyModalOpen(true)}
               className="kw-btn kw-btn-outline kw-btn-sm"
             >
               <MessageSquareHeart size={15} color="var(--color-primary)" />
-              <span>Khảo sát nhận +10 Xu</span>
+              <span>Nhận +5 Xu Tân Thủ</span>
             </button>
             <Link
               to="/donation-station"
               style={{
                 fontSize: 13,
                 fontWeight: 700,
-                color: 'var(--color-primary)',
+                color: 'var(--color-primary-dark)',
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: 4,
               }}
             >
-              <Gift size={15} /> Mở Trạm Tặng Đồ 0 Xu <ArrowRight size={14} />
+              <Gift size={15} /> Trạm Tặng Đồ Miễn Phí (0đ) <ArrowRight size={14} />
             </Link>
           </div>
         </div>
@@ -476,33 +709,33 @@ export const HomePage: React.FC = () => {
                   padding: '12px 14px',
                   borderRadius: 'var(--radius-default)',
                   border: active
-                    ? '2px solid var(--color-primary)'
-                    : '1px solid var(--color-border)',
-                  backgroundColor: active
-                    ? 'var(--color-primary-light)'
-                    : 'var(--color-card)',
+                    ? '2.5px solid var(--color-primary)'
+                    : '1.5px solid var(--color-border)',
+                  backgroundColor: active ? 'var(--color-primary-light)' : cat.bgToken,
                   cursor: 'pointer',
                   transition: 'all 0.15s ease',
-                  minHeight: 76,
+                  minHeight: 80,
                   display: 'flex',
                   flexDirection: 'column',
                   justifyContent: 'space-between',
+                  boxShadow: active ? 'var(--shadow-soft)' : 'none',
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
                   <div
                     style={{
-                      width: 30,
-                      height: 30,
-                      borderRadius: 8,
-                      backgroundColor: active ? 'var(--color-primary)' : 'var(--color-surface-subtle)',
-                      color: active ? '#FFFFFF' : 'var(--color-primary)',
+                      width: 32,
+                      height: 32,
+                      borderRadius: 10,
+                      backgroundColor: active ? 'var(--color-primary)' : 'var(--color-card)',
+                      color: active ? '#FFFFFF' : 'var(--color-primary-dark)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
+                      boxShadow: 'var(--shadow-soft)',
                     }}
                   >
-                    <IconComp size={16} />
+                    <IconComp size={17} />
                   </div>
                 </div>
                 <div>
@@ -516,7 +749,7 @@ export const HomePage: React.FC = () => {
                   >
                     {cat.label}
                   </div>
-                  <div style={{ fontSize: 11, color: 'var(--color-text-muted)', fontWeight: 600 }}>
+                  <div style={{ fontSize: 11, color: 'var(--color-text-muted)', fontWeight: 700 }}>
                     {cat.desc}
                   </div>
                 </div>

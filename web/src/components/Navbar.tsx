@@ -32,21 +32,21 @@ import { timeAgo } from '../utils/pricing';
 const ONBOARDING_SLIDES = [
   {
     step: 'Bước 1 / 3',
-    badge: 'Định Giá Cố Định • Không Mặc Cả',
-    title: 'Dọn nhà thông thái — Biến đồ cũ của bé thành Kindr Xu trong 30 giây',
-    desc: 'Không còn cảnh trả giá mất thời gian trên hội nhóm Facebook. Kindr áp dụng Ma trận giá chuẩn theo độ mới (90% / 80% / 70%) với tỷ giá cố định 1 Xu = 10.000đ, kèm AI tự động gợi ý mô tả & mức Xu.',
+    badge: 'Giá Cố Định • Không Mặc Cả (1 Xu = 10.000đ)',
+    title: 'Chọn món đồ ưng ý hoặc Chụp ảnh đăng đồ cũ của bé trong 30 giây',
+    desc: 'Không còn cảnh trả giá mất thời gian trên Facebook. Mỗi món đồ trên Kindr đều có giá niêm yết rõ ràng theo độ mới (90% / 80% / 70%) với tỷ giá dễ nhớ: 1 Xu = 10.000đ.',
   },
   {
     step: 'Bước 2 / 3',
-    badge: 'Bảo Chứng Kép (Double Escrow)',
-    title: 'An tâm tuyệt đối với Cọc 10% Safe Fee & Mã PIN 6 ký tự trao tay',
-    desc: 'Khi đăng đồ, Người bán đặt cọc 10% Safe Fee cam kết đúng mô tả. Khi đổi đồ, Người mua nhận Mã PIN 6 ký tự bí mật và chỉ đọc mã này khi trực tiếp gặp mặt kiểm tra và nhận đồ tận tay.',
+    badge: 'Giữ Hộ Xu An Toàn • Trao Tay Tại Đà Nẵng',
+    title: 'Gặp mặt nhận đồ tận tay rồi mới đọc Mã 6 số cho người bán',
+    desc: 'Khi bấm đổi đồ, hệ thống tạm giữ Xu trong két an toàn và cấp cho mẹ 1 Mã 6 số bí mật. Khi hai mẹ gặp nhau trực tiếp và kiểm tra đồ ưng ý, người mua mới đọc Mã 6 số này cho người bán.',
   },
   {
     step: 'Bước 3 / 3',
-    badge: '6 Giờ Safeful Time & Trạm Tặng Đồ 0 Xu',
-    title: '6 giờ kiểm định tại nhà & Cộng đồng Mẹ Bỉm Văn Minh Đà Nẵng',
-    desc: 'Sau khi nhập mã PIN bàn giao, hệ thống giữ hộ Xu thêm 6 giờ (Safeful Time) để mẹ mang đồ về nhà kiểm tra kỹ. Ngoài ra, mẹ có thể tặng đồ 0 Xu tại 3 Trạm Kindr Hub Đà Nẵng để tích lũy Điểm Văn Minh!',
+    badge: '6 Tiếng Kiểm Đồ Tại Nhà & Trạm Tặng Đồ 0đ',
+    title: 'Mang về nhà kiểm tra thêm 6 tiếng mới giải ngân Xu',
+    desc: 'Sau khi nhận đồ, hệ thống giữ hộ Xu thêm 6 tiếng để mẹ mang về nhà thử kỹ cho bé. Ngoài ra, mẹ có thể nhận hoặc tặng đồ miễn phí (0đ) tại 3 Trạm Tặng Đồ Kindr ở Hải Châu, Sơn Trà và Ngũ Hành Sơn!',
   },
 ];
 

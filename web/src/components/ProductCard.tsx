@@ -1,7 +1,7 @@
 // d:\Kindr\web\src\components\ProductCard.tsx
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { MapPin, ShieldCheck, Sparkles } from 'lucide-react';
+import { MapPin, ShieldCheck, Sparkles, ArrowRight } from 'lucide-react';
 import { Product } from '../types';
 import { KindrCoin, Avatar } from './KindrCoin';
 import { formatXuToVND, getCategoryLabel, getConditionLabel } from '../utils/pricing';
@@ -25,18 +25,20 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, currentUserId
         flexDirection: 'column',
         backgroundColor: 'var(--color-card)',
         borderRadius: 'var(--radius-md)',
-        border: '1px solid var(--color-border)',
+        border: '1.5px solid var(--color-border)',
         overflow: 'hidden',
         boxShadow: 'var(--shadow-soft)',
-        transition: 'transform 0.18s ease, box-shadow 0.18s ease',
+        transition: 'transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease',
       }}
       onMouseEnter={(e) => {
         e.currentTarget.style.transform = 'translateY(-3px)';
         e.currentTarget.style.boxShadow = 'var(--shadow-card)';
+        e.currentTarget.style.borderColor = 'var(--color-primary)';
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.transform = 'translateY(0)';
         e.currentTarget.style.boxShadow = 'var(--shadow-soft)';
+        e.currentTarget.style.borderColor = 'var(--color-border)';
       }}
     >
       {/* Thumbnail 4:3 */}
@@ -83,12 +85,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, currentUserId
           <span className="kw-badge kw-badge-teal">
             {product.conditionLabel || getConditionLabel(product.condition)}
           </span>
-          {isOwn && (
-            <span className="kw-badge kw-badge-coral">Tin của mẹ</span>
-          )}
+          {isOwn && <span className="kw-badge kw-badge-coral">Bài của mẹ</span>}
           {!isOwn && isCharity && (
             <span className="kw-badge kw-badge-coral">
-              <Sparkles size={12} /> Tặng 0 Xu
+              <Sparkles size={12} /> Tặng miễn phí
             </span>
           )}
         </div>
@@ -99,9 +99,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, currentUserId
             position: 'absolute',
             bottom: 8,
             left: 10,
-            backgroundColor: 'rgba(26, 29, 32, 0.72)',
+            backgroundColor: 'rgba(35, 31, 32, 0.76)',
             color: 'var(--color-on-primary)',
-            padding: '3px 10px',
+            padding: '4px 10px',
             borderRadius: 'var(--radius-full)',
             fontSize: 12,
             fontWeight: 600,
@@ -146,7 +146,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, currentUserId
               fontSize: 15,
               fontWeight: 700,
               color: 'var(--color-text)',
-              lineHeight: 1.35,
+              lineHeight: 1.38,
               display: '-webkit-box',
               WebkitLineClamp: 2,
               WebkitBoxOrient: 'vertical',
@@ -158,15 +158,20 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, currentUserId
         </div>
 
         <div>
-          {/* Price Row */}
+          {/* Clear Price Pill (Xu + VNĐ side by side for first-time users) */}
           <div
             className="kw-product-card-price-row"
             style={{
               display: 'flex',
-              alignItems: 'baseline',
+              alignItems: 'center',
               justifyContent: 'space-between',
               flexWrap: 'wrap',
-              gap: 4,
+              gap: 6,
+              padding: '6px 10px',
+              borderRadius: 'var(--radius-sm)',
+              backgroundColor: isCharity
+                ? 'var(--color-secondary-light)'
+                : 'var(--color-pastel-butter)',
               marginBottom: 10,
             }}
           >
@@ -175,20 +180,26 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, currentUserId
               <span
                 className="kw-product-card-price"
                 style={{
-                  fontSize: 17,
+                  fontSize: 16,
                   fontWeight: 800,
-                  color: isCharity ? 'var(--color-secondary-dark)' : 'var(--color-primary)',
+                  color: isCharity ? 'var(--color-secondary-dark)' : 'var(--color-primary-dark)',
                 }}
               >
-                {isCharity ? '0 Xu (Tặng)' : `${product.price} Xu`}
+                {isCharity ? 'Tặng 0đ' : `${product.price} Xu`}
               </span>
             </div>
-            <span style={{ fontSize: 11, color: 'var(--color-text-muted)', fontWeight: 600 }}>
-              {isCharity ? 'Miễn phí' : `~ ${formatXuToVND(product.price)}`}
+            <span
+              style={{
+                fontSize: 12,
+                color: isCharity ? 'var(--color-secondary-dark)' : 'var(--color-coin-text)',
+                fontWeight: 700,
+              }}
+            >
+              {isCharity ? '0 Xu' : `(${formatXuToVND(product.price)})`}
             </span>
           </div>
 
-          {/* Seller Footer */}
+          {/* Seller Footer + Clear Action Hint */}
           <div
             className="kw-product-card-footer"
             style={{
@@ -223,13 +234,14 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, currentUserId
                 gap: 3,
                 fontSize: 11,
                 fontWeight: 700,
-                color: 'var(--color-secondary-dark)',
+                color: 'var(--color-primary-dark)',
                 flexShrink: 0,
               }}
-              title="Đã ký quỹ bảo chứng chất lượng"
+              title="Bấm vào để xem ảnh chi tiết và đổi đồ"
             >
-              <ShieldCheck size={13} />
-              <span>Escrow</span>
+              <ShieldCheck size={13} color="var(--color-secondary-dark)" />
+              <span>{isOwn ? 'Xem bài' : 'Đổi đồ'}</span>
+              <ArrowRight size={12} />
             </span>
           </div>
         </div>

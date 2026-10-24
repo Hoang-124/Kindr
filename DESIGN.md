@@ -23,9 +23,15 @@ Kindr connects families to exchange gently used toys, educational games, and boo
 | `primaryLight` | `#FFE8E8` | Soft pastel tint for badge backgrounds and active pills |
 | `secondary` | `#4ECDC4` | Energetic teal — secondary actions, category tags, filters |
 | `accent` | `#FFD166` | Warm sunny yellow — ratings, reward badges, sparkles |
-| `background` | `#F8F9FA` | Warm off-white main canvas background |
+| `background` | `#FFFDF9` | Warm milky cream main canvas background (soothing for moms & babies) |
 | `card` | `#FFFFFF` | Crisp white elevated card & modal surface |
-| `surfaceSubtle` | `#F1F3F5` | Secondary surface for input fields and subtle section rows |
+| `surfaceSubtle` | `#FFF7EE` | Soft warm peach-cream surface for input fields and subtle section rows |
+| `pastelPink` | `#FFF0F3` | Nursery blush pink for baby clothing & primary hero accents |
+| `pastelMint` | `#E8FBF8` | Nursery mint green for strollers, cribs & free 0-Xu station badges |
+| `pastelButter` | `#FFF9DB` | Sunny duckling yellow for toys & Xu price pills |
+| `pastelSky` | `#EBF8FF` | Soft sky blue for children's books & Ehon |
+| `pastelLavender` | `#F3F0FF` | Soft lavender for educational items |
+| `pastelPeach` | `#FFF4E6` | Warm peach for large toys & activity gear |
 | `text` | `#1A1D20` | High-contrast dark charcoal for primary titles and body |
 | `textMuted` | `#6C757D` | Medium grey for secondary labels and timestamps |
 | `textDim` | `#ADB5BD` | Light grey for placeholder text and disabled states |
