@@ -231,16 +231,22 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, currentUserId
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: 3,
+                gap: 4,
                 fontSize: 11,
-                fontWeight: 700,
-                color: 'var(--color-primary-dark)',
+                fontWeight: 800,
+                padding: '4px 10px',
+                borderRadius: 99,
+                backgroundColor: isOwn
+                  ? 'var(--color-surface-subtle)'
+                  : isCharity
+                    ? 'var(--color-secondary)'
+                    : 'var(--color-primary)',
+                color: isOwn ? 'var(--color-text)' : '#FFFFFF',
                 flexShrink: 0,
               }}
               title="Bấm vào để xem ảnh chi tiết và đổi đồ"
             >
-              <ShieldCheck size={13} color="var(--color-secondary-dark)" />
-              <span>{isOwn ? 'Xem bài' : 'Đổi đồ'}</span>
+              <span>{isOwn ? 'Xem bài' : isCharity ? 'Nhận 0đ' : 'Đổi ngay'}</span>
               <ArrowRight size={12} />
             </span>
           </div>

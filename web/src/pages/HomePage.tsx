@@ -87,6 +87,14 @@ const BENTO_CATEGORIES = [
   },
 ];
 
+const DECLUTTER_CALCULATOR_ITEMS = [
+  { id: 'stroller', label: '🛒 Xe đẩy / Ghế ăn dặm', xu: 20 },
+  { id: 'clothes', label: '👗 3 bộ quần áo bé chật', xu: 9 },
+  { id: 'lego', label: '🧸 Đồ chơi gỗ / Lego', xu: 6 },
+  { id: 'books', label: '📚 Bộ sách truyện Ehon', xu: 2 },
+  { id: 'crib', label: '🛏️ Nôi cũi / Xe chòi chân', xu: 15 },
+];
+
 export const HomePage: React.FC = () => {
   const {
     currentUser,
@@ -102,6 +110,17 @@ export const HomePage: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [sortOrder, setSortOrder] = useState<'newest' | 'price_asc' | 'price_desc'>('newest');
   const [quickQuery, setQuickQuery] = useState('');
+  const [selectedCalcIds, setSelectedCalcIds] = useState<string[]>(['stroller', 'clothes', 'lego']);
+
+  const toggleCalcItem = (id: string) => {
+    setSelectedCalcIds((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  };
+
+  const totalCalcXu = DECLUTTER_CALCULATOR_ITEMS.filter((i) =>
+    selectedCalcIds.includes(i.id)
+  ).reduce((sum, i) => sum + i.xu, 0);
 
   // Popup Survey (+10 Xu) state
   const [surveyModalOpen, setSurveyModalOpen] = useState(false);
@@ -406,12 +425,12 @@ export const HomePage: React.FC = () => {
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
             <img
-              className="kw-hero-mascot-img"
+              className="kw-hero-mascot-img kw-float-anim"
               src="/assets/images/kindr-mascot-full.png"
               alt="Gấu Kindy Mascot"
               style={{
-                width: 84,
-                height: 84,
+                width: 86,
+                height: 86,
                 objectFit: 'contain',
                 borderRadius: 'var(--radius-default)',
                 backgroundColor: 'var(--color-pastel-butter)',
@@ -482,6 +501,290 @@ export const HomePage: React.FC = () => {
               </div>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* 3 GIANT TACTILE ACTION PORTALS — "Mẹ muốn làm gì hôm nay?" */}
+      <div>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: 8,
+            marginBottom: 14,
+          }}
+        >
+          <div>
+            <h2 style={{ fontSize: 22, fontWeight: 900, margin: 0 }}>
+              Mẹ muốn làm gì hôm nay? (Chỉ cần bấm 1 nút lớn bên dưới)
+            </h2>
+            <p style={{ fontSize: 14, color: 'var(--color-text-muted)', marginTop: 2 }}>
+              Thiết kế chữ to, rõ ràng — Dễ dùng ngay cả khi mẹ đang bế bé bằng một tay
+            </p>
+          </div>
+        </div>
+
+        <div className="kw-grid-3" style={{ gap: 16 }}>
+          {/* Portal 1: Tìm đồ cho bé */}
+          <button
+            type="button"
+            className="kw-action-portal"
+            style={{
+              backgroundColor: 'var(--color-pastel-pink)',
+              borderColor: 'var(--color-primary)',
+            }}
+            onClick={() => {
+              document.getElementById('product-shelf')?.scrollIntoView({ behavior: 'smooth' });
+            }}
+          >
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                <span
+                  style={{
+                    fontSize: 34,
+                    lineHeight: 1,
+                    backgroundColor: 'var(--color-card)',
+                    width: 58,
+                    height: 58,
+                    borderRadius: 18,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: 'var(--shadow-soft)',
+                  }}
+                >
+                  🧸
+                </span>
+                <span className="kw-badge kw-badge-coral">Bước 1 • Chọn đồ</span>
+              </div>
+              <h3 style={{ fontSize: 19, fontWeight: 900, color: 'var(--color-text)', marginBottom: 6 }}>
+                1. Xem & Đổi Đồ Cho Bé
+              </h3>
+              <p style={{ fontSize: 13, color: 'var(--color-text-muted)', lineHeight: 1.5, marginBottom: 14 }}>
+                Quần áo sơ sinh, đồ chơi gỗ, xe đẩy mới 90% quanh Đà Nẵng chỉ từ <strong>10.000đ (1 Xu)</strong>.
+              </p>
+            </div>
+            <div
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
+                fontWeight: 800,
+                fontSize: 14,
+                color: 'var(--color-primary-dark)',
+              }}
+            >
+              <span>Xem kệ đồ ngay</span>
+              <ArrowRight size={16} />
+            </div>
+          </button>
+
+          {/* Portal 2: Chụp ảnh đăng đồ cũ */}
+          <button
+            type="button"
+            className="kw-action-portal"
+            style={{
+              backgroundColor: 'var(--color-pastel-butter)',
+              borderColor: 'var(--color-warning)',
+            }}
+            onClick={() => navigate('/post')}
+          >
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                <span
+                  style={{
+                    fontSize: 34,
+                    lineHeight: 1,
+                    backgroundColor: 'var(--color-card)',
+                    width: 58,
+                    height: 58,
+                    borderRadius: 18,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: 'var(--shadow-soft)',
+                  }}
+                >
+                  📸
+                </span>
+                <span className="kw-badge kw-badge-gold">Chụp ảnh 30 giây</span>
+              </div>
+              <h3 style={{ fontSize: 19, fontWeight: 900, color: 'var(--color-text)', marginBottom: 6 }}>
+                2. Đổi Đồ Cũ Lấy Xu
+              </h3>
+              <p style={{ fontSize: 13, color: 'var(--color-text-muted)', lineHeight: 1.5, marginBottom: 14 }}>
+                Đồ bé mặc chật hay chơi chán đem đăng lên nhận ngay <strong>Kindr Xu</strong> để đổi món mới cho con.
+              </p>
+            </div>
+            <div
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
+                fontWeight: 800,
+                fontSize: 14,
+                color: 'var(--color-coin-text)',
+              }}
+            >
+              <span>Bấm đăng đồ ngay</span>
+              <ArrowRight size={16} />
+            </div>
+          </button>
+
+          {/* Portal 3: Trạm tặng đồ 0 đồng */}
+          <button
+            type="button"
+            className="kw-action-portal"
+            style={{
+              backgroundColor: 'var(--color-pastel-mint)',
+              borderColor: 'var(--color-secondary)',
+            }}
+            onClick={() => navigate('/donation-station')}
+          >
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                <span
+                  style={{
+                    fontSize: 34,
+                    lineHeight: 1,
+                    backgroundColor: 'var(--color-card)',
+                    width: 58,
+                    height: 58,
+                    borderRadius: 18,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: 'var(--shadow-soft)',
+                  }}
+                >
+                  🎁
+                </span>
+                <span className="kw-badge kw-badge-teal">Miễn phí 0 đồng</span>
+              </div>
+              <h3 style={{ fontSize: 19, fontWeight: 900, color: 'var(--color-text)', marginBottom: 6 }}>
+                3. Trạm Tặng Đồ 0 Đồng
+              </h3>
+              <p style={{ fontSize: 13, color: 'var(--color-text-muted)', lineHeight: 1.5, marginBottom: 14 }}>
+                Nhận hoặc gửi tặng đồ sơ sinh, sách truyện hoàn toàn <strong>miễn phí (0 Xu)</strong> tại 3 trạm Đà Nẵng.
+              </p>
+            </div>
+            <div
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
+                fontWeight: 800,
+                fontSize: 14,
+                color: 'var(--color-secondary-dark)',
+              }}
+            >
+              <span>Vào Trạm Tặng Đồ 0đ</span>
+              <ArrowRight size={16} />
+            </div>
+          </button>
+        </div>
+      </div>
+
+      {/* INTERACTIVE PIGGY BANK CALCULATOR — "Ống Heo Tính Xu Dọn Nhà Cho Mẹ" */}
+      <div
+        className="kw-card"
+        style={{
+          background:
+            'linear-gradient(135deg, var(--color-pastel-butter) 0%, var(--color-card) 55%, var(--color-pastel-pink) 100%)',
+          border: '2px solid var(--color-warning)',
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+          gap: 20,
+          alignItems: 'center',
+        }}
+      >
+        <div>
+          <span className="kw-badge kw-badge-gold" style={{ marginBottom: 8 }}>
+            🐷 Ống Heo Tính Thử • Nhà mẹ đang có món nào bé không dùng nữa?
+          </span>
+          <h3 style={{ fontSize: 20, fontWeight: 900, marginBottom: 6 }}>
+            Bấm chọn thử các món đồ cũ trong nhà để xem mẹ đổi được bao nhiêu Xu nhé!
+          </h3>
+          <p style={{ fontSize: 13, color: 'var(--color-text-muted)', marginBottom: 14 }}>
+            Chạm vào từng món bên dưới để cộng/trừ vào Ống Heo Tiết Kiệm của mẹ:
+          </p>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+            {DECLUTTER_CALCULATOR_ITEMS.map((item) => {
+              const active = selectedCalcIds.includes(item.id);
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => toggleCalcItem(item.id)}
+                  className={`kw-savings-chip ${active ? 'active' : ''}`}
+                >
+                  <span>{item.label}</span>
+                  <span
+                    style={{
+                      padding: '2px 8px',
+                      borderRadius: 99,
+                      backgroundColor: active ? 'var(--color-primary)' : 'var(--color-surface-subtle)',
+                      color: active ? '#fff' : 'var(--color-coin-text)',
+                      fontSize: 12,
+                    }}
+                  >
+                    +{item.xu} Xu
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div
+          style={{
+            backgroundColor: 'var(--color-card)',
+            borderRadius: 'var(--radius-md)',
+            border: '2px solid var(--color-border-strong)',
+            padding: 20,
+            textAlign: 'center',
+            boxShadow: 'var(--shadow-soft)',
+          }}
+        >
+          <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--color-text-muted)', marginBottom: 4 }}>
+            Tổng giá trị ống heo mẹ nhận về:
+          </div>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 8,
+              fontSize: 32,
+              fontWeight: 900,
+              color: 'var(--color-primary-dark)',
+              marginBottom: 4,
+            }}
+          >
+            <KindrCoin size={28} />
+            <span>{totalCalcXu} Kindr Xu</span>
+          </div>
+          <div
+            style={{
+              fontSize: 14,
+              fontWeight: 800,
+              color: 'var(--color-secondary-dark)',
+              marginBottom: 14,
+            }}
+          >
+            (Tương đương {(totalCalcXu * 10000).toLocaleString('vi-VN')}đ tiền mua đồ mới cho bé!)
+          </div>
+          <button
+            type="button"
+            onClick={() => navigate('/post')}
+            className="kw-btn kw-btn-primary"
+            style={{ width: '100%' }}
+          >
+            <PlusCircle size={18} />
+            <span>Đăng đồ nhận {totalCalcXu} Xu ngay</span>
+          </button>
         </div>
       </div>
 
@@ -760,7 +1063,7 @@ export const HomePage: React.FC = () => {
       </div>
 
       {/* Product Feed Header & Grid */}
-      <div>
+      <div id="product-shelf" style={{ scrollMarginTop: 90 }}>
         <div
           style={{
             display: 'flex',

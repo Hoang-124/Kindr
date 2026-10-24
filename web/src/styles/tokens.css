@@ -70,8 +70,8 @@
   --color-admin-badge: #FFF0EE;
   --color-admin-badge-text: #B73232;
 
-  /* Typography Stack */
-  --font-sans: 'Plus Jakarta Sans', 'Be Vietnam Pro', 'Inter', system-ui, -apple-system, sans-serif;
+  /* Typography Stack — Rounded, Joyful & 100% Vietnamese Supported */
+  --font-sans: 'Nunito', 'Plus Jakarta Sans', 'Be Vietnam Pro', 'Inter', system-ui, -apple-system, sans-serif;
 
   /* Spacing Grid (4pt / 8pt) */
   --space-1: 4px;
@@ -85,19 +85,22 @@
   --space-12: 48px;
 
   /* Border Radius Tokens — Soft, Child-Safe Rounded Edges */
-  --radius-sm: 10px;
-  --radius-default: 18px;
-  --radius-md: 22px;
-  --radius-lg: 28px;
-  --radius-xl: 40px;
+  --radius-sm: 12px;
+  --radius-default: 20px;
+  --radius-md: 24px;
+  --radius-lg: 30px;
+  --radius-xl: 42px;
   --radius-full: 9999px;
   --radius-pill: 9999px;
 
-  /* Warm Ambient Shadows */
-  --shadow-soft: 0 4px 14px rgba(140, 101, 80, 0.06);
-  --shadow-card: 0 10px 28px rgba(140, 101, 80, 0.08);
-  --shadow-elevated: 0 18px 42px rgba(140, 101, 80, 0.16);
-  --shadow-btn: 0 8px 20px rgba(255, 107, 107, 0.30);
+  /* Tactile 3D Toyblock & Warm Ambient Shadows */
+  --shadow-soft: 0 4px 0 rgba(140, 101, 80, 0.06), 0 8px 20px rgba(140, 101, 80, 0.06);
+  --shadow-card: 0 6px 0 rgba(255, 107, 107, 0.08), 0 14px 32px rgba(140, 101, 80, 0.09);
+  --shadow-elevated: 0 18px 44px rgba(140, 101, 80, 0.18);
+  --shadow-btn: 0 4px 0 #D94848, 0 8px 18px rgba(255, 107, 107, 0.32);
+  --shadow-btn-active: 0 1px 0 #D94848, 0 3px 8px rgba(255, 107, 107, 0.24);
+  --shadow-btn-secondary: 0 4px 0 #24857F, 0 8px 18px rgba(56, 178, 172, 0.28);
+  --shadow-btn-outline: 0 3px 0 rgba(140, 101, 80, 0.14);
 }
 
 [data-theme="dark"] {

@@ -506,7 +506,7 @@ textarea {
   font-weight: 700;
 }
 
-/* Ergonomic Buttons (>= 44px touch target) */
+/* Ergonomic Tactile 3D Toyblock Buttons (>= 44px touch target) */
 .kw-btn {
   display: inline-flex;
   align-items: center;
@@ -515,17 +515,16 @@ textarea {
   min-height: 44px;
   padding: 0 20px;
   border-radius: var(--radius-full);
-  border: 1px solid transparent;
+  border: 1.5px solid transparent;
   font-size: 14px;
-  font-weight: 700;
+  font-weight: 800;
   cursor: pointer;
-  transition: transform 0.12s ease, opacity 0.12s ease, background-color 0.16s ease, border-color 0.16s ease;
+  transition: transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.12s ease, opacity 0.12s ease, background-color 0.16s ease, border-color 0.16s ease;
   user-select: none;
 }
 
 .kw-btn:active:not(:disabled) {
-  transform: scale(0.98);
-  opacity: 0.92;
+  transform: translateY(2px) scale(0.98);
 }
 
 .kw-btn:disabled {
@@ -541,25 +540,35 @@ textarea {
 
 .kw-btn-primary:hover:not(:disabled) {
   background-color: var(--color-primary-dark);
+  transform: translateY(-1px);
+}
+
+.kw-btn-primary:active:not(:disabled) {
+  box-shadow: var(--shadow-btn-active);
 }
 
 .kw-btn-secondary {
   background-color: var(--color-secondary);
   color: var(--color-on-primary);
+  box-shadow: var(--shadow-btn-secondary);
 }
 
 .kw-btn-secondary:hover:not(:disabled) {
   background-color: var(--color-secondary-dark);
+  transform: translateY(-1px);
 }
 
 .kw-btn-outline {
   background-color: var(--color-card);
   color: var(--color-text);
   border-color: var(--color-border-strong);
+  box-shadow: var(--shadow-btn-outline);
 }
 
 .kw-btn-outline:hover:not(:disabled) {
   background-color: var(--color-surface-subtle);
+  border-color: var(--color-primary);
+  transform: translateY(-1px);
 }
 
 .kw-btn-ghost {
@@ -575,6 +584,7 @@ textarea {
 .kw-btn-danger {
   background-color: var(--color-error);
   color: var(--color-on-primary);
+  box-shadow: 0 4px 0 #B82A2A;
 }
 
 .kw-btn-sm {
@@ -589,10 +599,10 @@ textarea {
   font-size: 16px;
 }
 
-/* Elevated Cards */
+/* Plush Toybox Elevated Cards */
 .kw-card {
   background-color: var(--color-card);
-  border: 1px solid var(--color-border);
+  border: 2px solid var(--color-border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-card);
   padding: var(--space-6);
@@ -602,7 +612,7 @@ textarea {
 
 .kw-card-compact {
   background-color: var(--color-card);
-  border: 1px solid var(--color-border);
+  border: 1.5px solid var(--color-border);
   border-radius: var(--radius-default);
   box-shadow: var(--shadow-soft);
   padding: var(--space-4);
@@ -787,7 +797,8 @@ textarea {
   }
 
   .kw-product-card-escrow {
-    display: none !important;
+    padding: 3px 7px !important;
+    font-size: 10px !important;
   }
 }
 
@@ -855,4 +866,69 @@ textarea {
 
 .kw-table tr:hover td {
   background-color: var(--color-bg);
+}
+
+/* Playful Nursery Animations & Tactile Action Portals */
+@keyframes kindrFloat {
+  0%,
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-6px) rotate(1.5deg);
+  }
+}
+
+.kw-float-anim {
+  animation: kindrFloat 3.6s ease-in-out infinite;
+}
+
+.kw-action-portal {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 20px;
+  border-radius: var(--radius-md);
+  border: 2.5px solid var(--color-border-strong);
+  box-shadow: 0 6px 0 rgba(140, 101, 80, 0.12), 0 12px 24px rgba(140, 101, 80, 0.08);
+  cursor: pointer;
+  transition: transform 0.16s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.16s ease, border-color 0.16s ease;
+  text-align: left;
+  position: relative;
+  overflow: hidden;
+}
+
+.kw-action-portal:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 0 rgba(255, 107, 107, 0.18), 0 18px 34px rgba(140, 101, 80, 0.14);
+}
+
+.kw-action-portal:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 rgba(140, 101, 80, 0.12);
+}
+
+.kw-savings-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 46px;
+  padding: 8px 16px;
+  border-radius: var(--radius-full);
+  border: 2px solid var(--color-border-strong);
+  background-color: var(--color-card);
+  color: var(--color-text);
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 3px 0 rgba(140, 101, 80, 0.12);
+  transition: all 0.15s ease;
+}
+
+.kw-savings-chip.active {
+  background-color: var(--color-primary-light);
+  border-color: var(--color-primary);
+  color: var(--color-primary-dark);
+  box-shadow: 0 3px 0 var(--color-primary);
+  transform: translateY(-1px);
 }
