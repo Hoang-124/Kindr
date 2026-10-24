@@ -10,13 +10,6 @@ import {
   ArrowRight,
   Lock,
   SlidersHorizontal,
-  LayoutGrid,
-  ToyBrick,
-  Gamepad2,
-  BookOpen,
-  Shirt,
-  Baby,
-  GraduationCap,
   HelpCircle,
   MessageSquareHeart,
   Award,
@@ -26,6 +19,21 @@ import {
 import { useApp } from '../context/AppContext';
 import { ProductCard } from '../components/ProductCard';
 import { MascotIcon, KindrCoin } from '../components/KindrCoin';
+import {
+  PortalToyShelfSvg,
+  PortalCameraCoinSvg,
+  PortalGiftHeartSvg,
+  PiggyBankSvg,
+  CatAllSvg,
+  CatSmallToySvg,
+  CatLargeToySvg,
+  CatBookEhonSvg,
+  CatBabyClothesSvg,
+  CatStrollerCribSvg,
+  CatStudySvg,
+  CatCharityGiftSvg,
+  CribSvg,
+} from '../components/NurserySvgIllustrations';
 import { surveyApi, waitlistApi } from '../services/domainServices';
 
 const BENTO_CATEGORIES = [
@@ -34,65 +42,65 @@ const BENTO_CATEGORIES = [
     label: 'Tất cả đồ cho bé',
     desc: 'Xem toàn bộ tại Đà Nẵng',
     bgToken: 'var(--color-pastel-pink)',
-    Icon: LayoutGrid,
+    Icon: CatAllSvg,
   },
   {
     id: 'toy_small',
     label: 'Đồ chơi nhỏ',
     desc: '2 Xu (20.000đ)',
     bgToken: 'var(--color-pastel-butter)',
-    Icon: ToyBrick,
+    Icon: CatSmallToySvg,
   },
   {
     id: 'toy_large',
     label: 'Đồ chơi lớn',
     desc: '5–10 Xu (50–100k)',
     bgToken: 'var(--color-pastel-peach)',
-    Icon: Gamepad2,
+    Icon: CatLargeToySvg,
   },
   {
     id: 'book',
     label: 'Sách truyện & Ehon',
     desc: '1–2 Xu (10–20k)',
     bgToken: 'var(--color-pastel-sky)',
-    Icon: BookOpen,
+    Icon: CatBookEhonSvg,
   },
   {
     id: 'quan_ao',
     label: 'Quần áo bé',
     desc: '2–5 Xu (20–50k)',
     bgToken: 'var(--color-pastel-pink)',
-    Icon: Shirt,
+    Icon: CatBabyClothesSvg,
   },
   {
     id: 'xe_noi',
     label: 'Xe đẩy & Nôi cũi',
     desc: '15–30 Xu (150–300k)',
     bgToken: 'var(--color-pastel-mint)',
-    Icon: Baby,
+    Icon: CatStrollerCribSvg,
   },
   {
     id: 'do_hoc_tap',
     label: 'Đồ học tập',
     desc: '2–4 Xu (20–40k)',
     bgToken: 'var(--color-pastel-lavender)',
-    Icon: GraduationCap,
+    Icon: CatStudySvg,
   },
   {
     id: 'charity',
     label: 'Trạm Tặng 0đ',
     desc: 'Miễn phí 100%',
     bgToken: 'var(--color-pastel-mint)',
-    Icon: Gift,
+    Icon: CatCharityGiftSvg,
   },
 ];
 
 const DECLUTTER_CALCULATOR_ITEMS = [
-  { id: 'stroller', label: '🛒 Xe đẩy / Ghế ăn dặm', xu: 20 },
-  { id: 'clothes', label: '👗 3 bộ quần áo bé chật', xu: 9 },
-  { id: 'lego', label: '🧸 Đồ chơi gỗ / Lego', xu: 6 },
-  { id: 'books', label: '📚 Bộ sách truyện Ehon', xu: 2 },
-  { id: 'crib', label: '🛏️ Nôi cũi / Xe chòi chân', xu: 15 },
+  { id: 'stroller', label: 'Xe đẩy / Ghế ăn dặm', xu: 20, SvgIcon: CatStrollerCribSvg },
+  { id: 'clothes', label: '3 bộ quần áo bé chật', xu: 9, SvgIcon: CatBabyClothesSvg },
+  { id: 'lego', label: 'Đồ chơi gỗ / Lego', xu: 6, SvgIcon: CatLargeToySvg },
+  { id: 'books', label: 'Bộ sách truyện Ehon', xu: 2, SvgIcon: CatBookEhonSvg },
+  { id: 'crib', label: 'Nôi cũi / Xe chòi chân', xu: 15, SvgIcon: CribSvg },
 ];
 
 export const HomePage: React.FC = () => {
@@ -543,8 +551,6 @@ export const HomePage: React.FC = () => {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
                 <span
                   style={{
-                    fontSize: 34,
-                    lineHeight: 1,
                     backgroundColor: 'var(--color-card)',
                     width: 58,
                     height: 58,
@@ -555,7 +561,7 @@ export const HomePage: React.FC = () => {
                     boxShadow: 'var(--shadow-soft)',
                   }}
                 >
-                  🧸
+                  <PortalToyShelfSvg size={38} />
                 </span>
                 <span className="kw-badge kw-badge-coral">Bước 1 • Chọn đồ</span>
               </div>
@@ -595,8 +601,6 @@ export const HomePage: React.FC = () => {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
                 <span
                   style={{
-                    fontSize: 34,
-                    lineHeight: 1,
                     backgroundColor: 'var(--color-card)',
                     width: 58,
                     height: 58,
@@ -607,7 +611,7 @@ export const HomePage: React.FC = () => {
                     boxShadow: 'var(--shadow-soft)',
                   }}
                 >
-                  📸
+                  <PortalCameraCoinSvg size={38} />
                 </span>
                 <span className="kw-badge kw-badge-gold">Chụp ảnh 30 giây</span>
               </div>
@@ -647,8 +651,6 @@ export const HomePage: React.FC = () => {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
                 <span
                   style={{
-                    fontSize: 34,
-                    lineHeight: 1,
                     backgroundColor: 'var(--color-card)',
                     width: 58,
                     height: 58,
@@ -659,7 +661,7 @@ export const HomePage: React.FC = () => {
                     boxShadow: 'var(--shadow-soft)',
                   }}
                 >
-                  🎁
+                  <PortalGiftHeartSvg size={38} />
                 </span>
                 <span className="kw-badge kw-badge-teal">Miễn phí 0 đồng</span>
               </div>
@@ -702,7 +704,8 @@ export const HomePage: React.FC = () => {
       >
         <div>
           <span className="kw-badge kw-badge-gold" style={{ marginBottom: 8 }}>
-            🐷 Ống Heo Tính Thử • Nhà mẹ đang có món nào bé không dùng nữa?
+            <PiggyBankSvg size={18} />
+            <span>Ống Heo Tính Thử • Nhà mẹ đang có món nào bé không dùng nữa?</span>
           </span>
           <h3 style={{ fontSize: 20, fontWeight: 900, marginBottom: 6 }}>
             Bấm chọn thử các món đồ cũ trong nhà để xem mẹ đổi được bao nhiêu Xu nhé!
@@ -713,6 +716,7 @@ export const HomePage: React.FC = () => {
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
             {DECLUTTER_CALCULATOR_ITEMS.map((item) => {
               const active = selectedCalcIds.includes(item.id);
+              const ItemSvg = item.SvgIcon;
               return (
                 <button
                   key={item.id}
@@ -720,6 +724,7 @@ export const HomePage: React.FC = () => {
                   onClick={() => toggleCalcItem(item.id)}
                   className={`kw-savings-chip ${active ? 'active' : ''}`}
                 >
+                  <ItemSvg size={20} />
                   <span>{item.label}</span>
                   <span
                     style={{
@@ -1027,18 +1032,18 @@ export const HomePage: React.FC = () => {
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
                   <div
                     style={{
-                      width: 32,
-                      height: 32,
-                      borderRadius: 10,
-                      backgroundColor: active ? 'var(--color-primary)' : 'var(--color-card)',
-                      color: active ? '#FFFFFF' : 'var(--color-primary-dark)',
+                      width: 36,
+                      height: 36,
+                      borderRadius: 12,
+                      backgroundColor: 'var(--color-card)',
+                      border: active ? '1.5px solid var(--color-primary)' : '1px solid var(--color-border)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       boxShadow: 'var(--shadow-soft)',
                     }}
                   >
-                    <IconComp size={17} />
+                    <IconComp size={22} />
                   </div>
                 </div>
                 <div>
