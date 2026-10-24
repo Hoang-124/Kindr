@@ -456,7 +456,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const xu = payload?.xuAmount || 0;
       if (xu > 0) {
         showToast({
-          title: 'Nạp Xu thành công! 🎉',
+          title: 'Nạp Xu thành công!',
           message: `Ví của mẹ vừa được cộng thêm +${xu} Xu qua VietQR.`,
           type: 'success',
           link: '/wallet',

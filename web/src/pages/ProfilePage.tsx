@@ -323,8 +323,11 @@ export const ProfilePage: React.FC = () => {
             <p style={{ fontSize: 13, color: 'var(--color-text-secondary)', margin: '4px 0 10px' }}>
               {currentUser.bio || 'Thành viên cộng đồng trao đổi đồ mẹ và bé văn minh Kindr Đà Nẵng'}
             </p>
-            <div style={{ display: 'flex', gap: 16, fontSize: 13, fontWeight: 700 }}>
-              <span>★ {currentUser.reputationScore.toFixed(1)} Uy tín</span>
+            <div style={{ display: 'flex', gap: 16, fontSize: 13, fontWeight: 700, alignItems: 'center' }}>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                <Star size={14} fill="var(--color-coin-gold)" color="var(--color-coin-gold)" />
+                {currentUser.reputationScore.toFixed(1)} Uy tín
+              </span>
               <span>•</span>
               <span>{currentUser.tradesCount} lần đổi đồ</span>
               <span>•</span>
@@ -603,8 +606,10 @@ export const ProfilePage: React.FC = () => {
                   >
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
                       <strong>{r.fromUserName}</strong>
-                      <span style={{ color: 'var(--color-coin-text)', fontWeight: 800 }}>
-                        {'★'.repeat(r.stars)}
+                      <span style={{ color: 'var(--color-coin-text)', fontWeight: 800, display: 'inline-flex', gap: 2 }}>
+                        {Array.from({ length: r.stars }).map((_, idx) => (
+                          <Star key={idx} size={13} fill="var(--color-coin-gold)" color="var(--color-coin-gold)" />
+                        ))}
                       </span>
                     </div>
                     <p style={{ fontSize: 13, margin: '4px 0' }}>{r.comment}</p>
