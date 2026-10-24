@@ -1,5 +1,5 @@
 // d:\Kindr\web\src\components\Navbar.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import {
   Home,
@@ -22,6 +22,7 @@ import {
   ShieldCheck,
   Clock,
   Sparkles,
+  AlertTriangle,
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { KindrCoin, KindrLogo, Avatar } from './KindrCoin';
@@ -61,13 +62,40 @@ export const Navbar: React.FC = () => {
     onboardingOpen,
     setOnboardingOpen,
     toast,
+    showToast,
     dismissToast,
+    confirmDialog,
+    requestConfirm,
+    closeConfirm,
     logout,
   } = useApp();
 
   const navigate = useNavigate();
   const [notifOpen, setNotifOpen] = useState(false);
   const [slideIdx, setSlideIdx] = useState(0);
+  const [confirmLoading, setConfirmLoading] = useState(false);
+
+  useEffect(() => {
+    if (!confirmDialog) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && !confirmLoading) {
+        closeConfirm();
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [confirmDialog, confirmLoading, closeConfirm]);
+
+  const handleExecuteConfirm = async () => {
+    if (!confirmDialog || confirmLoading) return;
+    setConfirmLoading(true);
+    try {
+      await confirmDialog.onConfirm();
+    } finally {
+      setConfirmLoading(false);
+      closeConfirm();
+    }
+  };
 
   const systemNotifs = notifications.filter((n) => n.type !== 'chat_message');
 
@@ -320,8 +348,22 @@ export const Navbar: React.FC = () => {
                   type="button"
                   className="kw-btn kw-btn-ghost kw-btn-sm"
                   onClick={() => {
-                    logout();
-                    navigate('/login');
+                    requestConfirm({
+                      title: 'Xác nhận đăng xuất tài khoản?',
+                      message: `Mẹ ${currentUser.name} có chắc chắn muốn đăng xuất khỏi thiết bị này không?`,
+                      confirmText: 'Đăng xuất ngay',
+                      cancelText: 'Ở lại',
+                      variant: 'danger',
+                      onConfirm: async () => {
+                        await logout();
+                        showToast({
+                          title: 'Đã đăng xuất an toàn',
+                          message: 'Hẹn gặp lại mẹ trên cộng đồng Kindr Đà Nẵng!',
+                          type: 'info',
+                        });
+                        navigate('/login');
+                      },
+                    });
                   }}
                   title="Đăng xuất"
                   style={{ width: 36, minHeight: 36, padding: 0 }}
@@ -786,6 +828,102 @@ export const Navbar: React.FC = () => {
           >
             <X size={15} />
           </button>
+        </div>
+      )}
+
+      {/* Global Kindr Confirmation Dialog Modal */}
+      {confirmDialog && (
+        <div
+          className="kw-modal-backdrop"
+          style={{ zIndex: 1400 }}
+          onClick={() => {
+            if (!confirmLoading) closeConfirm();
+          }}
+        >
+          <div
+            className="kw-modal-box"
+            style={{ maxWidth: 440, padding: 24 }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14, marginBottom: 16 }}>
+              <div
+                style={{
+                  width: 44,
+                  height: 44,
+                  borderRadius: 'var(--radius-default)',
+                  backgroundColor:
+                    confirmDialog.variant === 'danger'
+                      ? 'var(--color-error-light)'
+                      : confirmDialog.variant === 'warning'
+                        ? 'var(--color-warning-light)'
+                        : 'var(--color-secondary-light)',
+                  color:
+                    confirmDialog.variant === 'danger'
+                      ? 'var(--color-error)'
+                      : confirmDialog.variant === 'warning'
+                        ? 'var(--color-warning)'
+                        : 'var(--color-secondary-dark)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                }}
+              >
+                {confirmDialog.variant === 'danger' || confirmDialog.variant === 'warning' ? (
+                  <AlertTriangle size={22} />
+                ) : (
+                  <ShieldCheck size={22} />
+                )}
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <h3 style={{ fontSize: 18, fontWeight: 800, marginBottom: 6, lineHeight: 1.3 }}>
+                  {confirmDialog.title}
+                </h3>
+                <p
+                  style={{
+                    fontSize: 14,
+                    color: 'var(--color-text-secondary)',
+                    lineHeight: 1.6,
+                    whiteSpace: 'pre-line',
+                  }}
+                >
+                  {confirmDialog.message}
+                </p>
+              </div>
+            </div>
+
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'flex-end',
+                gap: 10,
+                marginTop: 20,
+                paddingTop: 16,
+                borderTop: '1px solid var(--color-border)',
+              }}
+            >
+              <button
+                type="button"
+                className="kw-btn kw-btn-outline"
+                disabled={confirmLoading}
+                onClick={closeConfirm}
+              >
+                {confirmDialog.cancelText || 'Hủy bỏ'}
+              </button>
+              <button
+                type="button"
+                className={`kw-btn ${
+                  confirmDialog.variant === 'danger' ? 'kw-btn-danger' : 'kw-btn-primary'
+                }`}
+                disabled={confirmLoading}
+                onClick={handleExecuteConfirm}
+              >
+                {confirmLoading
+                  ? 'Đang xử lý...'
+                  : confirmDialog.confirmText || 'Xác nhận'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </>

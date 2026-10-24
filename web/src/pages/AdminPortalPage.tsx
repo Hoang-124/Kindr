@@ -29,7 +29,13 @@ import {
   CategoryItem,
   WaitlistEntry,
 } from '../types';
-import { formatFullDate, formatNumber } from '../utils/pricing';
+import {
+  formatFullDate,
+  formatNumber,
+  getProductStatusBadge,
+  getTransactionStatusBadge,
+  getWithdrawStatusBadge,
+} from '../utils/pricing';
 import { KindrCoin, MascotIcon } from '../components/KindrCoin';
 
 type AdminTab =
@@ -44,7 +50,7 @@ type AdminTab =
 
 export const AdminPortalPage: React.FC = () => {
   const navigate = useNavigate();
-  const { currentUser, showToast, refreshProducts, refreshUser } = useApp();
+  const { currentUser, showToast, refreshProducts, refreshUser, requestConfirm } = useApp();
 
   const [activeTab, setActiveTab] = useState<AdminTab>('overview');
   const [loading, setLoading] = useState(false);
@@ -154,28 +160,41 @@ export const AdminPortalPage: React.FC = () => {
     );
   }
 
-  const handleResolveDispute = async (
+  const handleResolveDispute = (
     txId: string,
     outcome: 'resolved_buyer' | 'resolved_seller'
   ) => {
-    try {
-      await adminApi.resolveDispute(txId, outcome);
-      showToast({
-        title: 'Đã phân xử tranh chấp thành công!',
-        message:
-          outcome === 'resolved_buyer'
-            ? 'Đã hoàn Xu cho người mua & tịch thu cọc Safe Fee của người bán.'
-            : 'Đã giải ngân Xu cho người bán & trừ điểm văn minh người khiếu nại sai.',
-        type: 'success',
-      });
-      await Promise.all([loadAdminData(), refreshProducts(), refreshUser()]);
-    } catch (err: any) {
-      showToast({
-        title: 'Lỗi phân xử',
-        message: err?.response?.data?.error || 'Không thể xử lý tranh chấp.',
-        type: 'error',
-      });
-    }
+    const isBuyerWin = outcome === 'resolved_buyer';
+    requestConfirm({
+      title: isBuyerWin
+        ? 'Phán quyết: Người Mua Thắng (Hoàn 100% Xu)?'
+        : 'Phán quyết: Người Bán Thắng (Giải ngân Xu)?',
+      message: isBuyerWin
+        ? 'Hệ thống sẽ hoàn trả 100% Xu cho Người Mua, tịch thu cọc Safe Fee và trừ -25 Điểm Văn Minh của Người Bán. Thao tác không thể hoàn tác.'
+        : 'Hệ thống sẽ giải ngân Xu + hoàn cọc Safe Fee cho Người Bán, đồng thời trừ -25 Điểm Văn Minh của Người Mua do khiếu nại sai. Thao tác không thể hoàn tác.',
+      confirmText: isBuyerWin ? 'Xác nhận: Người Mua Thắng' : 'Xác nhận: Người Bán Thắng',
+      cancelText: 'Xem xét lại',
+      variant: isBuyerWin ? 'danger' : 'primary',
+      onConfirm: async () => {
+        try {
+          await adminApi.resolveDispute(txId, outcome);
+          showToast({
+            title: 'Đã phân xử tranh chấp thành công!',
+            message: isBuyerWin
+              ? 'Đã hoàn Xu cho người mua & tịch thu cọc Safe Fee của người bán.'
+              : 'Đã giải ngân Xu cho người bán & trừ điểm văn minh người khiếu nại sai.',
+            type: 'success',
+          });
+          await Promise.all([loadAdminData(), refreshProducts(), refreshUser()]);
+        } catch (err: any) {
+          showToast({
+            title: 'Lỗi phân xử',
+            message: err?.response?.data?.error || 'Không thể xử lý tranh chấp.',
+            type: 'error',
+          });
+        }
+      },
+    });
   };
 
   const handleApproveProduct = async (productId: string) => {
@@ -192,72 +211,123 @@ export const AdminPortalPage: React.FC = () => {
     }
   };
 
-  const handleRemoveProduct = async (productId: string) => {
-    try {
-      await adminApi.removeProduct(productId);
-      showToast({
-        title: 'Đã gỡ bài đăng',
-        message: 'Sản phẩm đã được gỡ và hoàn cọc Safe Fee (nếu có).',
-        type: 'info',
-      });
-      await Promise.all([loadAdminData(), refreshProducts()]);
-    } catch {
-      // Ignore
-    }
+  const handleRemoveProduct = (productId: string) => {
+    const prod = adminProducts.find((p) => p.id === productId);
+    requestConfirm({
+      title: 'Gỡ bài đăng khỏi hệ thống?',
+      message: `Xác nhận gỡ bài đăng "${prod?.name || productId}" và hoàn trả cọc Safe Fee (nếu có) cho người bán?`,
+      confirmText: 'Xác nhận gỡ bài',
+      cancelText: 'Hủy bỏ',
+      variant: 'danger',
+      onConfirm: async () => {
+        try {
+          await adminApi.removeProduct(productId);
+          showToast({
+            title: 'Đã gỡ bài đăng',
+            message: 'Sản phẩm đã được gỡ và hoàn cọc Safe Fee (nếu có).',
+            type: 'info',
+          });
+          await Promise.all([loadAdminData(), refreshProducts()]);
+        } catch {
+          // Ignore
+        }
+      },
+    });
   };
 
-  const handleWithdrawAction = async (
+  const handleWithdrawAction = (
     id: string,
     action: 'approve' | 'reject'
   ) => {
-    try {
-      if (action === 'approve') {
-        await adminApi.approveWithdraw(id);
-      } else {
-        await adminApi.rejectWithdraw(id, 'Thông tin tài khoản ngân hàng chưa khớp');
-      }
-      showToast({
-        title: action === 'approve' ? 'Đã duyệt chuyển khoản!' : 'Đã từ chối & hoàn Xu',
-        message: 'Trạng thái lệnh rút tiền đã được cập nhật.',
-        type: 'success',
-      });
-      await loadAdminData();
-    } catch {
-      // Ignore
-    }
+    const w = withdraws.find((item) => item.id === id);
+    const isApprove = action === 'approve';
+    requestConfirm({
+      title: isApprove
+        ? 'Xác nhận đã chuyển khoản ngân hàng?'
+        : 'Từ chối lệnh rút tiền & Hoàn Xu?',
+      message: isApprove
+        ? `Xác nhận đã chuyển khoản ${formatNumber(w?.payoutVnd || 0)}đ tới TK ${w?.bankName || ''} • ${w?.accountNumber || ''} (${w?.accountHolder || ''})?`
+        : `Từ chối lệnh rút ${w?.xuAmount || 0} Xu của ${w?.userName || 'thành viên'} và hoàn lại 100% số Xu về ví của họ?`,
+      confirmText: isApprove ? 'Đã chuyển khoản' : 'Từ chối & Hoàn Xu',
+      cancelText: 'Hủy bỏ',
+      variant: isApprove ? 'primary' : 'danger',
+      onConfirm: async () => {
+        try {
+          if (isApprove) {
+            await adminApi.approveWithdraw(id);
+          } else {
+            await adminApi.rejectWithdraw(id, 'Thông tin tài khoản ngân hàng chưa khớp');
+          }
+          showToast({
+            title: isApprove ? 'Đã duyệt chuyển khoản!' : 'Đã từ chối & hoàn Xu',
+            message: 'Trạng thái lệnh rút tiền đã được cập nhật.',
+            type: 'success',
+          });
+          await loadAdminData();
+        } catch {
+          // Ignore
+        }
+      },
+    });
   };
 
-  const handleToggleUserLock = async (u: User) => {
-    try {
-      if (u.isLocked) {
-        await adminApi.unlockUser(u.id);
-      } else {
-        await adminApi.lockUser(u.id);
-      }
-      showToast({
-        title: u.isLocked ? 'Đã mở khóa tài khoản' : 'Đã khóa tài khoản',
-        message: `Thành viên: ${u.name}`,
-        type: 'info',
-      });
-      await loadAdminData();
-    } catch {
-      // Ignore
-    }
+  const handleToggleUserLock = (u: User) => {
+    requestConfirm({
+      title: u.isLocked ? `Mở khóa tài khoản ${u.name}?` : `Khóa tài khoản ${u.name}?`,
+      message: u.isLocked
+        ? `Cho phép thành viên "${u.name}" đăng nhập và giao dịch trở lại trên hệ thống Kindr?`
+        : `Tạm khóa tài khoản "${u.name}"? Thành viên này sẽ không thể đăng đồ hoặc tạo giao dịch mới cho tới khi được mở khóa.`,
+      confirmText: u.isLocked ? 'Mở khóa ngay' : 'Khóa tài khoản',
+      cancelText: 'Hủy bỏ',
+      variant: u.isLocked ? 'primary' : 'danger',
+      onConfirm: async () => {
+        try {
+          if (u.isLocked) {
+            await adminApi.unlockUser(u.id);
+          } else {
+            await adminApi.lockUser(u.id);
+          }
+          showToast({
+            title: u.isLocked ? 'Đã mở khóa tài khoản' : 'Đã khóa tài khoản',
+            message: `Thành viên: ${u.name}`,
+            type: 'info',
+          });
+          await loadAdminData();
+        } catch {
+          // Ignore
+        }
+      },
+    });
   };
 
-  const handleToggleUserRole = async (u: User) => {
-    try {
-      const nextRole = u.role === 'admin' ? 'user' : 'admin';
-      await adminApi.updateUserRole(u.id, nextRole);
-      showToast({
-        title: nextRole === 'admin' ? 'Đã cấp quyền Admin' : 'Đã thu hồi quyền Admin',
-        message: `Thành viên: ${u.name}`,
-        type: 'success',
-      });
-      await loadAdminData();
-    } catch {
-      // Ignore
-    }
+  const handleToggleUserRole = (u: User) => {
+    const nextRole = u.role === 'admin' ? 'user' : 'admin';
+    requestConfirm({
+      title:
+        nextRole === 'admin'
+          ? `Cấp quyền Quản trị viên (Admin) cho ${u.name}?`
+          : `Thu hồi quyền Admin của ${u.name}?`,
+      message:
+        nextRole === 'admin'
+          ? `Thành viên "${u.name}" sẽ có toàn quyền truy cập Trung tâm Điều hành Admin (phân xử khiếu nại, duyệt rút tiền, kiểm duyệt bài đăng).`
+          : `Chuyển tài khoản "${u.name}" về vai trò Thành viên thông thường (User)?`,
+      confirmText: nextRole === 'admin' ? 'Cấp quyền Admin' : 'Hạ xuống User',
+      cancelText: 'Hủy bỏ',
+      variant: 'warning',
+      onConfirm: async () => {
+        try {
+          await adminApi.updateUserRole(u.id, nextRole);
+          showToast({
+            title: nextRole === 'admin' ? 'Đã cấp quyền Admin' : 'Đã thu hồi quyền Admin',
+            message: `Thành viên: ${u.name}`,
+            type: 'success',
+          });
+          await loadAdminData();
+        } catch {
+          // Ignore
+        }
+      },
+    });
   };
 
   const handleCreateCategory = async (e: React.FormEvent) => {
@@ -342,15 +412,25 @@ export const AdminPortalPage: React.FC = () => {
             Trung tâm Điều hành Quản trị viên
           </h1>
         </div>
-        <button
-          type="button"
-          className="kw-btn kw-btn-outline kw-btn-sm"
-          onClick={loadAdminData}
-          disabled={loading}
-        >
-          <RefreshCw size={15} />
-          <span>{loading ? 'Đang đồng bộ...' : 'Đồng bộ dữ liệu'}</span>
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+          <button
+            type="button"
+            className="kw-btn kw-btn-outline kw-btn-sm"
+            onClick={() => navigate('/profile')}
+          >
+            <Users size={15} />
+            <span>Hồ sơ cá nhân</span>
+          </button>
+          <button
+            type="button"
+            className="kw-btn kw-btn-outline kw-btn-sm"
+            onClick={loadAdminData}
+            disabled={loading}
+          >
+            <RefreshCw size={15} />
+            <span>{loading ? 'Đang đồng bộ...' : 'Đồng bộ dữ liệu'}</span>
+          </button>
+        </div>
       </div>
 
       <div className="kw-admin-layout">
@@ -639,7 +719,9 @@ export const AdminPortalPage: React.FC = () => {
                           <strong>{p.price} Xu</strong>
                         </td>
                         <td>
-                          <span className="kw-badge kw-badge-secondary">{p.status}</span>
+                          <span className={`kw-badge ${getProductStatusBadge(p.status).className}`}>
+                            {getProductStatusBadge(p.status).label}
+                          </span>
                         </td>
                         <td>
                           <div style={{ display: 'flex', gap: 8 }}>
@@ -706,7 +788,9 @@ export const AdminPortalPage: React.FC = () => {
                           {w.bankName} • {w.accountNumber} ({w.accountHolder})
                         </td>
                         <td>
-                          <span className="kw-badge kw-badge-secondary">{w.status}</span>
+                          <span className={`kw-badge ${getWithdrawStatusBadge(w.status).className}`}>
+                            {getWithdrawStatusBadge(w.status).label}
+                          </span>
                         </td>
                         <td>
                           {w.status === 'pending' && (
@@ -852,7 +936,9 @@ export const AdminPortalPage: React.FC = () => {
                           Mua: {tx.buyerEscrowFrozen} Xu • Cọc: {tx.sellerEscrowFrozen} Xu
                         </td>
                         <td>
-                          <span className="kw-badge kw-badge-secondary">{tx.status}</span>
+                          <span className={`kw-badge ${getTransactionStatusBadge(tx.status).className}`}>
+                            {getTransactionStatusBadge(tx.status).label}
+                          </span>
                         </td>
                         <td>
                           <button
@@ -895,7 +981,7 @@ export const AdminPortalPage: React.FC = () => {
                         }}
                       >
                         <div style={{ fontWeight: 700, fontSize: 13 }}>
-                          [{r.targetType}] {r.reason}
+                          [{r.targetType === 'product' ? 'Bài đăng' : 'Tài khoản'}] {r.reason}
                         </div>
                         <div style={{ fontSize: 11, color: 'var(--color-text-secondary)', margin: '4px 0 8px' }}>
                           Người báo cáo: {r.reporterName} • Trạng thái:{' '}
@@ -1011,22 +1097,33 @@ export const AdminPortalPage: React.FC = () => {
                       <button
                         type="button"
                         className="kw-btn kw-btn-ghost kw-btn-sm"
-                        onClick={async () => {
-                          try {
-                            await adminApi.deleteCategory(c.id);
-                            showToast({
-                              title: 'Đã xóa danh mục',
-                              message: `Đã xóa danh mục "${c.name}".`,
-                              type: 'info',
-                            });
-                            loadAdminData();
-                          } catch (err: any) {
-                            showToast({
-                              title: 'Không thể xóa danh mục',
-                              message: err?.response?.data?.error || 'Danh mục này đang có sản phẩm hoặc không thể xóa.',
-                              type: 'error',
-                            });
-                          }
+                        onClick={() => {
+                          requestConfirm({
+                            title: `Xóa danh mục "${c.name}"?`,
+                            message: `Xác nhận xóa danh mục "${c.name}" (${c.code}) khỏi hệ thống?`,
+                            confirmText: 'Xóa danh mục',
+                            cancelText: 'Giữ lại',
+                            variant: 'danger',
+                            onConfirm: async () => {
+                              try {
+                                await adminApi.deleteCategory(c.id);
+                                showToast({
+                                  title: 'Đã xóa danh mục',
+                                  message: `Đã xóa danh mục "${c.name}".`,
+                                  type: 'info',
+                                });
+                                loadAdminData();
+                              } catch (err: any) {
+                                showToast({
+                                  title: 'Không thể xóa danh mục',
+                                  message:
+                                    err?.response?.data?.error ||
+                                    'Danh mục này đang có sản phẩm hoặc không thể xóa.',
+                                  type: 'error',
+                                });
+                              }
+                            },
+                          });
                         }}
                       >
                         <Trash2 size={14} />

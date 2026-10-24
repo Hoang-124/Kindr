@@ -54,10 +54,13 @@ export const TransactionDetailPage: React.FC = () => {
   const {
     currentUser,
     transactions,
+    chats,
     refreshTransactions,
+    refreshChats,
     refreshUser,
     refreshProducts,
     showToast,
+    requestConfirm,
   } = useApp();
 
   const [selectedTx, setSelectedTx] = useState<Transaction | null>(null);
@@ -292,25 +295,35 @@ export const TransactionDetailPage: React.FC = () => {
     }
   };
 
-  const handleCompleteEarly = async () => {
+  const handleCompleteEarly = () => {
     if (!selectedTx) return;
-    setErrorMsg('');
-    setActionLoading(true);
-    try {
-      await transactionApi.completeTransaction(selectedTx.id);
-      const updated = await transactionApi.getTransactionById(selectedTx.id);
-      setSelectedTx(updated);
-      await Promise.all([refreshTransactions(), refreshUser(), refreshProducts()]);
-      showToast({
-        title: 'Giao dịch hoàn tất!',
-        message: 'Đã giải ngân Xu cho người bán và hoàn cọc Safe Fee. Mẹ được cộng +1 Điểm Văn Minh!',
-        type: 'success',
-      });
-    } catch (err: any) {
-      setErrorMsg(err?.response?.data?.error || 'Không thể hoàn tất giao dịch lúc này.');
-    } finally {
-      setActionLoading(false);
-    }
+    requestConfirm({
+      title: 'Xác nhận hài lòng & giải ngân Xu sớm?',
+      message: `Mẹ xác nhận món đồ "${selectedTx.productName}" đúng cam kết và muốn kết thúc 6h kiểm định ngay bây giờ?\nHệ thống sẽ giải ngân ngay ${selectedTx.productPrice} Xu cho người bán và hoàn cọc Safe Fee. Thao tác này không thể hoàn tác.`,
+      confirmText: 'Giải ngân Xu ngay',
+      cancelText: 'Kiểm tra thêm',
+      variant: 'primary',
+      onConfirm: async () => {
+        setErrorMsg('');
+        setActionLoading(true);
+        try {
+          await transactionApi.completeTransaction(selectedTx.id);
+          const updated = await transactionApi.getTransactionById(selectedTx.id);
+          setSelectedTx(updated);
+          await Promise.all([refreshTransactions(), refreshUser(), refreshProducts()]);
+          showToast({
+            title: 'Giao dịch hoàn tất!',
+            message:
+              'Đã giải ngân Xu cho người bán và hoàn cọc Safe Fee. Mẹ được cộng +1 Điểm Văn Minh!',
+            type: 'success',
+          });
+        } catch (err: any) {
+          setErrorMsg(err?.response?.data?.error || 'Không thể hoàn tất giao dịch lúc này.');
+        } finally {
+          setActionLoading(false);
+        }
+      },
+    });
   };
 
   const handleUploadDisputeEvidence = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -395,9 +408,22 @@ export const TransactionDetailPage: React.FC = () => {
   };
 
   const handleOpenCounterpartyChat = async () => {
-    if (!selectedTx) return;
+    if (!selectedTx || !currentUser) return;
+    const partnerId =
+      selectedTx.buyerId === currentUser.id ? selectedTx.sellerId : selectedTx.buyerId;
     try {
-      const chat = await chatApi.createChat(selectedTx.productId, selectedTx.sellerId);
+      const existing = chats.find(
+        (c) =>
+          c.productId === selectedTx.productId &&
+          ((c.buyerId === currentUser.id && c.sellerId === partnerId) ||
+            (c.sellerId === currentUser.id && c.buyerId === partnerId))
+      );
+      if (existing) {
+        navigate(`/chat/${existing.id}`);
+        return;
+      }
+      const chat = await chatApi.createChat(selectedTx.productId, partnerId);
+      await refreshChats();
       navigate(`/chat/${chat.id}`);
     } catch {
       navigate('/chat');
@@ -835,24 +861,43 @@ export const TransactionDetailPage: React.FC = () => {
                             <button
                               type="button"
                               disabled={actionLoading}
-                              onClick={async () => {
-                                setActionLoading(true);
-                                setErrorMsg('');
-                                try {
-                                  await transactionApi.confirmHandover(selectedTx.id);
-                                  const updated = await transactionApi.getTransactionById(selectedTx.id);
-                                  setSelectedTx(updated);
-                                  await Promise.all([refreshTransactions(), refreshUser(), refreshProducts()]);
-                                  showToast({
-                                    title: 'Đã xác nhận nhận đồ!',
-                                    message: '6 giờ Safeful Time kiểm định tại nhà đã bắt đầu đếm ngược.',
-                                    type: 'success',
-                                  });
-                                } catch (err: any) {
-                                  setErrorMsg(err?.response?.data?.error || 'Không thể xác nhận bàn giao.');
-                                } finally {
-                                  setActionLoading(false);
-                                }
+                              onClick={() => {
+                                requestConfirm({
+                                  title: 'Xác nhận đã nhận đồ tận tay?',
+                                  message: `Mẹ xác nhận đã gặp người bán và nhận món đồ "${selectedTx.productName}" trực tiếp?\nHệ thống sẽ bắt đầu đếm ngược 6 Giờ Kiểm Định An Toàn (Safeful Time) tại nhà.`,
+                                  confirmText: 'Đã nhận đồ — Bắt đầu 6h',
+                                  cancelText: 'Chưa nhận đồ',
+                                  variant: 'primary',
+                                  onConfirm: async () => {
+                                    setActionLoading(true);
+                                    setErrorMsg('');
+                                    try {
+                                      await transactionApi.confirmHandover(selectedTx.id);
+                                      const updated = await transactionApi.getTransactionById(
+                                        selectedTx.id
+                                      );
+                                      setSelectedTx(updated);
+                                      await Promise.all([
+                                        refreshTransactions(),
+                                        refreshUser(),
+                                        refreshProducts(),
+                                      ]);
+                                      showToast({
+                                        title: 'Đã xác nhận nhận đồ!',
+                                        message:
+                                          '6 giờ Safeful Time kiểm định tại nhà đã bắt đầu đếm ngược.',
+                                        type: 'success',
+                                      });
+                                    } catch (err: any) {
+                                      setErrorMsg(
+                                        err?.response?.data?.error ||
+                                          'Không thể xác nhận bàn giao.'
+                                      );
+                                    } finally {
+                                      setActionLoading(false);
+                                    }
+                                  },
+                                });
                               }}
                               className="kw-btn kw-btn-primary kw-btn-sm"
                             >
@@ -1389,32 +1434,60 @@ export const TransactionDetailPage: React.FC = () => {
                   </form>
                 )}
 
-                {/* Counterparty Masked Contact Info */}
-                <div
-                  style={{
-                    marginTop: 20,
-                    paddingTop: 16,
-                    borderTop: '1px solid var(--color-border)',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    flexWrap: 'wrap',
-                    gap: 12,
-                    fontSize: 13,
-                    color: 'var(--color-text-secondary)',
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <Phone size={15} color="var(--color-secondary-dark)" />
-                    <span>
-                      SĐT bảo mật đối tác:{' '}
-                      <strong>
-                        {maskPhoneNumber(isBuyer ? selectedTx.sellerPhone : selectedTx.buyerPhone)}
-                      </strong>
-                    </span>
-                  </div>
-                  <span>Tạo lúc: {formatFullDate(selectedTx.createdAt)}</span>
-                </div>
+                {/* Counterparty Contact Info (Unmasked during active Escrow, masked after completion/refund) */}
+                {(() => {
+                  const counterpartyPhone = isBuyer
+                    ? selectedTx.sellerPhone || '0905123456'
+                    : selectedTx.buyerPhone || '0905234567';
+                  const isActiveEscrow =
+                    selectedTx.status === 'awaiting_handover' ||
+                    selectedTx.status === 'in_safeful_time' ||
+                    selectedTx.status === 'disputed';
+                  return (
+                    <div
+                      style={{
+                        marginTop: 20,
+                        paddingTop: 16,
+                        borderTop: '1px solid var(--color-border)',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        flexWrap: 'wrap',
+                        gap: 12,
+                        fontSize: 13,
+                        color: 'var(--color-text-secondary)',
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <Phone size={15} color="var(--color-secondary-dark)" />
+                          <span>
+                            SĐT liên hệ đối tác:{' '}
+                            <strong style={{ color: 'var(--color-text)' }}>
+                              {isActiveEscrow
+                                ? counterpartyPhone
+                                : maskPhoneNumber(counterpartyPhone)}
+                            </strong>
+                          </span>
+                        </div>
+                        {isActiveEscrow ? (
+                          <a
+                            href={`tel:${counterpartyPhone}`}
+                            className="kw-btn kw-btn-outline kw-btn-sm"
+                            style={{ minHeight: 30, padding: '0 10px', fontSize: 12 }}
+                          >
+                            <Phone size={12} /> Gọi hẹn gặp
+                          </a>
+                        ) : (
+                          <span style={{ fontSize: 11, color: 'var(--color-text-muted)' }}>
+                            (Đã ẩn tự động sau khi đóng giao dịch)
+                          </span>
+                        )}
+                      </div>
+                      <span>Tạo lúc: {formatFullDate(selectedTx.createdAt)}</span>
+                    </div>
+                  );
+                })()}
               </div>
             )}
           </div>

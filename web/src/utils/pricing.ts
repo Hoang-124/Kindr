@@ -83,6 +83,55 @@ export function getConditionLabel(condition: string): string {
   return map[condition] || `Mới ${condition}%`;
 }
 
+export function getProductStatusBadge(status?: string): { label: string; className: string } {
+  switch (status) {
+    case 'available':
+      return { label: 'Đang mở đổi', className: 'kw-badge-teal' };
+    case 'escrow':
+    case 'in_transaction':
+      return { label: 'Đang giao dịch Ký quỹ', className: 'kw-badge-gold' };
+    case 'swapped':
+    case 'completed':
+      return { label: 'Đã trao đổi', className: 'kw-badge-secondary' };
+    case 'pending_approval':
+      return { label: 'Chờ duyệt', className: 'kw-badge-coral' };
+    case 'removed':
+      return { label: 'Đã gỡ', className: 'kw-badge-danger' };
+    default:
+      return { label: status || 'Đang mở đổi', className: 'kw-badge-secondary' };
+  }
+}
+
+export function getTransactionStatusBadge(status?: string): { label: string; className: string } {
+  switch (status) {
+    case 'awaiting_handover':
+      return { label: 'Chờ gặp mặt bàn giao', className: 'kw-badge-gold' };
+    case 'in_safeful_time':
+      return { label: 'Đang kiểm định 6h', className: 'kw-badge-teal' };
+    case 'disputed':
+      return { label: 'Đang khiếu nại', className: 'kw-badge-danger' };
+    case 'completed':
+      return { label: 'Hoàn tất giải ngân', className: 'kw-badge-secondary' };
+    case 'refunded':
+      return { label: 'Đã hủy / Hoàn Xu', className: 'kw-badge-danger' };
+    default:
+      return { label: status || 'Đang xử lý', className: 'kw-badge-secondary' };
+  }
+}
+
+export function getWithdrawStatusBadge(status?: string): { label: string; className: string } {
+  switch (status) {
+    case 'pending':
+      return { label: 'Chờ duyệt chuyển khoản', className: 'kw-badge-gold' };
+    case 'approved':
+      return { label: 'Đã chuyển khoản', className: 'kw-badge-teal' };
+    case 'rejected':
+      return { label: 'Từ chối (Đã hoàn Xu)', className: 'kw-badge-danger' };
+    default:
+      return { label: status || 'Đang xử lý', className: 'kw-badge-secondary' };
+  }
+}
+
 export function getSmartPricingNudge(category: string, condition: ConditionType): string {
   if (category === 'charity' || category === 'tu_thien') {
     return 'Món đồ tặng 0 Xu tại Trạm Tặng Đồ được miễn 100% cọc Safe Fee và giúp mẹ tăng Điểm Văn Minh!';

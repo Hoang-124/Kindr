@@ -591,12 +591,18 @@ export const ChatPage: React.FC = () => {
                       activeChat.productId && (
                         <button
                           type="button"
-                          className="kw-btn kw-btn-primary kw-btn-sm"
+                          className={`kw-btn ${
+                            activeChat.sellerId === currentUser.id
+                              ? 'kw-btn-outline'
+                              : 'kw-btn-primary'
+                          } kw-btn-sm`}
                           style={{ minHeight: 34, padding: '0 10px', fontSize: 12 }}
                           onClick={() => navigate(`/products/${activeChat.productId}`)}
                         >
                           <ShieldCheck size={13} />
-                          <span>Đổi ngay</span>
+                          <span>
+                            {activeChat.sellerId === currentUser.id ? 'Xem bài đăng' : 'Đổi ngay'}
+                          </span>
                         </button>
                       )
                     )}

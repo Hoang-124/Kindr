@@ -24,7 +24,7 @@ import {
 } from '../services/domainServices';
 import { Product, RatingItem } from '../types';
 import { DANANG_DISTRICTS, getDistrictById } from '../utils/locations';
-import { formatFullDate } from '../utils/pricing';
+import { formatFullDate, getProductStatusBadge } from '../utils/pricing';
 import { Avatar, KindrCoin, MascotIcon } from '../components/KindrCoin';
 
 export const ProfilePage: React.FC = () => {
@@ -36,6 +36,7 @@ export const ProfilePage: React.FC = () => {
     refreshUser,
     logout,
     showToast,
+    requestConfirm,
   } = useApp();
 
   const [activeTab, setActiveTab] = useState<'posts' | 'civilization' | 'edit' | 'security'>('posts');
@@ -58,6 +59,7 @@ export const ProfilePage: React.FC = () => {
   // Security form
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
+  const [confirmNewPassword, setConfirmNewPassword] = useState('');
   const [changingPass, setChangingPass] = useState(false);
   const [confirmDeleteText, setConfirmDeleteText] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
@@ -167,22 +169,36 @@ export const ProfilePage: React.FC = () => {
     }
   };
 
-  const handleDeleteProduct = async (prod: Product) => {
+  const handleDeleteProduct = (prod: Product) => {
     setErrorMsg('');
-    try {
-      const res = await productApi.deleteProduct(prod.id);
-      setMyProducts((prev) => prev.filter((p) => p.id !== prod.id));
-      await Promise.all([refreshProducts(), refreshUser()]);
-      showToast({
-        title: 'Đã gỡ bài đăng',
-        message: res.message || 'Đã hoàn lại cọc Safe Fee về ví của mẹ.',
-        type: 'info',
-      });
-    } catch (err: any) {
-      setErrorMsg(
-        err?.response?.data?.error || 'Không thể xóa bài đăng đang trong quá trình giao dịch.'
-      );
-    }
+    const refundNote =
+      prod.safeFeeLocked > 0
+        ? `Hệ thống sẽ hoàn trả ngay 100% cọc bảo chứng (${prod.safeFeeLocked} Xu) về ví khả dụng của mẹ.`
+        : 'Bài đăng tặng 0 Xu này sẽ được gỡ khỏi kệ trực tuyến.';
+
+    requestConfirm({
+      title: 'Xác nhận gỡ bài đăng này?',
+      message: `Mẹ muốn gỡ món đồ "${prod.name}"?\n${refundNote}`,
+      confirmText: 'Xác nhận gỡ bài',
+      cancelText: 'Giữ lại',
+      variant: 'danger',
+      onConfirm: async () => {
+        try {
+          const res = await productApi.deleteProduct(prod.id);
+          setMyProducts((prev) => prev.filter((p) => p.id !== prod.id));
+          await Promise.all([refreshProducts(), refreshUser()]);
+          showToast({
+            title: 'Đã gỡ bài đăng',
+            message: res.message || 'Đã hoàn lại cọc Safe Fee về ví của mẹ.',
+            type: 'info',
+          });
+        } catch (err: any) {
+          setErrorMsg(
+            err?.response?.data?.error || 'Không thể xóa bài đăng đang trong quá trình giao dịch.'
+          );
+        }
+      },
+    });
   };
 
   const handleChangePassword = async (e: React.FormEvent) => {
@@ -192,11 +208,16 @@ export const ProfilePage: React.FC = () => {
       setErrorMsg('Mật khẩu mới phải từ 6 ký tự trở lên.');
       return;
     }
+    if (newPassword !== confirmNewPassword) {
+      setErrorMsg('Mật khẩu xác nhận không khớp với mật khẩu mới.');
+      return;
+    }
     setChangingPass(true);
     try {
       await authApi.changePassword(oldPassword, newPassword);
       setOldPassword('');
       setNewPassword('');
+      setConfirmNewPassword('');
       showToast({
         title: 'Đổi mật khẩu thành công!',
         message: 'Mật khẩu bảo mật của bạn đã được cập nhật.',
@@ -209,22 +230,32 @@ export const ProfilePage: React.FC = () => {
     }
   };
 
-  const handleDeleteAccount = async () => {
+  const handleDeleteAccount = () => {
     if (confirmDeleteText !== 'XOA TAI KHOAN') {
       setErrorMsg('Vui lòng nhập đúng chữ "XOA TAI KHOAN" để xác nhận.');
       return;
     }
     setErrorMsg('');
-    try {
-      await authApi.deleteAccount();
-      setCurrentUser(null);
-      navigate('/');
-    } catch (err: any) {
-      setErrorMsg(
-        err?.response?.data?.error ||
-          'Không thể xóa tài khoản khi còn giao dịch Double Escrow đang diễn ra.'
-      );
-    }
+    requestConfirm({
+      title: 'Xóa vĩnh viễn tài khoản Kindr?',
+      message:
+        'Hành động này sẽ xóa vĩnh viễn tài khoản và toàn bộ bài đăng của mẹ trên hệ thống Kindr. Thao tác này không thể khôi phục!',
+      confirmText: 'Xóa vĩnh viễn',
+      cancelText: 'Hủy bỏ',
+      variant: 'danger',
+      onConfirm: async () => {
+        try {
+          await authApi.deleteAccount();
+          setCurrentUser(null);
+          navigate('/');
+        } catch (err: any) {
+          setErrorMsg(
+            err?.response?.data?.error ||
+              'Không thể xóa tài khoản khi còn giao dịch Double Escrow đang diễn ra.'
+          );
+        }
+      },
+    });
   };
 
   const civPoints = Math.min(100, Math.max(0, currentUser.civilizationPoints ?? 95));
@@ -467,7 +498,9 @@ export const ProfilePage: React.FC = () => {
                       </td>
                       <td>{p.safeFeeLocked} Xu</td>
                       <td>
-                        <span className="kw-badge kw-badge-secondary">{p.status}</span>
+                        <span className={`kw-badge ${getProductStatusBadge(p.status).className}`}>
+                          {getProductStatusBadge(p.status).label}
+                        </span>
                       </td>
                       <td>
                         <div style={{ display: 'flex', gap: 8 }}>
@@ -677,7 +710,7 @@ export const ProfilePage: React.FC = () => {
               />
             </div>
 
-            <div style={{ marginBottom: 16 }}>
+            <div style={{ marginBottom: 12 }}>
               <label style={{ display: 'block', fontSize: 13, fontWeight: 700, marginBottom: 6 }}>
                 Mật khẩu mới (Tối thiểu 6 ký tự)
               </label>
@@ -689,8 +722,20 @@ export const ProfilePage: React.FC = () => {
               />
             </div>
 
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ display: 'block', fontSize: 13, fontWeight: 700, marginBottom: 6 }}>
+                Xác nhận mật khẩu mới
+              </label>
+              <input
+                type="password"
+                className="kw-input"
+                value={confirmNewPassword}
+                onChange={(e) => setConfirmNewPassword(e.target.value)}
+              />
+            </div>
+
             <button type="submit" className="kw-btn kw-btn-primary" disabled={changingPass}>
-              Cập nhật mật khẩu
+              {changingPass ? 'Đang cập nhật...' : 'Cập nhật mật khẩu'}
             </button>
           </form>
 
@@ -704,9 +749,23 @@ export const ProfilePage: React.FC = () => {
               type="button"
               className="kw-btn kw-btn-outline"
               style={{ width: '100%', marginBottom: 20 }}
-              onClick={async () => {
-                await logout();
-                navigate('/');
+              onClick={() => {
+                requestConfirm({
+                  title: 'Xác nhận đăng xuất tài khoản?',
+                  message: `Mẹ ${currentUser.name} có chắc chắn muốn đăng xuất khỏi thiết bị này không?`,
+                  confirmText: 'Đăng xuất ngay',
+                  cancelText: 'Ở lại',
+                  variant: 'danger',
+                  onConfirm: async () => {
+                    await logout();
+                    showToast({
+                      title: 'Đã đăng xuất an toàn',
+                      message: 'Hẹn gặp lại mẹ trên cộng đồng Kindr Đà Nẵng!',
+                      type: 'info',
+                    });
+                    navigate('/login');
+                  },
+                });
               }}
             >
               <LogOut size={16} />

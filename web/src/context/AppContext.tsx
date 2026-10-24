@@ -219,6 +219,15 @@ export interface ToastBanner {
   link?: string;
 }
 
+export interface ConfirmDialogOptions {
+  title: string;
+  message: string;
+  confirmText?: string;
+  cancelText?: string;
+  variant?: 'danger' | 'primary' | 'warning';
+  onConfirm: () => void | Promise<void>;
+}
+
 interface AppContextValue {
   currentUser: User | null;
   authLoading: boolean;
@@ -236,6 +245,9 @@ interface AppContextValue {
   toast: ToastBanner | null;
   showToast: (toast: Omit<ToastBanner, 'id'>) => void;
   dismissToast: () => void;
+  confirmDialog: ConfirmDialogOptions | null;
+  requestConfirm: (options: ConfirmDialogOptions) => void;
+  closeConfirm: () => void;
   refreshUser: () => Promise<void>;
   refreshProducts: (filters?: Record<string, any>) => Promise<void>;
   refreshTransactions: () => Promise<void>;
@@ -256,6 +268,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [chats, setChats] = useState<ChatSession[]>([]);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [toast, setToast] = useState<ToastBanner | null>(null);
+  const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogOptions | null>(null);
   const [onboardingOpen, setOnboardingOpen] = useState<boolean>(false);
 
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
@@ -279,6 +292,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const dismissToast = useCallback(() => {
     setToast(null);
+  }, []);
+
+  const requestConfirm = useCallback((options: ConfirmDialogOptions) => {
+    setConfirmDialog(options);
+  }, []);
+
+  const closeConfirm = useCallback(() => {
+    setConfirmDialog(null);
   }, []);
 
   useEffect(() => {
@@ -516,6 +537,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         toast,
         showToast,
         dismissToast,
+        confirmDialog,
+        requestConfirm,
+        closeConfirm,
         refreshUser,
         refreshProducts,
         refreshTransactions,

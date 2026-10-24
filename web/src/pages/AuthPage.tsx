@@ -78,7 +78,15 @@ export const AuthPage: React.FC = () => {
   const [forgotOtp, setForgotOtp] = useState('');
   const [forgotNewPassword, setForgotNewPassword] = useState('');
 
-  const { setCurrentUser, refreshProducts, refreshTransactions, showToast } = useApp();
+  const {
+    currentUser,
+    setCurrentUser,
+    refreshProducts,
+    refreshTransactions,
+    showToast,
+    logout,
+    requestConfirm,
+  } = useApp();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -418,6 +426,56 @@ export const AuthPage: React.FC = () => {
 
       {/* Right Column: Auth Forms */}
       <div className="kw-card">
+        {currentUser && (
+          <div
+            style={{
+              padding: '12px 14px',
+              marginBottom: 16,
+              borderRadius: 'var(--radius-default)',
+              backgroundColor: 'var(--color-secondary-light)',
+              border: '1px solid var(--color-secondary)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: 10,
+            }}
+          >
+            <div style={{ fontSize: 13 }}>
+              Đang đăng nhập: <strong>{currentUser.name}</strong> ({currentUser.xuBalance} Xu)
+            </div>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button
+                type="button"
+                className="kw-btn kw-btn-primary kw-btn-sm"
+                style={{ minHeight: 32, padding: '0 10px', fontSize: 12 }}
+                onClick={() => navigate(currentUser.role === 'admin' ? '/admin' : '/')}
+              >
+                Về trang chính
+              </button>
+              <button
+                type="button"
+                className="kw-btn kw-btn-outline kw-btn-sm"
+                style={{ minHeight: 32, padding: '0 10px', fontSize: 12 }}
+                onClick={() => {
+                  requestConfirm({
+                    title: 'Đăng xuất để đổi tài khoản?',
+                    message: `Mẹ muốn đăng xuất khỏi tài khoản "${currentUser.name}" để đăng nhập tài khoản khác?`,
+                    confirmText: 'Đăng xuất',
+                    cancelText: 'Giữ nguyên',
+                    variant: 'danger',
+                    onConfirm: async () => {
+                      await logout();
+                    },
+                  });
+                }}
+              >
+                Đăng xuất
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Mode Switcher Tabs */}
         <div
           style={{

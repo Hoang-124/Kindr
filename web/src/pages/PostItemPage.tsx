@@ -36,6 +36,19 @@ const SAMPLE_IMAGES = [
   'https://images.unsplash.com/photo-1522771930-78848d9293e8?w=800&auto=format&fit=crop&q=80',
 ];
 
+const CATEGORY_SAMPLE_IMAGE: Record<string, string> = {
+  toy_small: SAMPLE_IMAGES[0],
+  do_choi: SAMPLE_IMAGES[0],
+  toy_large: SAMPLE_IMAGES[0],
+  xe_noi: SAMPLE_IMAGES[1],
+  book: SAMPLE_IMAGES[2],
+  sach_truyen: SAMPLE_IMAGES[2],
+  do_hoc_tap: SAMPLE_IMAGES[2],
+  quan_ao: SAMPLE_IMAGES[3],
+  charity: SAMPLE_IMAGES[1],
+  tu_thien: SAMPLE_IMAGES[1],
+};
+
 const AGE_RANGES = ['0-12 tháng', '1-3 tuổi', '3-5 tuổi', 'Trên 5 tuổi', 'Mọi độ tuổi'];
 
 export const PostItemPage: React.FC = () => {
@@ -83,6 +96,15 @@ export const PostItemPage: React.FC = () => {
       try {
         const prod = await productApi.getProductById(editId!);
         if (!active) return;
+        if (currentUser && prod.sellerId !== currentUser.id && currentUser.role !== 'admin') {
+          showToast({
+            title: 'Không có quyền chỉnh sửa',
+            message: 'Mẹ chỉ có thể chỉnh sửa bài đăng thuộc sở hữu của mình.',
+            type: 'warning',
+          });
+          navigate(`/products/${prod.id}`);
+          return;
+        }
         setName(prod.name);
         setCategory((prod.category as CategoryType) || 'toy_large');
         setCondition((prod.condition as ConditionType) || '90');
@@ -93,6 +115,7 @@ export const PostItemPage: React.FC = () => {
         if (allImgs.length > 0) setImages(allImgs);
         if (prod.districtId) setDistrictId(prod.districtId);
         if (prod.wardId) setWardId(prod.wardId);
+        if (prod.locationName) setAddressDetail(prod.locationName);
         if (prod.coordinates) setCoords(prod.coordinates);
       } catch {
         setErrorMsg('Không tìm thấy sản phẩm cần chỉnh sửa.');
@@ -104,9 +127,9 @@ export const PostItemPage: React.FC = () => {
     return () => {
       active = false;
     };
-  }, [editId]);
+  }, [editId, currentUser?.id]);
 
-  // Update price bounds when category or condition changes (only if not loading existing)
+  // Update price bounds & default sample image when category or condition changes (only if not loading existing)
   useEffect(() => {
     if (loadingExisting) return;
     const bounds = getPriceBounds(category, condition);
@@ -115,7 +138,15 @@ export const PostItemPage: React.FC = () => {
     } else if (price <= 0 || price > bounds.max) {
       setPrice(bounds.suggested);
     }
-  }, [category, condition, loadingExisting]);
+    if (!editId) {
+      setImages((prev) => {
+        if (prev.length === 1 && SAMPLE_IMAGES.includes(prev[0])) {
+          return [CATEGORY_SAMPLE_IMAGE[category] || SAMPLE_IMAGES[0]];
+        }
+        return prev;
+      });
+    }
+  }, [category, condition, loadingExisting, editId]);
 
   // Update ward options when district changes
   useEffect(() => {

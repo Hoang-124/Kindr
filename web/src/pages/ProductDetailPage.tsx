@@ -34,6 +34,7 @@ import {
   formatXuToVND,
   getCategoryLabel,
   getConditionLabel,
+  getProductStatusBadge,
   maskPhoneNumber,
   formatFullDate,
 } from '../utils/pricing';
@@ -50,6 +51,7 @@ export const ProductDetailPage: React.FC = () => {
     refreshTransactions,
     refreshChats,
     showToast,
+    requestConfirm,
   } = useApp();
 
   const [product, setProduct] = useState<Product | null>(
@@ -227,58 +229,71 @@ export const ProductDetailPage: React.FC = () => {
     }
   };
 
-  const handleDeleteOwnProduct = async () => {
-    if (
-      !window.confirm(
-        'Mẹ có chắc muốn xóa bài đăng này? Hệ thống sẽ hoàn lại 100% cọc Safe Fee vào ví Xu của mẹ.'
-      )
-    ) {
-      return;
-    }
-    setSubmitting(true);
-    try {
-      const res = await productApi.deleteProduct(product.id);
-      await Promise.all([refreshProducts(), refreshUser()]);
-      showToast({
-        title: 'Đã xóa bài đăng',
-        message: res.message,
-        type: 'success',
-      });
-      navigate('/');
-    } catch (err: any) {
-      showToast({
-        title: 'Không thể xóa bài đăng',
-        message: err.response?.data?.error || 'Sản phẩm đang trong giao dịch.',
-        type: 'error',
-      });
-    } finally {
-      setSubmitting(false);
-    }
+  const handleDeleteOwnProduct = () => {
+    const refundNote =
+      product.safeFeeLocked > 0
+        ? `Hệ thống sẽ hoàn trả ngay 100% cọc Safe Fee (${product.safeFeeLocked} Xu) vào ví khả dụng của mẹ.`
+        : 'Món đồ tặng 0 Xu này sẽ được gỡ khỏi kệ trực tuyến.';
+
+    requestConfirm({
+      title: 'Xác nhận gỡ bài đăng món đồ này?',
+      message: `Mẹ có chắc chắn muốn gỡ "${product.name}"?\n${refundNote}`,
+      confirmText: 'Xác nhận gỡ bài',
+      cancelText: 'Giữ lại',
+      variant: 'danger',
+      onConfirm: async () => {
+        setSubmitting(true);
+        try {
+          const res = await productApi.deleteProduct(product.id);
+          await Promise.all([refreshProducts(), refreshUser()]);
+          showToast({
+            title: 'Đã xóa bài đăng',
+            message: res.message,
+            type: 'success',
+          });
+          navigate('/');
+        } catch (err: any) {
+          showToast({
+            title: 'Không thể xóa bài đăng',
+            message: err.response?.data?.error || 'Sản phẩm đang trong giao dịch.',
+            type: 'error',
+          });
+        } finally {
+          setSubmitting(false);
+        }
+      },
+    });
   };
 
-  const handleAdminRemove = async () => {
-    if (!window.confirm('Xác nhận gỡ bài đăng vi phạm này và hoàn trả Safe Fee cho người bán?')) {
-      return;
-    }
-    setSubmitting(true);
-    try {
-      await adminApi.removeProduct(product.id);
-      await refreshProducts();
-      showToast({
-        title: 'Admin: Đã gỡ bài đăng',
-        message: 'Bài đăng đã chuyển sang trạng thái removed.',
-        type: 'info',
-      });
-      navigate('/admin');
-    } catch (err: any) {
-      showToast({
-        title: 'Lỗi gỡ bài',
-        message: err.response?.data?.error || 'Không thể gỡ bài.',
-        type: 'error',
-      });
-    } finally {
-      setSubmitting(false);
-    }
+  const handleAdminRemove = () => {
+    requestConfirm({
+      title: 'Admin: Gỡ bài đăng vi phạm?',
+      message: `Xác nhận gỡ bài đăng "${product.name}" khỏi hệ thống và hoàn trả cọc Safe Fee cho người bán?`,
+      confirmText: 'Gỡ bài vi phạm',
+      cancelText: 'Hủy bỏ',
+      variant: 'danger',
+      onConfirm: async () => {
+        setSubmitting(true);
+        try {
+          await adminApi.removeProduct(product.id);
+          await refreshProducts();
+          showToast({
+            title: 'Admin: Đã gỡ bài đăng',
+            message: 'Bài đăng đã được gỡ khỏi kệ trực tuyến.',
+            type: 'info',
+          });
+          navigate('/admin');
+        } catch (err: any) {
+          showToast({
+            title: 'Lỗi gỡ bài',
+            message: err.response?.data?.error || 'Không thể gỡ bài.',
+            type: 'error',
+          });
+        } finally {
+          setSubmitting(false);
+        }
+      },
+    });
   };
 
   const handleSubmitReport = async (e: React.FormEvent) => {
@@ -654,7 +669,7 @@ export const ProductDetailPage: React.FC = () => {
                   textAlign: 'center',
                 }}
               >
-                Món đồ này hiện đang trong giao dịch Ký Quỹ hoặc đã được đổi xong ({product.status}).
+                Món đồ này hiện đang trong giao dịch Ký Quỹ hoặc đã được đổi xong ({getProductStatusBadge(product.status).label}).
               </div>
             ) : isOwner ? (
               <div style={{ display: 'flex', gap: 12 }}>
