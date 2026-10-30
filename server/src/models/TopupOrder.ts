@@ -29,7 +29,7 @@ const TopupOrderSchema = new Schema<ITopupOrder>({
   userName: { type: String, required: true },
   userPhone: { type: String },
   xuAmount: { type: Number, required: true, min: 1 },
-  vndAmount: { type: Number, required: true, min: 10000 },
+  vndAmount: { type: Number, required: true, min: 1000 },
   status: {
     type: String,
     enum: ['pending', 'completed', 'cancelled', 'expired'],
