@@ -1,7 +1,7 @@
 // d:\Kindr\web\src\utils\pricing.ts
 import { CategoryType, ConditionType } from '../types';
 
-export const XU_TO_VND_RATE = 10000;
+export const XU_TO_VND_RATE = 1000;
 
 export const PRICING_MATRIX: Record<string, Record<ConditionType, number>> = {
   book: { '90': 2, '80': 1, '70': 1 },

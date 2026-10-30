@@ -176,7 +176,7 @@ export const WalletPage: React.FC = () => {
     setErrorMsg('');
 
     if (withdrawXu < 10) {
-      setErrorMsg('Số lượng rút tối thiểu là 10 Xu (100.000đ).');
+      setErrorMsg('Số lượng rút tối thiểu là 10 Xu (10.000đ).');
       return;
     }
 
@@ -231,7 +231,7 @@ export const WalletPage: React.FC = () => {
           Ví Kindr Xu & Thanh khoản VietQR
         </h1>
         <p style={{ fontSize: 14, color: 'var(--color-text-secondary)', margin: '4px 0 0' }}>
-          Tỷ giá cố định: <strong>1 Xu = 10.000 VNĐ</strong> • Tự động đối soát qua SePay VietQR & Ký quỹ Double Escrow
+          Tỷ giá chuẩn: <strong>1 Xu = 1.000 VNĐ</strong> • Tự động đối soát qua SePay VietQR & Ký quỹ Double Escrow
         </p>
       </div>
 
@@ -414,19 +414,7 @@ export const WalletPage: React.FC = () => {
                 </span>
               </button>
 
-              <button
-                type="button"
-                className="kw-btn kw-btn-secondary"
-                onClick={handleInstantDemoTopup}
-                disabled={demoLoading}
-              >
-                <Sparkles size={17} />
-                <span>
-                  {demoLoading
-                    ? 'Đang cộng Xu...'
-                    : `Nạp nhanh Demo (+${selectedXu} Xu ngay)`}
-                </span>
-              </button>
+              
             </div>
           </div>
 

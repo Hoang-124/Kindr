@@ -7,7 +7,7 @@ export type { CategoryType, ConditionType };
  * Tỷ giá quy đổi chuẩn của Kindr
  * 1 Xu = 10.000 VNĐ
  */
-export const XU_TO_VND_RATE = 10000;
+export const XU_TO_VND_RATE = 1000;
 
 /**
  * Khung định giá cố định chuẩn hóa (Price Anchoring System)

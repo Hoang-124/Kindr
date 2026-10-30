@@ -662,7 +662,7 @@ router.post('/create-order', requireAuth, async (req: AuthRequest, res: Response
       return;
     }
 
-    const vndAmount = xuAmount * 10000;
+    const vndAmount = xuAmount * 1000;
     const orderCode = `TOPUP_${Date.now()}_${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
     const memo = `KINDR NAP ${xuAmount}XU ${orderCode}`;
     const bankCode = ENV.BANK_CODE || 'MB';
@@ -828,7 +828,7 @@ router.post('/topup', requireAuth, async (req: AuthRequest, res: Response): Prom
       return;
     }
 
-    const vndAmount = xuAmount * 10000;
+    const vndAmount = xuAmount * 1000;
     const orderCode = `TOPUP_${Date.now()}_${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
     const memo = `KINDR NAP ${xuAmount}XU ${orderCode}`;
     const bankCode = ENV.BANK_CODE || 'MB';
@@ -1099,7 +1099,7 @@ router.post('/withdraw', requireAuth, async (req: AuthRequest, res: Response): P
       return;
     }
 
-    const vndAmount = xuAmount * 10000;
+    const vndAmount = xuAmount * 1000;
     const feeVnd = Math.round(vndAmount * 0.1); // 10% cash-out fee
     const payoutVnd = vndAmount - feeVnd;
 
