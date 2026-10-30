@@ -33,6 +33,13 @@ export const ENV = {
   BANK_ACCOUNT_HOLDER: process.env.BANK_ACCOUNT_HOLDER || 'CONG DONG KINDR',
   ENABLE_DEMO_TOPUP: process.env.ENABLE_DEMO_TOPUP !== 'false',
   ENABLE_DEMO_LOGIN: process.env.ENABLE_DEMO_LOGIN !== 'false',
+
+  // PayOS Configuration
+  PAYOS_CLIENT_ID: process.env.PAYOS_CLIENT_ID || '',
+  PAYOS_API_KEY: process.env.PAYOS_API_KEY || '',
+  PAYOS_CHECKSUM_KEY: process.env.PAYOS_CHECKSUM_KEY || '',
+  PAYOS_RETURN_URL: process.env.PAYOS_RETURN_URL || 'http://localhost:8081',
+  PAYOS_CANCEL_URL: process.env.PAYOS_CANCEL_URL || 'http://localhost:8081',
 } as const;
 
 if (ENV.NODE_ENV === 'production') {
@@ -46,4 +53,3 @@ if (ENV.NODE_ENV === 'production') {
     );
   }
 }
-

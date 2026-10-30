@@ -90,20 +90,46 @@ d:\Kindr\
 
 ---
 
-### `routes/wallet.ts` ✅ COMPLETE (Balance, Topup VietQR, Webhook, Withdraw CAS, History)
+### `routes/wallet.ts` ✅ COMPLETE (Balance, Topup VietQR / PayOS, Webhook, Withdraw CAS, History)
 
+- **Cổng thanh toán PayOS (VietQR Chuẩn):** Tỷ giá nạp `1 Xu = 1.000 VNĐ`, miễn phí nạp (0đ).
+- **Thư viện tích hợp:** `@payos/node` (Client ID, API Key, Checksum Key).
+- Webhook PayOS xác thực chữ ký tự động (`payos.verifyPaymentWebhookData`), cơ chế **Idempotent** chống cộng tiền trùng lặp, cập nhật nguyên tử số dư `xuBalance` và ghi nhận lịch sử vào `PaymentOrder`.
+- Bắn sự kiện thời gian thực qua Socket.IO (`wallet:topup_success`, `topup_success`) và Expo Push Notification.
 - Gated demo topup bằng `ENABLE_DEMO_TOPUP` (403 trong production).
-- Webhook VietQR bảo vệ bằng header secret `x-webhook-secret`, kiểm tra số tiền thực thu `>= order.vndAmount`.
 - Rút Xu bảo vệ bằng Atomic CAS chống double-spending (`User.findOneAndUpdate({ _id, xuBalance: { $gte: amount } })`).
 
 | Method | Endpoint | Auth | Mô tả |
 |:---|:---|:---|:---|
 | GET | `/api/wallet/balance` | Required | Trả `{ xuBalance, xuFrozen, welcomeCreditRemaining }` |
-| POST | `/api/wallet/create-order` | Required | Tạo đơn nạp tiền VietQR kèm mã chuyển khoản duy nhất |
-| POST | `/api/wallet/webhook` | Webhook Secret | Đối soát tự động ngân hàng cộng Xu vào ví |
-| POST | `/api/wallet/topup` | Demo Only | Giả lập nạp tiền (chỉ bật khi ENABLE_DEMO_TOPUP=true) |
+| POST | `/api/wallet/topup/create-link` | Required | Tạo link thanh toán PayOS VietQR nạp Xu (1 Xu = 1.000 VNĐ, tối thiểu 10 Xu) |
+| POST | `/api/wallet/topup/payos-webhook` | Public | Webhook callback từ PayOS, xác thực chữ ký & cộng Xu Idempotent |
+| GET | `/api/wallet/topup/status/:orderCode` | Required | Kiểm tra trạng thái đơn nạp & tự động sync từ PayOS |
+| POST | `/api/wallet/topup/cancel/:orderCode` | Required | Hủy đơn nạp PENDING & hủy trên PayOS |
+| POST | `/api/wallet/topup/simulate-success/:orderCode` | Dev/Demo Only | Giả lập nạp tiền thành công phục vụ demo không cần chuyển khoản thật |
+| POST | `/api/wallet/create-order` | Required | Tạo đơn nạp tiền VietQR thủ công kèm mã chuyển khoản duy nhất |
+| POST | `/api/wallet/webhook` | Webhook Secret | Đối soát tự động ngân hàng thủ công |
+| POST | `/api/wallet/topup` | Demo Only | Giả lập nạp tiền trực tiếp |
 | POST | `/api/wallet/withdraw` | Required | Đặt lệnh rút tiền Atomic CAS, thu phí 10% |
-| GET | `/api/wallet/history` | Required | Lịch sử giao dịch ví và lệnh rút |
+| GET | `/api/wallet/history` | Required | Lịch sử giao dịch ví, lệnh rút và danh sách đơn PayOS |
+
+---
+
+### Hướng Dẫn Cấu Hình Cổng Thanh Toán PayOS (VietQR)
+1. **Lấy API Key trên PayOS Dashboard:**
+   - Truy cập [https://payos.vn/](https://payos.vn/) và đăng ký/đăng nhập tài khoản.
+   - Tạo kênh thanh toán và lấy bộ ba khóa: `Client ID`, `API Key`, `Checksum Key`.
+2. **Cấu hình biến môi trường (`server/.env`):**
+   ```env
+   PAYOS_CLIENT_ID=your_client_id_here
+   PAYOS_API_KEY=your_api_key_here
+   PAYOS_CHECKSUM_KEY=your_checksum_key_here
+   PAYOS_RETURN_URL=http://localhost:8081
+   PAYOS_CANCEL_URL=http://localhost:8081
+   ```
+3. **Cấu hình Webhook URL:**
+   - Khi chạy production/ngrok: Trỏ Webhook URL trên PayOS Dashboard về `https://your-domain.com/api/wallet/topup/payos-webhook`.
+   - Khi chạy localhost / không có public IP: Hệ thống tự động có cơ chế Polling 3s (`GET /api/wallet/topup/status/:orderCode`) tra cứu trực tiếp từ PayOS và nút **"Giả lập thanh toán test"** (`POST /api/wallet/topup/simulate-success/:orderCode`) giúp kiểm thử luồng cộng Xu tức thì.
 
 ---
 

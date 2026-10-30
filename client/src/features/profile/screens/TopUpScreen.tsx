@@ -11,10 +11,13 @@ import {
   ActivityIndicator,
   Modal,
   Platform,
+  TextInput,
+  Linking,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import QRCode from 'react-native-qrcode-svg';
 import { useAppSelector, useAppDispatch } from '../../../app/store/hooks';
-import { updateUserBalance, refreshWalletBalance } from '../../auth/store/authSlice';
+import { refreshWalletBalance } from '../../auth/store/authSlice';
 import * as walletService from '../../../services/walletService';
 import { socketService } from '../../../services/socketService';
 import { COLORS, TYPOGRAPHY, SPACING, RADIUS, SHADOWS } from '../../../theme';
@@ -22,7 +25,7 @@ import {
   Coins, 
   Check, 
   Info, 
-  QrCode, 
+  QrCode as QrCodeIcon, 
   Copy, 
   CheckCircle2, 
   Clock, 
@@ -31,21 +34,31 @@ import {
   ShieldCheck, 
   Sparkles,
   ArrowRight,
-  Flame
+  Flame,
+  ExternalLink,
+  XCircle,
+  HelpCircle,
+  Wallet
 } from 'lucide-react-native';
 import KindrCoin from '../../../components/common/KindrCoin';
-import { formatNumber } from '../../../utils/helpers';
+import { formatNumber, formatXuToVND } from '../../../utils/helpers';
 import ScreenContainer from '../../../components/layout/ScreenContainer';
 import Header from '../../../components/layout/Header';
 import Button from '../../../components/common/Button';
 import Card from '../../../components/layout/Card';
 import { PulseBadge } from '../../../components/common/PulseBadge';
+import { MascotIcon } from '../../../components/common/MascotIcon';
 
-const PACKAGES = [
-  { id: 'p1', coins: 10, price: 100000, label: 'Gói Trải Nghiệm (10 Xu)' },
-  { id: 'p2', coins: 20, price: 200000, label: 'Gói Phổ Biến (20 Xu)', popular: true },
-  { id: 'p3', coins: 50, price: 500000, label: 'Gói Mẹ Bỉm Tiết Kiệm (50 Xu)' },
-  { id: 'p4', coins: 100, price: 1000000, label: 'Gói VIP Đại Sứ (100 Xu)' },
+// Tỷ giá quy đổi chuẩn theo yêu cầu: 1 Xu = 1.000 VNĐ
+const XU_RATE = 1000;
+
+// Các gói nạp gợi ý nhanh (Quick Packages)
+const QUICK_PACKAGES = [
+  { coins: 20, price: 20 * XU_RATE, label: 'Gói Cơ Bản (20 Xu)' },
+  { coins: 50, price: 50 * XU_RATE, label: 'Gói Phổ Biến (50 Xu)', popular: true },
+  { coins: 100, price: 100 * XU_RATE, label: 'Gói Tiết Kiệm (100 Xu)' },
+  { coins: 200, price: 200 * XU_RATE, label: 'Gói Đại Sứ (200 Xu)' },
+  { coins: 500, price: 500 * XU_RATE, label: 'Gói VIP Bỉm Sữa (500 Xu)' },
 ];
 
 export const TopUpScreen = () => {
@@ -53,54 +66,83 @@ export const TopUpScreen = () => {
   const dispatch = useAppDispatch();
   const currentUser = useAppSelector((state) => state.auth.currentUser);
 
-  const [selectedPack, setSelectedPack] = useState(PACKAGES[1]);
-  const [activeOrder, setActiveOrder] = useState<walletService.TopupOrderData | null>(null);
-  const [generatingOrder, setGeneratingOrder] = useState(false);
-  const [checkingPayment, setCheckingPayment] = useState(false);
-  const [simulating, setSimulating] = useState(false);
-  const [paymentSuccess, setPaymentSuccess] = useState(false);
-  const [receivedCoins, setReceivedCoins] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(15 * 60); // 15 minutes in seconds
+  // Input states
+  const [selectedCoins, setSelectedCoins] = useState<number>(50);
+  const [customCoins, setCustomCoins] = useState<string>('');
+  const [isCustom, setIsCustom] = useState<boolean>(false);
+
+  // Active PayOS order state
+  const [payosOrder, setPayosOrder] = useState<walletService.PayOSPaymentLinkResult | null>(null);
+  const [loadingLink, setLoadingLink] = useState<boolean>(false);
+  const [checkingPayment, setCheckingPayment] = useState<boolean>(false);
+  const [simulating, setSimulating] = useState<boolean>(false);
+  const [cancelling, setCancelling] = useState<boolean>(false);
+
+  // Success celebration state
+  const [paymentSuccess, setPaymentSuccess] = useState<boolean>(false);
+  const [receivedCoins, setReceivedCoins] = useState<number>(0);
+  const [newBalance, setNewBalance] = useState<number | undefined>(undefined);
+
+  // Timer & UI helpers
+  const [timeLeft, setTimeLeft] = useState<number>(15 * 60); // 15 phút
   const [copiedField, setCopiedField] = useState<string | null>(null);
 
-  const activeOrderRef = useRef<walletService.TopupOrderData | null>(null);
-  activeOrderRef.current = activeOrder;
+  const activeOrderCodeRef = useRef<number | null>(null);
+  activeOrderCodeRef.current = payosOrder?.orderCode || null;
 
-  // 1. Generate order on initial load or package select
-  const fetchOrderForPackage = async (pack: typeof PACKAGES[0]) => {
-    setGeneratingOrder(true);
+  // Tính số Xu hiện tại
+  const currentCoins = isCustom 
+    ? Math.max(0, parseInt(customCoins, 10) || 0)
+    : selectedCoins;
+  const currentVnd = currentCoins * XU_RATE;
+
+  // Tạo Payment Link PayOS
+  const handleGeneratePayOSLink = async (coinsToLoad: number) => {
+    if (coinsToLoad < 10) {
+      Alert.alert('Số Xu không hợp lệ', 'Số Xu nạp tối thiểu là 10 Xu (10.000 VNĐ).');
+      return;
+    }
+    if (coinsToLoad > 10000) {
+      Alert.alert('Số Xu không hợp lệ', 'Số Xu nạp tối đa mỗi lần là 10.000 Xu (10.000.000 VNĐ).');
+      return;
+    }
+
+    setLoadingLink(true);
     try {
-      const res = await walletService.createTopupOrder(pack.coins);
-      setActiveOrder(res.order);
+      const res = await walletService.createPayOSPaymentLink(coinsToLoad);
+      setPayosOrder(res);
       setTimeLeft(15 * 60);
     } catch (err: any) {
-      console.warn('Fallback generating order:', err.message);
-      // Fallback local order if offline
-      const mockOrderCode = `TOPUP_${Date.now()}_MOCK`;
-      const memo = `KINDR NAP ${pack.coins}XU ${mockOrderCode}`;
-      setActiveOrder({
-        orderCode: mockOrderCode,
-        xuAmount: pack.coins,
-        vndAmount: pack.price,
-        memo,
-        vietqrUrl: `https://img.vietqr.io/image/MB-0905123456-compact.png?amount=${pack.price}&addInfo=${encodeURIComponent(memo)}&accountName=CONG%20DONG%20KINDR`,
-        bankName: 'MBBank',
-        accountNumber: '0905123456',
-        accountHolder: 'CONG DONG KINDR',
-        status: 'pending',
-        createdAt: new Date().toISOString(),
+      console.warn('Fallback generating PayOS payment link:', err);
+      // Fallback local mock link nếu không có mạng
+      const mockCode = Number(`${Date.now().toString().slice(-7)}${Math.floor(100 + Math.random() * 900)}`);
+      const mockVnd = coinsToLoad * XU_RATE;
+      const desc = `KINDR NAP ${coinsToLoad} XU`.slice(0, 25);
+      setPayosOrder({
+        success: true,
+        orderCode: mockCode,
+        xuAmount: coinsToLoad,
+        vndAmount: mockVnd,
+        checkoutUrl: `https://img.vietqr.io/image/MB-0901234567-compact2.png?amount=${mockVnd}&addInfo=${encodeURIComponent(desc)}&accountName=CONG%20DONG%20KINDR`,
+        qrCode: `https://img.vietqr.io/image/MB-0901234567-compact2.png?amount=${mockVnd}&addInfo=${encodeURIComponent(desc)}&accountName=CONG%20DONG%20KINDR`,
+        accountNumber: '0901234567',
+        accountName: 'CONG DONG KINDR',
+        bin: '970422',
+        description: desc,
+        status: 'PENDING',
       });
       setTimeLeft(15 * 60);
     } finally {
-      setGeneratingOrder(false);
+      setLoadingLink(false);
     }
   };
 
+  // Khởi tạo link thanh toán khi mount
   useEffect(() => {
-    fetchOrderForPackage(selectedPack);
-  }, [selectedPack]);
+    handleGeneratePayOSLink(selectedCoins);
+  }, []);
 
-  // 2. Countdown timer for QR validity (15 mins)
+  // 1. Đếm ngược hiệu lực mã VietQR (15 phút)
   useEffect(() => {
     if (paymentSuccess || timeLeft <= 0) return;
     const timer = setInterval(() => {
@@ -109,92 +151,143 @@ export const TopUpScreen = () => {
     return () => clearInterval(timer);
   }, [paymentSuccess, timeLeft]);
 
-  // 3. Realtime Socket.IO listener for `topup_success`
+  // 2. Lắng nghe Realtime Socket.IO (Cả 'wallet:topup_success' và 'topup_success')
   useEffect(() => {
-    const handleSocketTopup = (data: { orderCode: string; xuAmount: number; newBalance?: number }) => {
-      const current = activeOrderRef.current;
-      if (!current || data.orderCode === current.orderCode) {
-        setReceivedCoins(data.xuAmount || selectedPack.coins);
+    const handleTopupSuccess = (data: { orderCode?: number | string; xuAmount?: number; newBalance?: number }) => {
+      const activeCode = activeOrderCodeRef.current;
+      if (!activeCode || Number(data.orderCode) === activeCode) {
+        setReceivedCoins(data.xuAmount || currentCoins);
+        if (data.newBalance !== undefined) setNewBalance(data.newBalance);
         setPaymentSuccess(true);
         dispatch(refreshWalletBalance());
       }
     };
 
-    socketService.on('topup_success', handleSocketTopup);
-    return () => {
-      socketService.off('topup_success', handleSocketTopup);
-    };
-  }, [selectedPack.coins, dispatch]);
+    socketService.on('wallet:topup_success', handleTopupSuccess);
+    socketService.on('topup_success', handleTopupSuccess);
 
-  // 4. Polling fallback every 4 seconds
+    return () => {
+      socketService.off('wallet:topup_success', handleTopupSuccess);
+      socketService.off('topup_success', handleTopupSuccess);
+    };
+  }, [currentCoins, dispatch]);
+
+  // 3. Polling kiểm tra trạng thái mỗi 3 giây
   useEffect(() => {
-    if (!activeOrder || paymentSuccess) return;
+    if (!payosOrder || paymentSuccess || payosOrder.status === 'PAID') return;
 
     const interval = setInterval(async () => {
       try {
-        const statusRes = await walletService.checkOrderStatus(activeOrder.orderCode);
-        if (statusRes.status === 'completed') {
-          setReceivedCoins(statusRes.xuAmount);
+        const res = await walletService.getPayOSOrderStatus(payosOrder.orderCode);
+        if (res.status === 'PAID') {
+          setReceivedCoins(res.xuAmount);
           setPaymentSuccess(true);
           dispatch(refreshWalletBalance());
         }
       } catch (err) {
-        // silent polling error
+        // silent polling catch
       }
-    }, 4000);
+    }, 3000);
 
     return () => clearInterval(interval);
-  }, [activeOrder, paymentSuccess, dispatch]);
+  }, [payosOrder, paymentSuccess, dispatch]);
 
   if (!currentUser) return null;
 
+  // Xử lý sao chép thông tin
   const handleCopy = (field: string, value: string) => {
     setCopiedField(field);
     setTimeout(() => setCopiedField(null), 2500);
-    Alert.alert('Đã sao chép', `Đã chép "${value}" vào bộ nhớ tạm.`);
+    Alert.alert('Đã sao chép 📋', `Đã lưu "${value}" vào bộ nhớ tạm.`);
   };
 
-  // Manual check button handler
+  // Chọn gói nhanh
+  const handleSelectPackage = (coins: number) => {
+    setIsCustom(false);
+    setSelectedCoins(coins);
+    setCustomCoins('');
+    handleGeneratePayOSLink(coins);
+  };
+
+  // Áp dụng số Xu tự chọn
+  const handleApplyCustomCoins = () => {
+    const val = parseInt(customCoins, 10);
+    if (isNaN(val) || val < 10) {
+      Alert.alert('Số Xu không hợp lệ', 'Số Xu nạp tối thiểu là 10 Xu (10.000 VNĐ).');
+      return;
+    }
+    if (val > 10000) {
+      Alert.alert('Số Xu không hợp lệ', 'Số Xu nạp tối đa mỗi lần là 10.000 Xu (10.000.000 VNĐ).');
+      return;
+    }
+    setIsCustom(true);
+    handleGeneratePayOSLink(val);
+  };
+
+  // Kiểm tra thủ công nút bấm
   const handleManualCheck = async () => {
-    if (!activeOrder) return;
+    if (!payosOrder) return;
     setCheckingPayment(true);
     try {
-      const res = await walletService.checkOrderStatus(activeOrder.orderCode);
-      if (res.status === 'completed') {
+      const res = await walletService.getPayOSOrderStatus(payosOrder.orderCode);
+      if (res.status === 'PAID') {
         setReceivedCoins(res.xuAmount);
         setPaymentSuccess(true);
         dispatch(refreshWalletBalance());
       } else {
         Alert.alert(
           'Đang Chờ Ngân Hàng ⏳',
-          'Hệ thống chưa nhận được thông báo biến động số dư từ ngân hàng. Nếu mẹ vừa quét mã, vui lòng đợi 5-10 giây để ngân hàng gửi Webhook IPN nhé!'
+          'Hệ thống chưa nhận được thông báo chuyển tiền từ VietQR/PayOS. Mẹ vui lòng đợi vài giây để ngân hàng gửi Webhook nhé!'
         );
       }
     } catch {
-      Alert.alert(
-        'Đang Chờ Ngân Hàng ⏳',
-        'Giao dịch vẫn đang được xử lý. Mẹ vui lòng kiểm tra xem app ngân hàng đã hoàn tất chuyển tiền chưa nhé.'
-      );
+      Alert.alert('Đang kiểm tra', 'Giao dịch vẫn đang được xử lý.');
     } finally {
       setCheckingPayment(false);
     }
   };
 
-  // Simulation test button (immediate top-up for demo / dev)
-  const handleSimulateTopup = async () => {
+  // Hủy đơn nạp
+  const handleCancelOrder = async () => {
+    if (!payosOrder) return;
+    setCancelling(true);
+    try {
+      await walletService.cancelPayOSOrder(payosOrder.orderCode);
+      Alert.alert('Đã hủy', 'Đơn nạp tiền đã được hủy thành công.');
+      setPayosOrder(null);
+    } catch (err: any) {
+      Alert.alert('Không thể hủy', err?.response?.data?.error || 'Có lỗi xảy ra khi hủy đơn.');
+    } finally {
+      setCancelling(false);
+    }
+  };
+
+  // Nút giả lập nạp thành công (Demo/Dev mode)
+  const handleSimulateSuccess = async () => {
+    if (!payosOrder) return;
     setSimulating(true);
     try {
-      await walletService.topUpXu(selectedPack.coins);
-      dispatch(refreshWalletBalance());
-      setReceivedCoins(selectedPack.coins);
+      const res = await walletService.simulatePayOSSuccess(payosOrder.orderCode);
+      setReceivedCoins(payosOrder.xuAmount);
+      if (res.newBalance !== undefined) setNewBalance(res.newBalance);
       setPaymentSuccess(true);
+      dispatch(refreshWalletBalance());
     } catch (err: any) {
       Alert.alert(
-        'Không thể nạp demo',
-        err?.response?.data?.error || 'Chức năng nạp Xu giả lập chỉ khả dụng khi bật ENABLE_DEMO_TOPUP trên server.'
+        'Không thể giả lập',
+        err?.response?.data?.error || 'Chức năng chỉ bật ở môi trường Development / Demo.'
       );
     } finally {
       setSimulating(false);
+    }
+  };
+
+  // Mở trang thanh toán PayOS bên ngoài
+  const handleOpenCheckoutUrl = () => {
+    if (payosOrder?.checkoutUrl) {
+      Linking.openURL(payosOrder.checkoutUrl).catch(() => {
+        Alert.alert('Lỗi', 'Không thể mở liên kết thanh toán.');
+      });
     }
   };
 
@@ -203,6 +296,9 @@ export const TopUpScreen = () => {
     const secs = seconds % 60;
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
+
+  // Kiểm tra chuỗi QR xem là link ảnh hay chuỗi raw VietQR
+  const isImageQr = payosOrder?.qrCode && (payosOrder.qrCode.startsWith('http://') || payosOrder.qrCode.startsWith('https://'));
 
   return (
     <ScreenContainer scrollable={false}>
@@ -213,38 +309,66 @@ export const TopUpScreen = () => {
         contentContainerStyle={styles.contentContainer}
         showsVerticalScrollIndicator={false}
       >
-        {/* Policy Brief Info */}
-        <View style={styles.infoBox}>
-          <Info size={18} color={COLORS.onPrimaryContainer} />
-          <Text style={styles.infoText}>
-            Quy chuẩn: 1 Xu = 10.000 VNĐ. Tiền nạp vào đóng vai trò là Quỹ bảo chứng thanh toán và phí giao dịch trong hệ thống Kindr.
-          </Text>
+        {/* Card Số Dư Hiện Tại */}
+        <Card style={styles.balanceSummaryCard} contentStyle={styles.balanceSummaryContent}>
+          <View style={styles.balanceHeaderRow}>
+            <View style={styles.balanceIconWrapper}>
+              <Wallet size={22} color={COLORS.primary} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.balanceLabel}>Số dư ví hiện tại của mẹ</Text>
+              <View style={styles.balanceAmountsRow}>
+                <Text style={styles.balanceXuText}>{currentUser.xuBalance} Xu</Text>
+                <Text style={styles.balanceVndText}>≈ {formatNumber(currentUser.xuBalance * XU_RATE)} VNĐ</Text>
+              </View>
+            </View>
+          </View>
+          {currentUser.xuFrozen > 0 && (
+            <View style={styles.frozenRow}>
+              <Text style={styles.frozenText}>
+                🔒 Đang đóng băng ký quỹ Escrow: <Text style={{ fontWeight: '700' }}>{currentUser.xuFrozen} Xu</Text>
+              </Text>
+            </View>
+          )}
+        </Card>
+
+        {/* Mascot Kindr Buddy Nudge */}
+        <View style={styles.buddyContainer}>
+          <MascotIcon size={46} mood="happy" renderMode="vector" />
+          <View style={styles.buddyBubble}>
+            <Text style={styles.buddyText}>
+              <Text style={{ fontWeight: '700', color: COLORS.onPrimaryContainer }}>Gấu Kindr nhắc mẹ:</Text> Hệ thống sẽ tự động cộng Xu vào ví ngay sau khi mẹ quét mã VietQR thành công nhé!
+            </Text>
+          </View>
         </View>
 
-        {/* 1. Select Package */}
-        <Text style={styles.sectionTitle}>1. Chọn gói Xu muốn nạp:</Text>
+        {/* 1. Chọn Gói Nạp Nhanh */}
+        <View style={styles.sectionHeaderRow}>
+          <Text style={styles.sectionTitle}>1. Chọn gói Xu hoặc nhập số lượng:</Text>
+          <View style={styles.rateBadge}>
+            <Text style={styles.rateText}>🪙 1 Xu = 1.000 VNĐ</Text>
+          </View>
+        </View>
         
         <View style={styles.grid}>
-          {PACKAGES.map((pack) => {
-            const isSelected = selectedPack.id === pack.id;
+          {QUICK_PACKAGES.map((pack) => {
+            const isSelected = !isCustom && selectedCoins === pack.coins;
             return (
               <TouchableOpacity
-                key={pack.id}
+                key={pack.coins}
                 style={[
                   styles.packCard,
                   isSelected && styles.packCardSelected,
                 ]}
-                onPress={() => setSelectedPack(pack)}
+                onPress={() => handleSelectPackage(pack.coins)}
                 activeOpacity={0.85}
               >
                 {pack.popular && (
                   <View style={styles.popularBadge}>
-                    <Flame size={10} color={COLORS.surface} />
+                    <Flame size={10} color="#FFFFFF" />
                     <Text style={styles.popularBadgeText}>HOT</Text>
                   </View>
                 )}
-                
-                <Text style={styles.packLabel}>{pack.label}</Text>
                 
                 <View style={styles.coinWrapper}>
                   <KindrCoin size={20} />
@@ -259,7 +383,7 @@ export const TopUpScreen = () => {
 
                 {isSelected && (
                   <View style={styles.checkedCircle}>
-                    <Check size={12} color={COLORS.surface} strokeWidth={3} />
+                    <Check size={12} color="#FFFFFF" strokeWidth={3} />
                   </View>
                 )}
               </TouchableOpacity>
@@ -267,9 +391,56 @@ export const TopUpScreen = () => {
           })}
         </View>
 
-        {/* 2. Dynamic VietQR Banking Card */}
+        {/* Ô Nhập Số Xu Tùy Chỉnh */}
+        <View style={styles.customInputContainer}>
+          <Text style={styles.customInputLabel}>Hoặc nhập số Xu tùy chọn (10 – 10.000 Xu):</Text>
+          <View style={styles.customInputRow}>
+            <TextInput
+              style={styles.customTextInput}
+              placeholder="VD: 75"
+              placeholderTextColor={COLORS.textDim}
+              keyboardType="number-pad"
+              value={customCoins}
+              onChangeText={(text) => {
+                setCustomCoins(text.replace(/[^0-9]/g, ''));
+              }}
+            />
+            <Button
+              title="Tạo mã QR"
+              onPress={handleApplyCustomCoins}
+              style={styles.applyCustomBtn}
+              containerStyle={styles.applyCustomBtnContainer}
+            />
+          </View>
+        </View>
+
+        {/* 2. Bản Xem Trước (Summary Card) */}
+        <Card style={styles.summaryCard} contentStyle={styles.summaryCardContent}>
+          <Text style={styles.summaryTitle}>BẢN XEM TRƯỚC ĐƠN NẠP</Text>
+          <View style={styles.summaryRow}>
+            <Text style={styles.summaryLabel}>Số Xu nhận được:</Text>
+            <Text style={styles.summaryValueGold}>+{currentCoins} Xu</Text>
+          </View>
+          <View style={styles.summaryRow}>
+            <Text style={styles.summaryLabel}>Số tiền thanh toán:</Text>
+            <Text style={styles.summaryValue}>{formatNumber(currentVnd)} VNĐ</Text>
+          </View>
+          <View style={styles.summaryRow}>
+            <Text style={styles.summaryLabel}>Phí giao dịch:</Text>
+            <View style={styles.freeBadge}>
+              <Text style={styles.freeBadgeText}>0đ (Miễn phí nạp 100%)</Text>
+            </View>
+          </View>
+          <View style={styles.summaryDivider} />
+          <View style={styles.summaryRow}>
+            <Text style={styles.summaryTotalLabel}>Tổng thanh toán:</Text>
+            <Text style={styles.summaryTotalValue}>{formatNumber(currentVnd)} VNĐ</Text>
+          </View>
+        </Card>
+
+        {/* 3. Khung Thanh Toán PayOS VietQR */}
         <View style={styles.sectionHeaderRow}>
-          <Text style={styles.sectionTitle}>2. Quét mã VietQR chuyển khoản tự động:</Text>
+          <Text style={styles.sectionTitle}>2. Quét mã VietQR (PayOS tự động 3s):</Text>
           <View style={styles.timerBadge}>
             <Clock size={12} color={timeLeft < 180 ? COLORS.error : COLORS.onSurfaceVariant} />
             <Text style={[styles.timerText, timeLeft < 180 && { color: COLORS.error }]}>
@@ -279,11 +450,11 @@ export const TopUpScreen = () => {
         </View>
         
         <Card style={styles.qrCard}>
-          {/* Header with Pulse Live Listening */}
+          {/* Header VietQR với Pulsing live listening */}
           <View style={styles.qrHeader}>
             <View style={styles.qrHeaderLeft}>
-              <QrCode size={20} color={COLORS.primary} />
-              <Text style={styles.qrTitle}>MÃ VIETQR TỰ ĐỘNG (CỘNG TRONG 3S)</Text>
+              <QrCodeIcon size={20} color={COLORS.primary} />
+              <Text style={styles.qrTitle}>VIETQR NẠP TỰ ĐỘNG CỦA MẸ</Text>
             </View>
             <PulseBadge>
               <View style={styles.liveListeningPill}>
@@ -293,96 +464,121 @@ export const TopUpScreen = () => {
             </PulseBadge>
           </View>
 
-          {/* QR Code Container */}
+          {/* QR Code Canvas */}
           <View style={styles.qrImageContainer}>
-            {generatingOrder ? (
+            {loadingLink ? (
               <View style={styles.qrLoadingBox}>
                 <ActivityIndicator size="large" color={COLORS.primary} />
-                <Text style={styles.qrLoadingText}>Đang tạo mã VietQR động...</Text>
+                <Text style={styles.qrLoadingText}>Đang tạo mã VietQR từ PayOS...</Text>
               </View>
-            ) : activeOrder?.vietqrUrl ? (
-              <>
-                <Image 
-                  source={{ uri: activeOrder.vietqrUrl }} 
-                  style={styles.qrImage} 
-                  resizeMode="contain"
-                />
+            ) : payosOrder?.qrCode ? (
+              <View style={styles.qrWrapper}>
+                {isImageQr ? (
+                  <Image 
+                    source={{ uri: payosOrder.qrCode }} 
+                    style={styles.qrImage} 
+                    resizeMode="contain"
+                  />
+                ) : (
+                  <QRCode
+                    value={payosOrder.qrCode}
+                    size={210}
+                    color="#1A1D20"
+                    backgroundColor="#FFFFFF"
+                  />
+                )}
                 <Text style={styles.qrSubText}>
-                  Mở App ngân hàng bất kỳ (MB, VCB, Techcombank, VPBank...) để quét mã
+                  Mở ứng dụng ngân hàng bất kỳ (MB, Vietcombank, Techcombank...) để quét mã
                 </Text>
-              </>
+              </View>
             ) : (
               <View style={styles.qrLoadingBox}>
-                <Text style={styles.qrLoadingText}>Không tải được mã QR. Vui lòng thử lại.</Text>
+                <Text style={styles.qrLoadingText}>Không thể tạo mã QR. Vui lòng thử lại.</Text>
+                <Button 
+                  title="Thử lại" 
+                  onPress={() => handleGeneratePayOSLink(currentCoins)} 
+                  style={{ marginTop: 8 }}
+                />
               </View>
             )}
           </View>
 
-          {/* Bank Transfer Details with 1-Tap Copy */}
+          {/* Chi tiết chuyển khoản & Nút Copy 1-Chạm */}
           <View style={styles.bankDetailList}>
-            {/* Bank Name */}
             <View style={styles.bankRow}>
-              <Text style={styles.bankLabel}>Ngân hàng thụ hưởng:</Text>
-              <Text style={styles.bankValue}>{activeOrder?.bankName || 'MBBank'}</Text>
+              <Text style={styles.bankLabel}>Ngân hàng:</Text>
+              <Text style={styles.bankValue}>
+                {payosOrder?.bin === '970422' ? 'MBBank (Quân Đội)' : 'VietQR / Napas247'}
+              </Text>
             </View>
 
-            {/* Account Number */}
             <View style={styles.bankRow}>
               <Text style={styles.bankLabel}>Số tài khoản:</Text>
               <TouchableOpacity 
                 style={styles.copyableRow} 
-                onPress={() => handleCopy('account', activeOrder?.accountNumber || '0905123456')}
+                onPress={() => handleCopy('account', payosOrder?.accountNumber || '0901234567')}
                 activeOpacity={0.7}
               >
                 <Text style={[styles.bankValue, styles.highlightValue]}>
-                  {activeOrder?.accountNumber || '0905123456'}
+                  {payosOrder?.accountNumber || '0901234567'}
                 </Text>
                 <Copy size={16} color={copiedField === 'account' ? COLORS.success : COLORS.primary} />
               </TouchableOpacity>
             </View>
 
-            {/* Account Holder */}
             <View style={styles.bankRow}>
               <Text style={styles.bankLabel}>Chủ tài khoản:</Text>
-              <Text style={styles.bankValue}>{activeOrder?.accountHolder || 'CONG DONG KINDR'}</Text>
+              <Text style={styles.bankValue}>
+                {payosOrder?.accountName || 'CONG DONG KINDR'}
+              </Text>
             </View>
 
-            {/* Amount */}
             <View style={styles.bankRow}>
-              <Text style={styles.bankLabel}>Số tiền nạp:</Text>
+              <Text style={styles.bankLabel}>Số tiền:</Text>
               <TouchableOpacity 
                 style={styles.copyableRow}
-                onPress={() => handleCopy('amount', String(activeOrder?.vndAmount || selectedPack.price))}
+                onPress={() => handleCopy('amount', String(payosOrder?.vndAmount || currentVnd))}
                 activeOpacity={0.7}
               >
                 <Text style={[styles.bankValue, styles.amountHighlight]}>
-                  {formatNumber(activeOrder?.vndAmount || selectedPack.price)} VNĐ
+                  {formatNumber(payosOrder?.vndAmount || currentVnd)} VNĐ
                 </Text>
                 <Copy size={16} color={copiedField === 'amount' ? COLORS.success : COLORS.warning} />
               </TouchableOpacity>
             </View>
 
-            {/* Transfer Memo */}
             <View style={[styles.bankRow, styles.memoRow]}>
               <View style={styles.memoLabelCol}>
-                <Text style={styles.bankLabel}>Nội dung chuyển khoản:</Text>
-                <Text style={styles.memoSubLabel}>Bắt buộc giữ nguyên để cộng Xu tự động</Text>
+                <Text style={styles.bankLabel}>Nội dung CK:</Text>
+                <Text style={styles.memoSubLabel}>Bắt buộc giữ nguyên để đối soát tự động</Text>
               </View>
               <TouchableOpacity 
                 style={[styles.copyableRow, styles.memoPill]}
-                onPress={() => handleCopy('memo', activeOrder?.memo || '')}
+                onPress={() => handleCopy('memo', payosOrder?.description || '')}
                 activeOpacity={0.7}
               >
                 <Text style={styles.memoText} numberOfLines={1}>
-                  {activeOrder?.memo || 'KINDR NAP...'}
+                  {payosOrder?.description || `KINDR NAP ${currentCoins} XU`}
                 </Text>
                 <Copy size={16} color={copiedField === 'memo' ? COLORS.success : COLORS.primary} />
               </TouchableOpacity>
             </View>
           </View>
+
+          {/* Nút mở cổng PayOS bên ngoài */}
+          {payosOrder?.checkoutUrl && (
+            <TouchableOpacity 
+              style={styles.externalLinkBtn}
+              onPress={handleOpenCheckoutUrl}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.externalLinkText}>Mở trang thanh toán PayOS Checkout</Text>
+              <ExternalLink size={16} color={COLORS.primary} />
+            </TouchableOpacity>
+          )}
         </Card>
 
-        {/* Action Buttons */}
+        {/* Nút Hành Động & Kiểm Tra */}
         <View style={styles.actionButtonGroup}>
           <Button
             title={checkingPayment ? 'Đang kiểm tra...' : 'Kiểm tra trạng thái thanh toán'}
@@ -393,15 +589,27 @@ export const TopUpScreen = () => {
           />
 
           <Button
-            title={simulating ? 'Đang xử lý...' : `Giả lập thanh toán test (${selectedPack.coins} Xu)`}
-            onPress={handleSimulateTopup}
+            title={simulating ? 'Đang cộng Xu...' : `Giả lập thanh toán test (+${currentCoins} Xu)`}
+            onPress={handleSimulateSuccess}
             loading={simulating}
             style={styles.simulateBtn}
           />
+
+          {payosOrder && (
+            <TouchableOpacity
+              style={styles.cancelLink}
+              onPress={handleCancelOrder}
+              disabled={cancelling}
+            >
+              <Text style={styles.cancelLinkText}>
+                {cancelling ? 'Đang hủy...' : 'Hủy đơn nạp này'}
+              </Text>
+            </TouchableOpacity>
+          )}
         </View>
       </ScrollView>
 
-      {/* 5. SUCCESS CELEBRATION MODAL */}
+      {/* 4. MODAL NẠP XU THÀNH CÔNG */}
       <Modal
         visible={paymentSuccess}
         transparent
@@ -414,22 +622,24 @@ export const TopUpScreen = () => {
               <CheckCircle2 size={56} color={COLORS.success} />
             </View>
 
-            <Text style={styles.modalTitle}>NẠP XU THÀNH CÔNG!</Text>
+            <Text style={styles.modalTitle}>NẠP XU THÀNH CÔNG! 🎉</Text>
             <Text style={styles.modalSubText}>
-              Hệ thống vừa nhận được chuyển khoản ngân hàng qua Webhook tự động.
+              Cổng thanh toán PayOS VietQR đã ghi nhận giao dịch của mẹ.
             </Text>
 
             <View style={styles.rewardCard}>
-              <Coins size={28} color={COLORS.warning} />
+              <Coins size={32} color={COLORS.warning} />
               <View style={styles.rewardInfo}>
                 <Text style={styles.rewardAmount}>+{receivedCoins} Xu</Text>
-                <Text style={styles.rewardNote}>Đã cộng ngay vào ví của mẹ</Text>
+                <Text style={styles.rewardNote}>
+                  Số dư mới: <Text style={{ fontWeight: '700' }}>{newBalance !== undefined ? `${newBalance} Xu` : 'Đã cập nhật'}</Text>
+                </Text>
               </View>
             </View>
 
             <View style={styles.modalActionCol}>
               <Button
-                title="Về ví của mẹ ngay"
+                title="Về Ví Của Mẹ Ngay"
                 onPress={() => {
                   setPaymentSuccess(false);
                   navigation.goBack();
@@ -454,63 +664,112 @@ const styles = StyleSheet.create({
     paddingTop: SPACING.md,
     paddingBottom: 60,
   },
-  infoBox: {
-    backgroundColor: COLORS.primaryContainer,
-    borderRadius: RADIUS.md,
+  balanceSummaryCard: {
+    marginBottom: SPACING.md,
+    backgroundColor: COLORS.surfaceContainerLowest,
+    borderColor: COLORS.outlineVariant,
+    borderWidth: 1,
+    borderRadius: RADIUS.lg,
+  },
+  balanceSummaryContent: {
     padding: SPACING.md,
+  },
+  balanceHeaderRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: SPACING.md,
+  },
+  balanceIconWrapper: {
+    width: 44,
+    height: 44,
+    borderRadius: RADIUS.full,
+    backgroundColor: COLORS.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  balanceLabel: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: COLORS.textMuted,
+  },
+  balanceAmountsRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
     gap: SPACING.sm,
+    marginTop: 2,
+  },
+  balanceXuText: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: COLORS.primary,
+  },
+  balanceVndText: {
+    fontSize: 13,
+    color: COLORS.textMuted,
+  },
+  frozenRow: {
+    marginTop: SPACING.sm,
+    paddingTop: SPACING.sm,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.divider,
+  },
+  frozenText: {
+    fontSize: 12,
+    color: COLORS.warning,
+  },
+  buddyContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.primaryContainer,
+    borderRadius: RADIUS.lg,
+    padding: SPACING.md,
+    gap: SPACING.md,
     marginBottom: SPACING.lg,
   },
-  infoText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: COLORS.onPrimaryContainer,
+  buddyBubble: {
     flex: 1,
-    lineHeight: 17,
+  },
+  buddyText: {
+    fontSize: 12.5,
+    lineHeight: 18,
+    color: COLORS.onSurface,
   },
   sectionHeaderRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: SPACING.md,
+    marginBottom: SPACING.sm,
   },
   sectionTitle: {
-    fontSize: 15,
+    fontSize: 14.5,
     fontWeight: '700',
     color: COLORS.onSurface,
-    marginBottom: SPACING.md,
   },
-  timerBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    backgroundColor: COLORS.surfaceContainerHigh,
+  rateBadge: {
+    backgroundColor: COLORS.tertiaryContainer,
     paddingHorizontal: 8,
-    paddingVertical: 4,
+    paddingVertical: 3,
     borderRadius: RADIUS.full,
-    marginBottom: SPACING.md,
   },
-  timerText: {
-    fontSize: 12,
+  rateText: {
+    fontSize: 11,
     fontWeight: '700',
-    color: COLORS.onSurfaceVariant,
+    color: COLORS.onTertiaryContainer,
   },
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: SPACING.md,
-    marginBottom: SPACING.xl,
+    gap: SPACING.sm,
+    marginBottom: SPACING.md,
   },
   packCard: {
-    width: '47%',
-    minHeight: 110,
+    width: '31%',
+    minHeight: 88,
     backgroundColor: COLORS.surfaceContainerLowest,
     borderWidth: 1.5,
     borderColor: COLORS.outlineVariant,
-    borderRadius: RADIUS.lg,
-    padding: SPACING.md,
+    borderRadius: RADIUS.md,
+    padding: SPACING.sm,
     alignItems: 'center',
     justifyContent: 'center',
     position: 'relative',
@@ -522,91 +781,197 @@ const styles = StyleSheet.create({
   },
   popularBadge: {
     position: 'absolute',
-    top: -10,
-    right: -6,
+    top: -8,
+    right: -4,
     backgroundColor: COLORS.error,
     borderRadius: RADIUS.full,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
+    paddingHorizontal: 6,
+    paddingVertical: 1,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 2,
   },
   popularBadgeText: {
-    fontSize: 12,
+    color: '#FFFFFF',
+    fontSize: 9,
     fontWeight: '800',
-    color: COLORS.surface,
-  },
-  packLabel: {
-    fontSize: 12,
-    color: COLORS.outline,
-    fontWeight: '600',
-    marginBottom: 4,
-    textAlign: 'center',
   },
   coinWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    marginVertical: 4,
-  },
-  coinEmoji: {
-    fontSize: 18,
+    marginBottom: 4,
   },
   coinText: {
-    fontSize: 20,
-    fontWeight: '800',
+    fontSize: 14,
+    fontWeight: '700',
     color: COLORS.onSurface,
   },
   coinTextSelected: {
     color: COLORS.primary,
   },
   priceText: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: COLORS.outline,
+    fontSize: 11.5,
+    fontWeight: '600',
+    color: COLORS.textMuted,
   },
   priceTextSelected: {
-    color: COLORS.warning,
+    color: COLORS.primary,
+    fontWeight: '700',
   },
   checkedCircle: {
     position: 'absolute',
-    bottom: 8,
-    right: 8,
-    width: 22,
-    height: 22,
-    borderRadius: 11,
+    bottom: -6,
     backgroundColor: COLORS.primary,
+    borderRadius: RADIUS.full,
+    padding: 2,
+  },
+  customInputContainer: {
+    backgroundColor: COLORS.surfaceContainerLowest,
+    borderRadius: RADIUS.md,
+    padding: SPACING.md,
+    borderWidth: 1,
+    borderColor: COLORS.outlineVariant,
+    marginBottom: SPACING.lg,
+  },
+  customInputLabel: {
+    fontSize: 12.5,
+    fontWeight: '600',
+    color: COLORS.onSurfaceVariant,
+    marginBottom: SPACING.xs,
+  },
+  customInputRow: {
+    flexDirection: 'row',
+    gap: SPACING.sm,
     alignItems: 'center',
-    justifyContent: 'center',
+  },
+  customTextInput: {
+    flex: 1,
+    minHeight: 44,
+    backgroundColor: COLORS.background,
+    borderWidth: 1,
+    borderColor: COLORS.outlineVariant,
+    borderRadius: RADIUS.default,
+    paddingHorizontal: SPACING.md,
+    fontSize: 14,
+    color: COLORS.text,
+  },
+  applyCustomBtnContainer: {
+    width: 'auto',
+  },
+  applyCustomBtn: {
+    minHeight: 44,
+    paddingHorizontal: SPACING.lg,
+    borderRadius: RADIUS.default,
+  },
+  summaryCard: {
+    backgroundColor: '#FFFBF2',
+    borderColor: '#FFE8B5',
+    borderWidth: 1,
+    borderRadius: RADIUS.lg,
+    marginBottom: SPACING.lg,
+  },
+  summaryCardContent: {
+    padding: SPACING.md,
+  },
+  summaryTitle: {
+    fontSize: 11,
+    fontWeight: '800',
+    letterSpacing: 0.8,
+    color: '#8C6500',
+    marginBottom: SPACING.sm,
+  },
+  summaryRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginVertical: 3,
+  },
+  summaryLabel: {
+    fontSize: 13,
+    color: COLORS.onSurfaceVariant,
+  },
+  summaryValue: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: COLORS.onSurface,
+  },
+  summaryValueGold: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: COLORS.primary,
+  },
+  freeBadge: {
+    backgroundColor: COLORS.secondaryLight,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: RADIUS.full,
+  },
+  freeBadgeText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: COLORS.secondaryDark,
+  },
+  summaryDivider: {
+    height: 1,
+    backgroundColor: '#FFE8B5',
+    marginVertical: SPACING.sm,
+  },
+  summaryTotalLabel: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: COLORS.onSurface,
+  },
+  summaryTotalValue: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: COLORS.primary,
+  },
+  timerBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: COLORS.surfaceContainerHigh,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: RADIUS.full,
+  },
+  timerText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: COLORS.onSurfaceVariant,
   },
   qrCard: {
+    backgroundColor: COLORS.surface,
+    borderRadius: RADIUS.lg,
     padding: SPACING.md,
+    borderWidth: 1,
+    borderColor: COLORS.outlineVariant,
     marginBottom: SPACING.lg,
+    ...SHADOWS.soft,
   },
   qrHeader: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
-    paddingBottom: SPACING.sm,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(0, 0, 0, 0.06)',
+    alignItems: 'center',
+    marginBottom: SPACING.md,
   },
   qrHeaderLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: SPACING.xs,
   },
   qrTitle: {
     fontSize: 12,
     fontWeight: '800',
     color: COLORS.primary,
+    letterSpacing: 0.5,
   },
   liveListeningPill: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 5,
-    backgroundColor: COLORS.primaryLight,
+    backgroundColor: COLORS.secondaryLight,
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: RADIUS.full,
@@ -615,134 +980,150 @@ const styles = StyleSheet.create({
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: COLORS.success,
+    backgroundColor: COLORS.secondary,
   },
   liveText: {
-    fontSize: 12,
+    fontSize: 10,
     fontWeight: '700',
-    color: COLORS.success,
+    color: COLORS.secondaryDark,
   },
   qrImageContainer: {
     alignItems: 'center',
-    paddingVertical: SPACING.md,
+    justifyContent: 'center',
+    marginVertical: SPACING.sm,
+    minHeight: 230,
+  },
+  qrWrapper: {
+    alignItems: 'center',
+    padding: SPACING.sm,
+    backgroundColor: '#FFFFFF',
+    borderRadius: RADIUS.md,
+    ...SHADOWS.soft,
   },
   qrImage: {
-    width: 230,
-    height: 230,
-    backgroundColor: COLORS.surface,
-    borderRadius: RADIUS.md,
+    width: 210,
+    height: 210,
   },
   qrLoadingBox: {
-    width: 230,
-    height: 230,
-    backgroundColor: COLORS.surfaceContainerLow,
-    borderRadius: RADIUS.md,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
+    padding: SPACING.xl,
   },
   qrLoadingText: {
     fontSize: 12,
-    fontWeight: '600',
-    color: COLORS.outline,
+    color: COLORS.textMuted,
+    marginTop: SPACING.sm,
   },
   qrSubText: {
-    fontSize: 12,
-    color: COLORS.outline,
-    marginTop: 8,
+    fontSize: 11,
+    color: COLORS.textMuted,
     textAlign: 'center',
+    marginTop: SPACING.sm,
+    maxWidth: 240,
   },
   bankDetailList: {
-    backgroundColor: COLORS.surfaceContainerLow,
-    padding: SPACING.md,
-    borderRadius: RADIUS.md,
-    gap: 10,
+    marginTop: SPACING.md,
+    paddingTop: SPACING.md,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.divider,
+    gap: SPACING.xs,
   },
   bankRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    minHeight: 32,
   },
   bankLabel: {
-    fontSize: 12,
+    fontSize: 12.5,
     color: COLORS.onSurfaceVariant,
-    fontWeight: '500',
   },
   bankValue: {
     fontSize: 13,
-    fontWeight: '700',
+    fontWeight: '600',
     color: COLORS.onSurface,
+  },
+  copyableRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
   },
   highlightValue: {
     color: COLORS.primary,
-    fontWeight: '800',
+    fontWeight: '700',
   },
   amountHighlight: {
     color: COLORS.warning,
     fontWeight: '800',
     fontSize: 14,
   },
-  copyableRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    minHeight: 44, // Touch ergonomics >= 44pt
-    paddingHorizontal: 6,
-  },
   memoRow: {
-    flexDirection: 'column',
-    alignItems: 'stretch',
-    gap: 6,
-    backgroundColor: COLORS.tertiaryContainer,
-    padding: 8,
-    borderRadius: RADIUS.sm,
+    alignItems: 'flex-start',
+    marginTop: 4,
   },
   memoLabelCol: {
-    flexDirection: 'column',
+    flex: 1,
   },
   memoSubLabel: {
-    fontSize: 12,
-    color: COLORS.warning,
-    fontWeight: '500',
+    fontSize: 10.5,
+    color: COLORS.error,
   },
   memoPill: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: COLORS.surface,
-    paddingHorizontal: 10,
-    borderRadius: RADIUS.sm,
-    borderWidth: 1,
-    borderColor: COLORS.tertiaryContainer,
+    backgroundColor: COLORS.primaryLight,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: RADIUS.default,
+    maxWidth: 160,
   },
   memoText: {
-    fontSize: 13,
-    fontWeight: '800',
+    fontSize: 12,
+    fontWeight: '700',
     color: COLORS.primary,
-    flex: 1,
+  },
+  externalLinkBtn: {
+    marginTop: SPACING.md,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 10,
+    borderRadius: RADIUS.default,
+    backgroundColor: COLORS.primaryLight,
+  },
+  externalLinkText: {
+    fontSize: 12.5,
+    fontWeight: '700',
+    color: COLORS.primary,
   },
   actionButtonGroup: {
-    gap: SPACING.md,
-    marginBottom: SPACING.xxl,
+    gap: SPACING.sm,
   },
   checkBtn: {
-    minHeight: 48,
+    minHeight: 46,
   },
   simulateBtn: {
-    minHeight: 48,
-    backgroundColor: COLORS.primary,
+    minHeight: 46,
+    backgroundColor: COLORS.secondary,
   },
-  // Modal styles
+  cancelLink: {
+    alignItems: 'center',
+    paddingVertical: 8,
+  },
+  cancelLinkText: {
+    fontSize: 12,
+    color: COLORS.textMuted,
+    textDecorationLine: 'underline',
+  },
   modalOverlay: {
     flex: 1,
-    backgroundColor: COLORS.scrim,
+    backgroundColor: COLORS.overlay,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: SPACING.xl,
+    padding: SPACING.lg,
   },
   modalCard: {
     width: '100%',
-    maxWidth: 360,
+    maxWidth: 340,
     backgroundColor: COLORS.surface,
     borderRadius: RADIUS.xl,
     padding: SPACING.xl,
@@ -753,34 +1134,30 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: COLORS.primaryLight,
+    backgroundColor: COLORS.secondaryLight,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: SPACING.md,
   },
   modalTitle: {
     fontSize: 18,
-    fontWeight: '900',
+    fontWeight: '800',
     color: COLORS.onSurface,
     textAlign: 'center',
-    marginBottom: 6,
   },
   modalSubText: {
-    fontSize: 12,
-    color: COLORS.outline,
+    fontSize: 13,
+    color: COLORS.textMuted,
     textAlign: 'center',
-    lineHeight: 18,
+    marginTop: 4,
     marginBottom: SPACING.lg,
   },
   rewardCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: SPACING.md,
     backgroundColor: COLORS.tertiaryContainer,
-    borderWidth: 1.5,
-    borderColor: COLORS.tertiaryContainer,
-    paddingHorizontal: SPACING.lg,
-    paddingVertical: SPACING.md,
+    padding: SPACING.md,
     borderRadius: RADIUS.lg,
     width: '100%',
     marginBottom: SPACING.xl,
@@ -790,18 +1167,18 @@ const styles = StyleSheet.create({
   },
   rewardAmount: {
     fontSize: 22,
-    fontWeight: '900',
-    color: COLORS.warning,
+    fontWeight: '800',
+    color: COLORS.onTertiaryContainer,
   },
   rewardNote: {
     fontSize: 12,
-    color: COLORS.warning,
-    fontWeight: '600',
+    color: COLORS.onTertiaryContainer,
   },
   modalActionCol: {
     width: '100%',
   },
   modalBtn: {
+    width: '100%',
     minHeight: 48,
   },
 });

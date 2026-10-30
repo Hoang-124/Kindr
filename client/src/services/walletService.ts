@@ -48,6 +48,47 @@ export interface OrderStatusResponse {
   completedAt?: string;
 }
 
+export interface PayOSPaymentLinkResult {
+  success: boolean;
+  message?: string;
+  orderCode: number;
+  xuAmount: number;
+  vndAmount: number;
+  checkoutUrl: string;
+  qrCode: string;
+  accountNumber?: string;
+  accountName?: string;
+  bin?: string;
+  description?: string;
+  status: 'PENDING' | 'PAID' | 'CANCELLED' | 'EXPIRED';
+}
+
+export interface PayOSStatusResponse {
+  orderCode: number;
+  status: 'PENDING' | 'PAID' | 'CANCELLED' | 'EXPIRED';
+  xuAmount: number;
+  vndAmount: number;
+  paidAt?: string;
+  checkoutUrl?: string;
+  qrCode?: string;
+}
+
+export interface PayOSOrderItem {
+  _id: string;
+  orderCode: number;
+  xuAmount: number;
+  vndAmount: number;
+  status: 'PENDING' | 'PAID' | 'CANCELLED' | 'EXPIRED';
+  checkoutUrl?: string;
+  qrCode?: string;
+  accountNumber?: string;
+  accountName?: string;
+  bin?: string;
+  description?: string;
+  paidAt?: string;
+  createdAt: string;
+}
+
 export async function getWalletBalance(): Promise<WalletBalance> {
   const { data } = await api.get<WalletBalance>('/wallet/balance');
   return data;
@@ -68,13 +109,32 @@ export async function checkOrderStatus(orderCode: string): Promise<OrderStatusRe
   return data;
 }
 
+export async function createPayOSPaymentLink(xuAmount: number): Promise<PayOSPaymentLinkResult> {
+  const { data } = await api.post<PayOSPaymentLinkResult>('/wallet/topup/create-link', { xuAmount });
+  return data;
+}
+
+export async function getPayOSOrderStatus(orderCode: number): Promise<PayOSStatusResponse> {
+  const { data } = await api.get<PayOSStatusResponse>(`/wallet/topup/status/${orderCode}`);
+  return data;
+}
+
+export async function cancelPayOSOrder(orderCode: number): Promise<{ success: boolean; message: string; orderCode: number; status: string }> {
+  const { data } = await api.post(`/wallet/topup/cancel/${orderCode}`);
+  return data;
+}
+
+export async function simulatePayOSSuccess(orderCode: number): Promise<{ success: boolean; message: string; order: any; newBalance: number }> {
+  const { data } = await api.post(`/wallet/topup/simulate-success/${orderCode}`);
+  return data;
+}
+
 export async function requestWithdraw(payload: WithdrawPayload): Promise<{ message: string; withdrawRequest: any }> {
   const { data } = await api.post('/wallet/withdraw', payload);
   return data;
 }
 
-export async function getWalletHistory(): Promise<{ withdrawRequests: any[] }> {
+export async function getWalletHistory(): Promise<{ withdrawRequests: any[]; topupOrders?: any[]; payosOrders?: PayOSOrderItem[] }> {
   const { data } = await api.get('/wallet/history');
   return data;
 }
-

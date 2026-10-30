@@ -4,19 +4,26 @@
 // ========================================
 import { Router, Request, Response } from 'express';
 import { z } from 'zod';
+import mongoose from 'mongoose';
 import { User } from '../models/User';
 import { TopupOrder } from '../models/TopupOrder';
+import { PaymentOrder } from '../models/PaymentOrder';
 import { Notification } from '../models/Notification';
 import { emitToUser } from '../socket';
 import { WithdrawRequest } from '../models/WithdrawRequest';
 import { requireAuth, AuthRequest } from '../middleware/auth';
 import { ENV } from '../config/env';
 import { sendPushToUser } from '../services/pushNotificationService';
+import { payosService } from '../services/payosService';
 
 const router = Router();
 
 const TopupSchema = z.object({
   xuAmount: z.number().min(1, 'Số Xu nạp tối thiểu là 1 Xu').max(500, 'Số Xu nạp tối đa là 500 Xu'),
+});
+
+const PayOSTopupSchema = z.object({
+  xuAmount: z.number().int('Số Xu phải là số nguyên').min(10, 'Số Xu nạp tối thiểu là 10 Xu (10.000 VNĐ)').max(10000, 'Số Xu nạp tối đa là 10.000 Xu (10.000.000 VNĐ)'),
 });
 
 const WithdrawSchema = z.object({
@@ -26,7 +33,344 @@ const WithdrawSchema = z.object({
   accountHolder: z.string().min(2, 'Tên chủ tài khoản không hợp lệ'),
 });
 
+/**
+ * Helper: Atomic completion of a PayOS topup order
+ * Guarantees Idempotency and atomic updates to User balance and Ledger
+ */
+async function completePaymentOrderAtomic(
+  orderCode: number,
+  webhookData?: any
+): Promise<{ success: boolean; order?: any; user?: any; alreadyPaid?: boolean }> {
+  const existingOrder = await PaymentOrder.findOne({ orderCode });
+  if (!existingOrder) {
+    return { success: false };
+  }
+  if (existingOrder.status === 'PAID') {
+    return { success: true, order: existingOrder, alreadyPaid: true };
+  }
+
+  // Atomic CAS update: status from PENDING/EXPIRED to PAID
+  const completedOrder = await PaymentOrder.findOneAndUpdate(
+    { orderCode, status: { $ne: 'PAID' } },
+    {
+      $set: {
+        status: 'PAID',
+        paidAt: new Date(),
+        ...(webhookData ? { webhookData } : {}),
+      },
+    },
+    { new: true }
+  );
+
+  if (!completedOrder) {
+    const checkOrder = await PaymentOrder.findOne({ orderCode });
+    return { success: true, order: checkOrder, alreadyPaid: true };
+  }
+
+  // Credit user xuBalance atomically
+  const updatedUser = await User.findByIdAndUpdate(
+    completedOrder.userId,
+    { $inc: { xuBalance: completedOrder.xuAmount } },
+    { new: true }
+  );
+
+  // Create in-app notification
+  const notif = await Notification.create({
+    userId: completedOrder.userId,
+    type: 'topup_success',
+    title: 'Nạp Xu PayOS Thành Công! 🎉',
+    body: `Cổng PayOS đã xác nhận thanh toán ${completedOrder.vndAmount.toLocaleString('vi-VN')}đ (Mã GD: ${completedOrder.orderCode}). Đã cộng +${completedOrder.xuAmount} Xu vào ví của mẹ!`,
+    data: {
+      orderCode: completedOrder.orderCode,
+      xuAmount: completedOrder.xuAmount,
+      vndAmount: completedOrder.vndAmount,
+    },
+  });
+  emitToUser(completedOrder.userId.toString(), 'notification_new', notif);
+
+  // Emit Realtime Socket.IO events (support both event names)
+  emitToUser(completedOrder.userId.toString(), 'wallet:topup_success', {
+    orderCode: completedOrder.orderCode,
+    xuAmount: completedOrder.xuAmount,
+    vndAmount: completedOrder.vndAmount,
+    newBalance: updatedUser?.xuBalance,
+  });
+  emitToUser(completedOrder.userId.toString(), 'topup_success', {
+    orderCode: completedOrder.orderCode,
+    xuAmount: completedOrder.xuAmount,
+    newBalance: updatedUser?.xuBalance,
+  });
+
+  // Background Push Notification via Expo Push
+  try {
+    await sendPushToUser(completedOrder.userId, {
+      title: 'Nạp Xu PayOS Thành Công! 🪙',
+      body: `Đã cộng +${completedOrder.xuAmount} Xu vào ví từ chuyển khoản ngân hàng VietQR.`,
+      data: { type: 'topup_success', orderCode: completedOrder.orderCode },
+    });
+  } catch (err) {
+    console.warn('Push notification warning:', err);
+  }
+
+  return { success: true, order: completedOrder, user: updatedUser, alreadyPaid: false };
+}
+
 // ---- Routes ----
+
+/**
+ * POST /api/wallet/topup/create-link
+ * Tạo link thanh toán PayOS VietQR nạp Xu vào ví
+ */
+router.post('/topup/create-link', requireAuth, async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const parsed = PayOSTopupSchema.safeParse(req.body);
+    if (!parsed.success) {
+      res.status(400).json({ error: parsed.error.errors[0].message });
+      return;
+    }
+
+    const { xuAmount } = parsed.data;
+    const user = await User.findById(req.userId);
+    if (!user) {
+      res.status(404).json({ error: 'Tài khoản người dùng không tồn tại.' });
+      return;
+    }
+
+    // 1 Xu = 1.000 VNĐ
+    const vndAmount = xuAmount * 1000;
+
+    // Sinh orderCode kiểu Number duy nhất an toàn (<= MAX_SAFE_INTEGER, chuẩn PayOS)
+    const orderCode = Number(`${Date.now().toString().slice(-7)}${Math.floor(100 + Math.random() * 900)}`);
+    const description = `KINDR NAP ${xuAmount} XU`.slice(0, 25);
+
+    const paymentLink = await payosService.createPaymentLink({
+      orderCode,
+      amount: vndAmount,
+      description,
+      buyerName: user.name,
+      buyerPhone: user.phone,
+      buyerEmail: user.email,
+    });
+
+    const paymentOrder = await PaymentOrder.create({
+      orderCode,
+      userId: user._id,
+      userName: user.name,
+      userPhone: user.phone,
+      type: 'TOPUP',
+      xuAmount,
+      vndAmount,
+      status: 'PENDING',
+      paymentLinkId: paymentLink.paymentLinkId,
+      checkoutUrl: paymentLink.checkoutUrl,
+      qrCode: paymentLink.qrCode,
+      accountNumber: paymentLink.accountNumber,
+      accountName: paymentLink.accountName,
+      bin: paymentLink.bin,
+      description: paymentLink.description,
+    });
+
+    res.status(201).json({
+      success: true,
+      message: 'Đã tạo link thanh toán VietQR thành công.',
+      orderCode: paymentOrder.orderCode,
+      xuAmount: paymentOrder.xuAmount,
+      vndAmount: paymentOrder.vndAmount,
+      checkoutUrl: paymentOrder.checkoutUrl,
+      qrCode: paymentOrder.qrCode,
+      accountNumber: paymentOrder.accountNumber,
+      accountName: paymentOrder.accountName,
+      bin: paymentOrder.bin,
+      description: paymentOrder.description,
+      status: paymentOrder.status,
+    });
+  } catch (error: any) {
+    console.error('Create PayOS payment link error:', error);
+    res.status(500).json({ error: error?.message || 'Lỗi hệ thống khi tạo link nạp tiền PayOS.' });
+  }
+});
+
+/**
+ * POST /api/wallet/topup/payos-webhook
+ * Public Webhook endpoint nhận IPN callback từ PayOS
+ */
+router.post('/topup/payos-webhook', async (req: Request, res: Response): Promise<void> => {
+  try {
+    let webhookData: any = null;
+    try {
+      webhookData = await payosService.verifyPaymentWebhookData(req.body);
+    } catch (verifyErr: any) {
+      console.error('❌ PayOS Webhook signature verification failed:', verifyErr.message);
+      res.status(400).json({ error: 'Chữ ký webhook không hợp lệ.' });
+      return;
+    }
+
+    if (!webhookData || !webhookData.orderCode) {
+      res.status(400).json({ error: 'Dữ liệu webhook thiếu orderCode.' });
+      return;
+    }
+
+    const orderCode = Number(webhookData.orderCode);
+    console.log(`🔔 PayOS Webhook received for orderCode: ${orderCode}`);
+
+    const result = await completePaymentOrderAtomic(orderCode, req.body);
+    if (!result.success) {
+      res.status(404).json({ error: 'Không tìm thấy đơn nạp tương ứng với orderCode.' });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      message: result.alreadyPaid ? 'Đơn hàng đã được thanh toán trước đó.' : 'Đã xác nhận thanh toán và cộng Xu thành công.',
+      orderCode,
+    });
+  } catch (error) {
+    console.error('PayOS Webhook error:', error);
+    res.status(500).json({ error: 'Lỗi hệ thống khi xử lý webhook PayOS.' });
+  }
+});
+
+/**
+ * GET /api/wallet/topup/status/:orderCode
+ * Kiểm tra trạng thái đơn nạp PayOS (kết hợp tra cứu cổng PayOS nếu đang PENDING)
+ */
+router.get('/topup/status/:orderCode', requireAuth, async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const orderCode = Number(req.params.orderCode);
+    if (isNaN(orderCode)) {
+      res.status(400).json({ error: 'Mã đơn hàng không hợp lệ.' });
+      return;
+    }
+
+    const order = await PaymentOrder.findOne({ orderCode, userId: req.userId });
+    if (!order) {
+      res.status(404).json({ error: 'Không tìm thấy đơn nạp tiền.' });
+      return;
+    }
+
+    // Nếu đơn vẫn PENDING, kiểm tra với PayOS server để đồng bộ
+    if (order.status === 'PENDING') {
+      try {
+        const payosInfo = await payosService.getPaymentLinkInformation(orderCode);
+        if (payosInfo && payosInfo.status === 'PAID') {
+          const result = await completePaymentOrderAtomic(orderCode, payosInfo);
+          res.json({
+            orderCode: order.orderCode,
+            status: 'PAID',
+            xuAmount: order.xuAmount,
+            vndAmount: order.vndAmount,
+            paidAt: result.order?.paidAt || new Date(),
+            checkoutUrl: order.checkoutUrl,
+            qrCode: order.qrCode,
+          });
+          return;
+        } else if (payosInfo && (payosInfo.status === 'CANCELLED' || payosInfo.status === 'EXPIRED')) {
+          order.status = payosInfo.status;
+          await order.save();
+        }
+      } catch (checkErr) {
+        console.warn('PayOS status check sync error:', checkErr);
+      }
+    }
+
+    res.json({
+      orderCode: order.orderCode,
+      status: order.status,
+      xuAmount: order.xuAmount,
+      vndAmount: order.vndAmount,
+      paidAt: order.paidAt,
+      checkoutUrl: order.checkoutUrl,
+      qrCode: order.qrCode,
+    });
+  } catch (error) {
+    console.error('Check PayOS topup status error:', error);
+    res.status(500).json({ error: 'Lỗi hệ thống khi kiểm tra trạng thái đơn nạp.' });
+  }
+});
+
+/**
+ * POST /api/wallet/topup/cancel/:orderCode
+ * Hủy đơn nạp tiền đang PENDING
+ */
+router.post('/topup/cancel/:orderCode', requireAuth, async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const orderCode = Number(req.params.orderCode);
+    if (isNaN(orderCode)) {
+      res.status(400).json({ error: 'Mã đơn hàng không hợp lệ.' });
+      return;
+    }
+
+    const order = await PaymentOrder.findOne({ orderCode, userId: req.userId });
+    if (!order) {
+      res.status(404).json({ error: 'Không tìm thấy đơn hàng.' });
+      return;
+    }
+
+    if (order.status !== 'PENDING') {
+      res.status(400).json({ error: `Không thể hủy đơn hàng ở trạng thái ${order.status}.` });
+      return;
+    }
+
+    try {
+      await payosService.cancelPaymentLink(orderCode, 'Người dùng hủy đơn nạp trên Kindr');
+    } catch (cancelErr: any) {
+      console.warn('PayOS cancelPaymentLink warning:', cancelErr?.message);
+    }
+
+    order.status = 'CANCELLED';
+    await order.save();
+
+    res.json({
+      success: true,
+      message: 'Đã hủy đơn nạp tiền thành công.',
+      orderCode: order.orderCode,
+      status: order.status,
+    });
+  } catch (error) {
+    console.error('Cancel PayOS topup order error:', error);
+    res.status(500).json({ error: 'Lỗi hệ thống khi hủy đơn nạp.' });
+  }
+});
+
+/**
+ * POST /api/wallet/topup/simulate-success/:orderCode
+ * Giả lập nạp tiền thành công cho Dev/Demo (chỉ chạy khi development hoặc ENABLE_DEMO_TOPUP=true)
+ */
+router.post('/topup/simulate-success/:orderCode', requireAuth, async (req: AuthRequest, res: Response): Promise<void> => {
+  if (ENV.NODE_ENV !== 'development' && !ENV.ENABLE_DEMO_TOPUP) {
+    res.status(403).json({ error: 'Chức năng chỉ hỗ trợ ở môi trường Development / Demo.' });
+    return;
+  }
+
+  try {
+    const orderCode = Number(req.params.orderCode);
+    if (isNaN(orderCode)) {
+      res.status(400).json({ error: 'Mã đơn hàng không hợp lệ.' });
+      return;
+    }
+
+    const order = await PaymentOrder.findOne({ orderCode, userId: req.userId });
+    if (!order) {
+      res.status(404).json({ error: 'Không tìm thấy đơn nạp tiền.' });
+      return;
+    }
+
+    const result = await completePaymentOrderAtomic(orderCode, {
+      simulated: true,
+      simulatedAt: new Date(),
+    });
+
+    res.json({
+      success: true,
+      message: `Giả lập nạp thành công! Đã cộng +${order.xuAmount} Xu vào ví của mẹ.`,
+      order: result.order,
+      newBalance: result.user?.xuBalance,
+    });
+  } catch (error) {
+    console.error('Simulate PayOS success error:', error);
+    res.status(500).json({ error: 'Lỗi hệ thống khi giả lập nạp tiền.' });
+  }
+});
 
 /**
  * GET /api/wallet/balance
@@ -542,16 +886,17 @@ router.post('/withdraw', requireAuth, async (req: AuthRequest, res: Response): P
 
 /**
  * GET /api/wallet/history
- * Get withdraw history
+ * Get withdraw and topup history (including PayOS payment orders)
  */
 router.get('/history', requireAuth, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const [withdrawRequests, topupOrders] = await Promise.all([
+    const [withdrawRequests, topupOrders, payosOrders] = await Promise.all([
       WithdrawRequest.find({ userId: req.userId }).sort({ createdAt: -1 }).lean(),
       TopupOrder.find({ userId: req.userId }).sort({ createdAt: -1 }).limit(30).lean(),
+      PaymentOrder.find({ userId: req.userId }).sort({ createdAt: -1 }).limit(30).lean(),
     ]);
 
-    res.json({ withdrawRequests, topupOrders });
+    res.json({ withdrawRequests, topupOrders, payosOrders });
   } catch (error) {
     console.error('Get wallet history error:', error);
     res.status(500).json({ error: 'Lỗi hệ thống khi lấy lịch sử ví.' });
