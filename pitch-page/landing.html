@@ -1245,7 +1245,7 @@
       </div>
       <div class="section-heading-center">
         <h2 class="wallet-section-title">Trải Nghiệm Ví Xu &amp; Nạp Xu 1 Chạm <span class="highlight-payos">(PayOS VietQR)</span></h2>
-        <p class="wallet-section-subtitle">Tỷ giá chuẩn <strong>1 Xu = 1.000 VNĐ</strong>. Đổi đồ chơi &amp; vật dụng mẹ bé không lo mặc cả, bảo chứng 100% trong 6 giờ kiểm định.</p>
+        <p class="wallet-section-subtitle">Tỷ giá cố định: <strong>1 Xu = 10.000 VNĐ</strong>. Đổi đồ chơi &amp; vật dụng mẹ bé không lo mặc cả, bảo chứng 100% trong 6 giờ kiểm định.</p>
       </div>
 
       <div class="landing-wallet-grid">
@@ -1272,7 +1272,7 @@
                 <span class="balance-unit">Xu</span>
               </div>
               <div class="balance-vnd-fiat">
-                ≈ <span id="landingAvailVnd">100.000</span> VNĐ (Tỷ giá 1 Xu = 1.000đ)
+                ≈ <span id="landingAvailVnd">1.000.000</span> VNĐ (Tỷ giá 1 Xu = 10.000đ)
               </div>
             </div>
 
@@ -1300,7 +1300,7 @@
               </div>
               <div class="tip-content">
                 <strong>Gấu Kindr Buddy nhắc nhỏ:</strong>
-                <p>"1 Xu = 1.000đ. Xu dùng để đổi đồ không mặc cả và được bảo hộ an toàn 100% trong 6 giờ kiểm định!"</p>
+                <p>"1 Xu = 10.000đ. Xu dùng để đổi đồ không mặc cả và được bảo hộ an toàn 100% trong 6 giờ kiểm định!"</p>
               </div>
             </div>
           </div>
@@ -1323,50 +1323,98 @@
         <!-- CỘT PHẢI: BẢNG CHỌN GÓI NẠP XU NHANH & TẠO MÃ VIETQR -->
         <div class="wallet-col-right">
           <div class="topup-interactive-panel">
-            <div class="panel-header">
-              <div class="panel-tag">⚡ NẠP TIỀN QUA VIETQR TỰ ĐỘNG</div>
-              <h3 class="panel-title">Chọn Gói Nạp Xu Đổi Đồ</h3>
-              <p class="panel-sub">Quét mã QR thanh toán bằng bất kỳ App Ngân Hàng hoặc Ví Điện Tử nào (MB, VCB, Tech, MoMo...). Xu vào ví tức thì trong 3 giây.</p>
+            <!-- 3 TOP TABS MATCHING MOBILE APP -->
+            <div class="kw-top-nav-tabs">
+              <button type="button" class="kw-top-tab active" id="tabTopupVietQR">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="m19 5-14 14"/><path d="M19 15V5H9"/></svg>
+                <span>Nạp Xu qua VietQR</span>
+              </button>
+              <button type="button" class="kw-top-tab" id="tabWithdrawBank">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M5 19 19 5"/><path d="M5 9v10h10"/></svg>
+                <span>Rút Xu về Ngân hàng</span>
+              </button>
+              <button type="button" class="kw-top-tab" id="tabHistoryTx">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M21.5 2v6h-6"/><path d="M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                <span>Lịch sử Biến động &amp; Rút Xu</span>
+              </button>
             </div>
 
-            <!-- Lưới 4 nút chọn nhanh -->
-            <div class="topup-preset-grid">
-              <button type="button" class="topup-preset-btn" data-xu="20" data-vnd="20000">
-                <span class="pkg-xu">20 Xu</span>
-                <span class="pkg-vnd">20.000đ</span>
-              </button>
-              <button type="button" class="topup-preset-btn active" data-xu="50" data-vnd="50000">
-                <span class="pkg-popular-badge">Khuyên Dùng</span>
-                <span class="pkg-xu">50 Xu</span>
-                <span class="pkg-vnd">50.000đ</span>
-              </button>
-              <button type="button" class="topup-preset-btn" data-xu="100" data-vnd="100000">
-                <span class="pkg-popular-badge">Phổ Biến</span>
-                <span class="pkg-xu">100 Xu</span>
-                <span class="pkg-vnd">100.000đ</span>
-              </button>
-              <button type="button" class="topup-preset-btn" data-xu="200" data-vnd="200000">
-                <span class="pkg-xu">200 Xu</span>
-                <span class="pkg-vnd">200.000đ</span>
-              </button>
+            <div class="panel-header">
+              <h3 class="panel-title">Chọn gói Xu muốn nạp</h3>
+              <p class="panel-sub">Nạp Xu để nhận ngay những món đồ yêu thích khi chưa kịp đăng đồ cũ lên sàn.</p>
+            </div>
+
+            <!-- LƯỚI 4 GÓI NẠP CHUẨN BẢN MOBILE (5, 10, 20, 50 XU) -->
+            <div class="topup-preset-grid mobile-matched-grid">
+              <!-- Gói 1: 5 Xu (Phổ biến / Gói Trải Nghiệm) -->
+              <div class="topup-preset-card active" data-xu="5" data-vnd="50000" role="button" tabindex="0">
+                <div class="pkg-top-meta">
+                  <span class="kw-card-badge badge-coral">Phổ biến</span>
+                  <span class="kw-package-name">Gói Trải Nghiệm</span>
+                </div>
+                <div class="pkg-val-row">
+                  <span class="coin-circled-badge">Ⓚ</span>
+                  <span class="pkg-xu-title">5 Xu</span>
+                </div>
+                <div class="pkg-vnd-sub">50.000đ</div>
+              </div>
+
+              <!-- Gói 2: 10 Xu (Đổi được 2-5 món / Gói Mẹ Thông Thái) -->
+              <div class="topup-preset-card" data-xu="10" data-vnd="100000" role="button" tabindex="0">
+                <div class="pkg-top-meta">
+                  <span class="kw-card-badge badge-neutral">Đổi được 2-5 món</span>
+                  <span class="kw-package-name">Gói Mẹ Thông Thái</span>
+                </div>
+                <div class="pkg-val-row">
+                  <span class="coin-circled-badge">Ⓚ</span>
+                  <span class="pkg-xu-title">10 Xu</span>
+                </div>
+                <div class="pkg-vnd-sub">100.000đ</div>
+              </div>
+
+              <!-- Gói 3: 20 Xu (Đổi xe đẩy / nôi / Gói Tủ Đồ Cho Bé) -->
+              <div class="topup-preset-card" data-xu="20" data-vnd="200000" role="button" tabindex="0">
+                <div class="pkg-top-meta">
+                  <span class="kw-card-badge badge-neutral">Đổi xe đẩy / nôi</span>
+                  <span class="kw-package-name">Gói Tủ Đồ Cho Bé</span>
+                </div>
+                <div class="pkg-val-row">
+                  <span class="coin-circled-badge">Ⓚ</span>
+                  <span class="pkg-xu-title">20 Xu</span>
+                </div>
+                <div class="pkg-vnd-sub">200.000đ</div>
+              </div>
+
+              <!-- Gói 4: 50 Xu (Tiết kiệm thời gian / Gói Đại Gia Đình) -->
+              <div class="topup-preset-card" data-xu="50" data-vnd="500000" role="button" tabindex="0">
+                <div class="pkg-top-meta">
+                  <span class="kw-card-badge badge-neutral">Tiết kiệm thời gian</span>
+                  <span class="kw-package-name">Gói Đại Gia Đình</span>
+                </div>
+                <div class="pkg-val-row">
+                  <span class="coin-circled-badge">Ⓚ</span>
+                  <span class="pkg-xu-title">50 Xu</span>
+                </div>
+                <div class="pkg-vnd-sub">500.000đ</div>
+              </div>
             </div>
 
             <!-- Ô nhập Xu tùy chọn -->
             <div class="custom-xu-input-wrap">
-              <label for="customXuInput" class="custom-xu-label">Hoặc nhập số Xu tùy chỉnh (Tối thiểu 10 Xu):</label>
+              <label for="customXuInput" class="custom-xu-label">Hoặc nhập số Xu tùy chỉnh (Tối thiểu 5 Xu):</label>
               <div class="input-with-adornment">
                 <span class="adornment-icon">🪙</span>
-                <input type="number" id="customXuInput" class="custom-xu-field" min="10" max="5000" step="5" placeholder="Nhập số Xu (Ví dụ: 30, 80, 150)">
+                <input type="number" id="customXuInput" class="custom-xu-field" min="5" max="5000" step="1" placeholder="Nhập số Xu (Ví dụ: 15, 30, 80)">
                 <span class="adornment-unit">Xu</span>
               </div>
-              <div class="custom-hint" id="customXuHint">Quy đổi: 50 Xu = 50.000 VNĐ</div>
+              <div class="custom-hint" id="customXuHint">Quy đổi: 5 Xu = 50.000 VNĐ (Tỷ giá 1 Xu = 10.000đ)</div>
             </div>
 
             <!-- Bảng tóm tắt thanh toán -->
             <div class="topup-summary-receipt">
               <div class="receipt-row">
                 <span class="r-label">Số Xu thực nhận:</span>
-                <strong class="r-val highlight-amber" id="summaryXuAmount">50 Xu</strong>
+                <strong class="r-val highlight-amber" id="summaryXuAmount">5 Xu</strong>
               </div>
               <div class="receipt-row">
                 <span class="r-label">Thành tiền thanh toán:</span>
@@ -1386,7 +1434,7 @@
             <!-- Nút bấm lớn tạo mã VietQR -->
             <button type="button" class="btn btn-primary btn-full btn-create-payos-qr" id="btnCreateVietQR">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><line x1="7" y1="7" x2="7.01" y2="7"/><line x1="17" y1="7" x2="17.01" y2="7"/><line x1="7" y1="17" x2="7.01" y2="17"/><line x1="17" y1="17" x2="17.01" y2="17"/></svg>
-              <span>⚡ TẠO MÃ VIETQR NẠP XU NGAY (PAYOS)</span>
+              <span id="btnCreateQrText">Tạo mã VietQR (50.000đ)</span>
             </button>
             <p class="payos-secure-note">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5B9A8B" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
@@ -2256,17 +2304,10 @@
         </div>
 
         <div class="payos-actions-row">
-          <a href="#" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-open-checkout" id="btnPayosOpenCheckout">
+          <a href="#" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-full btn-open-checkout" id="btnPayosOpenCheckout">
             <span>Mở trang thanh toán PayOS ↗</span>
           </a>
-          <button type="button" class="btn btn-demo-simulate" id="btnSimulatePaid">
-            <span>🧪 Giả lập Quét QR Thành Công (Demo Mode)</span>
-          </button>
         </div>
-
-        <p class="payos-disclaimer">
-          * Trong môi trường thử nghiệm / chấm thi, bấm nút <strong>Giả lập Quét QR Thành Công</strong> để test hiệu ứng bắn pháo hoa Confetti và nạp Xu trực tiếp vào ví tức thì.
-        </p>
       </div>
     </div>
   </div>

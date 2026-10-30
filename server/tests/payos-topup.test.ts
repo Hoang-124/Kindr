@@ -9,7 +9,7 @@ import { User } from '../src/models/User';
 const app = createApp();
 
 describe('PayOS VietQR Topup Flow Tests', () => {
-  it('should create PayOS topup order with correct 1 Xu = 1.000 VNĐ rate', async () => {
+  it('should create PayOS topup order with correct 1 Xu = 10.000 VNĐ rate', async () => {
     const { user, token } = await createTestUser({ xuBalance: 20 });
 
     const res = await request(app)
@@ -20,7 +20,7 @@ describe('PayOS VietQR Topup Flow Tests', () => {
     expect(res.status).toBe(201);
     expect(res.body.success).toBe(true);
     expect(res.body.xuAmount).toBe(50);
-    expect(res.body.vndAmount).toBe(50000); // 50 * 1000
+    expect(res.body.vndAmount).toBe(500000); // 50 * 10000
     expect(res.body.status).toBe('PENDING');
     expect(res.body.orderCode).toBeTypeOf('number');
     expect(res.body.qrCode).toBeDefined();
@@ -28,19 +28,19 @@ describe('PayOS VietQR Topup Flow Tests', () => {
     const orderInDb = await PaymentOrder.findOne({ orderCode: res.body.orderCode });
     expect(orderInDb).toBeDefined();
     expect(orderInDb?.status).toBe('PENDING');
-    expect(orderInDb?.vndAmount).toBe(50000);
+    expect(orderInDb?.vndAmount).toBe(500000);
   });
 
-  it('should validate minimum xuAmount >= 10', async () => {
+  it('should validate minimum xuAmount >= 5', async () => {
     const { token } = await createTestUser();
 
     const res = await request(app)
       .post('/api/wallet/topup/create-link')
       .set('Authorization', `Bearer ${token}`)
-      .send({ xuAmount: 5 });
+      .send({ xuAmount: 2 });
 
     expect(res.status).toBe(400);
-    expect(res.body.error).toContain('tối thiểu là 10 Xu');
+    expect(res.body.error).toContain('tối thiểu là 5 Xu');
   });
 
   it('should retrieve status of pending order', async () => {

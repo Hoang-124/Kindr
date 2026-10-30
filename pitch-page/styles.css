@@ -7428,3 +7428,158 @@ button {
   margin-bottom: 0;
   line-height: 1.4;
 }
+
+
+/* ==========================================================================
+   MOBILE-MATCHED STYLING FOR KINDR WALLET TOPUP (EXACT MATCH TO WALLETPAGE)
+   ========================================================================== */
+.kw-top-nav-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.kw-top-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  border: 1px solid #EBE5DB;
+  background: #FFFFFF;
+  color: #635356;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.kw-top-tab:hover {
+  background: #F8F5F0;
+  border-color: #D4CCC0;
+}
+
+.kw-top-tab.active {
+  background: #FF6B6B;
+  color: #FFFFFF;
+  border-color: #FF6B6B;
+  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+}
+
+.mobile-matched-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.topup-preset-card {
+  background: #FFFDF9;
+  border: 1.5px solid #EFEAE2;
+  border-radius: 18px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.topup-preset-card:hover {
+  border-color: #FF8E8E;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 107, 107, 0.12);
+}
+
+.topup-preset-card.active {
+  background: #FFF5F5;
+  border: 2px solid #FF6B6B;
+  box-shadow: 0 6px 18px rgba(255, 107, 107, 0.18);
+}
+
+.pkg-top-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.kw-card-badge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 6px;
+  letter-spacing: 0.02em;
+}
+
+.kw-card-badge.badge-coral {
+  background: #FFE8E8;
+  color: #E03131;
+}
+
+.kw-card-badge.badge-neutral {
+  background: #F5EFEB;
+  color: #8C5400;
+}
+
+.kw-package-name {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #7D6B6E;
+  text-align: right;
+}
+
+.pkg-val-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.coin-circled-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #FBBF24;
+  color: #78350F;
+  font-size: 0.9rem;
+  font-weight: 900;
+  box-shadow: 0 2px 6px rgba(245, 166, 35, 0.35);
+}
+
+.pkg-xu-title {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: #2D2325;
+}
+
+.topup-preset-card.active .pkg-xu-title {
+  color: #D6336C;
+}
+
+.pkg-vnd-sub {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #7D6B6E;
+  margin-top: 4px;
+}
+
+.topup-preset-card.active .pkg-vnd-sub {
+  color: #C2255C;
+}
+
+.btn-create-payos-qr {
+  background: linear-gradient(135deg, #FF6B6B 0%, #FA5252 100%) !important;
+  box-shadow: 0 6px 18px rgba(255, 107, 107, 0.35) !important;
+}
+
+.btn-create-payos-qr:hover {
+  background: linear-gradient(135deg, #FA5252 0%, #E03131 100%) !important;
+  box-shadow: 0 8px 22px rgba(255, 107, 107, 0.45) !important;
+}

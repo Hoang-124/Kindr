@@ -29,7 +29,7 @@ const TopupSchema = z.object({
 });
 
 const PayOSTopupSchema = z.object({
-  xuAmount: z.number().int('Số Xu phải là số nguyên').min(10, 'Số Xu nạp tối thiểu là 10 Xu (10.000 VNĐ)').max(10000, 'Số Xu nạp tối đa là 10.000 Xu (10.000.000 VNĐ)'),
+  xuAmount: z.number().int('Số Xu phải là số nguyên').min(5, 'Số Xu nạp tối thiểu là 5 Xu (50.000 VNĐ)').max(10000, 'Số Xu nạp tối đa là 10.000 Xu (100.000.000 VNĐ)'),
 });
 
 const WithdrawSchema = z.object({
@@ -159,8 +159,8 @@ router.post('/topup/create-link', requireAuth, async (req: AuthRequest, res: Res
       return;
     }
 
-    // 1 Xu = 1.000 VNĐ
-    const vndAmount = xuAmount * 1000;
+    // 1 Xu = 10.000 VNĐ (Chuẩn tỷ giá hệ sinh thái KinDr)
+    const vndAmount = xuAmount * 10000;
 
     // Sinh orderCode kiểu Number duy nhất an toàn (<= MAX_SAFE_INTEGER, chuẩn PayOS)
     const orderCode = Number(`${Date.now().toString().slice(-7)}${Math.floor(100 + Math.random() * 900)}`);
@@ -436,7 +436,8 @@ router.post('/landing/topup/create', async (req: Request, res: Response): Promis
 
     const { xuAmount } = parsed.data;
     const clientId = req.body.clientId || 'guest_default';
-    const vndAmount = xuAmount * 1000;
+    // 1 Xu = 10.000 VNĐ
+    const vndAmount = xuAmount * 10000;
     const orderCode = Number(String(Date.now()).slice(-9));
     const description = `KINDR NAP ${xuAmount} XU`.slice(0, 25);
 

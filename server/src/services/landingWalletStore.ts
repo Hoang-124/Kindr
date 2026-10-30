@@ -202,3 +202,4 @@ export function updateEscrowLock(clientId: string, lockAmount: number = 50): Lan
 
   return wallet;
 }
+

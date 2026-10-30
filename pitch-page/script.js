@@ -1422,7 +1422,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const landingEscrowXu = document.getElementById('landingEscrowXu');
 
     if (landingAvailXu) landingAvailXu.textContent = wallet.availableXu;
-    if (landingAvailVnd) landingAvailVnd.textContent = (wallet.availableXu * 1000).toLocaleString('vi-VN');
+    if (landingAvailVnd) landingAvailVnd.textContent = (wallet.availableXu * 10000).toLocaleString('vi-VN');
     if (landingAvailBadge) landingAvailBadge.textContent = wallet.availableXu + ' Xu';
     if (landingEscrowXu) landingEscrowXu.textContent = wallet.escrowXu + ' Xu';
 
@@ -1517,7 +1517,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Top-up Preset & Custom input logic
-  let selectedTopupXu = 50;
+  let selectedTopupXu = 5;
   const presetBtns = document.querySelectorAll('.topup-preset-btn');
   const customXuInput = document.getElementById('customXuInput');
   const summaryXuAmount = document.getElementById('summaryXuAmount');
@@ -1526,34 +1526,58 @@ document.addEventListener('DOMContentLoaded', () => {
   const customXuHint = document.getElementById('customXuHint');
 
   function updateTopupSummary(xu) {
-    selectedTopupXu = Math.max(10, Math.floor(xu));
-    const vnd = selectedTopupXu * 1000;
+    selectedTopupXu = Math.max(5, Math.floor(xu));
+    const vnd = selectedTopupXu * 10000;
     const formattedVnd = vnd.toLocaleString('vi-VN') + ' VNĐ';
+    const shortVnd = vnd.toLocaleString('vi-VN') + 'đ';
 
     if (summaryXuAmount) summaryXuAmount.textContent = selectedTopupXu + ' Xu';
     if (summaryVndAmount) summaryVndAmount.textContent = formattedVnd;
     if (summaryTotalVnd) summaryTotalVnd.textContent = formattedVnd;
-    if (customXuHint) customXuHint.textContent = 'Quy đổi: ' + selectedTopupXu + ' Xu = ' + vnd.toLocaleString('vi-VN') + ' VNĐ';
+    if (customXuHint) customXuHint.textContent = 'Quy đổi: ' + selectedTopupXu + ' Xu = ' + formattedVnd + ' (Tỷ giá 1 Xu = 10.000đ)';
+
+    const btnCreateQrText = document.getElementById('btnCreateQrText');
+    if (btnCreateQrText) {
+      btnCreateQrText.textContent = 'Tạo mã VietQR (' + shortVnd + ')';
+    }
   }
 
-  presetBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-      presetBtns.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
+  const presetCards = document.querySelectorAll('.topup-preset-card, .topup-preset-btn');
+  presetCards.forEach(card => {
+    card.addEventListener('click', () => {
+      presetCards.forEach(c => c.classList.remove('active'));
+      card.classList.add('active');
       if (customXuInput) customXuInput.value = '';
-      const xu = Number(btn.dataset.xu) || 50;
+      const xu = Number(card.dataset.xu) || 5;
       updateTopupSummary(xu);
     });
   });
 
+  // Top nav tabs
+  const tabTopupVietQR = document.getElementById('tabTopupVietQR');
+  const tabWithdrawBank = document.getElementById('tabWithdrawBank');
+  const tabHistoryTx = document.getElementById('tabHistoryTx');
+
+  if (tabWithdrawBank) {
+    tabWithdrawBank.addEventListener('click', () => {
+      alert('Chức năng Rút Xu về Ngân Hàng dành cho mẹ bỉm đã xác thực tài khoản tại chung cư FPT Plaza Đà Nẵng.');
+    });
+  }
+  if (tabHistoryTx) {
+    tabHistoryTx.addEventListener('click', () => {
+      const historyEl = document.getElementById('landingWalletHistory');
+      if (historyEl) historyEl.scrollIntoView({ behavior: 'smooth' });
+    });
+  }
+
   if (customXuInput) {
     customXuInput.addEventListener('input', () => {
-      presetBtns.forEach(b => b.classList.remove('active'));
+      presetCards.forEach(b => b.classList.remove('active'));
       const val = Number(customXuInput.value);
-      if (val >= 10) {
+      if (val >= 5) {
         updateTopupSummary(val);
       } else {
-        updateTopupSummary(10);
+        updateTopupSummary(5);
       }
     });
   }
@@ -1573,7 +1597,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const payosDescription = document.getElementById('payosDescription');
   const payosXuAmount = document.getElementById('payosXuAmount');
   const btnPayosOpenCheckout = document.getElementById('btnPayosOpenCheckout');
-  const btnSimulatePaid = document.getElementById('btnSimulatePaid');
 
   let activeOrderCode = null;
   let payosPollingTimer = null;
@@ -1724,36 +1747,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Simulate Paid Button (Demo Mode)
-  if (btnSimulatePaid) {
-    btnSimulatePaid.addEventListener('click', async () => {
-      if (!activeOrderCode) {
-        alert('Chưa có mã đơn nạp nào đang chờ');
-        return;
-      }
-      try {
-        btnSimulatePaid.disabled = true;
-        btnSimulatePaid.textContent = '⏳ Đang giả lập chuyển khoản...';
-
-        const res = await fetch(`${API_BASE_URL}/api/wallet/landing/topup/simulate-paid/${activeOrderCode}`, {
-          method: 'POST'
-        });
-
-        if (!res.ok) {
-          throw new Error('Giả lập thanh toán không thành công');
-        }
-
-        const data = await res.json();
-        triggerPaymentSuccess(data.order, data.wallet);
-      } catch (err) {
-        console.error('Simulate paid error:', err);
-        alert('Lỗi giả lập: ' + err.message);
-      } finally {
-        btnSimulatePaid.disabled = false;
-        btnSimulatePaid.textContent = '🧪 Giả lập Quét QR Thành Công (Demo Mode)';
-      }
-    });
-  }
+  // Demo mode button removed per user request: 100% Real PayOS VietQR flow
 
   // 2-Way Synchronization: Lock Escrow Xu when user clicks "Đổi đồ" in Simulator
   if (btnActionStep2) {
