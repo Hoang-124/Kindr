@@ -11,10 +11,16 @@ import { PaymentOrder } from '../models/PaymentOrder';
 import { Notification } from '../models/Notification';
 import { emitToUser } from '../socket';
 import { WithdrawRequest } from '../models/WithdrawRequest';
-import { requireAuth, AuthRequest } from '../middleware/auth';
+import { requireAuth, optionalAuth, AuthRequest } from '../middleware/auth';
 import { ENV } from '../config/env';
 import { sendPushToUser } from '../services/pushNotificationService';
 import { payosService } from '../services/payosService';
+import {
+  getOrCreateWallet,
+  recordWalletOrder,
+  completeLandingTopup,
+  updateEscrowLock,
+} from '../services/landingWalletStore';
 
 const router = Router();
 
@@ -67,49 +73,66 @@ async function completePaymentOrderAtomic(
     return { success: true, order: checkOrder, alreadyPaid: true };
   }
 
-  // Credit user xuBalance atomically
-  const updatedUser = await User.findByIdAndUpdate(
-    completedOrder.userId,
-    { $inc: { xuBalance: completedOrder.xuAmount } },
-    { new: true }
-  );
+  // Sync with landing wallet json store if clientId is present
+  try {
+    completeLandingTopup(orderCode, completedOrder.paidAt || new Date());
+    if (completedOrder.clientId) {
+      emitToUser(completedOrder.clientId, 'wallet:topup_success', {
+        orderCode: completedOrder.orderCode,
+        xuAmount: completedOrder.xuAmount,
+        vndAmount: completedOrder.vndAmount,
+      });
+    }
+  } catch (err) {
+    console.warn('Sync landing wallet store warning:', err);
+  }
 
-  // Create in-app notification
-  const notif = await Notification.create({
-    userId: completedOrder.userId,
-    type: 'topup_success',
-    title: 'Nạp Xu PayOS Thành Công! 🎉',
-    body: `Cổng PayOS đã xác nhận thanh toán ${completedOrder.vndAmount.toLocaleString('vi-VN')}đ (Mã GD: ${completedOrder.orderCode}). Đã cộng +${completedOrder.xuAmount} Xu vào ví của mẹ!`,
-    data: {
+  // Credit user xuBalance atomically if user is attached
+  let updatedUser = null;
+  if (completedOrder.userId) {
+    updatedUser = await User.findByIdAndUpdate(
+      completedOrder.userId,
+      { $inc: { xuBalance: completedOrder.xuAmount } },
+      { new: true }
+    );
+
+    // Create in-app notification
+    const notif = await Notification.create({
+      userId: completedOrder.userId,
+      type: 'topup_success',
+      title: 'Nạp Xu PayOS Thành Công! 🎉',
+      body: `Cổng PayOS đã xác nhận thanh toán ${completedOrder.vndAmount.toLocaleString('vi-VN')}đ (Mã GD: ${completedOrder.orderCode}). Đã cộng +${completedOrder.xuAmount} Xu vào ví của mẹ!`,
+      data: {
+        orderCode: completedOrder.orderCode,
+        xuAmount: completedOrder.xuAmount,
+        vndAmount: completedOrder.vndAmount,
+      },
+    });
+    emitToUser(completedOrder.userId.toString(), 'notification_new', notif);
+
+    // Emit Realtime Socket.IO events (support both event names)
+    emitToUser(completedOrder.userId.toString(), 'wallet:topup_success', {
       orderCode: completedOrder.orderCode,
       xuAmount: completedOrder.xuAmount,
       vndAmount: completedOrder.vndAmount,
-    },
-  });
-  emitToUser(completedOrder.userId.toString(), 'notification_new', notif);
-
-  // Emit Realtime Socket.IO events (support both event names)
-  emitToUser(completedOrder.userId.toString(), 'wallet:topup_success', {
-    orderCode: completedOrder.orderCode,
-    xuAmount: completedOrder.xuAmount,
-    vndAmount: completedOrder.vndAmount,
-    newBalance: updatedUser?.xuBalance,
-  });
-  emitToUser(completedOrder.userId.toString(), 'topup_success', {
-    orderCode: completedOrder.orderCode,
-    xuAmount: completedOrder.xuAmount,
-    newBalance: updatedUser?.xuBalance,
-  });
-
-  // Background Push Notification via Expo Push
-  try {
-    await sendPushToUser(completedOrder.userId, {
-      title: 'Nạp Xu PayOS Thành Công! 🪙',
-      body: `Đã cộng +${completedOrder.xuAmount} Xu vào ví từ chuyển khoản ngân hàng VietQR.`,
-      data: { type: 'topup_success', orderCode: completedOrder.orderCode },
+      newBalance: updatedUser?.xuBalance,
     });
-  } catch (err) {
-    console.warn('Push notification warning:', err);
+    emitToUser(completedOrder.userId.toString(), 'topup_success', {
+      orderCode: completedOrder.orderCode,
+      xuAmount: completedOrder.xuAmount,
+      newBalance: updatedUser?.xuBalance,
+    });
+
+    // Background Push Notification via Expo Push
+    try {
+      await sendPushToUser(completedOrder.userId, {
+        title: 'Nạp Xu PayOS Thành Công! 🪙',
+        body: `Đã cộng +${completedOrder.xuAmount} Xu vào ví từ chuyển khoản ngân hàng VietQR.`,
+        data: { type: 'topup_success', orderCode: completedOrder.orderCode },
+      });
+    } catch (err) {
+      console.warn('Push notification warning:', err);
+    }
   }
 
   return { success: true, order: completedOrder, user: updatedUser, alreadyPaid: false };
@@ -369,6 +392,224 @@ router.post('/topup/simulate-success/:orderCode', requireAuth, async (req: AuthR
   } catch (error) {
     console.error('Simulate PayOS success error:', error);
     res.status(500).json({ error: 'Lỗi hệ thống khi giả lập nạp tiền.' });
+  }
+});
+
+// ========================================================
+// LANDING PAGE / GUEST WALLET APIS (Full-Stack Support)
+// ========================================================
+
+/**
+ * GET /api/wallet/landing/:clientId
+ * Lấy số dư khả dụng, số dư ký quỹ Escrow và lịch sử ví trên Landing Page
+ */
+router.get('/landing/:clientId', (req: Request, res: Response): void => {
+  try {
+    const rawId = req.params.clientId;
+    const clientId = (Array.isArray(rawId) ? rawId[0] : rawId) || 'guest_default';
+    const wallet = getOrCreateWallet(clientId);
+    res.json({
+      success: true,
+      clientId: wallet.clientId,
+      availableXu: wallet.availableXu,
+      escrowXu: wallet.escrowXu,
+      totalXu: wallet.totalXu,
+      transactions: wallet.transactions,
+    });
+  } catch (error) {
+    console.error('Get landing wallet error:', error);
+    res.status(500).json({ error: 'Lỗi khi lấy thông tin ví Landing Page.' });
+  }
+});
+
+/**
+ * POST /api/wallet/landing/topup/create
+ * Tạo đơn nạp PayOS VietQR trực tiếp từ Landing Page
+ */
+router.post('/landing/topup/create', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const parsed = PayOSTopupSchema.safeParse(req.body);
+    if (!parsed.success) {
+      res.status(400).json({ error: parsed.error.errors[0].message });
+      return;
+    }
+
+    const { xuAmount } = parsed.data;
+    const clientId = req.body.clientId || 'guest_default';
+    const vndAmount = xuAmount * 1000;
+    const orderCode = Number(String(Date.now()).slice(-9));
+    const description = `KINDR NAP ${xuAmount} XU`.slice(0, 25);
+
+    const paymentLink = await payosService.createPaymentLink({
+      orderCode,
+      amount: vndAmount,
+      description,
+      buyerName: 'Mẹ Bỉm Landing Page',
+    });
+
+    const paymentOrder = await PaymentOrder.create({
+      orderCode,
+      clientId,
+      userName: 'Mẹ Bỉm Landing Page',
+      type: 'TOPUP',
+      xuAmount,
+      vndAmount,
+      status: 'PENDING',
+      paymentLinkId: paymentLink.paymentLinkId,
+      checkoutUrl: paymentLink.checkoutUrl,
+      qrCode: paymentLink.qrCode,
+      accountNumber: paymentLink.accountNumber,
+      accountName: paymentLink.accountName,
+      bin: paymentLink.bin,
+      description: paymentLink.description,
+    });
+
+    // Save into landing wallet json store
+    recordWalletOrder(clientId, {
+      orderCode,
+      xuAmount,
+      vndAmount,
+      status: 'PENDING',
+      checkoutUrl: paymentLink.checkoutUrl,
+      qrCode: paymentLink.qrCode,
+      accountNumber: paymentLink.accountNumber,
+      accountName: paymentLink.accountName,
+      bin: paymentLink.bin,
+      description: paymentLink.description,
+      createdAt: new Date().toISOString(),
+    });
+
+    res.status(201).json({
+      success: true,
+      message: 'Đã tạo link thanh toán VietQR thành công.',
+      orderCode: paymentOrder.orderCode,
+      xuAmount: paymentOrder.xuAmount,
+      vndAmount: paymentOrder.vndAmount,
+      checkoutUrl: paymentOrder.checkoutUrl,
+      qrCode: paymentOrder.qrCode,
+      accountNumber: paymentOrder.accountNumber,
+      accountName: paymentOrder.accountName,
+      bin: paymentOrder.bin,
+      description: paymentOrder.description,
+      status: paymentOrder.status,
+    });
+  } catch (error: any) {
+    console.error('Landing topup create error:', error);
+    res.status(500).json({ error: error?.message || 'Lỗi hệ thống khi tạo đơn nạp PayOS.' });
+  }
+});
+
+/**
+ * GET /api/wallet/landing/topup/status/:orderCode
+ * Polling kiểm tra trạng thái đơn nạp cho Landing Page
+ */
+router.get('/landing/topup/status/:orderCode', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const orderCode = Number(req.params.orderCode);
+    if (isNaN(orderCode)) {
+      res.status(400).json({ error: 'Mã đơn hàng không hợp lệ.' });
+      return;
+    }
+
+    let order = await PaymentOrder.findOne({ orderCode });
+
+    // Nếu PENDING, thử đồng bộ với PayOS
+    if (order && order.status === 'PENDING') {
+      try {
+        const payosInfo = await payosService.getPaymentLinkInformation(orderCode);
+        if (payosInfo && payosInfo.status === 'PAID') {
+          const comp = await completePaymentOrderAtomic(orderCode, payosInfo);
+          order = comp.order || order;
+        }
+      } catch (syncErr) {
+        console.warn('PayOS landing sync warning:', syncErr);
+      }
+    }
+
+    // Check landing json store fallback if not in Mongo
+    const landingResult = completeLandingTopup(orderCode);
+    const isPaid = (order && order.status === 'PAID') || (landingResult.wallet && landingResult.alreadyPaid);
+
+    const clientId = order?.clientId || landingResult.wallet?.clientId || 'guest_default';
+    const wallet = getOrCreateWallet(clientId);
+
+    res.json({
+      success: true,
+      orderCode,
+      status: isPaid ? 'PAID' : (order?.status || 'PENDING'),
+      wallet: {
+        availableXu: wallet.availableXu,
+        escrowXu: wallet.escrowXu,
+        totalXu: wallet.totalXu,
+      },
+    });
+  } catch (error) {
+    console.error('Landing status check error:', error);
+    res.status(500).json({ error: 'Lỗi kiểm tra trạng thái đơn.' });
+  }
+});
+
+/**
+ * POST /api/wallet/landing/topup/simulate-paid/:orderCode
+ * Giả lập thanh toán thành công cho Landing Page (sân khấu demo)
+ */
+router.post('/landing/topup/simulate-paid/:orderCode', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const orderCode = Number(req.params.orderCode);
+    if (isNaN(orderCode)) {
+      res.status(400).json({ error: 'Mã đơn hàng không hợp lệ.' });
+      return;
+    }
+
+    // 1. Complete Mongo atomic if exists
+    const comp = await completePaymentOrderAtomic(orderCode, {
+      simulated: true,
+      simulatedAt: new Date(),
+    });
+
+    // 2. Complete landing wallet store
+    const landingComp = completeLandingTopup(orderCode, new Date());
+    const order = comp.order || await PaymentOrder.findOne({ orderCode });
+    const clientId = order?.clientId || landingComp.wallet?.clientId || 'guest_default';
+    const wallet = getOrCreateWallet(clientId);
+
+    res.json({
+      success: true,
+      message: 'Giả lập thanh toán thành công!',
+      status: 'PAID',
+      xuAmount: order?.xuAmount || landingComp.xuAmount || 50,
+      wallet: {
+        availableXu: wallet.availableXu,
+        escrowXu: wallet.escrowXu,
+        totalXu: wallet.totalXu,
+      },
+    });
+  } catch (error) {
+    console.error('Landing simulate paid error:', error);
+    res.status(500).json({ error: 'Lỗi khi giả lập thanh toán.' });
+  }
+});
+
+/**
+ * POST /api/wallet/landing/escrow-lock
+ * Tạm khóa 50 Xu khi đổi đồ trên Simulator
+ */
+router.post('/landing/escrow-lock', (req: Request, res: Response): void => {
+  try {
+    const clientId = req.body.clientId || 'guest_default';
+    const amount = Number(req.body.amount) || 50;
+    const wallet = updateEscrowLock(clientId, amount);
+    res.json({
+      success: true,
+      wallet: {
+        availableXu: wallet.availableXu,
+        escrowXu: wallet.escrowXu,
+        totalXu: wallet.totalXu,
+      },
+    });
+  } catch (error) {
+    console.error('Landing escrow lock error:', error);
+    res.status(500).json({ error: 'Lỗi khi cập nhật Escrow.' });
   }
 });
 

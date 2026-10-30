@@ -304,11 +304,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 8. Update Xu balance simulation
     if (flowUserXu) {
-      if (currentFlowStep === 3 || currentFlowStep === 4 || currentFlowStep === 5) {
-        flowUserXu.textContent = '90 Xu';
-      } else {
-        flowUserXu.textContent = '100 Xu';
-      }
+      flowUserXu.textContent = (window.__kindrWallet ? window.__kindrWallet.availableXu : (currentFlowStep >= 3 ? 90 : 100)) + ' Xu';
     }
   }
 
@@ -1386,4 +1382,402 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
   }
+
+  // ==========================================================================
+  // 10. KINDR WALLET & PAYOS VIETQR INTEGRATION (FULL-STACK LIVE SYNC)
+  // ==========================================================================
+  let landingWalletState = {
+    availableXu: 100,
+    escrowXu: 0,
+    totalXu: 100,
+    transactions: []
+  };
+  window.__kindrWallet = landingWalletState;
+
+  const CLIENT_STORAGE_KEY = 'kindr_landing_client_id';
+  let landingClientId = localStorage.getItem(CLIENT_STORAGE_KEY);
+  if (!landingClientId) {
+    landingClientId = 'client_' + Date.now().toString(36) + '_' + Math.random().toString(36).substring(2, 7);
+    localStorage.setItem(CLIENT_STORAGE_KEY, landingClientId);
+  }
+
+  const displayClientIdEl = document.getElementById('displayClientId');
+  if (displayClientIdEl) {
+    displayClientIdEl.textContent = 'ID: ' + landingClientId.slice(-8).toUpperCase();
+  }
+
+  function syncWalletUI(wallet) {
+    if (!wallet) return;
+    landingWalletState = wallet;
+    window.__kindrWallet = wallet;
+
+    // 1. Header Sticky Widget
+    const navXuBalance = document.getElementById('nav-xu-balance');
+    if (navXuBalance) navXuBalance.textContent = wallet.availableXu;
+
+    // 2. Landing Wallet Left Card
+    const landingAvailXu = document.getElementById('landingAvailXu');
+    const landingAvailVnd = document.getElementById('landingAvailVnd');
+    const landingAvailBadge = document.getElementById('landingAvailBadge');
+    const landingEscrowXu = document.getElementById('landingEscrowXu');
+
+    if (landingAvailXu) landingAvailXu.textContent = wallet.availableXu;
+    if (landingAvailVnd) landingAvailVnd.textContent = (wallet.availableXu * 1000).toLocaleString('vi-VN');
+    if (landingAvailBadge) landingAvailBadge.textContent = wallet.availableXu + ' Xu';
+    if (landingEscrowXu) landingEscrowXu.textContent = wallet.escrowXu + ' Xu';
+
+    // 3. Smartphone Simulator Elements
+    if (flowUserXu) {
+      flowUserXu.textContent = wallet.availableXu + ' Xu';
+    }
+    const walletPassXuNum = document.getElementById('walletPassXuNum');
+    const walletPassAvail = document.getElementById('walletPassAvail');
+    const walletPassLocked = document.getElementById('walletPassLocked');
+
+    if (walletPassXuNum) walletPassXuNum.textContent = wallet.availableXu + wallet.escrowXu;
+    if (walletPassAvail) walletPassAvail.textContent = wallet.availableXu + ' Xu';
+    if (walletPassLocked) walletPassLocked.textContent = wallet.escrowXu + ' Xu';
+
+    // 4. Render Transaction History
+    renderWalletHistory(wallet.transactions);
+  }
+
+  function renderWalletHistory(txs) {
+    const historyContainer = document.getElementById('landingWalletHistory');
+    if (!historyContainer) return;
+
+    if (!txs || txs.length === 0) {
+      historyContainer.innerHTML = `
+        <div class="history-row-item">
+          <div class="history-item-left">
+            <span class="h-icon-circle icon-in">🪙</span>
+            <div class="h-desc-wrap">
+              <strong>Tặng 100 Xu trải nghiệm tiên phong</strong>
+              <span>Khởi tạo tài khoản Kindr</span>
+            </div>
+          </div>
+          <span class="h-amount-badge pos">+100 Xu</span>
+        </div>
+      `;
+      return;
+    }
+
+    const sorted = [...txs].reverse();
+    historyContainer.innerHTML = sorted.map(tx => {
+      const isPositive = tx.amount > 0;
+      const isLock = tx.type === 'ESCROW_LOCK';
+      const iconClass = isLock ? 'icon-lock' : (isPositive ? 'icon-in' : 'icon-lock');
+      const iconChar = isLock ? '🔒' : (isPositive ? '➕' : '➖');
+      const badgeClass = isLock ? 'lock' : (isPositive ? 'pos' : 'lock');
+      const sign = isPositive ? '+' : '';
+      const txDate = tx.createdAt ? new Date(tx.createdAt) : new Date();
+      const timeStr = txDate.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) + ' ' +
+                      txDate.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' });
+
+      return `
+        <div class="history-row-item">
+          <div class="history-item-left">
+            <span class="h-icon-circle ${iconClass}">${iconChar}</span>
+            <div class="h-desc-wrap">
+              <strong>${tx.description || 'Giao dịch ví Xu'}</strong>
+              <span>${timeStr}</span>
+            </div>
+          </div>
+          <span class="h-amount-badge ${badgeClass}">${sign}${tx.amount} Xu</span>
+        </div>
+      `;
+    }).join('');
+  }
+
+  async function fetchLandingWallet() {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/wallet/landing/${landingClientId}`);
+      if (!res.ok) throw new Error('Failed to fetch wallet');
+      const data = await res.json();
+      if (data.wallet) {
+        syncWalletUI(data.wallet);
+      }
+    } catch (err) {
+      console.warn('[LandingWallet] Error fetching wallet, using local state:', err);
+      syncWalletUI(landingWalletState);
+    }
+  }
+  fetchLandingWallet();
+
+  // Scroll to wallet when clicking header button
+  const btnNavTopup = document.getElementById('btnNavTopup');
+  if (btnNavTopup) {
+    btnNavTopup.addEventListener('click', (e) => {
+      e.preventDefault();
+      const sec = document.getElementById('landing-wallet-section');
+      if (sec) {
+        sec.scrollIntoView({ behavior: 'smooth' });
+      }
+    });
+  }
+
+  // Top-up Preset & Custom input logic
+  let selectedTopupXu = 50;
+  const presetBtns = document.querySelectorAll('.topup-preset-btn');
+  const customXuInput = document.getElementById('customXuInput');
+  const summaryXuAmount = document.getElementById('summaryXuAmount');
+  const summaryVndAmount = document.getElementById('summaryVndAmount');
+  const summaryTotalVnd = document.getElementById('summaryTotalVnd');
+  const customXuHint = document.getElementById('customXuHint');
+
+  function updateTopupSummary(xu) {
+    selectedTopupXu = Math.max(10, Math.floor(xu));
+    const vnd = selectedTopupXu * 1000;
+    const formattedVnd = vnd.toLocaleString('vi-VN') + ' VNĐ';
+
+    if (summaryXuAmount) summaryXuAmount.textContent = selectedTopupXu + ' Xu';
+    if (summaryVndAmount) summaryVndAmount.textContent = formattedVnd;
+    if (summaryTotalVnd) summaryTotalVnd.textContent = formattedVnd;
+    if (customXuHint) customXuHint.textContent = 'Quy đổi: ' + selectedTopupXu + ' Xu = ' + vnd.toLocaleString('vi-VN') + ' VNĐ';
+  }
+
+  presetBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      presetBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      if (customXuInput) customXuInput.value = '';
+      const xu = Number(btn.dataset.xu) || 50;
+      updateTopupSummary(xu);
+    });
+  });
+
+  if (customXuInput) {
+    customXuInput.addEventListener('input', () => {
+      presetBtns.forEach(b => b.classList.remove('active'));
+      const val = Number(customXuInput.value);
+      if (val >= 10) {
+        updateTopupSummary(val);
+      } else {
+        updateTopupSummary(10);
+      }
+    });
+  }
+
+  // PayOS Modal Controls
+  const landingPayosModal = document.getElementById('landingPayosModal');
+  const btnClosePayosModal = document.getElementById('btnClosePayosModal');
+  const btnCreateVietQR = document.getElementById('btnCreateVietQR');
+  const payosQrImage = document.getElementById('payosQrImage');
+  const payosQrLoading = document.getElementById('payosQrLoading');
+  const payosStatusText = document.getElementById('payosStatusText');
+  const payosBankName = document.getElementById('payosBankName');
+  const payosAccountName = document.getElementById('payosAccountName');
+  const payosAccountNum = document.getElementById('payosAccountNum');
+  const payosVndAmount = document.getElementById('payosVndAmount');
+  const payosRawVnd = document.getElementById('payosRawVnd');
+  const payosDescription = document.getElementById('payosDescription');
+  const payosXuAmount = document.getElementById('payosXuAmount');
+  const btnPayosOpenCheckout = document.getElementById('btnPayosOpenCheckout');
+  const btnSimulatePaid = document.getElementById('btnSimulatePaid');
+
+  let activeOrderCode = null;
+  let payosPollingTimer = null;
+
+  function stopPayosPolling() {
+    if (payosPollingTimer) {
+      clearInterval(payosPollingTimer);
+      payosPollingTimer = null;
+    }
+  }
+
+  if (btnClosePayosModal) {
+    btnClosePayosModal.addEventListener('click', () => {
+      stopPayosPolling();
+      if (landingPayosModal) landingPayosModal.classList.add('hidden');
+    });
+  }
+
+  // Copy buttons
+  document.querySelectorAll('.copy-field-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const targetId = btn.dataset.target;
+      const targetEl = document.getElementById(targetId);
+      if (targetEl) {
+        const textToCopy = targetEl.textContent.trim();
+        navigator.clipboard.writeText(textToCopy).then(() => {
+          const originalText = btn.textContent;
+          btn.textContent = 'Đã chép!';
+          btn.style.background = '#5B9A8B';
+          btn.style.color = '#FFFFFF';
+          setTimeout(() => {
+            btn.textContent = originalText;
+            btn.style.background = '';
+            btn.style.color = '';
+          }, 1500);
+        }).catch(err => {
+          console.warn('Clipboard write failed:', err);
+        });
+      }
+    });
+  });
+
+  function triggerPaymentSuccess(order, wallet) {
+    stopPayosPolling();
+    if (landingPayosModal) landingPayosModal.classList.add('hidden');
+
+    // Confetti explosion
+    if (typeof confetti === 'function') {
+      confetti({
+        particleCount: 120,
+        spread: 80,
+        origin: { y: 0.6 }
+      });
+      setTimeout(() => {
+        confetti({
+          particleCount: 60,
+          angle: 60,
+          spread: 55,
+          origin: { x: 0 }
+        });
+        confetti({
+          particleCount: 60,
+          angle: 120,
+          spread: 55,
+          origin: { x: 1 }
+        });
+      }, 250);
+    }
+
+    if (wallet) {
+      syncWalletUI(wallet);
+    }
+
+    const addedXu = order ? order.xuAmount : selectedTopupXu;
+    showPhoneToast(`+${addedXu} Xu vào ví thành công!`, 'gift');
+  }
+
+  // Create VietQR Button Click
+  if (btnCreateVietQR) {
+    btnCreateVietQR.addEventListener('click', async () => {
+      try {
+        if (payosQrLoading) payosQrLoading.classList.remove('hidden');
+        if (landingPayosModal) landingPayosModal.classList.remove('hidden');
+
+        if (payosStatusText) {
+          payosStatusText.textContent = '⏳ Đang khởi tạo mã VietQR từ PayOS...';
+        }
+
+        const res = await fetch(`${API_BASE_URL}/api/wallet/landing/topup/create`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            clientId: landingClientId,
+            xuAmount: selectedTopupXu
+          })
+        });
+
+        if (!res.ok) {
+          throw new Error('Không thể tạo đơn nạp VietQR');
+        }
+
+        const data = await res.json();
+        const order = data.order;
+        activeOrderCode = order.orderCode;
+
+        if (payosQrImage) {
+          payosQrImage.src = order.qrCode;
+        }
+        if (payosBankName) payosBankName.textContent = (order.bankCode || 'MB') + ' (Quân Đội)';
+        if (payosAccountName) payosAccountName.textContent = order.accountHolder || 'NGUYEN NGOC BUU';
+        if (payosAccountNum) payosAccountNum.textContent = order.accountNumber || '0822835695';
+        if (payosVndAmount) payosVndAmount.textContent = (order.vndAmount).toLocaleString('vi-VN') + ' VNĐ';
+        if (payosRawVnd) payosRawVnd.textContent = String(order.vndAmount);
+        if (payosDescription) payosDescription.textContent = order.description;
+        if (payosXuAmount) payosXuAmount.textContent = '+' + order.xuAmount + ' Xu';
+
+        if (btnPayosOpenCheckout && order.checkoutUrl) {
+          btnPayosOpenCheckout.href = order.checkoutUrl;
+        }
+
+        if (payosQrLoading) payosQrLoading.classList.add('hidden');
+        if (payosStatusText) {
+          payosStatusText.textContent = '⏳ Đang chờ bạn quét mã thanh toán... (Tự động cập nhật mỗi 3s)';
+        }
+
+        // Start polling every 3 seconds
+        stopPayosPolling();
+        payosPollingTimer = setInterval(async () => {
+          if (!activeOrderCode) return;
+          try {
+            const checkRes = await fetch(`${API_BASE_URL}/api/wallet/landing/topup/status/${activeOrderCode}`);
+            if (checkRes.ok) {
+              const checkData = await checkRes.json();
+              if (checkData.status === 'PAID') {
+                triggerPaymentSuccess(checkData.order, checkData.wallet);
+              }
+            }
+          } catch (pollErr) {
+            console.warn('[PayOS Polling error]', pollErr);
+          }
+        }, 3000);
+
+      } catch (err) {
+        if (payosQrLoading) payosQrLoading.classList.add('hidden');
+        console.error('Error creating VietQR:', err);
+        alert('Lỗi tạo mã thanh toán: ' + (err.message || 'Vui lòng thử lại'));
+      }
+    });
+  }
+
+  // Simulate Paid Button (Demo Mode)
+  if (btnSimulatePaid) {
+    btnSimulatePaid.addEventListener('click', async () => {
+      if (!activeOrderCode) {
+        alert('Chưa có mã đơn nạp nào đang chờ');
+        return;
+      }
+      try {
+        btnSimulatePaid.disabled = true;
+        btnSimulatePaid.textContent = '⏳ Đang giả lập chuyển khoản...';
+
+        const res = await fetch(`${API_BASE_URL}/api/wallet/landing/topup/simulate-paid/${activeOrderCode}`, {
+          method: 'POST'
+        });
+
+        if (!res.ok) {
+          throw new Error('Giả lập thanh toán không thành công');
+        }
+
+        const data = await res.json();
+        triggerPaymentSuccess(data.order, data.wallet);
+      } catch (err) {
+        console.error('Simulate paid error:', err);
+        alert('Lỗi giả lập: ' + err.message);
+      } finally {
+        btnSimulatePaid.disabled = false;
+        btnSimulatePaid.textContent = '🧪 Giả lập Quét QR Thành Công (Demo Mode)';
+      }
+    });
+  }
+
+  // 2-Way Synchronization: Lock Escrow Xu when user clicks "Đổi đồ" in Simulator
+  if (btnActionStep2) {
+    btnActionStep2.addEventListener('click', async () => {
+      try {
+        const lockRes = await fetch(`${API_BASE_URL}/api/wallet/landing/escrow-lock`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            clientId: landingClientId,
+            amount: 50,
+            itemName: 'Bộ đường ray tàu gỗ'
+          })
+        });
+        if (lockRes.ok) {
+          const lockData = await lockRes.json();
+          if (lockData.wallet) {
+            syncWalletUI(lockData.wallet);
+          }
+        }
+      } catch (e) {
+        console.warn('Escrow lock fetch error:', e);
+      }
+    });
+  }
+
 });

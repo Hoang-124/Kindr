@@ -27,6 +27,8 @@
   
   <!-- Artisanal Design System Styles -->
   <link rel="stylesheet" href="styles.css">
+  <!-- Canvas Confetti Library -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 
   <!-- Google Analytics 4 (GA4) - Gated by window.KINDR_GA_ID -->
   <script>
@@ -70,6 +72,7 @@
         <ul class="nav-links">
           <li><a href="#signature-bento" class="nav-link">Đặc trưng cốt lõi</a></li>
           <li><a href="#mvp-showcase" class="nav-link">Bản dùng thử</a></li>
+          <li><a href="#landing-wallet-section" class="nav-link">Ví Xu &amp; PayOS</a></li>
           <li><a href="#popup-campaign" class="nav-link">Điểm hẹn FPT Plaza</a></li>
           <li><a href="#founding-card" class="nav-link">Thẻ Sáng Lập</a></li>
           <li><a href="#waitlist" class="nav-link highlight-pill">Mốc 200 Mẹ</a></li>
@@ -77,6 +80,14 @@
       </nav>
 
       <div class="nav-actions">
+        <!-- Widget Ví Xu trên Thanh Navbar (Sticky Header) -->
+        <div class="nav-wallet-widget" id="navWalletWidget" title="Ví Xu Kindr">
+          <span class="nav-coin-icon">🪙</span>
+          <span class="nav-coin-val"><strong id="nav-xu-balance">100</strong> Xu</span>
+          <button type="button" class="btn-nav-topup" id="btnNavTopup" title="Nạp thêm Xu qua PayOS VietQR">
+            + Nạp Xu
+          </button>
+        </div>
         <div class="live-status-pill" id="navWaitlistPill">
           <span class="status-pulse-dot"></span>
           <span class="status-text"><strong id="navWaitlistCount">—</strong>/200<span class="status-region-txt"> Mẹ Đà Nẵng</span></span>
@@ -1223,6 +1234,171 @@
 </div> <!-- End container hero-layout -->
 </section> <!-- End section hero-stage -->
 
+  <!-- ================= SECTION: TRẢI NGHIỆM VÍ XU & NẠP XU 1 CHẠM (PAYOS VIETQR) ================= -->
+  <section class="section landing-wallet-section" id="landing-wallet-section">
+    <div class="container">
+      <div class="section-badge-center">
+        <span class="badge-pill-mint">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><path d="M12 9v6"/></svg>
+          HỆ SINH THÁI TÀI CHÍNH TUẦN HOÀN KINDR
+        </span>
+      </div>
+      <div class="section-heading-center">
+        <h2 class="wallet-section-title">Trải Nghiệm Ví Xu &amp; Nạp Xu 1 Chạm <span class="highlight-payos">(PayOS VietQR)</span></h2>
+        <p class="wallet-section-subtitle">Tỷ giá chuẩn <strong>1 Xu = 1.000 VNĐ</strong>. Đổi đồ chơi &amp; vật dụng mẹ bé không lo mặc cả, bảo chứng 100% trong 6 giờ kiểm định.</p>
+      </div>
+
+      <div class="landing-wallet-grid">
+        <!-- CỘT TRÁI: THẺ VÍ KINDR & LỊCH SỬ BIẾN ĐỘNG -->
+        <div class="wallet-col-left">
+          <!-- Thẻ ví phong cách sang trọng Gradient Xanh Mint -->
+          <div class="kindr-premium-wallet-card">
+            <div class="wallet-card-header">
+              <div class="wallet-card-brand">
+                <img src="kindr-mascot.png" alt="Kindr Bear" class="wallet-card-logo" width="36" height="36">
+                <div>
+                  <div class="wallet-card-name">KINDR COIN PASS</div>
+                  <span class="wallet-card-sub">Double Escrow Guaranteed</span>
+                </div>
+              </div>
+              <div class="wallet-card-badge">Đã Bảo Chứng 100%</div>
+            </div>
+
+            <div class="wallet-card-balance-block">
+              <div class="balance-sub-label">SỐ DƯ KHẢ DỤNG</div>
+              <div class="balance-main-num">
+                <span class="coin-glow">🪙</span>
+                <span class="balance-val" id="landingAvailXu">100</span>
+                <span class="balance-unit">Xu</span>
+              </div>
+              <div class="balance-vnd-fiat">
+                ≈ <span id="landingAvailVnd">100.000</span> VNĐ (Tỷ giá 1 Xu = 1.000đ)
+              </div>
+            </div>
+
+            <div class="wallet-card-status-row">
+              <div class="status-box status-available">
+                <span class="status-indicator-dot dot-green"></span>
+                <div>
+                  <div class="s-label">Khả dụng đổi đồ</div>
+                  <strong class="s-val" id="landingAvailBadge">100 Xu</strong>
+                </div>
+              </div>
+              <div class="status-box status-escrow">
+                <span class="status-indicator-dot dot-amber"></span>
+                <div>
+                  <div class="s-label">Đang khóa bảo chứng (Escrow)</div>
+                  <strong class="s-val" id="landingEscrowXu">0 Xu</strong>
+                </div>
+              </div>
+            </div>
+
+            <!-- Lời nhắc từ Gấu Kindr Buddy -->
+            <div class="wallet-mascot-tip">
+              <div class="tip-mascot-avatar">
+                <img src="kindr-mascot.png" alt="Gấu Buddy" width="32" height="32">
+              </div>
+              <div class="tip-content">
+                <strong>Gấu Kindr Buddy nhắc nhỏ:</strong>
+                <p>"1 Xu = 1.000đ. Xu dùng để đổi đồ không mặc cả và được bảo hộ an toàn 100% trong 6 giờ kiểm định!"</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Lịch sử biến động gần đây -->
+          <div class="wallet-history-card">
+            <div class="history-card-header">
+              <div class="history-title-wrap">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                <span>Lịch sử giao dịch gần đây</span>
+              </div>
+              <span class="history-client-id" id="displayClientId">Khách trải nghiệm</span>
+            </div>
+            <div class="history-card-list" id="landingWalletHistory">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- CỘT PHẢI: BẢNG CHỌN GÓI NẠP XU NHANH & TẠO MÃ VIETQR -->
+        <div class="wallet-col-right">
+          <div class="topup-interactive-panel">
+            <div class="panel-header">
+              <div class="panel-tag">⚡ NẠP TIỀN QUA VIETQR TỰ ĐỘNG</div>
+              <h3 class="panel-title">Chọn Gói Nạp Xu Đổi Đồ</h3>
+              <p class="panel-sub">Quét mã QR thanh toán bằng bất kỳ App Ngân Hàng hoặc Ví Điện Tử nào (MB, VCB, Tech, MoMo...). Xu vào ví tức thì trong 3 giây.</p>
+            </div>
+
+            <!-- Lưới 4 nút chọn nhanh -->
+            <div class="topup-preset-grid">
+              <button type="button" class="topup-preset-btn" data-xu="20" data-vnd="20000">
+                <span class="pkg-xu">20 Xu</span>
+                <span class="pkg-vnd">20.000đ</span>
+              </button>
+              <button type="button" class="topup-preset-btn active" data-xu="50" data-vnd="50000">
+                <span class="pkg-popular-badge">Khuyên Dùng</span>
+                <span class="pkg-xu">50 Xu</span>
+                <span class="pkg-vnd">50.000đ</span>
+              </button>
+              <button type="button" class="topup-preset-btn" data-xu="100" data-vnd="100000">
+                <span class="pkg-popular-badge">Phổ Biến</span>
+                <span class="pkg-xu">100 Xu</span>
+                <span class="pkg-vnd">100.000đ</span>
+              </button>
+              <button type="button" class="topup-preset-btn" data-xu="200" data-vnd="200000">
+                <span class="pkg-xu">200 Xu</span>
+                <span class="pkg-vnd">200.000đ</span>
+              </button>
+            </div>
+
+            <!-- Ô nhập Xu tùy chọn -->
+            <div class="custom-xu-input-wrap">
+              <label for="customXuInput" class="custom-xu-label">Hoặc nhập số Xu tùy chỉnh (Tối thiểu 10 Xu):</label>
+              <div class="input-with-adornment">
+                <span class="adornment-icon">🪙</span>
+                <input type="number" id="customXuInput" class="custom-xu-field" min="10" max="5000" step="5" placeholder="Nhập số Xu (Ví dụ: 30, 80, 150)">
+                <span class="adornment-unit">Xu</span>
+              </div>
+              <div class="custom-hint" id="customXuHint">Quy đổi: 50 Xu = 50.000 VNĐ</div>
+            </div>
+
+            <!-- Bảng tóm tắt thanh toán -->
+            <div class="topup-summary-receipt">
+              <div class="receipt-row">
+                <span class="r-label">Số Xu thực nhận:</span>
+                <strong class="r-val highlight-amber" id="summaryXuAmount">50 Xu</strong>
+              </div>
+              <div class="receipt-row">
+                <span class="r-label">Thành tiền thanh toán:</span>
+                <strong class="r-val" id="summaryVndAmount">50.000 VNĐ</strong>
+              </div>
+              <div class="receipt-row">
+                <span class="r-label">Phí giao dịch VietQR:</span>
+                <span class="r-val free-badge">0đ (Miễn phí 100%)</span>
+              </div>
+              <div class="receipt-divider"></div>
+              <div class="receipt-row total-row">
+                <span class="r-label">Tổng thanh toán:</span>
+                <strong class="r-val total-price" id="summaryTotalVnd">50.000 VNĐ</strong>
+              </div>
+            </div>
+
+            <!-- Nút bấm lớn tạo mã VietQR -->
+            <button type="button" class="btn btn-primary btn-full btn-create-payos-qr" id="btnCreateVietQR">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><line x1="7" y1="7" x2="7.01" y2="7"/><line x1="17" y1="7" x2="17.01" y2="7"/><line x1="7" y1="17" x2="7.01" y2="17"/><line x1="17" y1="17" x2="17.01" y2="17"/></svg>
+              <span>⚡ TẠO MÃ VIETQR NẠP XU NGAY (PAYOS)</span>
+            </button>
+            <p class="payos-secure-note">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5B9A8B" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              Thanh toán bảo mật chuẩn VietQR NAPAS 247 qua Cổng Thanh Toán PayOS
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
   <!-- ================= HYPER-LOCAL RESIDENT NETWORK TICKER (ĐÀ NẴNG) ================= -->
   <section class="danang-network-strip">
     <div class="container network-strip-inner">
@@ -2007,6 +2183,93 @@
       <span class="mascot-online-dot"></span>
     </button>
   </aside>
+
+  
+  <!-- ================= MODAL: THANH TOÁN QUÉT MÃ PAYOS VIETQR ================= -->
+  <div class="modal-overlay hidden" id="landingPayosModal" role="dialog" aria-modal="true" aria-labelledby="payosModalTitle">
+    <div class="modal-card payos-modal-card">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <div class="payos-badge-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#5B9A8B" stroke-width="2.4"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          </div>
+          <div>
+            <h3 class="modal-title" id="payosModalTitle">Quét Mã VietQR Nạp Xu Kindr</h3>
+            <span class="modal-subtitle">Tự động cộng Xu vào ví ngay khi nhận chuyển khoản</span>
+          </div>
+        </div>
+        <button type="button" class="modal-close-btn" id="btnClosePayosModal" aria-label="Đóng cửa sổ">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <div class="payos-modal-body">
+        <div class="payos-qr-frame">
+          <div class="qr-pulse-glow"></div>
+          <img id="payosQrImage" src="" alt="Mã VietQR PayOS" class="payos-qr-img" width="220" height="220">
+          <div class="qr-loading-overlay hidden" id="payosQrLoading">
+            <span class="spinner-circle"></span>
+            <span>Đang tạo mã thanh toán VietQR...</span>
+          </div>
+        </div>
+
+        <div class="payos-status-pulse">
+          <span class="status-pulse-dot"></span>
+          <span id="payosStatusText">⏳ Đang chờ bạn quét mã thanh toán... (Tự động kiểm tra mỗi 3s)</span>
+        </div>
+
+        <div class="payos-details-table">
+          <div class="detail-row">
+            <span class="d-label">Ngân hàng thụ hưởng:</span>
+            <strong class="d-val" id="payosBankName">MB Bank (Quân Đội)</strong>
+          </div>
+          <div class="detail-row">
+            <span class="d-label">Chủ tài khoản:</span>
+            <strong class="d-val" id="payosAccountName">NGUYEN NGOC BUU</strong>
+          </div>
+          <div class="detail-row">
+            <span class="d-label">Số tài khoản:</span>
+            <div class="d-val-copyable">
+              <strong id="payosAccountNum">0822835695</strong>
+              <button type="button" class="copy-field-btn" data-target="payosAccountNum" title="Sao chép STK">Sao chép</button>
+            </div>
+          </div>
+          <div class="detail-row highlight-amount-row">
+            <span class="d-label">Số tiền cần chuyển:</span>
+            <div class="d-val-copyable">
+              <strong class="amount-accent" id="payosVndAmount">50.000 VNĐ</strong>
+              <button type="button" class="copy-field-btn" data-target="payosRawVnd" title="Sao chép số tiền">Sao chép</button>
+              <span id="payosRawVnd" class="hidden">50000</span>
+            </div>
+          </div>
+          <div class="detail-row highlight-content-row">
+            <span class="d-label">Nội dung CK (Bắt buộc):</span>
+            <div class="d-val-copyable">
+              <code class="order-desc-code" id="payosDescription">KINDR NAP 50 XU</code>
+              <button type="button" class="copy-field-btn" data-target="payosDescription" title="Sao chép nội dung">Sao chép</button>
+            </div>
+          </div>
+          <div class="detail-row">
+            <span class="d-label">Số Xu nhận được:</span>
+            <strong class="d-val highlight-amber" id="payosXuAmount">+50 Xu</strong>
+          </div>
+        </div>
+
+        <div class="payos-actions-row">
+          <a href="#" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-open-checkout" id="btnPayosOpenCheckout">
+            <span>Mở trang thanh toán PayOS ↗</span>
+          </a>
+          <button type="button" class="btn btn-demo-simulate" id="btnSimulatePaid">
+            <span>🧪 Giả lập Quét QR Thành Công (Demo Mode)</span>
+          </button>
+        </div>
+
+        <p class="payos-disclaimer">
+          * Trong môi trường thử nghiệm / chấm thi, bấm nút <strong>Giả lập Quét QR Thành Công</strong> để test hiệu ứng bắn pháo hoa Confetti và nạp Xu trực tiếp vào ví tức thì.
+        </p>
+      </div>
+    </div>
+  </div>
 
   <script src="script.js"></script>
 </body>

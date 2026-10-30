@@ -6,7 +6,8 @@ export type PaymentOrderType = 'TOPUP' | 'WITHDRAW' | 'ESCROW_LOCK' | 'ESCROW_RE
 
 export interface IPaymentOrder extends Document {
   orderCode: number;
-  userId: Types.ObjectId;
+  userId?: Types.ObjectId;
+  clientId?: string;
   userName?: string;
   userPhone?: string;
   type: PaymentOrderType;
@@ -28,7 +29,8 @@ export interface IPaymentOrder extends Document {
 
 const PaymentOrderSchema = new Schema<IPaymentOrder>({
   orderCode: { type: Number, required: true, unique: true, index: true },
-  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
+  userId: { type: Schema.Types.ObjectId, ref: 'User', required: false, index: true },
+  clientId: { type: String, required: false, index: true },
   userName: { type: String },
   userPhone: { type: String },
   type: {
