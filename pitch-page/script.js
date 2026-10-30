@@ -1422,7 +1422,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const landingEscrowXu = document.getElementById('landingEscrowXu');
 
     if (landingAvailXu) landingAvailXu.textContent = wallet.availableXu;
-    if (landingAvailVnd) landingAvailVnd.textContent = (wallet.availableXu * 10000).toLocaleString('vi-VN');
+    if (landingAvailVnd) landingAvailVnd.textContent = (wallet.availableXu * 1000).toLocaleString('vi-VN');
     if (landingAvailBadge) landingAvailBadge.textContent = wallet.availableXu + ' Xu';
     if (landingEscrowXu) landingEscrowXu.textContent = wallet.escrowXu + ' Xu';
 
@@ -1527,14 +1527,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function updateTopupSummary(xu) {
     selectedTopupXu = Math.max(5, Math.floor(xu));
-    const vnd = selectedTopupXu * 10000;
+    const vnd = selectedTopupXu * 1000;
     const formattedVnd = vnd.toLocaleString('vi-VN') + ' VNĐ';
     const shortVnd = vnd.toLocaleString('vi-VN') + 'đ';
 
     if (summaryXuAmount) summaryXuAmount.textContent = selectedTopupXu + ' Xu';
     if (summaryVndAmount) summaryVndAmount.textContent = formattedVnd;
     if (summaryTotalVnd) summaryTotalVnd.textContent = formattedVnd;
-    if (customXuHint) customXuHint.textContent = 'Quy đổi: ' + selectedTopupXu + ' Xu = ' + formattedVnd + ' (Tỷ giá 1 Xu = 10.000đ)';
+    if (customXuHint) customXuHint.textContent = 'Quy đổi: ' + selectedTopupXu + ' Xu = ' + formattedVnd + ' (Tỷ giá 1 Xu = 1.000đ)';
 
     const btnCreateQrText = document.getElementById('btnCreateQrText');
     if (btnCreateQrText) {
