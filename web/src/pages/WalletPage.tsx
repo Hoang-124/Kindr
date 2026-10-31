@@ -14,9 +14,11 @@ import {
   CheckCircle2,
   AlertCircle,
   Landmark,
+  Clock,
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { walletApi } from '../services/domainServices';
+import { socketService } from '../services/socketService';
 import { TopupOrderData, WithdrawRequestItem } from '../types';
 import { getWithdrawableXu } from '../utils/walletRules';
 import {
@@ -90,26 +92,50 @@ export const WalletPage: React.FC = () => {
     }
   }, [currentUser?.id]);
 
-  // Poll VietQR order status if pending
+  // Poll VietQR order status if pending & listen to socket
   useEffect(() => {
     if (!topupOrder || topupOrder.status !== 'pending') return;
+
+    const handleSuccess = async (xu: number) => {
+      setTopupOrder((prev) => (prev ? { ...prev, status: 'completed' } : null));
+      await refreshUser();
+      await loadHistory();
+      if ((window as any).confetti) {
+        (window as any).confetti({
+          particleCount: 120,
+          spread: 80,
+          origin: { y: 0.6 }
+        });
+      }
+      showToast({
+        title: 'Nạp Xu VietQR thành công! 🎉',
+        message: `Ví của mẹ đã được cộng thêm +${xu} Xu.`,
+        type: 'success',
+      });
+    };
+
     const interval = setInterval(async () => {
       try {
         const res = await walletApi.checkOrderStatus(topupOrder.orderCode);
-        if (res.status === 'completed') {
-          setTopupOrder((prev) => (prev ? { ...prev, status: 'completed' } : null));
-          await refreshUser();
-          showToast({
-            title: 'Nạp Xu VietQR thành công!',
-            message: `Ví của mẹ đã được cộng thêm +${topupOrder.xuAmount} Xu.`,
-            type: 'success',
-          });
+        if (res.status === 'completed' || res.status === 'PAID') {
+          handleSuccess(res.xuAmount || topupOrder.xuAmount);
         }
       } catch {
         // Ignore polling error
       }
-    }, 5000);
-    return () => clearInterval(interval);
+    }, 2000);
+
+    const handleSocket = (data: any) => {
+      if (String(data.orderCode) === String(topupOrder.orderCode) || data.newBalance !== undefined) {
+        handleSuccess(data.xuAmount || topupOrder.xuAmount);
+      }
+    };
+    socketService.on('topup_success', handleSocket);
+
+    return () => {
+      clearInterval(interval);
+      socketService.off('topup_success', handleSocket);
+    };
   }, [topupOrder?.orderCode, topupOrder?.status, refreshUser, showToast]);
 
   if (!currentUser) {
@@ -426,15 +452,86 @@ export const WalletPage: React.FC = () => {
                   Thanh toán tự động 24/7 qua VietQR
                 </h4>
                 <p style={{ fontSize: 13, color: 'var(--color-text-secondary)', lineHeight: 1.5 }}>
-                  Bấm nút <strong>"Tạo mã VietQR"</strong> để hiển thị mã QR ngân hàng kèm nội dung chuyển khoản tự động. Hệ thống SePay Webhook sẽ cộng Xu ngay sau 3–5 giây!
+                  Bấm nút <strong>"Tạo mã VietQR"</strong> để hiển thị mã QR thanh toán. Quét mã xong hệ thống sẽ tự động nhận diện và cộng Xu ngay!
                 </p>
               </div>
+            ) : topupOrder.status === 'completed' ? (
+              /* MÀN HÌNH GIAO DỊCH THÀNH CÔNG (QUÉT XONG TỰ ĐỘNG HIỆN LÊN & CỘNG XU) */
+              <div style={{ textAlign: 'center', padding: '28px 12px' }}>
+                <div
+                  style={{
+                    width: 68,
+                    height: 68,
+                    borderRadius: '50%',
+                    backgroundColor: '#E8F7F3',
+                    color: '#10B981',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    margin: '0 auto 16px',
+                  }}
+                >
+                  <CheckCircle2 size={40} />
+                </div>
+                <span className="kw-badge kw-badge-primary" style={{ marginBottom: 8, display: 'inline-block' }}>
+                  Thanh toán thành công
+                </span>
+                <h3 style={{ fontSize: 21, fontWeight: 800, color: '#2D2325', margin: '4px 0 6px' }}>
+                  Giao dịch đã thành công! 🎉
+                </h3>
+                <p style={{ fontSize: 14, color: 'var(--color-text-secondary)', margin: '0 0 20px' }}>
+                  Đã cộng thành công <strong style={{ color: '#10B981' }}>+{topupOrder.xuAmount} Xu</strong> vào ví của mẹ.
+                </p>
+
+                <div
+                  style={{
+                    backgroundColor: 'var(--color-surface-subtle)',
+                    borderRadius: 'var(--radius-default)',
+                    padding: 16,
+                    textAlign: 'left',
+                    fontSize: 13,
+                    marginBottom: 20,
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                    <span style={{ color: 'var(--color-text-secondary)' }}>Mã đơn hàng:</span>
+                    <strong>{topupOrder.orderCode}</strong>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                    <span style={{ color: 'var(--color-text-secondary)' }}>Số tiền đã nạp:</span>
+                    <strong>{formatNumber(topupOrder.vndAmount)}đ</strong>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span style={{ color: 'var(--color-text-secondary)' }}>Số Xu nhận được:</span>
+                    <strong style={{ color: '#D97706' }}>+{topupOrder.xuAmount} Xu</strong>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
+                  <button
+                    type="button"
+                    className="kw-btn kw-btn-primary"
+                    onClick={() => {
+                      setTopupOrder(null);
+                      navigate('/');
+                    }}
+                  >
+                    <span>Khám phá đồ bé &amp; Đổi ngay</span>
+                  </button>
+                  <button
+                    type="button"
+                    className="kw-btn kw-btn-outline"
+                    onClick={() => setTopupOrder(null)}
+                  >
+                    <span>Nạp thêm đơn khác</span>
+                  </button>
+                </div>
+              </div>
             ) : (
+              /* MÀN HÌNH CHỜ QUÉT MÃ VIETQR (ĐÃ BỎ NÚT MÔ PHỎNG) */
               <div style={{ textAlign: 'center' }}>
                 <span className="kw-badge kw-badge-secondary">
-                  {topupOrder.status === 'completed'
-                    ? 'Đã thanh toán thành công'
-                    : 'Đang chờ quét mã QR...'}
+                  Đang chờ quét mã QR...
                 </span>
                 <h4 style={{ fontSize: 17, fontWeight: 800, margin: '10px 0' }}>
                   Quét mã bằng ứng dụng Ngân hàng bất kỳ
@@ -463,7 +560,7 @@ export const WalletPage: React.FC = () => {
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
                     <span style={{ color: 'var(--color-text-secondary)' }}>Ngân hàng:</span>
-                    <strong>{topupOrder.bankName}</strong>
+                    <strong>{topupOrder.bankName || 'MBBank'}</strong>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
                     <span style={{ color: 'var(--color-text-secondary)' }}>Số tài khoản:</span>
@@ -498,43 +595,12 @@ export const WalletPage: React.FC = () => {
                   </div>
                 </div>
 
-                {topupOrder.status !== 'completed' && (
-                  <button
-                    type="button"
-                    className="kw-btn kw-btn-primary"
-                    style={{ width: '100%', marginTop: 14 }}
-                    disabled={demoLoading}
-                    onClick={async () => {
-                      setDemoLoading(true);
-                      setErrorMsg('');
-                      try {
-                        await walletApi.simulateVietQrWebhook(topupOrder.orderCode);
-                        setTopupOrder((prev) => (prev ? { ...prev, status: 'completed' } : null));
-                        await refreshUser();
-                        await loadHistory();
-                        showToast({
-                          title: 'SePay Webhook xác nhận thành công!',
-                          message: `Đã tự động cộng +${topupOrder.xuAmount} Xu từ lệnh VietQR ${topupOrder.orderCode}.`,
-                          type: 'success',
-                        });
-                      } catch (err: any) {
-                        setErrorMsg(err?.response?.data?.error || 'Không thể mô phỏng Webhook lúc này.');
-                      } finally {
-                        setDemoLoading(false);
-                      }
-                    }}
-                  >
-                    <CheckCircle2 size={17} />
-                    <span>
-                      {demoLoading
-                        ? 'Đang đối soát Webhook...'
-                        : 'Mô phỏng Ngân hàng Báo Có (Test SePay Webhook)'}
-                    </span>
-                  </button>
-                )}
+                <div style={{ marginTop: 14, fontSize: 13, color: 'var(--color-text-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                  <Clock size={14} />
+                  <span>Hệ thống tự động kiểm tra mỗi 2 giây sau khi bạn chuyển khoản...</span>
+                </div>
               </div>
-            )}
-          </div>
+            )}          </div>
         </div>
       )}
 

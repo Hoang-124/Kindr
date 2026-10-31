@@ -663,13 +663,38 @@ router.post('/create-order', requireAuth, async (req: AuthRequest, res: Response
     }
 
     const vndAmount = xuAmount * 1000;
-    const orderCode = `TOPUP_${Date.now()}_${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
-    const memo = `KINDR NAP ${xuAmount}XU ${orderCode}`;
-    const bankCode = ENV.BANK_CODE || 'MB';
-    const bankName = ENV.BANK_NAME || 'MBBank';
-    const accountNumber = ENV.BANK_ACCOUNT_NUMBER;
-    const accountHolder = ENV.BANK_ACCOUNT_HOLDER || 'CONG DONG KINDR';
-    const vietqrUrl = `https://img.vietqr.io/image/${bankCode}-${accountNumber}-compact.png?amount=${vndAmount}&addInfo=${encodeURIComponent(memo)}&accountName=${encodeURIComponent(accountHolder)}`;
+    const numericOrderCode = Number(String(Date.now()).slice(-9));
+    const orderCode = `TOPUP_${numericOrderCode}`;
+    const description = `KINDR NAP ${xuAmount} XU`.slice(0, 25);
+
+    // Call PayOS
+    const paymentLink = await payosService.createPaymentLink({
+      orderCode: numericOrderCode,
+      amount: vndAmount,
+      description,
+      buyerName: user.name,
+      buyerPhone: user.phone,
+      buyerEmail: user.email,
+    });
+
+    // Record in PaymentOrder for PayOS tracking
+    await PaymentOrder.create({
+      orderCode: numericOrderCode,
+      userId: user._id,
+      userName: user.name,
+      userPhone: user.phone,
+      type: 'TOPUP',
+      xuAmount,
+      vndAmount,
+      status: 'PENDING',
+      paymentLinkId: paymentLink.paymentLinkId,
+      checkoutUrl: paymentLink.checkoutUrl,
+      qrCode: paymentLink.qrCode,
+      accountNumber: paymentLink.accountNumber,
+      accountName: paymentLink.accountName,
+      bin: paymentLink.bin,
+      description: paymentLink.description,
+    });
 
     const order = await TopupOrder.create({
       orderCode,
@@ -678,10 +703,10 @@ router.post('/create-order', requireAuth, async (req: AuthRequest, res: Response
       userPhone: user.phone,
       xuAmount,
       vndAmount,
-      memo,
-      vietqrUrl,
-      bankName,
-      accountNumber,
+      memo: paymentLink.description || description,
+      vietqrUrl: paymentLink.qrCode,
+      bankName: paymentLink.accountName ? 'MBBank' : (ENV.BANK_NAME || 'MBBank'),
+      accountNumber: paymentLink.accountNumber || ENV.BANK_ACCOUNT_NUMBER || '0822835695',
       status: 'pending',
     });
 
@@ -695,7 +720,8 @@ router.post('/create-order', requireAuth, async (req: AuthRequest, res: Response
         vietqrUrl: order.vietqrUrl,
         bankName: order.bankName,
         accountNumber: order.accountNumber,
-        accountHolder,
+        accountHolder: paymentLink.accountName || ENV.BANK_ACCOUNT_HOLDER || 'NGUYEN NGOC BUU',
+        checkoutUrl: paymentLink.checkoutUrl,
         status: order.status,
         createdAt: order.createdAt,
       },
@@ -712,11 +738,36 @@ router.post('/create-order', requireAuth, async (req: AuthRequest, res: Response
  */
 router.get('/orders/:orderCode/status', requireAuth, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const order = await TopupOrder.findOne({ orderCode: req.params.orderCode, userId: req.userId });
+    const rawParam = req.params.orderCode;
+    const rawCode = (Array.isArray(rawParam) ? rawParam[0] : rawParam) || '';
+    const order = await TopupOrder.findOne({ orderCode: rawCode, userId: req.userId });
     if (!order) {
       res.status(404).json({ error: 'Không tìm thấy đơn hàng.' });
       return;
     }
+
+    if (order.status !== 'completed') {
+      const numCode = Number(rawCode.replace(/\D/g, '').slice(-9));
+      if (!isNaN(numCode)) {
+        try {
+          const payosInfo = await payosService.getPaymentLinkInformation(numCode);
+          if (payosInfo && payosInfo.status === 'PAID') {
+            await completePaymentOrderAtomic(numCode, payosInfo);
+            order.status = 'completed';
+            order.completedAt = new Date();
+            await order.save();
+          }
+        } catch (err) {
+          const pOrder = await PaymentOrder.findOne({ orderCode: numCode });
+          if (pOrder && pOrder.status === 'PAID') {
+            order.status = 'completed';
+            order.completedAt = pOrder.paidAt || new Date();
+            await order.save();
+          }
+        }
+      }
+    }
+
     res.json({
       orderCode: order.orderCode,
       status: order.status,
