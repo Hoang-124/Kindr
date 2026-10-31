@@ -696,6 +696,21 @@ router.post('/create-order', requireAuth, async (req: AuthRequest, res: Response
       description: paymentLink.description,
     });
 
+    const accountNum = paymentLink.accountNumber || ENV.BANK_ACCOUNT_NUMBER || '0822835695';
+    const accountName = paymentLink.accountName || ENV.BANK_ACCOUNT_HOLDER || 'CONG DONG KINDR';
+    const binCode = paymentLink.bin || '970422';
+
+    // Tạo QR Code URL luôn hiển thị được trực tiếp trên thẻ <img>
+    let qrImageUrl = '';
+    if (paymentLink.qrCode && paymentLink.qrCode.startsWith('http')) {
+      qrImageUrl = paymentLink.qrCode;
+    } else if (paymentLink.qrCode && paymentLink.qrCode.startsWith('000201')) {
+      // Dùng endpoint tạo QR image từ chuỗi EMVCo chuẩn ngân hàng
+      qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=320x320&data=${encodeURIComponent(paymentLink.qrCode)}`;
+    } else {
+      qrImageUrl = `https://img.vietqr.io/image/${binCode}-${accountNum}-compact2.png?amount=${vndAmount}&addInfo=${encodeURIComponent(paymentLink.description || description)}&accountName=${encodeURIComponent(accountName)}`;
+    }
+
     const order = await TopupOrder.create({
       orderCode,
       userId: user._id,
@@ -704,9 +719,9 @@ router.post('/create-order', requireAuth, async (req: AuthRequest, res: Response
       xuAmount,
       vndAmount,
       memo: paymentLink.description || description,
-      vietqrUrl: paymentLink.qrCode,
+      vietqrUrl: qrImageUrl,
       bankName: paymentLink.accountName ? 'MBBank' : (ENV.BANK_NAME || 'MBBank'),
-      accountNumber: paymentLink.accountNumber || ENV.BANK_ACCOUNT_NUMBER || '0822835695',
+      accountNumber: accountNum,
       status: 'pending',
     });
 
@@ -751,13 +766,17 @@ router.get('/orders/:orderCode/status', requireAuth, async (req: AuthRequest, re
       if (!isNaN(numCode)) {
         try {
           const payosInfo = await payosService.getPaymentLinkInformation(numCode);
-          if (payosInfo && payosInfo.status === 'PAID') {
+          if (payosInfo && (payosInfo.status === 'PAID' || payosInfo.status === 'SUCCESS')) {
             await completePaymentOrderAtomic(numCode, payosInfo);
             order.status = 'completed';
             order.completedAt = new Date();
             await order.save();
           }
         } catch (err) {
+          // Ignore transient network errors during rapid polling
+        }
+
+        if (order.status !== 'completed') {
           const pOrder = await PaymentOrder.findOne({ orderCode: numCode });
           if (pOrder && pOrder.status === 'PAID') {
             order.status = 'completed';

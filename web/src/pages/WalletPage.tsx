@@ -536,19 +536,37 @@ export const WalletPage: React.FC = () => {
                 <h4 style={{ fontSize: 17, fontWeight: 800, margin: '10px 0' }}>
                   Quét mã bằng ứng dụng Ngân hàng bất kỳ
                 </h4>
-                <img
-                  src={topupOrder.vietqrUrl}
-                  alt="VietQR"
-                  style={{
-                    width: 240,
-                    height: 240,
-                    objectFit: 'contain',
-                    borderRadius: 'var(--radius-default)',
-                    border: '1px solid var(--color-border)',
-                    margin: '8px auto 16px',
-                    display: 'block',
-                  }}
-                />
+                {(() => {
+                  const rawUrl = topupOrder.vietqrUrl || '';
+                  const qrSrc = (rawUrl.startsWith('http://') || rawUrl.startsWith('https://'))
+                    ? rawUrl
+                    : rawUrl.startsWith('000201')
+                    ? `https://api.qrserver.com/v1/create-qr-code/?size=320x320&data=${encodeURIComponent(rawUrl)}`
+                    : `https://img.vietqr.io/image/970422-${topupOrder.accountNumber}-compact2.png?amount=${topupOrder.vndAmount}&addInfo=${encodeURIComponent(topupOrder.memo)}`;
+
+                  return (
+                    <img
+                      src={qrSrc}
+                      alt="VietQR"
+                      onError={(e) => {
+                        const fallback = `https://img.vietqr.io/image/970422-${topupOrder.accountNumber}-compact2.png?amount=${topupOrder.vndAmount}&addInfo=${encodeURIComponent(topupOrder.memo)}`;
+                        if (e.currentTarget.src !== fallback) {
+                          e.currentTarget.src = fallback;
+                        }
+                      }}
+                      style={{
+                        width: 240,
+                        height: 240,
+                        objectFit: 'contain',
+                        borderRadius: 'var(--radius-default)',
+                        border: '1px solid var(--color-border)',
+                        margin: '8px auto 16px',
+                        display: 'block',
+                        backgroundColor: '#fff',
+                      }}
+                    />
+                  );
+                })()}
                 <div
                   style={{
                     textAlign: 'left',
